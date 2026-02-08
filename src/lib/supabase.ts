@@ -1,28 +1,30 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file.'
-  );
-}
+// Helper to check if Supabase is properly configured
+export const isSupabaseConfigured = (): boolean => {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+};
 
-export const supabase = createClient<Database>(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-  {
+// Only create client if credentials are available
+let supabaseClient: SupabaseClient<Database> | null = null;
+
+if (isSupabaseConfigured()) {
+  supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
     },
-  }
-);
+  });
+} else {
+  console.warn(
+    'Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
+  );
+}
 
-// Helper to check if Supabase is properly configured
-export const isSupabaseConfigured = (): boolean => {
-  return Boolean(supabaseUrl && supabaseAnonKey);
-};
+// Export a proxy that throws helpful errors if used without configuration
+export const supabase = supabaseClient as SupabaseClient<Database>;
