@@ -223,22 +223,22 @@ const HowItWorksPage = () => {
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
               <Users className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">50,000+</div>
+              <div className="font-display text-4xl font-bold mb-1">50,000+</div>
               <div className="opacity-80">Happy Travelers</div>
             </div>
             <div>
               <Home className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">10,000+</div>
+              <div className="font-display text-4xl font-bold mb-1">10,000+</div>
               <div className="opacity-80">Properties Listed</div>
             </div>
             <div>
               <Star className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">4.8/5</div>
+              <div className="font-display text-4xl font-bold mb-1">4.8/5</div>
               <div className="opacity-80">Average Rating</div>
             </div>
             <div>
               <Clock className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="text-4xl font-bold mb-1">24/7</div>
+              <div className="font-display text-4xl font-bold mb-1">24/7</div>
               <div className="opacity-80">Customer Support</div>
             </div>
           </div>
