@@ -9,22 +9,29 @@ export const isSupabaseConfigured = (): boolean => {
   return Boolean(supabaseUrl && supabaseAnonKey);
 };
 
-// Only create client if credentials are available
-let supabaseClient: SupabaseClient<Database> | null = null;
+// Create the client - use dummy values if not configured to prevent TypeScript issues
+// The actual calls will fail gracefully at runtime
+const createSupabaseClient = (): SupabaseClient<Database> => {
+  if (isSupabaseConfigured()) {
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
+  } else {
+    console.warn(
+      'Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
+    );
+    // Return a client with dummy values - operations will fail but TypeScript will be happy
+    return createClient<Database>('https://placeholder.supabase.co', 'placeholder-key', {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+};
 
-if (isSupabaseConfigured()) {
-  supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  });
-} else {
-  console.warn(
-    'Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
-  );
-}
-
-// Export a proxy that throws helpful errors if used without configuration
-export const supabase = supabaseClient as SupabaseClient<Database>;
+export const supabase = createSupabaseClient();
