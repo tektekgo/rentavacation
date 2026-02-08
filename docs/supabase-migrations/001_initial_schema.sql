@@ -431,7 +431,7 @@ CREATE POLICY "Owners can update own property images"
   TO authenticated
   USING (
     bucket_id = 'property-images' AND
-    (owner = auth.uid()::text OR public.is_rav_team(auth.uid()))
+    ((storage.foldername(name))[1] = auth.uid()::text OR public.is_rav_team(auth.uid()))
   );
 
 CREATE POLICY "Owners can delete own property images"
@@ -439,7 +439,7 @@ CREATE POLICY "Owners can delete own property images"
   TO authenticated
   USING (
     bucket_id = 'property-images' AND
-    (owner = auth.uid()::text OR public.is_rav_team(auth.uid()))
+    ((storage.foldername(name))[1] = auth.uid()::text OR public.is_rav_team(auth.uid()))
   );
 
 -- ============================================================
