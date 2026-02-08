@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, profile, isPropertyOwner, isRavTeam, signOut, isLoading } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
@@ -63,16 +78,64 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                Log In
-              </Button>
-            </Link>
-            <Link to="/signup">
-              <Button variant="default" size="sm">
-                Sign Up
-              </Button>
-            </Link>
+            {isLoading ? (
+              <div className="w-20 h-9 bg-muted animate-pulse rounded-md" />
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="max-w-32 truncate">{profile?.full_name || user.email}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  
+                  {isRavTeam() && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                        <ShieldCheck className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {isPropertyOwner() && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/owner-dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard className="h-4 w-4" />
+                        Owner Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {(isRavTeam() || isPropertyOwner()) && <DropdownMenuSeparator />}
+                  
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    Log In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="default" size="sm">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -129,13 +192,57 @@ const Header = () => {
             >
               FAQs
             </Link>
+            
+            {user && (
+              <>
+                <div className="border-t border-border pt-4">
+                  {isRavTeam() && (
+                    <Link 
+                      to="/admin" 
+                      className="flex items-center gap-2 text-foreground py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {isPropertyOwner() && (
+                    <Link 
+                      to="/owner-dashboard" 
+                      className="flex items-center gap-2 text-foreground py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Owner Dashboard
+                    </Link>
+                  )}
+                </div>
+              </>
+            )}
+            
             <div className="flex gap-3 pt-4 border-t border-border">
-              <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" className="w-full">Log In</Button>
-              </Link>
-              <Link to="/signup" className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="default" className="w-full">Sign Up</Button>
-              </Link>
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Link to="/login" className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">Log In</Button>
+                  </Link>
+                  <Link to="/signup" className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="default" className="w-full">Sign Up</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
