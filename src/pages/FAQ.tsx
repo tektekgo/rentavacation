@@ -123,7 +123,7 @@ const faqCategories = [
       {
         question: "How do I contact customer support?",
         answer:
-          "You can reach us via email at support@vacayshare.com, by phone at 1-800-VACAY-00, or through the live chat feature on our website. We're available 24/7.",
+          "You can reach us via email at support@rentavacation.com, by phone at 1-800-RENT-VAC, or through the live chat feature on our website. We're available 24/7.",
       },
     ],
   },

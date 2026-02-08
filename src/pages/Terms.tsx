@@ -20,7 +20,7 @@ const Terms = () => {
                   1. Acceptance of Terms
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  By accessing or using VacayShare's website and services, you agree to be bound
+                  By accessing or using Rent-A-Vacation's website and services, you agree to be bound
                   by these Terms of Service. If you do not agree to these terms, please do not
                   use our services.
                 </p>
@@ -31,7 +31,7 @@ const Terms = () => {
                   2. Description of Service
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  VacayShare provides an online marketplace connecting vacation property owners
+                  Rent-A-Vacation provides an online marketplace connecting vacation property owners
                   (timeshare owners) with travelers seeking accommodations. We facilitate the
                   listing, discovery, and booking of vacation rentals but do not own or operate
                   any properties ourselves.
@@ -61,7 +61,7 @@ const Terms = () => {
                 </h2>
                 <p className="text-muted-foreground mb-4">
                   Property owners are solely responsible for the accuracy of their listings,
-                  including descriptions, photos, pricing, and availability. VacayShare reserves
+                  including descriptions, photos, pricing, and availability. Rent-A-Vacation reserves
                   the right to remove any listing that violates these terms or our policies.
                 </p>
               </section>
@@ -71,7 +71,7 @@ const Terms = () => {
                   5. Bookings and Payments
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  All bookings made through VacayShare are subject to the owner's approval
+                  All bookings made through Rent-A-Vacation are subject to the owner's approval
                   (unless instant booking is enabled). Payments are processed securely through
                   our platform and held until check-in confirmation.
                 </p>
@@ -108,7 +108,7 @@ const Terms = () => {
                   8. Limitation of Liability
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  VacayShare acts as an intermediary between owners and travelers. We are not
+                  Rent-A-Vacation acts as an intermediary between owners and travelers. We are not
                   responsible for the condition of properties, the conduct of users, or any
                   damages arising from the use of our service beyond what is required by law.
                 </p>
@@ -120,7 +120,7 @@ const Terms = () => {
                 </h2>
                 <p className="text-muted-foreground mb-4">
                   Any disputes between users should first be attempted to be resolved directly.
-                  If unsuccessful, VacayShare's customer support team can assist with mediation.
+                  If unsuccessful, Rent-A-Vacation's customer support team can assist with mediation.
                   Unresolved disputes may be subject to binding arbitration.
                 </p>
               </section>
@@ -144,7 +144,7 @@ const Terms = () => {
                   For questions about these Terms of Service, please contact us at:
                 </p>
                 <p className="text-muted-foreground">
-                  Email: legal@vacayshare.com
+                  Email: legal@rentavacation.com
                   <br />
                   Address: 123 Vacation Lane, Miami, FL 33101
                 </p>
