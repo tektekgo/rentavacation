@@ -41,7 +41,7 @@ const travelerSteps = [
     icon: CreditCard,
     title: "Secure Payment",
     description:
-      "Pay securely through VacayShare. Your payment is protected until you check in, giving you peace of mind.",
+      "Pay securely through Rent-A-Vacation. Your payment is protected until you check in, giving you peace of mind.",
   },
   {
     icon: Key,
@@ -116,7 +116,7 @@ const HowItWorksPage = () => {
       <section className="pt-32 pb-16 bg-gradient-warm">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
-            How VacayShare Works
+            How Rent-A-Vacation Works
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Whether you're looking to book an amazing vacation or earn from your

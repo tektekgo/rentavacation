@@ -39,7 +39,7 @@ const Signup = () => {
                 Create Your Account
               </h1>
               <p className="text-muted-foreground">
-                Join thousands of travelers and owners on VacayShare
+                Join thousands of travelers and owners on Rent-A-Vacation
               </p>
             </div>
 
@@ -178,7 +178,7 @@ const Signup = () => {
                 <div className="flex items-start gap-2">
                   <input type="checkbox" className="rounded border-border mt-1" required />
                   <span className="text-sm text-muted-foreground">
-                    I agree to VacayShare's{" "}
+                    I agree to Rent-A-Vacation's{" "}
                     <Link to="/terms" className="text-primary hover:underline">
                       Terms of Service
                     </Link>{" "}

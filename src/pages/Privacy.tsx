@@ -20,7 +20,7 @@ const Privacy = () => {
                   1. Introduction
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  VacayShare ("we," "our," or "us") is committed to protecting your privacy.
+                  Rent-A-Vacation ("we," "our," or "us") is committed to protecting your privacy.
                   This Privacy Policy explains how we collect, use, disclose, and safeguard
                   your information when you use our website and services.
                 </p>
@@ -189,7 +189,7 @@ const Privacy = () => {
                   For questions about this Privacy Policy or our data practices, contact us at:
                 </p>
                 <p className="text-muted-foreground">
-                  Email: privacy@vacayshare.com
+                  Email: privacy@rentavacation.com
                   <br />
                   Address: 123 Vacation Lane, Miami, FL 33101
                 </p>

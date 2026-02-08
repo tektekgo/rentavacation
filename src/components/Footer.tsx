@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -10,9 +10,9 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-display font-bold text-xl">V</span>
+                <span className="text-primary-foreground font-body font-bold text-xl">R</span>
               </div>
-              <span className="font-display font-bold text-xl text-white">VacayShare</span>
+              <span className="font-body font-bold text-xl text-white">Rent-A-Vacation</span>
             </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
               The smarter way to vacation. Rent directly from timeshare owners and save up to 70% on luxury resort stays worldwide.
@@ -63,7 +63,7 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 mt-0.5 text-primary" />
-                <span>support@vacayshare.com</span>
+                <span>support@rentavacation.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-5 h-5 mt-0.5 text-primary" />
@@ -83,10 +83,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-white/50">
-              © 2025 VacayShare. All rights reserved.
-            </div>
-            <div className="flex items-center gap-2 text-sm text-white/50">
-              Made with <Heart className="w-4 h-4 text-accent fill-accent" /> by the brains of Ajumon & Sujit
+              © 2026 Rent-A-Vacation. A Techsilon Group Company. All rights reserved.
             </div>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
