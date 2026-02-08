@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Roboto Slab', 'serif'],
+        display: ['Roboto', 'sans-serif'],
         body: ['Roboto', 'sans-serif'],
       },
       colors: {
