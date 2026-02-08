@@ -41,7 +41,7 @@ const TrustBadges = () => {
           {badges.map((badge, index) => (
             <div key={index} className="text-center">
               <badge.icon className="w-8 h-8 mx-auto mb-3 opacity-80" />
-              <div className="text-2xl md:text-3xl font-bold mb-1">{badge.value}</div>
+              <div className="font-display text-2xl md:text-3xl font-bold mb-1">{badge.value}</div>
               <div className="text-sm opacity-80">{badge.label}</div>
             </div>
           ))}

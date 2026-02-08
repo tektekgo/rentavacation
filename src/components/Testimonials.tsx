@@ -15,7 +15,7 @@ const testimonials = [
     location: "Miami, FL",
     avatar: "J",
     rating: 5,
-    text: "I've been renting my timeshare for 2 years now. VacayShare makes it so easy and I've covered all my maintenance fees plus some.",
+    text: "I've been renting my timeshare for 2 years now. Rent-A-Vacation makes it so easy and I've covered all my maintenance fees plus some.",
   },
   {
     name: "Emily Chen",
@@ -37,7 +37,7 @@ const Testimonials = () => {
             Loved by Travelers & Owners
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Join thousands of happy users who've discovered the VacayShare difference
+            Join thousands of happy users who've discovered the Rent-A-Vacation difference
           </p>
         </div>
 
