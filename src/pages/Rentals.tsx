@@ -316,7 +316,7 @@ const Rentals = () => {
                         ${listing.originalPrice}
                       </span>
                       <div className="text-foreground">
-                        <span className="text-xl font-bold">${listing.pricePerNight}</span>
+                        <span className="font-display text-xl font-bold">${listing.pricePerNight}</span>
                         <span className="text-muted-foreground text-sm"> / night</span>
                       </div>
                     </div>
