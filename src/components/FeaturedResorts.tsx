@@ -1,5 +1,6 @@
 import { Star, MapPin, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
@@ -79,16 +80,19 @@ const FeaturedResorts = () => {
               Hand-picked vacation properties from verified timeshare owners
             </p>
           </div>
-          <Button variant="outline" className="mt-4 md:mt-0">
-            View All Resorts
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <Link to="/rentals">
+            <Button variant="outline">
+              View All Resorts
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </Link>
         </div>
 
         {/* Resort Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {resorts.map((resort, index) => (
-            <div
+            <Link
+              to={`/property/${resort.id}`}
               key={resort.id}
               className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
@@ -106,7 +110,10 @@ const FeaturedResorts = () => {
                 </span>
                 {/* Like Button */}
                 <button
-                  onClick={() => toggleLike(resort.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleLike(resort.id);
+                  }}
                   className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
                 >
                   <Heart
@@ -156,7 +163,7 @@ const FeaturedResorts = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
