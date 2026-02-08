@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -67,11 +67,11 @@ const Footer = () => {
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-5 h-5 mt-0.5 text-primary" />
-                <span>1-800-VACAY-00</span>
+                <span>1-800-RAV-0800</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-0.5 text-primary" />
-                <span>123 Vacation Lane<br />Miami, FL 33101</span>
+                <span>7874 Chase Meadows Dr W<br />Jacksonville, FL 32256</span>
               </li>
             </ul>
           </div>
@@ -84,6 +84,9 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-white/50">
               © 2026 Rent-A-Vacation. A Techsilon Group Company. All rights reserved.
+            </div>
+            <div className="flex items-center gap-2 text-sm text-white/50">
+              Made with <Heart className="w-4 h-4 text-accent fill-accent" /> by Ajumon & Sujit
             </div>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>

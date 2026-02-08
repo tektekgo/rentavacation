@@ -191,7 +191,7 @@ const Privacy = () => {
                 <p className="text-muted-foreground">
                   Email: privacy@rentavacation.com
                   <br />
-                  Address: 123 Vacation Lane, Miami, FL 33101
+                  Address: 7874 Chase Meadows Dr W, Jacksonville, FL 32256
                 </p>
               </section>
             </div>
