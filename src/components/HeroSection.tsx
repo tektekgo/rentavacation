@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Search, Calendar, MapPin, Users, Sparkles } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, Calendar as CalendarIcon, MapPin, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
@@ -18,6 +22,8 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTab, setSearchTab] = useState<"flexible" | "calendar">("flexible");
   const [searchLocation, setSearchLocation] = useState("");
+  const [checkInDate, setCheckInDate] = useState<Date>();
+  const [checkOutDate, setCheckOutDate] = useState<Date>();
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % destinations.length);
@@ -89,7 +95,7 @@ const HeroSection = () => {
                     : "text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <Calendar className="w-4 h-4 inline-block mr-1" />
+                <CalendarIcon className="w-4 h-4 inline-block mr-1" />
                 Calendar
               </button>
             </div>
@@ -108,15 +114,30 @@ const HeroSection = () => {
                   />
                 </div>
               </div>
-              <div>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Check-in"
-                    className="w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
+              <div className="relative">
+                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className={cn(
+                        "w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-left focus:outline-none focus:ring-2 focus:ring-primary/50",
+                        !checkInDate ? "text-muted-foreground" : "text-foreground"
+                      )}
+                    >
+                      {checkInDate ? format(checkInDate, "MMM d, yyyy") : "Check-in"}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={checkInDate}
+                      onSelect={setCheckInDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Button 
