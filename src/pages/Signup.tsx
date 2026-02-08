@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,11 +16,55 @@ const Signup = () => {
     password: "",
     accountType: "traveler",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { signUp, isConfigured } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will be connected to Supabase auth
-    console.log("Signup:", formData);
+    
+    if (!isConfigured) {
+      toast({
+        title: "Backend not configured",
+        description: "Please set up your environment variables first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password requirements
+    const hasMinLength = formData.password.length >= 8;
+    const hasNumber = /\d/.test(formData.password);
+    const hasUppercase = /[A-Z]/.test(formData.password);
+    
+    if (!hasMinLength || !hasNumber || !hasUppercase) {
+      toast({
+        title: "Password requirements not met",
+        description: "Please ensure your password meets all requirements.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    const { error } = await signUp(formData.email, formData.password, formData.name);
+    setIsLoading(false);
+    
+    if (error) {
+      toast({
+        title: "Signup failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Check your email",
+        description: "We sent you a confirmation link to complete your registration.",
+      });
+      navigate("/login");
+    }
   };
 
   const passwordRequirements = [
@@ -189,9 +235,18 @@ const Signup = () => {
                   </span>
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Create Account
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </form>
 
