@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
@@ -52,8 +53,9 @@ const TopDestinations = () => {
         {/* Destination Grid - Masonry Style */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {destinations.map((dest, index) => (
-            <div
+            <Link
               key={index}
+              to={`/rentals?location=${encodeURIComponent(dest.name)}`}
               className={`group relative rounded-2xl overflow-hidden cursor-pointer ${
                 dest.featured ? "md:row-span-2 md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
               }`}
@@ -79,7 +81,7 @@ const TopDestinations = () => {
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

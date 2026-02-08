@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Calendar, MapPin, Users, Sparkles } from "lucide-react";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
 import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
-
 const destinations = [
   { image: keralaImage, name: "Kerala Backwaters", location: "India" },
   { image: utahImage, name: "Utah Arches", location: "Utah, USA" },
@@ -14,9 +14,10 @@ const destinations = [
 ];
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTab, setSearchTab] = useState<"flexible" | "calendar">("flexible");
-
+  const [searchLocation, setSearchLocation] = useState("");
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % destinations.length);
@@ -101,6 +102,8 @@ const HeroSection = () => {
                   <input
                     type="text"
                     placeholder="Where do you want to go?"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
                     className="w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
@@ -116,7 +119,12 @@ const HeroSection = () => {
                 </div>
               </div>
               <div>
-                <Button variant="hero" size="lg" className="w-full h-12">
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="w-full h-12"
+                  onClick={() => navigate(`/rentals${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`)}
+                >
                   <Search className="w-5 h-5" />
                   Search
                 </Button>

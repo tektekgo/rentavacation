@@ -1,4 +1,5 @@
 import { Search, Calendar, Key, DollarSign, Home, Shield, MessageSquare, CreditCard } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -125,9 +126,11 @@ const HowItWorks = () => {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button variant="hero" size="xl">
-            {activeTab === "travelers" ? "Start Searching" : "List Your Property"}
-          </Button>
+          <Link to={activeTab === "travelers" ? "/rentals" : "/list-property"}>
+            <Button variant="hero" size="xl">
+              {activeTab === "travelers" ? "Start Searching" : "List Your Property"}
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
