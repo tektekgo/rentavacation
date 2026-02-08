@@ -16,6 +16,7 @@ import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/owner-dashboard" element={<OwnerDashboard />} />
             {/* Legacy routes - redirect to new paths */}
             <Route path="/deals" element={<Rentals />} />
             <Route path="/owner-resources" element={<HowItWorksPage />} />
