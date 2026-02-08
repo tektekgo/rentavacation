@@ -1,0 +1,102 @@
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const Footer = () => {
+  return (
+    <footer className="bg-foreground text-white/80">
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            <Link to="/" className="flex items-center gap-2 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-display font-bold text-xl">V</span>
+              </div>
+              <span className="font-display font-bold text-xl text-white">VacayShare</span>
+            </Link>
+            <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
+              The smarter way to vacation. Rent directly from timeshare owners and save up to 70% on luxury resort stays worldwide.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-display font-semibold text-white mb-6">For Travelers</h4>
+            <ul className="space-y-3">
+              <li><Link to="/rentals" className="hover:text-white transition-colors">Browse Rentals</Link></li>
+              <li><Link to="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+              <li><Link to="/destinations" className="hover:text-white transition-colors">Top Destinations</Link></li>
+              <li><Link to="/deals" className="hover:text-white transition-colors">Last Minute Deals</Link></li>
+              <li><Link to="/faq" className="hover:text-white transition-colors">FAQs</Link></li>
+            </ul>
+          </div>
+
+          {/* For Owners */}
+          <div>
+            <h4 className="font-display font-semibold text-white mb-6">For Owners</h4>
+            <ul className="space-y-3">
+              <li><Link to="/list-property" className="hover:text-white transition-colors">List Your Property</Link></li>
+              <li><Link to="/owner-resources" className="hover:text-white transition-colors">Owner Resources</Link></li>
+              <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing & Fees</Link></li>
+              <li><Link to="/success-stories" className="hover:text-white transition-colors">Success Stories</Link></li>
+              <li><Link to="/owner-faq" className="hover:text-white transition-colors">Owner FAQs</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-display font-semibold text-white mb-6">Contact Us</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <Mail className="w-5 h-5 mt-0.5 text-primary" />
+                <span>support@vacayshare.com</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Phone className="w-5 h-5 mt-0.5 text-primary" />
+                <span>1-800-VACAY-00</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 mt-0.5 text-primary" />
+                <span>123 Vacation Lane<br />Miami, FL 33101</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-white/50">
+              © 2025 VacayShare. All rights reserved.
+            </div>
+            <div className="flex items-center gap-2 text-sm text-white/50">
+              Made with <Heart className="w-4 h-4 text-accent fill-accent" /> by the brains of Ajumon & Sujit
+            </div>
+            <div className="flex gap-6 text-sm">
+              <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-white/50 hover:text-white transition-colors">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
