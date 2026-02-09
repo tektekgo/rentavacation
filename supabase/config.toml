@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.send-verification-notification]
 verify_jwt = false
+
+[functions.send-booking-confirmation-reminder]
+verify_jwt = false
