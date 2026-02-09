@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend@2.0.0";
+import { buildEmailHtml, detailRow } from "../_shared/email-template.ts";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -202,6 +206,60 @@ serve(async (req) => {
         logStep("Warning: Failed to add to guarantee fund", { error: fundError.message });
       } else {
         logStep("Guarantee fund contribution added", { amount: guaranteeFundContribution });
+      }
+
+      // Send booking confirmation email to traveler
+      try {
+        const resortName = booking.listing?.property?.resort_name || "Your Resort";
+        const location = booking.listing?.property?.location || "";
+        const checkIn = new Date(booking.listing?.check_in_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+        const checkOut = new Date(booking.listing?.check_out_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+        const nights = Math.ceil((new Date(booking.listing?.check_out_date).getTime() - new Date(booking.listing?.check_in_date).getTime()) / (1000 * 60 * 60 * 24));
+        const unitType = booking.listing?.unit_type || "Standard";
+
+        // Fetch traveler profile for name
+        const { data: travelerProfile } = await supabaseClient
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", user.id)
+          .single();
+
+        const travelerName = travelerProfile?.full_name || "Traveler";
+        const travelerEmail = travelerProfile?.email || user.email;
+
+        if (travelerEmail) {
+          const html = buildEmailHtml({
+            recipientName: travelerName,
+            heading: "Booking Confirmed!",
+            body: `
+              <p>Congratulations! Your booking has been confirmed and payment received.</p>
+              <p>Here are the details of your reservation:</p>
+              <div style="background: #f7fafc; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
+                ${detailRow("Booking ID", bookingId.slice(0, 8).toUpperCase())}
+                ${detailRow("Resort", resortName)}
+                ${location ? detailRow("Location", location) : ""}
+                ${detailRow("Unit Type", unitType)}
+                ${detailRow("Dates", `${checkIn} – ${checkOut}`)}
+                ${detailRow("Duration", `${nights} night${nights !== 1 ? "s" : ""}`)}
+                ${detailRow("Total Paid", `$${booking.total_amount?.toLocaleString()}`)}
+              </div>
+              <p>The property owner will confirm your reservation with the resort shortly. We'll notify you once that's complete.</p>
+              <p>You can also share this with your travel companions and start planning your trip!</p>
+            `,
+            cta: { label: "View My Booking", url: `https://rentavacation.lovable.app/booking-success?booking_id=${bookingId}` },
+          });
+
+          await resend.emails.send({
+            from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+            to: [travelerEmail],
+            subject: `Booking Confirmed – ${resortName}`,
+            html,
+          });
+
+          logStep("Traveler confirmation email sent", { travelerEmail });
+        }
+      } catch (emailError) {
+        logStep("Warning: Failed to send traveler confirmation email", { error: String(emailError) });
       }
 
       logStep("Booking confirmed successfully with escrow");
