@@ -18,7 +18,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Shield
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import OwnerProperties from "@/components/owner/OwnerProperties";
@@ -26,6 +27,7 @@ import OwnerListings from "@/components/owner/OwnerListings";
 import OwnerBookings from "@/components/owner/OwnerBookings";
 import OwnerEarnings from "@/components/owner/OwnerEarnings";
 import { OwnerProposals } from "@/components/owner/OwnerProposals";
+import { OwnerVerification } from "@/components/owner/OwnerVerification";
 
 interface DashboardStats {
   totalProperties: number;
@@ -198,7 +200,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -222,6 +224,10 @@ const OwnerDashboard = () => {
             <TabsTrigger value="earnings" className="gap-2">
               <DollarSign className="h-4 w-4" />
               <span className="hidden sm:inline">Earnings</span>
+            </TabsTrigger>
+            <TabsTrigger value="verification" className="gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Verification</span>
             </TabsTrigger>
           </TabsList>
 
@@ -423,6 +429,17 @@ const OwnerDashboard = () => {
           {/* Earnings Tab */}
           <TabsContent value="earnings" className="mt-6">
             <OwnerEarnings />
+          </TabsContent>
+
+          {/* Verification Tab */}
+          <TabsContent value="verification" className="mt-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold">Owner Verification</h2>
+              <p className="text-muted-foreground">
+                Verify your ownership to unlock more features and build trust
+              </p>
+            </div>
+            <OwnerVerification />
           </TabsContent>
         </Tabs>
       </main>

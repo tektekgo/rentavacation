@@ -757,3 +757,12 @@ export const ESCROW_STATUS_LABELS: Record<EscrowStatus, string> = {
   refunded: 'Refunded',
   disputed: 'Disputed',
 };
+
+// Verification status display helpers
+export const VERIFICATION_STATUS_LABELS: Record<VerificationStatus, string> = {
+  pending: 'Pending',
+  under_review: 'Under Review',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  expired: 'Expired',
+};
