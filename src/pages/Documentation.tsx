@@ -28,6 +28,16 @@ import {
 const Documentation = () => {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  // Handle print - show all sections during print
+  const handlePrint = () => {
+    setIsPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrinting(false);
+    }, 100);
+  };
 
   const sections = [
     { id: "overview", label: "Platform Overview", icon: Home },
@@ -44,9 +54,6 @@ const Documentation = () => {
     { id: "admin", label: "Admin Dashboard", icon: Settings },
   ];
 
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,7 +126,7 @@ const Documentation = () => {
           <div className="max-w-4xl mx-auto">
             
             {/* Overview Section */}
-            {activeSection === "overview" && (
+            {(isPrinting || activeSection === "overview") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Platform Overview</h1>
@@ -192,7 +199,7 @@ const Documentation = () => {
             )}
 
             {/* User Roles Section */}
-            {activeSection === "user-roles" && (
+            {(isPrinting || activeSection === "user-roles") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">User Roles & Access</h1>
@@ -297,7 +304,7 @@ const Documentation = () => {
             )}
 
             {/* Property Management Section */}
-            {activeSection === "property-management" && (
+            {(isPrinting || activeSection === "property-management") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Property Management</h1>
@@ -385,7 +392,7 @@ const Documentation = () => {
             )}
 
             {/* Bidding System Section */}
-            {activeSection === "bidding-system" && (
+            {(isPrinting || activeSection === "bidding-system") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Bidding & Marketplace</h1>
@@ -493,7 +500,7 @@ const Documentation = () => {
             )}
 
             {/* Booking Flow Section */}
-            {activeSection === "booking-flow" && (
+            {(isPrinting || activeSection === "booking-flow") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Booking Flow</h1>
@@ -583,7 +590,7 @@ const Documentation = () => {
             )}
 
             {/* Payments Section */}
-            {activeSection === "payments" && (
+            {(isPrinting || activeSection === "payments") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Payments & Payouts</h1>
@@ -679,7 +686,7 @@ const Documentation = () => {
             )}
 
             {/* Trust & Safety Section */}
-            {activeSection === "trust-safety" && (
+            {(isPrinting || activeSection === "trust-safety") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Trust & Safety</h1>
@@ -772,7 +779,7 @@ const Documentation = () => {
             )}
 
             {/* Owner Verification Section */}
-            {activeSection === "owner-verification" && (
+            {(isPrinting || activeSection === "owner-verification") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Owner Verification</h1>
@@ -836,7 +843,7 @@ const Documentation = () => {
             )}
 
             {/* Booking Confirmations Section */}
-            {activeSection === "confirmations" && (
+            {(isPrinting || activeSection === "confirmations") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Booking Confirmations</h1>
@@ -930,7 +937,7 @@ const Documentation = () => {
             )}
 
             {/* Cancellation Policies Section */}
-            {activeSection === "cancellations" && (
+            {(isPrinting || activeSection === "cancellations") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Cancellation Policies</h1>
@@ -1007,7 +1014,7 @@ const Documentation = () => {
             )}
 
             {/* Notifications Section */}
-            {activeSection === "notifications" && (
+            {(isPrinting || activeSection === "notifications") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Email Notifications</h1>
@@ -1069,7 +1076,7 @@ const Documentation = () => {
             )}
 
             {/* Admin Dashboard Section */}
-            {activeSection === "admin" && (
+            {(isPrinting || activeSection === "admin") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Admin Dashboard</h1>
@@ -1132,7 +1139,27 @@ const Documentation = () => {
         @media print {
           .print\\:hidden { display: none !important; }
           .print\\:break-after-page { page-break-after: always; }
-          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          body { 
+            print-color-adjust: exact; 
+            -webkit-print-color-adjust: exact;
+          }
+          aside { display: none !important; }
+          header { display: none !important; }
+          main { 
+            padding: 0 !important; 
+            margin: 0 !important;
+          }
+          section {
+            page-break-inside: avoid;
+            page-break-after: always;
+            margin-bottom: 2rem;
+          }
+          section:last-of-type {
+            page-break-after: auto;
+          }
+          .max-w-4xl {
+            max-width: 100% !important;
+          }
         }
       `}</style>
     </div>
