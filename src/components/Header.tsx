@@ -40,16 +40,16 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <div 
-              className="relative"
+              className="relative pb-2 -mb-2"
               onMouseEnter={() => setIsDropdownOpen(true)}
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
-              <button className="flex items-center gap-1 cursor-pointer group">
+              <button className="flex items-center gap-1 cursor-pointer group py-2">
                 <span className="text-muted-foreground group-hover:text-foreground transition-colors">Explore</span>
                 <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-card-hover border border-border p-2 animate-fade-in">
+                <div className="absolute top-full left-0 w-56 bg-card rounded-xl shadow-card-hover border border-border p-2 animate-fade-in z-50">
                   <Link 
                     to="/rentals" 
                     className="block px-4 py-2 rounded-lg hover:bg-muted transition-colors"
