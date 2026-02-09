@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
+import { RoleBadge, getDisplayRole } from "@/components/RoleBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, profile, isPropertyOwner, isRavTeam, signOut, isLoading } = useAuth();
+  const { user, profile, roles, isPropertyOwner, isRavTeam, signOut, isLoading } = useAuth();
+  const displayRole = getDisplayRole(roles);
 
   const handleSignOut = async () => {
     await signOut();
@@ -43,7 +45,7 @@ const Header = () => {
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
               <button className="flex items-center gap-1 cursor-pointer group">
-                <span className="text-muted-foreground group-hover:text-foreground transition-colors">Browse Rentals</span>
+                <span className="text-muted-foreground group-hover:text-foreground transition-colors">Explore</span>
                 <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
               {isDropdownOpen && (
@@ -73,8 +75,8 @@ const Header = () => {
               How It Works
             </Link>
             <Link to="/bidding" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              <Gavel className="h-4 w-4" />
-              Bidding
+              <Store className="h-4 w-4" />
+              Marketplace
             </Link>
             <Link to="/list-property" className="text-muted-foreground hover:text-foreground transition-colors">
               List Your Property
@@ -98,7 +100,10 @@ const Header = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
+                        {displayRole && <RoleBadge role={displayRole} variant="compact" />}
+                      </div>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
@@ -205,8 +210,8 @@ const Header = () => {
               className="text-foreground py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Gavel className="h-4 w-4" />
-              Bidding Marketplace
+              <Store className="h-4 w-4" />
+              Vacation Marketplace
             </Link>
             <Link 
               to="/faq" 
@@ -224,7 +229,7 @@ const Header = () => {
                     className="flex items-center gap-2 text-foreground py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Sparkles className="h-4 w-4" />
+                    <Gavel className="h-4 w-4" />
                     My Bids & Requests
                   </Link>
                   {isRavTeam() && (
