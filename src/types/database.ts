@@ -11,6 +11,10 @@ export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
 
 export type AgreementStatus = 'pending' | 'active' | 'suspended' | 'terminated';
 
+export type CancellationPolicy = 'flexible' | 'moderate' | 'strict' | 'super_strict';
+
+export type CancellationStatus = 'pending' | 'approved' | 'denied' | 'counter_offer' | 'completed';
+
 export type VacationClubBrand = 
   | 'hilton_grand_vacations'
   | 'marriott_vacation_club'
@@ -170,6 +174,7 @@ export interface Database {
           rav_markup: number; // RAV's markup amount
           final_price: number; // What renter pays
           notes: string | null;
+          cancellation_policy: CancellationPolicy;
           approved_by: string | null;
           approved_at: string | null;
           created_at: string;
@@ -186,6 +191,7 @@ export interface Database {
           rav_markup?: number;
           final_price: number;
           notes?: string | null;
+          cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;
           approved_at?: string | null;
           created_at?: string;
@@ -202,8 +208,64 @@ export interface Database {
           rav_markup?: number;
           final_price?: number;
           notes?: string | null;
+          cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;
           approved_at?: string | null;
+          updated_at?: string;
+        };
+      };
+      cancellation_requests: {
+        Row: {
+          id: string;
+          booking_id: string;
+          requester_id: string;
+          status: CancellationStatus;
+          reason: string;
+          requested_refund_amount: number;
+          policy_refund_amount: number;
+          days_until_checkin: number;
+          owner_response: string | null;
+          counter_offer_amount: number | null;
+          responded_at: string | null;
+          final_refund_amount: number | null;
+          refund_processed_at: string | null;
+          refund_reference: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          booking_id: string;
+          requester_id: string;
+          status?: CancellationStatus;
+          reason: string;
+          requested_refund_amount: number;
+          policy_refund_amount: number;
+          days_until_checkin: number;
+          owner_response?: string | null;
+          counter_offer_amount?: number | null;
+          responded_at?: string | null;
+          final_refund_amount?: number | null;
+          refund_processed_at?: string | null;
+          refund_reference?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          booking_id?: string;
+          requester_id?: string;
+          status?: CancellationStatus;
+          reason?: string;
+          requested_refund_amount?: number;
+          policy_refund_amount?: number;
+          days_until_checkin?: number;
+          owner_response?: string | null;
+          counter_offer_amount?: number | null;
+          responded_at?: string | null;
+          final_refund_amount?: number | null;
+          refund_processed_at?: string | null;
+          refund_reference?: string | null;
           updated_at?: string;
         };
       };
@@ -288,6 +350,8 @@ export interface Database {
       payout_status: PayoutStatus;
       agreement_status: AgreementStatus;
       vacation_club_brand: VacationClubBrand;
+      cancellation_policy: CancellationPolicy;
+      cancellation_status: CancellationStatus;
     };
   };
 }
@@ -299,6 +363,7 @@ export type Property = Database['public']['Tables']['properties']['Row'];
 export type OwnerAgreement = Database['public']['Tables']['owner_agreements']['Row'];
 export type Listing = Database['public']['Tables']['listings']['Row'];
 export type Booking = Database['public']['Tables']['bookings']['Row'];
+export type CancellationRequest = Database['public']['Tables']['cancellation_requests']['Row'];
 
 // Extended types with joins
 export type ListingWithProperty = Listing & {
@@ -308,4 +373,23 @@ export type ListingWithProperty = Listing & {
 export type BookingWithDetails = Booking & {
   listing: ListingWithProperty;
   renter: Profile;
+};
+
+export type CancellationRequestWithDetails = CancellationRequest & {
+  booking: BookingWithDetails;
+};
+
+// Cancellation policy display helpers
+export const CANCELLATION_POLICY_LABELS: Record<CancellationPolicy, string> = {
+  flexible: 'Flexible',
+  moderate: 'Moderate',
+  strict: 'Strict',
+  super_strict: 'Super Strict',
+};
+
+export const CANCELLATION_POLICY_DESCRIPTIONS: Record<CancellationPolicy, string> = {
+  flexible: 'Full refund up to 24 hours before check-in',
+  moderate: 'Full refund 5+ days before, 50% refund 1-4 days before',
+  strict: '50% refund 7+ days before, no refund after',
+  super_strict: 'No refunds after booking is confirmed',
 };

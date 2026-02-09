@@ -36,9 +36,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Calendar, MapPin, Edit, Trash2, XCircle, Gavel, Eye } from "lucide-react";
+import { Plus, Calendar, MapPin, Edit, Trash2, XCircle, Gavel, Eye, ShieldCheck } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
-import type { Property, Listing, ListingStatus, Database } from "@/types/database";
+import type { Property, Listing, ListingStatus, CancellationPolicy, Database } from "@/types/database";
+import { CANCELLATION_POLICY_LABELS, CANCELLATION_POLICY_DESCRIPTIONS } from "@/types/database";
 import { OpenForBiddingDialog } from "@/components/bidding/OpenForBiddingDialog";
 import { BidsManagerDialog } from "@/components/bidding/BidsManagerDialog";
 
@@ -52,6 +53,7 @@ type ListingWithProperty = Listing & {
   min_bid_amount?: number | null;
   reserve_price?: number | null;
   allow_counter_offers?: boolean;
+  cancellation_policy: CancellationPolicy;
 };
 
 const STATUS_COLORS: Record<ListingStatus, string> = {
@@ -78,6 +80,7 @@ interface ListingFormData {
   check_out_date: string;
   owner_price: number;
   notes: string;
+  cancellation_policy: CancellationPolicy;
 }
 
 const initialFormData: ListingFormData = {
@@ -86,6 +89,7 @@ const initialFormData: ListingFormData = {
   check_out_date: "",
   owner_price: 0,
   notes: "",
+  cancellation_policy: "moderate",
 };
 
 const OwnerListings = () => {
@@ -175,6 +179,7 @@ const OwnerListings = () => {
           rav_markup: 0,
           final_price: formData.owner_price,
           notes: formData.notes || null,
+          cancellation_policy: formData.cancellation_policy,
           status: "pending_approval",
         };
 
@@ -196,6 +201,7 @@ const OwnerListings = () => {
           rav_markup: 0,
           final_price: formData.owner_price,
           notes: formData.notes || null,
+          cancellation_policy: formData.cancellation_policy,
           status: "pending_approval",
         };
 
@@ -233,6 +239,7 @@ const OwnerListings = () => {
       check_out_date: listing.check_out_date,
       owner_price: listing.owner_price,
       notes: listing.notes || "",
+      cancellation_policy: listing.cancellation_policy || "moderate",
     });
     setIsDialogOpen(true);
   };
@@ -397,6 +404,32 @@ const OwnerListings = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
+                <Select
+                  value={formData.cancellation_policy}
+                  onValueChange={(value: CancellationPolicy) =>
+                    setFormData((prev) => ({ ...prev, cancellation_policy: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select cancellation policy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(CANCELLATION_POLICY_LABELS) as CancellationPolicy[]).map((policy) => (
+                      <SelectItem key={policy} value={policy}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{CANCELLATION_POLICY_LABELS[policy]}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {CANCELLATION_POLICY_DESCRIPTIONS[formData.cancellation_policy]}
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="notes">Notes (optional)</Label>
                 <Textarea
                   id="notes"
@@ -497,12 +530,18 @@ const OwnerListings = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-6 text-sm mb-4">
+                <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>
                       {format(new Date(listing.check_in_date), "MMM d, yyyy")} -{" "}
                       {format(new Date(listing.check_out_date), "MMM d, yyyy")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {CANCELLATION_POLICY_LABELS[listing.cancellation_policy] || 'Moderate'} cancellation
                     </span>
                   </div>
                 </div>
