@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -22,10 +24,14 @@ import {
   UserCheck,
   MapPin,
   Calendar,
-  Briefcase
+  Briefcase,
+  ArrowLeft,
+  AlertCircle
 } from "lucide-react";
 
 const Documentation = () => {
+  const navigate = useNavigate();
+  const { user, isRavTeam, isLoading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -61,6 +67,53 @@ const Documentation = () => {
     day: 'numeric' 
   });
 
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Authentication Required</h1>
+        <p className="text-muted-foreground text-center mb-6 max-w-md">
+          Please log in to access the Admin Manual.
+        </p>
+        <Button variant="outline" onClick={() => navigate("/login?redirect=/documentation")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Go to Login
+        </Button>
+      </div>
+    );
+  }
+
+  // Access denied if not RAV team
+  if (!isRavTeam()) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+        <p className="text-muted-foreground text-center mb-6 max-w-md">
+          This documentation is only accessible to RAV team members (Owner, Admin, or Staff).
+        </p>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => navigate("/")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
+          <Button onClick={() => navigate("/user-guide")}>
+            View User Guide
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
