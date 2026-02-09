@@ -88,7 +88,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center gap-2 text-sm text-white/50">
               <Gavel className="w-4 h-4 text-primary" />
-              <span>Name Your Price. Book Your Paradise.</span>
+              <span>A Marketplace for Renters and Owners</span>
             </div>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
