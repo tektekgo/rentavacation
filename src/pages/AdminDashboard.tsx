@@ -101,6 +101,10 @@ const AdminDashboard = () => {
                 </p>
               </div>
             </div>
+            <Button variant="outline" onClick={() => navigate("/documentation")}>
+              <FileCheck className="h-4 w-4 mr-2" />
+              Documentation
+            </Button>
           </div>
         </div>
       </header>
