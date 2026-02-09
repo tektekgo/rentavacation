@@ -19,12 +19,14 @@ import {
   CheckCircle2,
   AlertCircle,
   MessageSquare,
-  Shield
+  Shield,
+  FileCheck
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import OwnerProperties from "@/components/owner/OwnerProperties";
 import OwnerListings from "@/components/owner/OwnerListings";
 import OwnerBookings from "@/components/owner/OwnerBookings";
+import OwnerBookingConfirmations from "@/components/owner/OwnerBookingConfirmations";
 import OwnerEarnings from "@/components/owner/OwnerEarnings";
 import { OwnerProposals } from "@/components/owner/OwnerProposals";
 import { OwnerVerification } from "@/components/owner/OwnerVerification";
@@ -200,7 +202,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -220,6 +222,10 @@ const OwnerDashboard = () => {
             <TabsTrigger value="bookings" className="gap-2">
               <Clock className="h-4 w-4" />
               <span className="hidden sm:inline">Bookings</span>
+            </TabsTrigger>
+            <TabsTrigger value="confirmations" className="gap-2">
+              <FileCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Confirmations</span>
             </TabsTrigger>
             <TabsTrigger value="earnings" className="gap-2">
               <DollarSign className="h-4 w-4" />
@@ -424,6 +430,11 @@ const OwnerDashboard = () => {
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="mt-6">
             <OwnerBookings />
+          </TabsContent>
+
+          {/* Confirmations Tab */}
+          <TabsContent value="confirmations" className="mt-6">
+            <OwnerBookingConfirmations />
           </TabsContent>
 
           {/* Earnings Tab */}
