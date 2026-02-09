@@ -22,6 +22,7 @@ import BookingSuccess from "./pages/BookingSuccess";
 import BiddingMarketplace from "./pages/BiddingMarketplace";
 import MyBidsDashboard from "./pages/MyBidsDashboard";
 import TravelerCheckin from "./pages/TravelerCheckin";
+import Documentation from "./pages/Documentation";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/bidding" element={<BiddingMarketplace />} />
             <Route path="/my-bids" element={<MyBidsDashboard />} />
             <Route path="/checkin" element={<TravelerCheckin />} />
+            <Route path="/documentation" element={<Documentation />} />
             {/* Legacy routes - redirect to new paths */}
             <Route path="/deals" element={<Rentals />} />
             <Route path="/owner-resources" element={<HowItWorksPage />} />
