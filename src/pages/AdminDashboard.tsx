@@ -20,7 +20,8 @@ import {
   ShieldCheck,
   Wallet,
   FileCheck,
-  ShieldCheck as EscrowIcon
+  ShieldCheck as EscrowIcon,
+  MessageSquareWarning
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -31,6 +32,7 @@ import AdminUsers from "@/components/admin/AdminUsers";
 import AdminPayouts from "@/components/admin/AdminPayouts";
 import AdminVerifications from "@/components/admin/AdminVerifications";
 import AdminEscrow from "@/components/admin/AdminEscrow";
+import AdminCheckinIssues from "@/components/admin/AdminCheckinIssues";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -106,7 +108,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-10 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -126,6 +128,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="escrow" className="gap-2">
               <EscrowIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Escrow</span>
+            </TabsTrigger>
+            <TabsTrigger value="issues" className="gap-2">
+              <MessageSquareWarning className="h-4 w-4" />
+              <span className="hidden sm:inline">Issues</span>
             </TabsTrigger>
             <TabsTrigger value="verifications" className="gap-2">
               <FileCheck className="h-4 w-4" />
@@ -163,6 +169,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="escrow">
             <AdminEscrow />
+          </TabsContent>
+
+          <TabsContent value="issues">
+            <AdminCheckinIssues />
           </TabsContent>
 
           <TabsContent value="verifications">
