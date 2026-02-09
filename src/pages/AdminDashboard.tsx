@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
-  Wallet
+  Wallet,
+  FileCheck
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -27,6 +28,7 @@ import AdminBookings from "@/components/admin/AdminBookings";
 import AdminFinancials from "@/components/admin/AdminFinancials";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminPayouts from "@/components/admin/AdminPayouts";
+import AdminVerifications from "@/components/admin/AdminVerifications";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -102,7 +104,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -118,6 +120,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="bookings" className="gap-2">
               <Clock className="h-4 w-4" />
               <span className="hidden sm:inline">Bookings</span>
+            </TabsTrigger>
+            <TabsTrigger value="verifications" className="gap-2">
+              <FileCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Verifications</span>
             </TabsTrigger>
             <TabsTrigger value="financials" className="gap-2">
               <DollarSign className="h-4 w-4" />
@@ -147,6 +153,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="bookings">
             <AdminBookings />
+          </TabsContent>
+
+          <TabsContent value="verifications">
+            <AdminVerifications />
           </TabsContent>
 
           <TabsContent value="financials">
