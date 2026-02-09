@@ -1,4 +1,4 @@
-import { Search, Calendar, Key, DollarSign, Home, Shield, MessageSquare, CreditCard } from "lucide-react";
+import { Search, Calendar, Key, DollarSign, Home, Shield, MessageSquare, Gavel, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -6,23 +6,23 @@ import { useState } from "react";
 const travelerSteps = [
   {
     icon: Search,
-    title: "Search & Discover",
-    description: "Browse thousands of timeshare rentals at world-class resorts by Marriott, Hilton, Wyndham, and more.",
+    title: "Browse or Bid",
+    description: "Search thousands of owner-listed timeshare rentals, or place bids on properties open for competitive pricing.",
   },
   {
-    icon: Calendar,
-    title: "Book Your Dates",
-    description: "Find availability that works for you. Use flexible dates or pick exact check-in and check-out dates.",
+    icon: Send,
+    title: "Post Your Travel Plans",
+    description: "Tell us where and when you want to travel. Owners will send you personalized proposals — you pick the best offer.",
   },
   {
     icon: MessageSquare,
-    title: "Connect with Owners",
-    description: "Message hosts directly to ask questions, confirm details, and finalize your booking.",
+    title: "Deal Direct with Owners",
+    description: "No middlemen. Connect directly with verified timeshare owners to ask questions and finalize your booking.",
   },
   {
     icon: Key,
     title: "Enjoy Your Stay",
-    description: "Check in at the resort and enjoy your luxury vacation at a fraction of the hotel price.",
+    description: "Check in at the resort and enjoy your luxury vacation at up to 70% less than booking through the resort.",
   },
 ];
 
@@ -30,7 +30,12 @@ const ownerSteps = [
   {
     icon: Home,
     title: "List Your Property",
-    description: "Create a free listing in minutes. Add photos, details, and set your price and availability.",
+    description: "Create a free listing in minutes. Add photos, details, and set your price — or open it up for bidding.",
+  },
+  {
+    icon: Gavel,
+    title: "Accept Bids & Proposals",
+    description: "Open your listing for competitive bidding, or respond to traveler requests with personalized proposals.",
   },
   {
     icon: Shield,
@@ -38,14 +43,9 @@ const ownerSteps = [
     description: "Our team verifies your ownership to build trust with travelers and protect your listing.",
   },
   {
-    icon: MessageSquare,
-    title: "Manage Inquiries",
-    description: "Respond to traveler messages, accept bookings, and manage your calendar all in one place.",
-  },
-  {
     icon: DollarSign,
-    title: "Earn Money",
-    description: "Get paid securely for rentals. Offset your maintenance fees and earn extra income.",
+    title: "Earn More Money",
+    description: "Set your price or let the market decide. Get paid securely and offset those maintenance fees.",
   },
 ];
 
@@ -59,11 +59,11 @@ const HowItWorks = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            How Rent-A-Vacation Works
+            How Direct-from-Owner Rentals Work
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
-            Whether you're looking to book an amazing vacation or earn from your timeshare, 
-            we make it simple and secure.
+            Skip the resort markup. Rent directly from verified owners, bid on listings, 
+            or post your travel needs and let owners compete for your booking.
           </p>
 
           {/* Tab Toggle */}

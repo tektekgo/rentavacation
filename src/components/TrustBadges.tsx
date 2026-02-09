@@ -1,10 +1,10 @@
-import { Shield, Users, Star, CreditCard, Clock, Award } from "lucide-react";
+import { Shield, Users, Star, Gavel, Clock, Award } from "lucide-react";
 
 const badges = [
   {
     icon: Shield,
     value: "100%",
-    label: "Secure Payments",
+    label: "Direct from Owners",
   },
   {
     icon: Users,
@@ -12,9 +12,9 @@ const badges = [
     label: "Happy Travelers",
   },
   {
-    icon: Star,
-    value: "4.8/5",
-    label: "Average Rating",
+    icon: Gavel,
+    value: "Open",
+    label: "Bidding Marketplace",
   },
   {
     icon: Clock,
@@ -27,7 +27,7 @@ const badges = [
     label: "Verified Owners",
   },
   {
-    icon: CreditCard,
+    icon: Star,
     value: "70%",
     label: "Avg. Savings",
   },
