@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/bidding/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,10 @@ const Header = () => {
             <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
               How It Works
             </Link>
+            <Link to="/bidding" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Gavel className="h-4 w-4" />
+              Bidding
+            </Link>
             <Link to="/list-property" className="text-muted-foreground hover:text-foreground transition-colors">
               List Your Property
             </Link>
@@ -81,47 +86,57 @@ const Header = () => {
             {isLoading ? (
               <div className="w-20 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="max-w-32 truncate">{profile?.full_name || user.email}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  
-                  {isRavTeam() && (
+              <div className="flex items-center gap-2">
+                <NotificationBell />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="max-w-32 truncate">{profile?.full_name || user.email}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
-                        <ShieldCheck className="h-4 w-4" />
-                        Admin Dashboard
+                      <Link to="/my-bids" className="flex items-center gap-2 cursor-pointer">
+                        <Gavel className="h-4 w-4" />
+                        My Bids & Requests
                       </Link>
                     </DropdownMenuItem>
-                  )}
-                  
-                  {isPropertyOwner() && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/owner-dashboard" className="flex items-center gap-2 cursor-pointer">
-                        <LayoutDashboard className="h-4 w-4" />
-                        Owner Dashboard
-                      </Link>
+                    
+                    {isRavTeam() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                          <ShieldCheck className="h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {isPropertyOwner() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/owner-dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <LayoutDashboard className="h-4 w-4" />
+                          Owner Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {(isRavTeam() || isPropertyOwner()) && <DropdownMenuSeparator />}
+                    
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
                     </DropdownMenuItem>
-                  )}
-                  
-                  {(isRavTeam() || isPropertyOwner()) && <DropdownMenuSeparator />}
-                  
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <>
                 <Link to="/login">
@@ -186,6 +201,14 @@ const Header = () => {
               List Your Property
             </Link>
             <Link 
+              to="/bidding" 
+              className="text-foreground py-2 flex items-center gap-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Gavel className="h-4 w-4" />
+              Bidding Marketplace
+            </Link>
+            <Link 
               to="/faq" 
               className="text-foreground py-2"
               onClick={() => setIsMenuOpen(false)}
@@ -196,6 +219,14 @@ const Header = () => {
             {user && (
               <>
                 <div className="border-t border-border pt-4">
+                  <Link 
+                    to="/my-bids" 
+                    className="flex items-center gap-2 text-foreground py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    My Bids & Requests
+                  </Link>
                   {isRavTeam() && (
                     <Link 
                       to="/admin" 
