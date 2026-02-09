@@ -148,6 +148,25 @@ serve(async (req) => {
           confirmationId: bookingConfirmation.id,
           deadline: confirmationDeadline 
         });
+
+        // Send email notification to owner about new booking
+        try {
+          const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-confirmation-reminder`;
+          await fetch(notificationUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+            },
+            body: JSON.stringify({
+              type: "new_booking",
+              bookingConfirmationId: bookingConfirmation.id,
+            }),
+          });
+          logStep("New booking notification sent to owner");
+        } catch (emailError) {
+          logStep("Warning: Failed to send new booking notification", { error: String(emailError) });
+        }
       }
 
       // Create checkin_confirmations record for traveler check-in (24h after arrival)
