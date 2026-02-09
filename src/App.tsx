@@ -19,6 +19,8 @@ import NotFound from "./pages/NotFound";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import BookingSuccess from "./pages/BookingSuccess";
+import BiddingMarketplace from "./pages/BiddingMarketplace";
+import MyBidsDashboard from "./pages/MyBidsDashboard";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/owner-dashboard" element={<OwnerDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
+            <Route path="/bidding" element={<BiddingMarketplace />} />
+            <Route path="/my-bids" element={<MyBidsDashboard />} />
             {/* Legacy routes - redirect to new paths */}
             <Route path="/deals" element={<Rentals />} />
             <Route path="/owner-resources" element={<HowItWorksPage />} />

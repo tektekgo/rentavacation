@@ -1,0 +1,595 @@
+// Hooks for the Bidding System
+// Provides data fetching and mutations for bids, travel requests, and proposals
+
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import type {
+  ListingBid,
+  ListingBidWithDetails,
+  BidOnListing,
+  ListingWithBidding,
+  TravelRequest,
+  TravelRequestWithDetails,
+  TravelProposal,
+  TravelProposalWithDetails,
+  Notification,
+  NotificationPreferences,
+  CreateBidInput,
+  CreateTravelRequestInput,
+  CreateProposalInput,
+  OpenListingForBiddingInput,
+  BidStatus,
+  TravelRequestStatus,
+  ProposalStatus,
+} from '@/types/bidding';
+
+// ============================================================
+// LISTING BIDS - Owner-initiated bidding
+// ============================================================
+
+// Fetch listings open for bidding (for travelers)
+export function useListingsOpenForBidding() {
+  return useQuery({
+    queryKey: ['listings', 'open-for-bidding'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          property:properties(*)
+        `)
+        .eq('open_for_bidding', true)
+        .eq('status', 'active')
+        .gt('bidding_ends_at', new Date().toISOString())
+        .order('bidding_ends_at', { ascending: true });
+
+      if (error) throw error;
+      return data as ListingWithBidding[];
+    },
+  });
+}
+
+// Fetch bids for a specific listing (for owners)
+export function useBidsForListing(listingId: string | undefined) {
+  return useQuery({
+    queryKey: ['bids', 'listing', listingId],
+    queryFn: async () => {
+      if (!listingId) return [];
+      
+      const { data, error } = await supabase
+        .from('listing_bids')
+        .select(`
+          *,
+          bidder:profiles(*)
+        `)
+        .eq('listing_id', listingId)
+        .order('bid_amount', { ascending: false });
+
+      if (error) throw error;
+      return data as BidOnListing[];
+    },
+    enabled: !!listingId,
+  });
+}
+
+// Fetch user's own bids (for travelers)
+export function useMyBids() {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['bids', 'my-bids', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('listing_bids')
+        .select(`
+          *,
+          listing:listings(*, property:properties(*))
+        `)
+        .eq('bidder_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as ListingBidWithDetails[];
+    },
+    enabled: !!user,
+  });
+}
+
+// Create a bid
+export function useCreateBid() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (input: CreateBidInput) => {
+      if (!user) throw new Error('Must be logged in');
+      
+      const { data, error } = await (supabase
+        .from('listing_bids') as any)
+        .insert({
+          listing_id: input.listing_id,
+          bidder_id: user.id,
+          bid_amount: input.bid_amount,
+          message: input.message || null,
+          guest_count: input.guest_count,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bids'] });
+      toast.success('Bid submitted successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to submit bid');
+    },
+  });
+}
+
+// Update bid status (for owners)
+export function useUpdateBidStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      bidId, 
+      status, 
+      counterOfferAmount,
+      counterOfferMessage 
+    }: { 
+      bidId: string; 
+      status: BidStatus;
+      counterOfferAmount?: number;
+      counterOfferMessage?: string;
+    }) => {
+      const updateData: any = { 
+        status, 
+        responded_at: new Date().toISOString() 
+      };
+      
+      if (counterOfferAmount !== undefined) {
+        updateData.counter_offer_amount = counterOfferAmount;
+        updateData.counter_offer_message = counterOfferMessage || null;
+      }
+
+      const { data, error } = await (supabase
+        .from('listing_bids') as any)
+        .update(updateData)
+        .eq('id', bidId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['bids'] });
+      const message = variables.status === 'accepted' 
+        ? 'Bid accepted!' 
+        : variables.status === 'rejected' 
+          ? 'Bid rejected' 
+          : 'Bid updated';
+      toast.success(message);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update bid');
+    },
+  });
+}
+
+// Open listing for bidding
+export function useOpenListingForBidding() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: OpenListingForBiddingInput) => {
+      const { data, error } = await (supabase
+        .from('listings') as any)
+        .update({
+          open_for_bidding: true,
+          bidding_ends_at: input.bidding_ends_at,
+          min_bid_amount: input.min_bid_amount || null,
+          reserve_price: input.reserve_price || null,
+          allow_counter_offers: input.allow_counter_offers ?? true,
+        })
+        .eq('id', input.listing_id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+      toast.success('Listing is now open for bidding!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to open listing for bidding');
+    },
+  });
+}
+
+// ============================================================
+// TRAVEL REQUESTS - Traveler-initiated
+// ============================================================
+
+// Fetch open travel requests (for owners to browse)
+export function useOpenTravelRequests() {
+  return useQuery({
+    queryKey: ['travel-requests', 'open'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('travel_requests')
+        .select(`
+          *,
+          traveler:profiles(*)
+        `)
+        .eq('status', 'open')
+        .gt('proposals_deadline', new Date().toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as TravelRequestWithDetails[];
+    },
+  });
+}
+
+// Fetch user's own travel requests
+export function useMyTravelRequests() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['travel-requests', 'mine', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('travel_requests')
+        .select('*')
+        .eq('traveler_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as TravelRequest[];
+    },
+    enabled: !!user,
+  });
+}
+
+// Create travel request
+export function useCreateTravelRequest() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (input: CreateTravelRequestInput) => {
+      if (!user) throw new Error('Must be logged in');
+
+      const { data, error } = await (supabase
+        .from('travel_requests') as any)
+        .insert({
+          traveler_id: user.id,
+          ...input,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
+      toast.success('Travel request posted!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to create travel request');
+    },
+  });
+}
+
+// Update travel request status
+export function useUpdateTravelRequestStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      requestId, 
+      status 
+    }: { 
+      requestId: string; 
+      status: TravelRequestStatus;
+    }) => {
+      const { data, error } = await (supabase
+        .from('travel_requests') as any)
+        .update({ status })
+        .eq('id', requestId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
+      toast.success('Request updated');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update request');
+    },
+  });
+}
+
+// ============================================================
+// TRAVEL PROPOSALS - Owner response to requests
+// ============================================================
+
+// Fetch proposals for a travel request (for travelers)
+export function useProposalsForRequest(requestId: string | undefined) {
+  return useQuery({
+    queryKey: ['proposals', 'request', requestId],
+    queryFn: async () => {
+      if (!requestId) return [];
+      
+      const { data, error } = await supabase
+        .from('travel_proposals')
+        .select(`
+          *,
+          property:properties(*),
+          owner:profiles(*)
+        `)
+        .eq('request_id', requestId)
+        .order('proposed_price', { ascending: true });
+
+      if (error) throw error;
+      return data as TravelProposalWithDetails[];
+    },
+    enabled: !!requestId,
+  });
+}
+
+// Fetch owner's own proposals
+export function useMyProposals() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['proposals', 'mine', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('travel_proposals')
+        .select(`
+          *,
+          property:properties(*),
+          request:travel_requests(*)
+        `)
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as TravelProposalWithDetails[];
+    },
+    enabled: !!user,
+  });
+}
+
+// Create proposal
+export function useCreateProposal() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (input: CreateProposalInput) => {
+      if (!user) throw new Error('Must be logged in');
+
+      const { data, error } = await (supabase
+        .from('travel_proposals') as any)
+        .insert({
+          ...input,
+          owner_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      toast.success('Proposal submitted!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to submit proposal');
+    },
+  });
+}
+
+// Update proposal status (for travelers accepting/rejecting)
+export function useUpdateProposalStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      proposalId, 
+      status 
+    }: { 
+      proposalId: string; 
+      status: ProposalStatus;
+    }) => {
+      const { data, error } = await (supabase
+        .from('travel_proposals') as any)
+        .update({ 
+          status, 
+          responded_at: new Date().toISOString() 
+        })
+        .eq('id', proposalId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
+      const message = variables.status === 'accepted' 
+        ? 'Proposal accepted!' 
+        : 'Proposal updated';
+      toast.success(message);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update proposal');
+    },
+  });
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+// Fetch user's notifications
+export function useNotifications(limit = 20) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notifications', user?.id, limit],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data as Notification[];
+    },
+    enabled: !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+}
+
+// Get unread count
+export function useUnreadNotificationCount() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notifications', 'unread-count', user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .is('read_at', null);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
+}
+
+// Mark notification as read
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await (supabase
+        .from('notifications') as any)
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
+// Mark all as read
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Must be logged in');
+      
+      const { error } = await (supabase
+        .from('notifications') as any)
+        .update({ read_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .is('read_at', null);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast.success('All notifications marked as read');
+    },
+  });
+}
+
+// Notification preferences
+export function useNotificationPreferences() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['notification-preferences', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('notification_preferences')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data as NotificationPreferences | null;
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpdateNotificationPreferences() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (preferences: Partial<NotificationPreferences>) => {
+      if (!user) throw new Error('Must be logged in');
+
+      const { data, error } = await (supabase
+        .from('notification_preferences') as any)
+        .upsert({
+          user_id: user.id,
+          ...preferences,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
+      toast.success('Preferences saved');
+    },
+  });
+}
