@@ -55,9 +55,9 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Fun Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 mb-6 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-accent" />
+            <Gavel className="w-4 h-4 text-accent" />
             <span className="text-white/90 text-sm font-medium">
-              The brainchild of Ajumon & Sujit ✨
+              Name Your Price. Book Your Paradise. ✨
             </span>
           </div>
 
