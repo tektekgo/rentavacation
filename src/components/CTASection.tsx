@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Gavel } from "lucide-react";
 
 const CTASection = () => {
   return (
@@ -15,29 +15,30 @@ const CTASection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6">
-            <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-white/90 text-sm font-medium">Start Your Journey Today</span>
+            <Gavel className="w-4 h-4 text-accent" />
+            <span className="text-white/90 text-sm font-medium">Your Price. Your Paradise.</span>
           </div>
 
           <h2 className="font-display text-3xl md:text-5xl font-bold text-white mb-6">
-            Ready to Experience Luxury for Less?
+            Why Pay Resort Prices When You Can Bid?
           </h2>
           
           <p className="text-lg text-white/80 mb-10 max-w-xl mx-auto">
-            Join thousands of smart travelers saving up to 70% on their dream vacations. 
-            No hidden fees, no hassle — just amazing stays.
+            Rent directly from timeshare owners at up to 70% off. Place bids on open listings 
+            or post your travel plans and let owners come to you with offers.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/rentals">
+            <Link to="/bidding">
               <Button variant="hero" size="xl">
-                Browse Rentals
-                <ArrowRight className="w-5 h-5" />
+                <Gavel className="w-5 h-5" />
+                Start Bidding
               </Button>
             </Link>
-            <Link to="/list-property">
+            <Link to="/rentals">
               <Button variant="hero-outline" size="xl">
-                List Your Property
+                Browse Rentals
+                <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           </div>

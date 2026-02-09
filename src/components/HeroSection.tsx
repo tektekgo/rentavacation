@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Calendar as CalendarIcon, MapPin, Sparkles } from "lucide-react";
+import { Search, Calendar as CalendarIcon, MapPin, Sparkles, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
@@ -63,15 +63,22 @@ const HeroSection = () => {
 
           {/* Headline */}
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up">
-            Insider Access to{" "}
-            <span className="text-accent">Members-Only</span>{" "}
-            Vacation Clubs
+            Rent <span className="text-accent">Direct from Owners</span>{" "}
+            — Name Your Price
           </h1>
 
-          <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto animate-fade-in">
-            Rent directly from timeshare owners at a fraction of the resort's price. 
-            Save up to 70% on luxury vacation stays.
+          <p className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto animate-fade-in">
+            Skip the middleman. Book luxury vacation club stays directly from members at up to 70% off. 
+            Bid on properties or post your travel plans and let owners compete for your booking.
           </p>
+
+          {/* Bidding CTA */}
+          <div className="flex justify-center gap-4 mb-8 animate-fade-in">
+            <Link to="/bidding" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 hover:bg-accent/30 transition-colors">
+              <Gavel className="w-4 h-4 text-accent" />
+              <span className="text-white/90 text-sm font-medium">Explore Bidding Marketplace</span>
+            </Link>
+          </div>
 
           {/* Search Box */}
           <div className="bg-card/95 backdrop-blur-lg rounded-2xl shadow-card-hover p-4 md:p-6 max-w-3xl mx-auto animate-scale-in">
