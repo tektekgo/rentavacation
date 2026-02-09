@@ -198,9 +198,25 @@ const AdminVerifications = () => {
         if (docsError) throw docsError;
       }
 
+      // Send email notification to owner
+      try {
+        await supabase.functions.invoke("send-verification-notification", {
+          body: {
+            ownerId: selectedVerification.owner_id,
+            ownerEmail: selectedVerification.owner?.email,
+            ownerName: selectedVerification.owner?.full_name || "",
+            status: "approved",
+            trustLevel: newTrustLevel,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send notification email:", emailError);
+        // Don't fail the whole operation if email fails
+      }
+
       toast({
         title: "Verification Approved",
-        description: `Owner verified and trust level set to ${TRUST_LEVEL_LABELS[newTrustLevel]}.`,
+        description: `Owner verified and trust level set to ${TRUST_LEVEL_LABELS[newTrustLevel]}. Notification sent.`,
       });
 
       setIsReviewDialogOpen(false);
@@ -252,9 +268,25 @@ const AdminVerifications = () => {
         if (docsError) throw docsError;
       }
 
+      // Send email notification to owner
+      try {
+        await supabase.functions.invoke("send-verification-notification", {
+          body: {
+            ownerId: selectedVerification.owner_id,
+            ownerEmail: selectedVerification.owner?.email,
+            ownerName: selectedVerification.owner?.full_name || "",
+            status: "rejected",
+            rejectionReason: rejectionReason,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send notification email:", emailError);
+        // Don't fail the whole operation if email fails
+      }
+
       toast({
         title: "Verification Rejected",
-        description: "Owner has been notified of the rejection.",
+        description: "Owner has been notified of the rejection via email.",
       });
 
       setIsReviewDialogOpen(false);
