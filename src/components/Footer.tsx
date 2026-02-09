@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Heart } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Gavel } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -86,7 +86,8 @@ const Footer = () => {
               © 2026 Rent-A-Vacation. A Techsilon Group Company. All rights reserved.
             </div>
             <div className="flex items-center gap-2 text-sm text-white/50">
-              Made with <Heart className="w-4 h-4 text-accent fill-accent" /> by Ajumon & Sujit
+              <Gavel className="w-4 h-4 text-primary" />
+              <span>Name Your Price. Book Your Paradise.</span>
             </div>
             <div className="flex gap-6 text-sm">
               <Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
