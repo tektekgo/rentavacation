@@ -128,15 +128,23 @@ const Documentation = () => {
           >
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-2"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div className="flex items-center gap-3">
             <img src="/rav-logo.png" alt="RAV Logo" className="h-8 w-8" />
             <div>
               <h1 className="text-lg font-bold text-foreground">Rent-A-Vacation</h1>
-              <p className="text-xs text-muted-foreground">Product Documentation v1.0</p>
+              <p className="text-xs text-muted-foreground">Admin Manual v1.0</p>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <Button onClick={() => window.location.href = '/user-guide'} variant="ghost" size="sm">
+            <Button onClick={() => navigate('/user-guide')} variant="ghost" size="sm">
               User Guide
             </Button>
             <Button onClick={handlePrint} variant="outline" size="sm">
