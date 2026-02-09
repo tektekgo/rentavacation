@@ -654,6 +654,7 @@ export interface Database {
           claim_reason?: string | null;
         };
       };
+    };
     Views: {};
     Functions: {
       has_role: {
