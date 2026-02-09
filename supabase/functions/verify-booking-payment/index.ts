@@ -12,6 +12,20 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[VERIFY-BOOKING-PAYMENT] ${step}${detailsStr}`);
 };
 
+// Calculate 48-hour confirmation deadline from now
+const getConfirmationDeadline = (): string => {
+  const deadline = new Date();
+  deadline.setHours(deadline.getHours() + 48);
+  return deadline.toISOString();
+};
+
+// Calculate check-in confirmation deadline (24 hours after check-in date)
+const getCheckinConfirmationDeadline = (checkInDate: string): string => {
+  const deadline = new Date(checkInDate);
+  deadline.setHours(deadline.getHours() + 24);
+  return deadline.toISOString();
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,10 +58,16 @@ serve(async (req) => {
     if (!bookingId) throw new Error("Booking ID is required");
     logStep("Request body parsed", { bookingId });
 
-    // Fetch the booking
+    // Fetch the booking with listing and property details
     const { data: booking, error: bookingError } = await supabaseClient
       .from("bookings")
-      .select("*")
+      .select(`
+        *,
+        listing:listings(
+          *,
+          property:properties(*)
+        )
+      `)
       .eq("id", bookingId)
       .eq("renter_id", user.id)
       .single();
@@ -106,12 +126,75 @@ serve(async (req) => {
         logStep("Warning: Failed to update listing status", { error: listingError.message });
       }
 
-      logStep("Booking confirmed successfully");
+      // Create booking_confirmations record with 48-hour deadline (escrow)
+      const confirmationDeadline = getConfirmationDeadline();
+      const { data: bookingConfirmation, error: confirmationError } = await supabaseClient
+        .from("booking_confirmations")
+        .insert({
+          booking_id: bookingId,
+          listing_id: booking.listing_id,
+          owner_id: booking.listing?.owner_id,
+          confirmation_deadline: confirmationDeadline,
+          escrow_status: "pending_confirmation",
+          escrow_amount: booking.total_amount,
+        })
+        .select()
+        .single();
+
+      if (confirmationError) {
+        logStep("Warning: Failed to create booking confirmation", { error: confirmationError.message });
+      } else {
+        logStep("Booking confirmation created", { 
+          confirmationId: bookingConfirmation.id,
+          deadline: confirmationDeadline 
+        });
+      }
+
+      // Create checkin_confirmations record for traveler check-in (24h after arrival)
+      const checkInDate = booking.listing?.check_in_date;
+      if (checkInDate) {
+        const checkinDeadline = getCheckinConfirmationDeadline(checkInDate);
+        const { error: checkinError } = await supabaseClient
+          .from("checkin_confirmations")
+          .insert({
+            booking_id: bookingId,
+            traveler_id: user.id,
+            confirmation_deadline: checkinDeadline,
+          });
+
+        if (checkinError) {
+          logStep("Warning: Failed to create checkin confirmation", { error: checkinError.message });
+        } else {
+          logStep("Checkin confirmation created", { deadline: checkinDeadline });
+        }
+      }
+
+      // Contribute to platform guarantee fund (3% of commission)
+      const guaranteeFundContribution = Math.round(booking.rav_commission * 0.03 * 100) / 100;
+      const { error: fundError } = await supabaseClient
+        .from("platform_guarantee_fund")
+        .insert({
+          booking_id: bookingId,
+          contribution_amount: guaranteeFundContribution,
+          contribution_percentage: 3,
+        });
+
+      if (fundError) {
+        logStep("Warning: Failed to add to guarantee fund", { error: fundError.message });
+      } else {
+        logStep("Guarantee fund contribution added", { amount: guaranteeFundContribution });
+      }
+
+      logStep("Booking confirmed successfully with escrow");
       return new Response(
         JSON.stringify({ 
           success: true, 
           status: "confirmed",
-          message: "Payment verified and booking confirmed" 
+          message: "Payment verified and booking confirmed with escrow",
+          escrow: {
+            deadline: confirmationDeadline,
+            amount: booking.total_amount,
+          }
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
