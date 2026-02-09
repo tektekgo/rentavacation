@@ -52,7 +52,14 @@ const Documentation = () => {
     { id: "cancellations", label: "Cancellation Policies", icon: AlertTriangle },
     { id: "notifications", label: "Email Notifications", icon: Mail },
     { id: "admin", label: "Admin Dashboard", icon: Settings },
+    { id: "rav-owner-guide", label: "RAV Owner How-To Guide", icon: Briefcase },
   ];
+
+  const currentDate = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 
 
   return (
@@ -75,7 +82,10 @@ const Documentation = () => {
               <p className="text-xs text-muted-foreground">Product Documentation v1.0</p>
             </div>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <Button onClick={() => window.location.href = '/user-guide'} variant="ghost" size="sm">
+              User Guide
+            </Button>
             <Button onClick={handlePrint} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export PDF
@@ -125,6 +135,57 @@ const Documentation = () => {
         <main className="flex-1 min-w-0 p-6 md:p-8 lg:p-12">
           <div className="max-w-4xl mx-auto">
             
+            {/* Print Cover Page */}
+            {isPrinting && (
+              <section className="print:break-after-page hidden print:block">
+                <div className="min-h-[90vh] flex flex-col items-center justify-center text-center">
+                  <img src="/rav-logo.png" alt="RAV Logo" className="h-24 w-24 mb-8" />
+                  <h1 className="text-5xl font-bold text-foreground mb-4">Rent-A-Vacation</h1>
+                  <p className="text-2xl text-primary font-medium mb-2">Administrator Manual</p>
+                  <p className="text-xl text-muted-foreground mb-8">Name Your Price. Book Your Paradise.</p>
+                  <div className="bg-muted/50 rounded-xl p-6 max-w-md">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Version:</strong> 1.0<br />
+                      <strong>Last Updated:</strong> {currentDate}<br />
+                      <strong>Confidential:</strong> For RAV Administrators Only
+                    </p>
+                  </div>
+                  <div className="mt-auto pt-16">
+                    <p className="text-sm text-muted-foreground">A Techsilon Group Company</p>
+                    <p className="text-xs text-muted-foreground mt-1">Jacksonville, FL • rentavacation.com</p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Print Table of Contents */}
+            {isPrinting && (
+              <section className="print:break-after-page hidden print:block">
+                <h2 className="text-3xl font-bold text-foreground mb-8">Table of Contents</h2>
+                <div className="space-y-3">
+                  {sections.map((section, index) => {
+                    const Icon = section.icon;
+                    return (
+                      <div key={section.id} className="flex items-center gap-4 py-2 border-b border-dashed">
+                        <span className="text-lg font-medium text-primary w-8">{index + 1}.</span>
+                        <Icon className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-lg">{section.label}</span>
+                        <span className="flex-1 border-b border-dotted border-muted-foreground/30" />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-12 bg-muted/50 rounded-xl p-6">
+                  <h3 className="font-semibold mb-3">About This Document</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    This Administrator Manual provides comprehensive documentation of the Rent-A-Vacation platform, 
+                    including all features, workflows, and operational procedures. It is intended for RAV Owners and 
+                    Administrators who manage the marketplace and oversee transactions between property owners and travelers.
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* Overview Section */}
             {(isPrinting || activeSection === "overview") && (
               <section className="space-y-8 print:break-after-page">
@@ -1125,7 +1186,304 @@ const Documentation = () => {
               </section>
             )}
 
-            {/* Footer */}
+            {/* RAV Owner How-To Guide Section */}
+            {(isPrinting || activeSection === "rav-owner-guide") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">RAV Owner How-To Guide</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Step-by-step operational procedures for platform superusers managing the Rent-A-Vacation marketplace.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-6 border border-amber-500/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">👑</span>
+                    <h3 className="font-semibold text-lg">RAV Owner Responsibilities</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    As a RAV Owner, you have complete oversight of the platform including user management, financial operations, 
+                    listing approvals, dispute resolution, and payout processing. This guide walks you through each core workflow.
+                  </p>
+                </div>
+
+                {/* Daily Operations */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    Daily Operations Checklist
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { task: "Review pending listing approvals", path: "/admin → Listings tab", priority: "High" },
+                      { task: "Check new owner verification requests", path: "/admin → Verifications tab", priority: "High" },
+                      { task: "Monitor booking confirmation deadlines", path: "/admin → Bookings tab", priority: "Critical" },
+                      { task: "Review reported check-in issues", path: "/admin → Check-in Issues tab", priority: "High" },
+                      { task: "Process pending payouts", path: "/admin → Payouts tab", priority: "Medium" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.task}</p>
+                          <p className="text-xs text-muted-foreground">{item.path}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          item.priority === 'Critical' ? 'bg-red-100 text-red-700' :
+                          item.priority === 'High' ? 'bg-amber-100 text-amber-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>{item.priority}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* How to Approve Listings */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    How to Approve/Reject Listings
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      All new listings are set to "Pending Approval" status. Review each listing for accuracy and compliance.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Navigate to <strong>/admin</strong> and select the <strong>Listings</strong> tab</li>
+                      <li>Filter by "Pending" status to see listings awaiting review</li>
+                      <li>Click on a listing to view full details including property photos and pricing</li>
+                      <li>Verify the listing meets platform standards:
+                        <ul className="list-disc list-inside ml-4 mt-2 text-muted-foreground">
+                          <li>Accurate resort/property information</li>
+                          <li>Clear, high-quality photos</li>
+                          <li>Reasonable pricing within market range</li>
+                          <li>Complete amenity descriptions</li>
+                        </ul>
+                      </li>
+                      <li>Click <strong>Approve</strong> to publish or <strong>Reject</strong> with a reason</li>
+                    </ol>
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                      <p className="text-sm text-amber-800">
+                        <strong>⚠️ Tip:</strong> Always verify the owner has completed identity verification before approving their first listing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How to Verify Owners */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <UserCheck className="h-5 w-5 text-primary" />
+                    How to Verify Property Owners
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Owner verification builds trust. Review submitted documents to confirm identity and property ownership.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Go to <strong>/admin</strong> → <strong>Verifications</strong> tab</li>
+                      <li>Review pending verification requests</li>
+                      <li>Check submitted documents:
+                        <ul className="list-disc list-inside ml-4 mt-2 text-muted-foreground">
+                          <li>Government-issued ID (passport, driver's license)</li>
+                          <li>Vacation club membership certificate or statement</li>
+                          <li>Proof of address (optional but recommended)</li>
+                        </ul>
+                      </li>
+                      <li>Verify documents are legible, not expired, and match owner's profile</li>
+                      <li>Approve verification or request additional documentation</li>
+                    </ol>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                      <p className="text-sm text-green-800">
+                        <strong>✓ Result:</strong> Verified owners display a "Verified Owner ✓" badge on all their listings.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How to Process Payouts */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                    How to Process Owner Payouts
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Payouts are released 5 days after guest checkout, assuming no issues are reported.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Navigate to <strong>/admin</strong> → <strong>Payouts</strong> tab</li>
+                      <li>Review bookings with "Ready for Payout" status</li>
+                      <li>Confirm the following before processing:
+                        <ul className="list-disc list-inside ml-4 mt-2 text-muted-foreground">
+                          <li>Traveler confirmed check-in successfully</li>
+                          <li>No disputes or issues reported</li>
+                          <li>5 days have passed since checkout</li>
+                        </ul>
+                      </li>
+                      <li>Calculate payout amount (booking total minus 15% platform commission)</li>
+                      <li>Process payout via configured payment method</li>
+                      <li>Mark as "Paid" with transaction reference</li>
+                    </ol>
+                    <div className="bg-muted/50 rounded-lg p-4 mt-4">
+                      <p className="text-sm">
+                        <strong>Payout Formula:</strong><br />
+                        Owner Payout = Total Booking Amount × 85%<br />
+                        Platform Commission = Total Booking Amount × 15%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How to Handle Disputes */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-primary" />
+                    How to Handle Check-in Issues & Disputes
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Travelers can report issues during check-in. These require immediate attention.
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h4 className="font-medium text-red-800 mb-2">Access Issues</h4>
+                        <p className="text-xs text-red-700">
+                          Cannot access unit, wrong key/code, unit occupied. Contact owner immediately; may require alternative accommodation or full refund.
+                        </p>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <h4 className="font-medium text-amber-800 mb-2">Condition Issues</h4>
+                        <p className="text-xs text-amber-700">
+                          Unit not as described, cleanliness problems. Document with photos; negotiate partial refund or resolution with owner.
+                        </p>
+                      </div>
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 className="font-medium text-orange-800 mb-2">Safety Concerns</h4>
+                        <p className="text-xs text-orange-700">
+                          Safety hazards, security issues. Prioritize guest safety; may require immediate relocation and Guarantee Fund usage.
+                        </p>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-800 mb-2">Amenity Mismatches</h4>
+                        <p className="text-xs text-blue-700">
+                          Advertised amenities unavailable. Negotiate compensation; update listing for accuracy.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4 mt-4">
+                      <p className="text-sm">
+                        <strong>Guarantee Fund:</strong> 3% of each transaction is held in reserve for emergency resolutions requiring platform intervention.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Managing User Roles */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    How to Manage User Roles
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Only RAV Owners can assign or modify user roles. This is a sensitive operation.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Navigate to <strong>/admin</strong> → <strong>Users</strong> tab</li>
+                      <li>Search for the user by email or name</li>
+                      <li>Click on the user to view their profile</li>
+                      <li>Select the appropriate role from the dropdown:
+                        <ul className="list-disc list-inside ml-4 mt-2 text-muted-foreground">
+                          <li><strong>rav_owner</strong> — Full platform access (use sparingly)</li>
+                          <li><strong>rav_admin</strong> — Administrative access without role management</li>
+                          <li><strong>rav_staff</strong> — Support staff with view access</li>
+                          <li><strong>property_owner</strong> — Can list and manage properties</li>
+                          <li><strong>renter</strong> — Default traveler role</li>
+                        </ul>
+                      </li>
+                      <li>Save changes and confirm the role update</li>
+                    </ol>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+                      <p className="text-sm text-red-800">
+                        <strong>⚠️ Security:</strong> Roles are stored in a separate secure table with database-level access control. Never share admin credentials.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Reporting */}
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Understanding Financial Reports
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      The Financials tab provides a comprehensive view of platform revenue and transactions.
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Revenue Metrics</h4>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          <li>• Gross Booking Volume (GBV)</li>
+                          <li>• Platform Commission (15% of GBV)</li>
+                          <li>• Guarantee Fund Reserve (3%)</li>
+                          <li>• Net Revenue</li>
+                        </ul>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Transaction Status</h4>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          <li>• In Escrow (awaiting checkout)</li>
+                          <li>• Pending Payout (post-checkout hold)</li>
+                          <li>• Paid Out (completed)</li>
+                          <li>• Refunded (cancellations)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Procedures */}
+                <div className="bg-card rounded-xl p-6 border border-red-200">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2 text-red-700">
+                    <Shield className="h-5 w-5" />
+                    Emergency Procedures
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-red-50 rounded-lg p-4">
+                      <h4 className="font-medium text-red-800 mb-2">Fraudulent Listing Detected</h4>
+                      <ol className="list-decimal list-inside text-xs text-red-700 space-y-1">
+                        <li>Immediately suspend the listing and owner account</li>
+                        <li>Identify all active bookings for the property</li>
+                        <li>Contact affected travelers with resolution options</li>
+                        <li>Process refunds from Guarantee Fund if needed</li>
+                        <li>Document incident for legal review</li>
+                      </ol>
+                    </div>
+                    <div className="bg-amber-50 rounded-lg p-4">
+                      <h4 className="font-medium text-amber-800 mb-2">Owner Fails to Confirm Booking</h4>
+                      <ol className="list-decimal list-inside text-xs text-amber-700 space-y-1">
+                        <li>System sends automated reminders at 12h and 6h before deadline</li>
+                        <li>If deadline passes, booking auto-cancels with full refund</li>
+                        <li>Owner receives warning; repeated failures may result in suspension</li>
+                        <li>Help traveler find alternative accommodation</li>
+                      </ol>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Payment Processing Issues</h4>
+                      <ol className="list-decimal list-inside text-xs text-muted-foreground space-y-1">
+                        <li>Check Stripe dashboard for transaction status</li>
+                        <li>Verify webhook delivery in Edge Functions logs</li>
+                        <li>Manual reconciliation may be needed for edge cases</li>
+                        <li>Contact Stripe support for disputed charges</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             <footer className="mt-16 pt-8 border-t text-center text-sm text-muted-foreground">
               <p>Rent-A-Vacation © 2024 — A Techsilon Group Company</p>
               <p className="mt-1">Jacksonville, FL • 1-800-RAV-0800 • rentavacation.com</p>
