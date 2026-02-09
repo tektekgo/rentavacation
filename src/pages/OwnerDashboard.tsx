@@ -17,13 +17,15 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import OwnerProperties from "@/components/owner/OwnerProperties";
 import OwnerListings from "@/components/owner/OwnerListings";
 import OwnerBookings from "@/components/owner/OwnerBookings";
 import OwnerEarnings from "@/components/owner/OwnerEarnings";
+import { OwnerProposals } from "@/components/owner/OwnerProposals";
 
 interface DashboardStats {
   totalProperties: number;
@@ -196,7 +198,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -208,6 +210,10 @@ const OwnerDashboard = () => {
             <TabsTrigger value="listings" className="gap-2">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Listings</span>
+            </TabsTrigger>
+            <TabsTrigger value="proposals" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Proposals</span>
             </TabsTrigger>
             <TabsTrigger value="bookings" className="gap-2">
               <Clock className="h-4 w-4" />
@@ -396,6 +402,17 @@ const OwnerDashboard = () => {
           {/* Listings Tab */}
           <TabsContent value="listings" className="mt-6">
             <OwnerListings />
+          </TabsContent>
+
+          {/* Proposals Tab */}
+          <TabsContent value="proposals" className="mt-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold">Your Proposals</h2>
+              <p className="text-muted-foreground">
+                Proposals you've submitted for traveler requests
+              </p>
+            </div>
+            <OwnerProposals />
           </TabsContent>
 
           {/* Bookings Tab */}

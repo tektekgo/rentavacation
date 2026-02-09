@@ -36,14 +36,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Calendar, MapPin, Edit, Trash2, XCircle } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Calendar, MapPin, Edit, Trash2, XCircle, Gavel, Eye } from "lucide-react";
+import { format, formatDistanceToNow, isPast } from "date-fns";
 import type { Property, Listing, ListingStatus, Database } from "@/types/database";
+import { OpenForBiddingDialog } from "@/components/bidding/OpenForBiddingDialog";
+import { BidsManagerDialog } from "@/components/bidding/BidsManagerDialog";
 
 type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 type ListingUpdate = Database['public']['Tables']['listings']['Update'];
 
-type ListingWithProperty = Listing & { property: Property };
+type ListingWithProperty = Listing & { 
+  property: Property;
+  open_for_bidding?: boolean;
+  bidding_ends_at?: string | null;
+  min_bid_amount?: number | null;
+  reserve_price?: number | null;
+  allow_counter_offers?: boolean;
+};
 
 const STATUS_COLORS: Record<ListingStatus, string> = {
   draft: "bg-gray-500",
@@ -88,6 +97,11 @@ const OwnerListings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editingListing, setEditingListing] = useState<ListingWithProperty | null>(null);
   const [formData, setFormData] = useState<ListingFormData>(initialFormData);
+  
+  // Bidding dialog states
+  const [biddingDialogOpen, setBiddingDialogOpen] = useState(false);
+  const [bidsManagerOpen, setBidsManagerOpen] = useState(false);
+  const [selectedListingForBidding, setSelectedListingForBidding] = useState<ListingWithProperty | null>(null);
 
   // Fetch listings and properties
   const fetchData = async () => {
@@ -443,6 +457,19 @@ const OwnerListings = () => {
                       <Badge className={STATUS_COLORS[listing.status]}>
                         {STATUS_LABELS[listing.status]}
                       </Badge>
+                      {/* Bidding Status Badge */}
+                      {listing.open_for_bidding && listing.bidding_ends_at && (
+                        isPast(new Date(listing.bidding_ends_at)) ? (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            Bidding Ended
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-accent text-accent-foreground">
+                            <Gavel className="h-3 w-3 mr-1" />
+                            Bidding Open
+                          </Badge>
+                        )
+                      )}
                     </div>
                     <CardTitle className="text-lg">
                       {listing.property?.resort_name}
@@ -458,6 +485,12 @@ const OwnerListings = () => {
                     {listing.rav_markup > 0 && (
                       <p className="text-xs text-muted-foreground">
                         (Your price: ${listing.owner_price.toLocaleString()})
+                      </p>
+                    )}
+                    {/* Bidding End Time */}
+                    {listing.open_for_bidding && listing.bidding_ends_at && !isPast(new Date(listing.bidding_ends_at)) && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ends {formatDistanceToNow(new Date(listing.bidding_ends_at), { addSuffix: true })}
                       </p>
                     )}
                   </div>
@@ -480,7 +513,38 @@ const OwnerListings = () => {
                   </p>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {/* Bidding Controls */}
+                  {listing.status === 'active' && (
+                    <>
+                      {listing.open_for_bidding && listing.bidding_ends_at && !isPast(new Date(listing.bidding_ends_at)) ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedListingForBidding(listing);
+                            setBidsManagerOpen(true);
+                          }}
+                        >
+                          <Eye className="mr-2 h-3 w-3" />
+                          View Bids
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedListingForBidding(listing);
+                            setBiddingDialogOpen(true);
+                          }}
+                        >
+                          <Gavel className="mr-2 h-3 w-3" />
+                          Open for Bidding
+                        </Button>
+                      )}
+                    </>
+                  )}
+
                   {["draft", "pending_approval"].includes(listing.status) && (
                     <Button
                       variant="outline"
@@ -550,6 +614,35 @@ const OwnerListings = () => {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Open for Bidding Dialog */}
+      {selectedListingForBidding && (
+        <OpenForBiddingDialog
+          listingId={selectedListingForBidding.id}
+          listingPrice={selectedListingForBidding.final_price}
+          open={biddingDialogOpen}
+          onOpenChange={(open) => {
+            setBiddingDialogOpen(open);
+            if (!open) {
+              setSelectedListingForBidding(null);
+              fetchData(); // Refresh listings
+            }
+          }}
+        />
+      )}
+
+      {/* Bids Manager Dialog */}
+      {selectedListingForBidding && (
+        <BidsManagerDialog
+          listingId={selectedListingForBidding.id}
+          listingTitle={`${selectedListingForBidding.property?.resort_name} - ${format(new Date(selectedListingForBidding.check_in_date), 'MMM d')} to ${format(new Date(selectedListingForBidding.check_out_date), 'MMM d, yyyy')}`}
+          open={bidsManagerOpen}
+          onOpenChange={(open) => {
+            setBidsManagerOpen(open);
+            if (!open) setSelectedListingForBidding(null);
+          }}
+        />
       )}
     </div>
   );
