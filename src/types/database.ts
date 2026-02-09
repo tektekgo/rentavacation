@@ -7,6 +7,8 @@ export type ListingStatus = 'draft' | 'pending_approval' | 'active' | 'booked' |
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
+export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
+
 export type AgreementStatus = 'pending' | 'active' | 'suspended' | 'terminated';
 
 export type VacationClubBrand = 
@@ -218,6 +220,10 @@ export interface Database {
           special_requests: string | null;
           payment_intent_id: string | null;
           paid_at: string | null;
+          payout_status: PayoutStatus | null;
+          payout_date: string | null;
+          payout_reference: string | null;
+          payout_notes: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -233,6 +239,10 @@ export interface Database {
           special_requests?: string | null;
           payment_intent_id?: string | null;
           paid_at?: string | null;
+          payout_status?: PayoutStatus | null;
+          payout_date?: string | null;
+          payout_reference?: string | null;
+          payout_notes?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -248,6 +258,10 @@ export interface Database {
           special_requests?: string | null;
           payment_intent_id?: string | null;
           paid_at?: string | null;
+          payout_status?: PayoutStatus | null;
+          payout_date?: string | null;
+          payout_reference?: string | null;
+          payout_notes?: string | null;
           updated_at?: string;
         };
       };
@@ -271,6 +285,7 @@ export interface Database {
       app_role: AppRole;
       listing_status: ListingStatus;
       booking_status: BookingStatus;
+      payout_status: PayoutStatus;
       agreement_status: AgreementStatus;
       vacation_club_brand: VacationClubBrand;
     };

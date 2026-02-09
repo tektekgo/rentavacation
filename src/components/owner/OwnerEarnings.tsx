@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,9 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, TrendingUp, Calendar, Clock, CheckCircle } from "lucide-react";
-import { format } from "date-fns";
-import type { Booking, BookingStatus, Property, Listing } from "@/types/database";
+import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, Loader2, Calendar } from "lucide-react";
+import { format, addDays, startOfMonth, subMonths, isAfter } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import type { Booking, Listing, Property, PayoutStatus } from "@/types/database";
 
 interface BookingWithListing extends Booking {
   listing: Listing & { property: Property };
@@ -24,10 +25,66 @@ interface BookingWithListing extends Booking {
 interface EarningsSummary {
   totalEarnings: number;
   pendingPayouts: number;
+  processingPayouts: number;
   completedPayouts: number;
   totalBookings: number;
   averagePerBooking: number;
 }
+
+interface MonthlyEarning {
+  month: string;
+  earnings: number;
+  bookings: number;
+}
+
+const PAYOUT_PROCESSING_DAYS = 5;
+
+const getPayoutStatusBadge = (booking: BookingWithListing) => {
+  const payoutStatus = booking.payout_status || 'pending';
+  
+  switch (payoutStatus) {
+    case 'paid':
+      return (
+        <Badge className="bg-green-500 hover:bg-green-600">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Paid
+        </Badge>
+      );
+    case 'processing':
+      return (
+        <Badge className="bg-blue-500 hover:bg-blue-600">
+          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+          Processing
+        </Badge>
+      );
+    case 'failed':
+      return (
+        <Badge variant="destructive">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          Failed
+        </Badge>
+      );
+    default:
+      // For pending, show expected date based on checkout
+      const checkoutDate = new Date(booking.listing.check_out_date);
+      const expectedPayoutDate = addDays(checkoutDate, PAYOUT_PROCESSING_DAYS);
+      const isUpcoming = isAfter(expectedPayoutDate, new Date());
+      
+      return (
+        <div className="flex flex-col">
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+          {isUpcoming && (
+            <span className="text-xs text-muted-foreground mt-1">
+              Est. {format(expectedPayoutDate, "MMM d")}
+            </span>
+          )}
+        </div>
+      );
+  }
+};
 
 const OwnerEarnings = () => {
   const { user } = useAuth();
@@ -35,11 +92,13 @@ const OwnerEarnings = () => {
   const [summary, setSummary] = useState<EarningsSummary>({
     totalEarnings: 0,
     pendingPayouts: 0,
+    processingPayouts: 0,
     completedPayouts: 0,
     totalBookings: 0,
     averagePerBooking: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
 
   const fetchEarnings = async () => {
     if (!user) return;
@@ -77,17 +136,22 @@ const OwnerEarnings = () => {
       const bookingsData = data as BookingWithListing[] || [];
       setBookings(bookingsData);
 
-      // Calculate summary
-      const completedBookings = bookingsData.filter((b) => b.status === "completed");
-      const confirmedBookings = bookingsData.filter((b) => b.status === "confirmed");
+      // Calculate summary with payout status
+      const paidBookings = bookingsData.filter((b) => b.payout_status === "paid");
+      const processingBookings = bookingsData.filter((b) => b.payout_status === "processing");
+      const pendingBookings = bookingsData.filter((b) => 
+        !b.payout_status || b.payout_status === "pending"
+      );
 
       const totalEarnings = bookingsData.reduce((sum, b) => sum + b.owner_payout, 0);
-      const completedPayouts = completedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
-      const pendingPayouts = confirmedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
+      const completedPayouts = paidBookings.reduce((sum, b) => sum + b.owner_payout, 0);
+      const processingPayouts = processingBookings.reduce((sum, b) => sum + b.owner_payout, 0);
+      const pendingPayouts = pendingBookings.reduce((sum, b) => sum + b.owner_payout, 0);
 
       setSummary({
         totalEarnings,
         pendingPayouts,
+        processingPayouts,
         completedPayouts,
         totalBookings: bookingsData.length,
         averagePerBooking: bookingsData.length > 0 ? totalEarnings / bookingsData.length : 0,
@@ -102,6 +166,45 @@ const OwnerEarnings = () => {
   useEffect(() => {
     fetchEarnings();
   }, [user]);
+
+  // Calculate monthly earnings for chart
+  const monthlyData = useMemo(() => {
+    const months: MonthlyEarning[] = [];
+    const now = new Date();
+    
+    // Last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = startOfMonth(subMonths(now, i));
+      const monthEnd = startOfMonth(subMonths(now, i - 1));
+      
+      const monthBookings = bookings.filter((b) => {
+        const bookingDate = new Date(b.created_at);
+        return bookingDate >= monthStart && bookingDate < monthEnd;
+      });
+
+      months.push({
+        month: format(monthStart, "MMM"),
+        earnings: monthBookings.reduce((sum, b) => sum + b.owner_payout, 0),
+        bookings: monthBookings.length,
+      });
+    }
+    
+    return months;
+  }, [bookings]);
+
+  // Filter bookings based on tab
+  const filteredBookings = useMemo(() => {
+    switch (activeTab) {
+      case "pending":
+        return bookings.filter((b) => !b.payout_status || b.payout_status === "pending");
+      case "processing":
+        return bookings.filter((b) => b.payout_status === "processing");
+      case "paid":
+        return bookings.filter((b) => b.payout_status === "paid");
+      default:
+        return bookings;
+    }
+  }, [bookings, activeTab]);
 
   if (isLoading) {
     return (
@@ -125,9 +228,9 @@ const OwnerEarnings = () => {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">Earnings</h2>
+        <h2 className="text-2xl font-bold">Earnings & Payouts</h2>
         <p className="text-muted-foreground">
-          Track your payouts and performance
+          Track your earnings, payout status, and performance
         </p>
       </div>
 
@@ -148,9 +251,9 @@ const OwnerEarnings = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-green-200 bg-green-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Payouts</CardTitle>
+            <CardTitle className="text-sm font-medium">Paid Out</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -158,14 +261,29 @@ const OwnerEarnings = () => {
               ${summary.completedPayouts.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              Successfully paid out
+              Successfully transferred
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-blue-200 bg-blue-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
+            <CardTitle className="text-sm font-medium">Processing</CardTitle>
+            <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              ${summary.processingPayouts.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Being processed now
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-yellow-200 bg-yellow-50/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -177,24 +295,57 @@ const OwnerEarnings = () => {
             </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. per Booking</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${summary.averagePerBooking.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Average earnings
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Transactions Table */}
+      {/* Monthly Chart */}
+      {bookings.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Earnings Over Time
+            </CardTitle>
+            <CardDescription>Your earnings from the last 6 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="month" 
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    className="text-xs"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Earnings']}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Bar dataKey="earnings" radius={[4, 4, 0, 0]}>
+                    {monthlyData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.earnings > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))'} 
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transactions Table with Tabs */}
       <Card>
         <CardHeader>
           <CardTitle>Transaction History</CardTitle>
@@ -203,71 +354,94 @@ const OwnerEarnings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {bookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No earnings yet</h3>
-              <p className="text-muted-foreground text-center">
-                Your completed bookings and payouts will appear here
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Stay Dates</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Total Paid</TableHead>
-                  <TableHead className="text-right">Commission</TableHead>
-                  <TableHead className="text-right">Your Payout</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookings.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>
-                      {format(new Date(booking.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{booking.listing.property?.resort_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {booking.listing.property?.location}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(booking.listing.check_in_date), "MMM d")} -{" "}
-                      {format(new Date(booking.listing.check_out_date), "MMM d")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={booking.status === "completed" ? "default" : "secondary"}
-                        className={
-                          booking.status === "completed"
-                            ? "bg-green-500"
-                            : "bg-yellow-500"
-                        }
-                      >
-                        {booking.status === "completed" ? "Completed" : "Confirmed"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${booking.total_amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      -${booking.rav_commission.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">
-                      ${booking.owner_payout.toLocaleString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">
+                All ({bookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending">
+                Pending ({bookings.filter((b) => !b.payout_status || b.payout_status === "pending").length})
+              </TabsTrigger>
+              <TabsTrigger value="processing">
+                Processing ({bookings.filter((b) => b.payout_status === "processing").length})
+              </TabsTrigger>
+              <TabsTrigger value="paid">
+                Paid ({bookings.filter((b) => b.payout_status === "paid").length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={activeTab}>
+              {filteredBookings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    {activeTab === "all" ? "No earnings yet" : `No ${activeTab} payouts`}
+                  </h3>
+                  <p className="text-muted-foreground text-center">
+                    {activeTab === "all" 
+                      ? "Your completed bookings and payouts will appear here"
+                      : `You don't have any payouts with "${activeTab}" status`
+                    }
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Booking Date</TableHead>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Stay Dates</TableHead>
+                      <TableHead>Payout Status</TableHead>
+                      <TableHead className="text-right">Total Paid</TableHead>
+                      <TableHead className="text-right">Commission</TableHead>
+                      <TableHead className="text-right">Your Payout</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBookings.map((booking) => (
+                      <TableRow key={booking.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {format(new Date(booking.created_at), "MMM d, yyyy")}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{booking.listing.property?.resort_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {booking.listing.property?.location}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(booking.listing.check_in_date), "MMM d")} -{" "}
+                          {format(new Date(booking.listing.check_out_date), "MMM d")}
+                        </TableCell>
+                        <TableCell>
+                          {getPayoutStatusBadge(booking)}
+                          {booking.payout_date && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Paid {format(new Date(booking.payout_date), "MMM d, yyyy")}
+                            </p>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${booking.total_amount.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          -${booking.rav_commission.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-green-600">
+                          ${booking.owner_payout.toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -277,7 +451,7 @@ const OwnerEarnings = () => {
           <CardTitle className="text-base">How Payouts Work</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3 text-sm">
+          <div className="grid gap-4 md:grid-cols-4 text-sm">
             <div className="flex gap-3">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="font-semibold text-primary">1</span>
@@ -285,32 +459,50 @@ const OwnerEarnings = () => {
               <div>
                 <p className="font-medium">Booking Confirmed</p>
                 <p className="text-muted-foreground">
-                  Renter pays the full amount to RAV
+                  Renter pays the full amount
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-semibold text-primary">2</span>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Clock className="h-4 w-4 text-yellow-600" />
               </div>
               <div>
-                <p className="font-medium">Stay Completed</p>
+                <p className="font-medium">Pending</p>
                 <p className="text-muted-foreground">
-                  After checkout, booking is marked complete
+                  Awaiting guest checkout
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="font-semibold text-primary">3</span>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <Loader2 className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="font-medium">Payout Sent</p>
+                <p className="font-medium">Processing</p>
                 <p className="text-muted-foreground">
-                  Your earnings are transferred within 5 business days
+                  Payout being prepared
                 </p>
               </div>
             </div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
+              <div>
+                <p className="font-medium">Paid</p>
+                <p className="text-muted-foreground">
+                  Transferred to your account
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Note:</strong> Payouts are typically processed within {PAYOUT_PROCESSING_DAYS} business days after guest checkout.
+              You'll receive payment via your preferred method (Zelle or bank transfer).
+            </p>
           </div>
         </CardContent>
       </Card>
