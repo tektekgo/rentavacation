@@ -1,4 +1,4 @@
-// Bidding Marketplace - Browse listings open for bidding and post travel requests
+// Vacation Marketplace - Browse listings open for bidding and post travel requests
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { useListingsOpenForBidding, useOpenTravelRequests } from '@/hooks/useBid
 import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
 import { TravelRequestCard } from '@/components/bidding/TravelRequestCard';
 import { BidFormDialog } from '@/components/bidding/BidFormDialog';
+import { VerifiedOwnerBadge, TravelerBadge } from '@/components/RoleBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,14 +17,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Gavel, 
-  Sparkles, 
+  Store,
   MapPin, 
   Calendar, 
   Users, 
   Clock,
-  DollarSign,
   TrendingUp,
   ArrowRight,
+  Send,
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import type { ListingWithBidding } from '@/types/bidding';
@@ -50,15 +51,15 @@ const BiddingMarketplace = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <Badge className="mb-4 bg-accent text-accent-foreground">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Name Your Price
+              <Store className="h-3 w-3 mr-1" />
+              Direct from Owners
             </Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Bidding Marketplace
+              Vacation Marketplace
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Bid on vacation properties or post your travel needs and let owners come to you with offers.
-              Get the best deals through our unique two-way bidding system.
+              The open marketplace for vacation rentals. Bid on owner-listed properties 
+              or post your travel plans and let verified owners compete for your booking.
             </p>
             {user && isRenter() && (
               <TravelRequestForm />
@@ -82,7 +83,7 @@ const BiddingMarketplace = () => {
                 Bid on Listings
               </TabsTrigger>
               <TabsTrigger value="requests" className="gap-2">
-                <Sparkles className="h-4 w-4" />
+                <Send className="h-4 w-4" />
                 Travel Requests
               </TabsTrigger>
             </TabsList>
@@ -91,9 +92,9 @@ const BiddingMarketplace = () => {
             <TabsContent value="listings" className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Properties Open for Bidding</h2>
+                  <h2 className="text-2xl font-bold">Owner Listings Open for Bidding</h2>
                   <p className="text-muted-foreground">
-                    Submit your best offer on these vacation rentals
+                    Submit your best offer directly to verified property owners
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-lg px-4 py-2">
@@ -178,10 +179,10 @@ const BiddingMarketplace = () => {
               ) : (
                 <Card className="border-dashed">
                   <CardContent className="flex flex-col items-center justify-center py-16">
-                    <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
+                    <Send className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No travel requests yet</h3>
                     <p className="text-muted-foreground text-center mb-4">
-                      Be the first to post your travel needs!
+                      Be the first to post your travel needs and get offers from owners!
                     </p>
                     {user ? (
                       <TravelRequestForm />
@@ -198,10 +199,10 @@ const BiddingMarketplace = () => {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* How the Marketplace Works */}
       <section className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-12">How the Bidding System Works</h2>
+          <h2 className="text-2xl font-bold text-center mb-12">How the Marketplace Works</h2>
           <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {/* Traveler Flow */}
             <div className="space-y-6">
@@ -352,6 +353,7 @@ function BiddableListingCard({ listing, onBidClick }: BiddableListingCardProps) 
               {listing.property?.location}
             </CardDescription>
           </div>
+          <VerifiedOwnerBadge />
         </div>
       </CardHeader>
 

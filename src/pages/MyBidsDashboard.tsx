@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyBids, useMyTravelRequests, useProposalsForRequest, useUpdateProposalStatus } from '@/hooks/useBidding';
+import { VerifiedOwnerBadge } from '@/components/RoleBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { 
   Gavel, 
-  Sparkles, 
+  Send, 
   MapPin, 
   Calendar, 
   Clock,
@@ -90,7 +91,7 @@ const MyBidsDashboard = () => {
                 )}
               </TabsTrigger>
               <TabsTrigger value="requests" className="gap-2">
-                <Sparkles className="h-4 w-4" />
+                <Send className="h-4 w-4" />
                 My Travel Requests
                 {myRequests && myRequests.length > 0 && (
                   <Badge variant="secondary" className="ml-1">{myRequests.length}</Badge>
@@ -252,13 +253,13 @@ const MyBidsDashboard = () => {
               ) : (
                 <Card className="border-dashed">
                   <CardContent className="flex flex-col items-center justify-center py-16">
-                    <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
+                    <Send className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No travel requests yet</h3>
                     <p className="text-muted-foreground text-center mb-4">
-                      Post your vacation needs and let owners come to you
+                      Post your vacation needs and let verified owners come to you
                     </p>
                     <Button asChild>
-                      <Link to="/bidding">Post a Travel Request</Link>
+                      <Link to="/bidding">Explore Marketplace</Link>
                     </Button>
                   </CardContent>
                 </Card>

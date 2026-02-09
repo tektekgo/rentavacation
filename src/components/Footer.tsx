@@ -15,7 +15,7 @@ const Footer = () => {
             <span className="font-display font-bold text-xl text-white">Rent-A-Vacation</span>
           </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
-              The smarter way to vacation. Rent directly from timeshare owners and save up to 70% on luxury resort stays worldwide.
+              The open marketplace for vacation rentals. Rent directly from verified timeshare owners, bid on properties, or post your travel plans and let owners compete for your booking.
             </p>
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
@@ -37,10 +37,10 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-semibold text-white mb-6">For Travelers</h4>
             <ul className="space-y-3">
+              <li><Link to="/bidding" className="hover:text-white transition-colors">Vacation Marketplace</Link></li>
               <li><Link to="/rentals" className="hover:text-white transition-colors">Browse Rentals</Link></li>
               <li><Link to="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
               <li><Link to="/destinations" className="hover:text-white transition-colors">Top Destinations</Link></li>
-              <li><Link to="/deals" className="hover:text-white transition-colors">Last Minute Deals</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQs</Link></li>
             </ul>
           </div>
