@@ -78,7 +78,13 @@ Add to `.env.local`:
 ```bash
 VITE_VAPI_PUBLIC_KEY=your_public_key_from_vapi_dashboard
 VITE_VAPI_ASSISTANT_ID=asst_xxxxx  # From VAPI handoff
+VITE_FEATURE_VOICE_ENABLED=true     # Master kill switch for voice features
 ```
+
+**Feature Flag Behavior:**
+- `true` → Voice button visible, feature enabled
+- `false` → Voice button hidden site-wide, manual search only
+- Missing/undefined → Defaults to `false` (safe default)
 
 ### **TypeScript Types**
 
@@ -395,7 +401,10 @@ export default function Rentals() {
   // Existing state and hooks
   const [searchFilters, setSearchFilters] = useState({ ... });
   
-  // NEW: Voice search hook
+  // NEW: Feature flag check
+  const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === 'true';
+  
+  // NEW: Voice search hook (only initialize if enabled)
   const {
     status: voiceStatus,
     results: voiceResults,
@@ -434,20 +443,24 @@ export default function Rentals() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Browse Rentals</h1>
         
-        {/* Voice Search Button */}
-        <VoiceSearchButton
-          isListening={isListening}
-          isProcessing={voiceStatus === "processing"}
-          onClick={handleVoiceToggle}
-        />
+        {/* Voice Search Button - Only show if feature enabled */}
+        {voiceEnabled && (
+          <VoiceSearchButton
+            isListening={isListening}
+            isProcessing={voiceStatus === "processing"}
+            onClick={handleVoiceToggle}
+          />
+        )}
       </div>
 
-      {/* Voice Status Indicator */}
-      <VoiceStatusIndicator
-        status={voiceStatus}
-        resultCount={voiceResults.length}
-        error={voiceError}
-      />
+      {/* Voice Status Indicator - Only show if feature enabled */}
+      {voiceEnabled && (
+        <VoiceStatusIndicator
+          status={voiceStatus}
+          resultCount={voiceResults.length}
+          error={voiceError}
+        />
+      )}
 
       {/* Existing search filters and results */}
       {/* ... rest of component ... */}
