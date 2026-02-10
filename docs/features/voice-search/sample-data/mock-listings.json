@@ -1,0 +1,196 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "property_id": "660e8400-e29b-41d4-a716-446655440001",
+    "owner_id": "770e8400-e29b-41d4-a716-446655440001",
+    "status": "active",
+    "check_in_date": "2026-03-10",
+    "check_out_date": "2026-03-17",
+    "owner_price": 2400.00,
+    "rav_markup": 360.00,
+    "final_price": 2760.00,
+    "open_for_bidding": false,
+    "cancellation_policy": "moderate",
+    "notes": "Ocean view, recently renovated, perfect for families",
+    "created_at": "2026-02-01T10:00:00Z",
+    "updated_at": "2026-02-01T10:00:00Z",
+    "property": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Hilton Grand Vacations - Maui Bay",
+      "description": "Stunning beachfront condo with panoramic ocean views. Fully equipped kitchen, spacious living area, and access to resort amenities including pools, spa, and restaurants.",
+      "property_type": "condo",
+      "address": "3700 Wailea Alanui Drive",
+      "city": "Lahaina",
+      "state": "HI",
+      "country": "USA",
+      "zip_code": "96761",
+      "bedrooms": 2,
+      "bathrooms": 2.0,
+      "max_guests": 6,
+      "amenities": ["beachfront", "pool", "wifi", "full_kitchen", "parking", "oceanview", "spa", "restaurant"],
+      "images": [
+        {
+          "url": "https://example.com/images/hilton-maui-1.jpg",
+          "is_primary": true
+        }
+      ],
+      "verification_status": "verified"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "property_id": "660e8400-e29b-41d4-a716-446655440002",
+    "owner_id": "770e8400-e29b-41d4-a716-446655440002",
+    "status": "active",
+    "check_in_date": "2026-04-05",
+    "check_out_date": "2026-04-12",
+    "owner_price": 1500.00,
+    "rav_markup": 225.00,
+    "final_price": 1725.00,
+    "open_for_bidding": false,
+    "cancellation_policy": "flexible",
+    "notes": "Walking distance to Disney World theme parks. Shuttle service available.",
+    "created_at": "2026-02-01T11:00:00Z",
+    "updated_at": "2026-02-01T11:00:00Z",
+    "property": {
+      "id": "660e8400-e29b-41d4-a716-446655440002",
+      "name": "Marriott's Grande Vista",
+      "description": "Family-friendly resort close to all Orlando attractions. Features full kitchen, separate bedroom, and access to world-class golf course and pools.",
+      "property_type": "condo",
+      "address": "5925 Avenida Vista",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "zip_code": "32821",
+      "bedrooms": 1,
+      "bathrooms": 1.0,
+      "max_guests": 4,
+      "amenities": ["pool", "wifi", "full_kitchen", "parking", "gym", "golf", "shuttle"],
+      "images": [
+        {
+          "url": "https://example.com/images/marriott-orlando-1.jpg",
+          "is_primary": true
+        }
+      ],
+      "verification_status": "verified"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "property_id": "660e8400-e29b-41d4-a716-446655440003",
+    "owner_id": "770e8400-e29b-41d4-a716-446655440003",
+    "status": "active",
+    "check_in_date": "2026-05-20",
+    "check_out_date": "2026-05-27",
+    "owner_price": 900.00,
+    "rav_markup": 135.00,
+    "final_price": 1035.00,
+    "open_for_bidding": false,
+    "cancellation_policy": "moderate",
+    "notes": "Modern studio with Strip views. Perfect for couples. Close to all major casinos and entertainment.",
+    "created_at": "2026-02-01T12:00:00Z",
+    "updated_at": "2026-02-01T12:00:00Z",
+    "property": {
+      "id": "660e8400-e29b-41d4-a716-446655440003",
+      "name": "Wyndham Grand Desert",
+      "description": "Contemporary studio unit with stunning Las Vegas Strip views. Kitchenette, modern furnishings, and access to resort pools and hot tubs.",
+      "property_type": "studio",
+      "address": "265 East Harmon Avenue",
+      "city": "Las Vegas",
+      "state": "NV",
+      "country": "USA",
+      "zip_code": "89169",
+      "bedrooms": 0,
+      "bathrooms": 1.0,
+      "max_guests": 2,
+      "amenities": ["pool", "wifi", "kitchenette", "parking", "casino_nearby", "hot_tub"],
+      "images": [
+        {
+          "url": "https://example.com/images/wyndham-vegas-1.jpg",
+          "is_primary": true
+        }
+      ],
+      "verification_status": "verified"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440004",
+    "property_id": "660e8400-e29b-41d4-a716-446655440004",
+    "owner_id": "770e8400-e29b-41d4-a716-446655440004",
+    "status": "active",
+    "check_in_date": "2026-06-15",
+    "check_out_date": "2026-06-22",
+    "owner_price": 3200.00,
+    "rav_markup": 480.00,
+    "final_price": 3680.00,
+    "open_for_bidding": false,
+    "cancellation_policy": "strict",
+    "notes": "Spacious family villa perfect for summer vacation. Multiple pools, kids' activities, and BBQ facilities.",
+    "created_at": "2026-02-01T13:00:00Z",
+    "updated_at": "2026-02-01T13:00:00Z",
+    "property": {
+      "id": "660e8400-e29b-41d4-a716-446655440004",
+      "name": "Welk San Diego Resort",
+      "description": "Large family-friendly villa with full kitchen, multiple bedrooms, and private patio. Resort features water park, mini golf, and organized kids' activities.",
+      "property_type": "villa",
+      "address": "8860 Lawrence Welk Drive",
+      "city": "Escondido",
+      "state": "CA",
+      "country": "USA",
+      "zip_code": "92026",
+      "bedrooms": 3,
+      "bathrooms": 2.0,
+      "max_guests": 8,
+      "amenities": ["pool", "wifi", "full_kitchen", "parking", "playground", "bbq", "waterpark", "miniature_golf"],
+      "images": [
+        {
+          "url": "https://example.com/images/welk-sandiego-1.jpg",
+          "is_primary": true
+        }
+      ],
+      "verification_status": "verified"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440005",
+    "property_id": "660e8400-e29b-41d4-a716-446655440005",
+    "owner_id": "770e8400-e29b-41d4-a716-446655440005",
+    "status": "active",
+    "check_in_date": "2026-02-28",
+    "check_out_date": "2026-03-07",
+    "owner_price": 1100.00,
+    "rav_markup": 165.00,
+    "final_price": 1265.00,
+    "open_for_bidding": true,
+    "bidding_ends_at": "2026-02-25T23:59:59Z",
+    "min_bid_amount": 1000.00,
+    "reserve_price": 1200.00,
+    "allow_counter_offers": true,
+    "cancellation_policy": "moderate",
+    "notes": "Open for bidding! Owner is flexible on dates. Cozy mountain cabin with fireplace and hot tub.",
+    "created_at": "2026-02-01T14:00:00Z",
+    "updated_at": "2026-02-01T14:00:00Z",
+    "property": {
+      "id": "660e8400-e29b-41d4-a716-446655440005",
+      "name": "Bluegreen Vacations MountainLoft",
+      "description": "Charming mountain cabin with panoramic views of the Smoky Mountains. Features wood-burning fireplace, full kitchen, private hot tub, and access to hiking trails.",
+      "property_type": "cabin",
+      "address": "370 Collier Drive",
+      "city": "Gatlinburg",
+      "state": "TN",
+      "country": "USA",
+      "zip_code": "37738",
+      "bedrooms": 2,
+      "bathrooms": 2.0,
+      "max_guests": 6,
+      "amenities": ["mountain_view", "wifi", "full_kitchen", "parking", "fireplace", "hot_tub", "hiking"],
+      "images": [
+        {
+          "url": "https://example.com/images/bluegreen-smokies-1.jpg",
+          "is_primary": true
+        }
+      ],
+      "verification_status": "verified"
+    }
+  }
+]
