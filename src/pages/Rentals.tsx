@@ -21,6 +21,11 @@ import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
 import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
+import { VoiceSearchButton } from "@/components/VoiceSearchButton";
+import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
+
+const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
 
 const allListings = [
   {
@@ -115,6 +120,18 @@ const Rentals = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Voice search integration
+  const {
+    status: voiceStatus,
+    results: voiceResults,
+    error: voiceError,
+    transcript: voiceTranscript,
+    isCallActive,
+    startVoiceSearch,
+    stopVoiceSearch,
+    reset: resetVoice,
+  } = useVoiceSearch();
+
   const toggleLike = (id: number) => {
     setLiked((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -148,11 +165,32 @@ const Rentals = () => {
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input placeholder="Check-in - Check-out" className="pl-10" />
               </div>
-              <Button className="w-full">
-                <Search className="w-4 h-4 mr-2" />
-                Search
-              </Button>
+              <div className="flex gap-2">
+                <Button className="flex-1">
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+                {voiceEnabled && (
+                  <VoiceSearchButton
+                    status={voiceStatus}
+                    isCallActive={isCallActive}
+                    onStart={startVoiceSearch}
+                    onStop={stopVoiceSearch}
+                  />
+                )}
+              </div>
             </div>
+
+            {/* Voice Status Indicator */}
+            {voiceEnabled && voiceStatus !== "idle" && (
+              <VoiceStatusIndicator
+                status={voiceStatus}
+                transcript={voiceTranscript}
+                resultCount={voiceResults.length}
+                error={voiceError}
+                onDismiss={voiceStatus === "success" || voiceStatus === "error" ? resetVoice : undefined}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -238,6 +276,83 @@ const Rentals = () => {
                 <Button>Apply Filters</Button>
                 <Button variant="outline">Clear All</Button>
               </div>
+            </div>
+          )}
+
+          {/* Voice Search Results */}
+          {voiceEnabled && voiceResults.length > 0 && (
+            <div className="mb-8 animate-fade-in">
+              <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+                Voice Search Results
+              </h2>
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    : "flex flex-col gap-4"
+                }
+              >
+                {voiceResults.map((result) => (
+                  <div
+                    key={result.listing_id}
+                    className={`group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${
+                      viewMode === "list" ? "flex" : ""
+                    }`}
+                  >
+                    {/* Image */}
+                    <div
+                      className={`relative overflow-hidden bg-muted ${
+                        viewMode === "list" ? "w-72 h-48" : "h-52"
+                      }`}
+                    >
+                      {result.image_url ? (
+                        <img
+                          src={result.image_url}
+                          alt={result.property_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <MapPin className="w-8 h-8" />
+                        </div>
+                      )}
+                      {result.brand && (
+                        <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+                          {result.brand.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 flex-1">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {result.location}
+                      </div>
+                      <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1">
+                        {result.property_name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {result.check_in} — {result.check_out}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="text-foreground">
+                          <span className="font-display text-xl font-bold">
+                            ${result.price.toLocaleString()}
+                          </span>
+                          <span className="text-muted-foreground text-sm"> / week</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          <Users className="w-3 h-3 inline mr-1" />
+                          {result.sleeps} guests • {result.bedrooms} BR
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-b border-border my-8" />
             </div>
           )}
 
