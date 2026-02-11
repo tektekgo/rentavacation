@@ -24,6 +24,8 @@ export function VoiceStatusIndicator({
     <Alert
       variant={status === "error" ? "destructive" : "default"}
       className="mt-4 animate-fade-in"
+      role="status"
+      aria-live="polite"
     >
       {status === "listening" && (
         <>
@@ -49,7 +51,7 @@ export function VoiceStatusIndicator({
           <CheckCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>
-              {resultCount && resultCount > 0
+              {resultCount != null && resultCount > 0
                 ? `Found ${resultCount} ${resultCount === 1 ? "result" : "results"}`
                 : "No results found — try a different search"}
               {transcript ? ` for "${transcript}"` : ""}
