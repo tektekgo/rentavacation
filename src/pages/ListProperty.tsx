@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { ResortSelector } from "@/components/resort/ResortSelector";
+import { UnitTypeSelector } from "@/components/resort/UnitTypeSelector";
+import { ResortPreview } from "@/components/resort/ResortPreview";
 import {
   Home,
   Camera,
@@ -18,6 +28,8 @@ import {
   Upload,
   MapPin,
 } from "lucide-react";
+import type { VacationClubBrand, Resort, ResortUnitType } from "@/types/database";
+import { supabase } from "@/lib/supabase";
 
 const benefits = [
   {
@@ -51,7 +63,7 @@ const steps = [
   {
     number: 2,
     title: "Add Property Details",
-    description: "Enter your resort name, unit size, amenities, and upload photos.",
+    description: "Select your resort, unit type, and we'll auto-fill the details.",
   },
   {
     number: 3,
@@ -70,8 +82,91 @@ const steps = [
   },
 ];
 
+const BRAND_LABELS: Record<string, string> = {
+  hilton_grand_vacations: "Hilton Grand Vacations",
+  marriott_vacation_club: "Marriott Vacation Club",
+  disney_vacation_club: "Disney Vacation Club",
+  other: "Other / Not Listed",
+};
+
+type ResortSummary = Pick<
+  Resort,
+  "id" | "brand" | "resort_name" | "location" | "guest_rating"
+>;
+
 const ListProperty = () => {
   const [formStep, setFormStep] = useState(1);
+
+  // Resort selection state
+  const [selectedBrand, setSelectedBrand] = useState<VacationClubBrand | "">("");
+  const [selectedResort, setSelectedResort] = useState<ResortSummary | null>(null);
+  const [resortDetails, setResortDetails] = useState<Resort | null>(null);
+  const [selectedUnitType, setSelectedUnitType] = useState<ResortUnitType | null>(null);
+  const [isManualEntry, setIsManualEntry] = useState(false);
+
+  // Form fields (auto-populated from resort/unit selection)
+  const [resortName, setResortName] = useState("");
+  const [location, setLocation] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+  const [sleeps, setSleeps] = useState("");
+  const [description, setDescription] = useState("");
+
+  // Load full resort details when selected
+  useEffect(() => {
+    if (selectedResort) {
+      loadResortDetails(selectedResort.id);
+    }
+  }, [selectedResort]);
+
+  async function loadResortDetails(resortId: string) {
+    const { data } = await supabase
+      .from("resorts")
+      .select("*")
+      .eq("id", resortId)
+      .single();
+
+    if (data) {
+      setResortDetails(data as Resort);
+      setResortName(data.resort_name);
+      setLocation(data.location?.full_address || `${data.location?.city}, ${data.location?.state}`);
+      setDescription(data.description || "");
+    }
+  }
+
+  function handleBrandChange(brand: string) {
+    setSelectedBrand(brand as VacationClubBrand);
+    setSelectedResort(null);
+    setResortDetails(null);
+    setSelectedUnitType(null);
+    setIsManualEntry(brand === "other");
+    if (brand === "other") {
+      setResortName("");
+      setLocation("");
+      setBedrooms("");
+      setBathrooms("");
+      setSleeps("");
+      setDescription("");
+    }
+  }
+
+  function handleResortSelect(resort: ResortSummary) {
+    setSelectedResort(resort);
+    setSelectedUnitType(null);
+  }
+
+  function handleUnitTypeSelect(unitType: ResortUnitType) {
+    setSelectedUnitType(unitType);
+    // Auto-populate from unit type
+    setBedrooms(unitType.bedrooms.toString());
+    setBathrooms(unitType.bathrooms.toString());
+    setSleeps(unitType.max_occupancy.toString());
+  }
+
+  const canProceedStep1 =
+    isManualEntry
+      ? resortName && location && bedrooms && bathrooms && sleeps
+      : selectedResort && selectedUnitType;
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,51 +292,192 @@ const ListProperty = () => {
                 ))}
               </div>
 
-              {/* Step 1: Basic Info */}
+              {/* Step 1: Property Information with Resort Selection */}
               {formStep === 1 && (
                 <div className="space-y-6">
                   <h3 className="font-semibold text-lg mb-4">Property Information</h3>
+
+                  {/* Brand Selection */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Resort Name</label>
-                    <Input placeholder="e.g., Marriott's Ko Olina Beach Club" />
+                    <label className="block text-sm font-medium mb-2">
+                      Vacation Club Brand
+                    </label>
+                    <Select
+                      value={selectedBrand}
+                      onValueChange={handleBrandChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your vacation club" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(BRAND_LABELS).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
+
+                  {/* Resort Selection (for known brands) */}
+                  {selectedBrand && selectedBrand !== "other" && (
                     <div>
-                      <label className="block text-sm font-medium mb-2">Location</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input placeholder="City, State/Country" className="pl-10" />
-                      </div>
+                      <label className="block text-sm font-medium mb-2">
+                        Select Your Resort
+                      </label>
+                      <ResortSelector
+                        selectedBrand={selectedBrand}
+                        onResortSelect={handleResortSelect}
+                        selectedResortId={selectedResort?.id}
+                      />
+                      {/* Resort not listed fallback */}
+                      <button
+                        type="button"
+                        className="mt-2 text-xs text-primary hover:underline"
+                        onClick={() => {
+                          setIsManualEntry(true);
+                          setSelectedResort(null);
+                          setResortDetails(null);
+                          setSelectedUnitType(null);
+                          setResortName("");
+                          setLocation("");
+                          setBedrooms("");
+                          setBathrooms("");
+                          setSleeps("");
+                          setDescription("");
+                        }}
+                      >
+                        My resort is not listed
+                      </button>
                     </div>
+                  )}
+
+                  {/* Unit Type Selection */}
+                  {selectedResort && !isManualEntry && (
                     <div>
-                      <label className="block text-sm font-medium mb-2">Unit Size</label>
-                      <select className="w-full h-10 rounded-md border border-input bg-background px-3">
-                        <option>Studio</option>
-                        <option>1 Bedroom</option>
-                        <option>2 Bedroom</option>
-                        <option>3 Bedroom</option>
-                        <option>4+ Bedroom</option>
-                      </select>
+                      <label className="block text-sm font-medium mb-2">
+                        Unit Type
+                      </label>
+                      <UnitTypeSelector
+                        resortId={selectedResort.id}
+                        onUnitTypeSelect={handleUnitTypeSelect}
+                        selectedUnitTypeId={selectedUnitType?.id}
+                      />
                     </div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Sleeps</label>
-                      <Input type="number" placeholder="e.g., 6" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Bathrooms</label>
-                      <Input type="number" placeholder="e.g., 2" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
-                    <Textarea
-                      placeholder="Describe your property, views, nearby attractions..."
-                      rows={4}
+                  )}
+
+                  {/* Resort Preview */}
+                  {resortDetails && !isManualEntry && (
+                    <ResortPreview
+                      resort={resortDetails}
+                      unitType={selectedUnitType}
                     />
-                  </div>
-                  <Button className="w-full" onClick={() => setFormStep(2)}>
+                  )}
+
+                  {/* Manual Entry Fields (for "other" brand or "not listed") */}
+                  {isManualEntry && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Resort Name</label>
+                        <Input
+                          placeholder="e.g., Marriott's Ko Olina Beach Club"
+                          value={resortName}
+                          onChange={(e) => setResortName(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Location</label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              placeholder="City, State/Country"
+                              className="pl-10"
+                              value={location}
+                              onChange={(e) => setLocation(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Bedrooms</label>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 2"
+                            value={bedrooms}
+                            onChange={(e) => setBedrooms(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Sleeps</label>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 6"
+                            value={sleeps}
+                            onChange={(e) => setSleeps(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Bathrooms</label>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 2"
+                            value={bathrooms}
+                            onChange={(e) => setBathrooms(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Description</label>
+                        <Textarea
+                          placeholder="Describe your property, views, nearby attractions..."
+                          rows={4}
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                        />
+                      </div>
+                      {/* Back to resort selector */}
+                      {selectedBrand && selectedBrand !== "other" && (
+                        <button
+                          type="button"
+                          className="text-xs text-primary hover:underline"
+                          onClick={() => {
+                            setIsManualEntry(false);
+                          }}
+                        >
+                          Back to resort selector
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                  {/* Auto-populated summary (for resort selection mode) */}
+                  {selectedUnitType && !isManualEntry && (
+                    <div className="bg-primary/5 rounded-lg p-4 space-y-1">
+                      <p className="text-sm font-medium text-primary">
+                        Auto-populated from resort data:
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {resortName} — {selectedUnitType.unit_type_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedUnitType.bedrooms === 0 ? "Studio" : `${selectedUnitType.bedrooms} Bedrooms`},{" "}
+                        {selectedUnitType.bathrooms} Bathrooms, Sleeps {selectedUnitType.max_occupancy}
+                      </p>
+                      {selectedUnitType.square_footage && (
+                        <p className="text-sm text-muted-foreground">
+                          {selectedUnitType.square_footage} sq ft — {selectedUnitType.kitchen_type}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full"
+                    onClick={() => setFormStep(2)}
+                    disabled={!canProceedStep1}
+                  >
                     Continue
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>

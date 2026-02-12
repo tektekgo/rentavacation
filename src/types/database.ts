@@ -48,6 +48,59 @@ export type VacationClubBrand =
   | 'worldmark'
   | 'other';
 
+// Resort master data types
+export interface Resort {
+  id: string;
+  brand: VacationClubBrand;
+  resort_name: string;
+  location: {
+    city: string;
+    state: string;
+    country: string;
+    full_address: string;
+  };
+  description: string | null;
+  contact: {
+    phone: string;
+    email: string;
+    website: string;
+  } | null;
+  resort_amenities: string[];
+  policies: {
+    check_in: string;
+    check_out: string;
+    parking: string;
+    pets: string;
+  } | null;
+  nearby_airports: string[];
+  guest_rating: number | null;
+  main_image_url: string | null;
+  additional_images: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResortUnitType {
+  id: string;
+  resort_id: string;
+  unit_type_name: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_occupancy: number;
+  square_footage: number | null;
+  kitchen_type: string | null;
+  bedding_config: string | null;
+  features: {
+    balcony: boolean;
+    view_type: string;
+    washer_dryer: boolean;
+    accessible: boolean;
+  } | null;
+  unit_amenities: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -111,6 +164,8 @@ export interface Database {
           sleeps: number;
           amenities: string[];
           images: string[];
+          resort_id: string | null;
+          unit_type_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -126,6 +181,8 @@ export interface Database {
           sleeps: number;
           amenities?: string[];
           images?: string[];
+          resort_id?: string | null;
+          unit_type_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -141,6 +198,8 @@ export interface Database {
           sleeps?: number;
           amenities?: string[];
           images?: string[];
+          resort_id?: string | null;
+          unit_type_id?: string | null;
           updated_at?: string;
         };
       };
@@ -619,6 +678,24 @@ export interface Database {
           resolution_notes?: string | null;
           updated_at?: string;
         };
+      };
+      resorts: {
+        Row: Resort;
+        Insert: Omit<Resort, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<Resort, 'id' | 'created_at'>>;
+      };
+      resort_unit_types: {
+        Row: ResortUnitType;
+        Insert: Omit<ResortUnitType, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<ResortUnitType, 'id' | 'created_at'>>;
       };
       platform_guarantee_fund: {
         Row: {
