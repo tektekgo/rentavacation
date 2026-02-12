@@ -8,8 +8,8 @@ const ACCENT_COLOR = "#e86a4a";
 const TEXT_COLOR = "#2d3748";
 const MUTED_COLOR = "#718096";
 const BG_COLOR = "#f7fafc";
-const LOGO_URL = "https://rentavacation.lovable.app/rav-logo.png";
-const SITE_URL = "https://rentavacation.lovable.app";
+const LOGO_URL = "https://rent-a-vacation.com/rav-logo.png";
+const SITE_URL = "https://rent-a-vacation.com";
 
 interface EmailTemplateOptions {
   /** Recipient's first name */

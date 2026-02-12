@@ -31,9 +31,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-xl">R</span>
-            </div>
+            <img src="/rav-logo.png" alt="Rent-A-Vacation" className="h-10 w-10 rounded-xl object-contain" />
             <span className="font-display font-bold text-xl text-foreground">Rent-A-Vacation</span>
           </Link>
 
