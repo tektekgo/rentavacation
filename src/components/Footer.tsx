@@ -9,8 +9,12 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-6">
-            <img src="/rav-logo.png" alt="Rent-A-Vacation" className="h-[60px] w-auto object-contain" />
-            <span className="font-display font-bold text-xl text-white">Rent-A-Vacation</span>
+            <img
+              src="/rav-logo.svg"
+              alt="Rent-A-Vacation"
+              className="h-14 md:h-16 w-auto select-none brightness-0 invert"
+              draggable={false}
+            />
           </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
               The open marketplace for vacation rentals. Rent directly from verified timeshare owners, bid on properties, or post your travel plans and let owners compete for your booking.

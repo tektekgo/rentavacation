@@ -31,8 +31,12 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/rav-logo.png" alt="Rent-A-Vacation" className="h-[60px] w-auto object-contain" />
-            <span className="font-display font-bold text-xl text-foreground">Rent-A-Vacation</span>
+            <img
+              src="/rav-logo.svg"
+              alt="Rent-A-Vacation"
+              className="h-14 md:h-16 w-auto select-none"
+              draggable={false}
+            />
           </Link>
 
           {/* Desktop Navigation */}
