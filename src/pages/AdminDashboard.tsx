@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  LayoutDashboard, 
-  Building2, 
-  Calendar, 
-  DollarSign, 
+import { Badge } from "@/components/ui/badge";
+import {
+  LayoutDashboard,
+  Building2,
+  Calendar,
+  DollarSign,
   Users,
   ArrowLeft,
   TrendingUp,
@@ -21,7 +22,8 @@ import {
   Wallet,
   FileCheck,
   ShieldCheck as EscrowIcon,
-  MessageSquareWarning
+  MessageSquareWarning,
+  UserCheck
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -33,12 +35,14 @@ import AdminPayouts from "@/components/admin/AdminPayouts";
 import AdminVerifications from "@/components/admin/AdminVerifications";
 import AdminEscrow from "@/components/admin/AdminEscrow";
 import AdminCheckinIssues from "@/components/admin/AdminCheckinIssues";
+import { PendingApprovals } from "@/components/admin/PendingApprovals";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isRavTeam, isLoading: authLoading } = useAuth();
-  
+  const [pendingCount, setPendingCount] = useState(0);
+
   const activeTab = searchParams.get("tab") || "overview";
 
   const setActiveTab = (tab: string) => {
@@ -51,6 +55,24 @@ const AdminDashboard = () => {
       navigate("/login?redirect=/admin");
     }
   }, [user, authLoading, navigate]);
+
+  // Fetch pending approval count for badge
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("approval_status", "pending_approval");
+
+      setPendingCount(count || 0);
+    };
+
+    fetchPendingCount();
+
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (authLoading) {
     return (
@@ -112,7 +134,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-10 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -152,6 +174,15 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending-approvals" className="gap-2">
+              <UserCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Approvals</span>
+              {pendingCount > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1 text-xs">
+                  {pendingCount}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -193,6 +224,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="users">
             <AdminUsers />
+          </TabsContent>
+
+          <TabsContent value="pending-approvals">
+            <PendingApprovals />
           </TabsContent>
         </Tabs>
       </main>

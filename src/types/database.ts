@@ -37,7 +37,9 @@ export type EscrowStatus =
   | 'refunded'
   | 'disputed';
 
-export type VacationClubBrand = 
+export type ApprovalStatus = 'pending_approval' | 'approved' | 'rejected';
+
+export type VacationClubBrand =
   | 'hilton_grand_vacations'
   | 'marriott_vacation_club'
   | 'disney_vacation_club'
@@ -111,6 +113,10 @@ export interface Database {
           full_name: string | null;
           phone: string | null;
           avatar_url: string | null;
+          approval_status: ApprovalStatus;
+          approved_by: string | null;
+          approved_at: string | null;
+          rejection_reason: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -120,6 +126,10 @@ export interface Database {
           full_name?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
+          approval_status?: ApprovalStatus;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          rejection_reason?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -129,6 +139,10 @@ export interface Database {
           full_name?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
+          approval_status?: ApprovalStatus;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          rejection_reason?: string | null;
           updated_at?: string;
         };
       };
@@ -697,6 +711,34 @@ export interface Database {
         };
         Update: Partial<Omit<ResortUnitType, 'id' | 'created_at'>>;
       };
+      system_settings: {
+        Row: {
+          id: string;
+          setting_key: string;
+          setting_value: Record<string, unknown>;
+          description: string | null;
+          updated_by: string | null;
+          updated_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          setting_key: string;
+          setting_value: Record<string, unknown>;
+          description?: string | null;
+          updated_by?: string | null;
+          updated_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          setting_key?: string;
+          setting_value?: Record<string, unknown>;
+          description?: string | null;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+      };
       platform_guarantee_fund: {
         Row: {
           id: string;
@@ -744,6 +786,18 @@ export interface Database {
       };
       is_rav_team: {
         Args: { _user_id: string };
+        Returns: boolean;
+      };
+      can_access_platform: {
+        Args: { _user_id: string };
+        Returns: boolean;
+      };
+      approve_user: {
+        Args: { _user_id: string; _approved_by: string };
+        Returns: boolean;
+      };
+      reject_user: {
+        Args: { _user_id: string; _rejected_by: string; _reason?: string };
         Returns: boolean;
       };
     };
