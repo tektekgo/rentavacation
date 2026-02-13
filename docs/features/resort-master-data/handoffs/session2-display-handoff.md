@@ -32,6 +32,25 @@
 
 ---
 
+## Post-Session 2: PROD Data Import
+
+After Session 2, the deployed site (rent-a-vacation.com) showed 0 resorts because the Vercel deployment points to PROD Supabase, but data had only been imported to DEV.
+
+**Fix applied:**
+- Linked Supabase CLI to PROD (`xzfllqndrlmhclqfybew`)
+- Ran `npx supabase db push` to apply migration to PROD
+- Ran import script with PROD service role key
+- Verified: 117 resorts + 351 unit types imported, all counts PASS
+- Re-linked Supabase CLI back to DEV
+
+**Environment mapping:**
+| Environment | Supabase Project | Status |
+|---|---|---|
+| Local dev (`.env.local`) | rentavacation-DEV (`oukbxqnlxnkainnligfz`) | Data imported |
+| Vercel (rent-a-vacation.com) | rentavacation-PROD (`xzfllqndrlmhclqfybew`) | Data imported |
+
+---
+
 ## Build Status
 
 - TypeScript: No errors

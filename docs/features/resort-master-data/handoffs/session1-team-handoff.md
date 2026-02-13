@@ -84,22 +84,32 @@
 - TypeScript: No errors (`tsc --noEmit` passes)
 - Vite build: Succeeds (built in ~21s)
 
-## How to Deploy
+## Deployment Status
 
-### Step 1: Run Migration on DEV Supabase
-Copy the SQL from `supabase/migrations/20260211_resort_master_data.sql` and run in Supabase SQL Editor for project `oukbxqnlxnkainnligfz`.
+### DEV Supabase (`oukbxqnlxnkainnligfz` / rentavacation-DEV)
+- Migration: Applied via `npx supabase db push`
+- Data import: 117 resorts + 351 unit types imported
+- Verified: All counts PASS
 
-### Step 2: Import Data
+### PROD Supabase (`xzfllqndrlmhclqfybew` / rentavacation-PROD)
+- Migration: Applied via `npx supabase db push` (2026-02-11)
+- Data import: 117 resorts + 351 unit types imported (2026-02-11)
+- Verified: All counts PASS
+- Vercel deployment at rent-a-vacation.com uses PROD
+
+### How to Re-Import (if needed)
 ```bash
-# Set environment variables
-export SUPABASE_URL=https://oukbxqnlxnkainnligfz.supabase.co
-export SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+# Link to target project
+npx supabase link --project-ref <project-ref-id>
 
-# Run import
-npx tsx scripts/import-resort-data.ts
+# Push migration
+npx supabase db push
+
+# Import data (use target project's service role key)
+SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<key> npx tsx scripts/import-resort-data.ts
 ```
 
-### Step 3: Verify in Supabase
+### Verification Query
 ```sql
 SELECT brand, COUNT(*) FROM resorts GROUP BY brand;
 -- Expected: hilton=62, marriott=40, disney=15
@@ -108,22 +118,13 @@ SELECT COUNT(*) FROM resort_unit_types;
 -- Expected: 351
 ```
 
-### Step 4: Deploy Frontend
-```bash
-git add .
-git commit -m "Add resort master data system"
-git push
-```
-
 ## Known Limitations
 - Photos upload (Step 2) is still placeholder - no file upload logic
 - Form doesn't persist to database yet (redirects to signup)
 - No edit/delete for resorts from UI (admin-only via Supabase dashboard)
 - Resort images (main_image_url, additional_images) not populated in data
 
-## Next Session Priorities
-1. Run migration + import on DEV Supabase
-2. Test full flow in browser with live data
-3. Add resort images
-4. Wire up form submission to create property in database
-5. Deploy to PROD when verified
+## Migration Notes
+- `uuid_generate_v4()` not available in Postgres 17 — use `gen_random_uuid()` instead
+- Import script uses ESM (`import.meta.url`) — requires `npx tsx` (not `node`)
+- On Windows, use bash-style inline env vars: `VAR=val npx tsx script.ts`

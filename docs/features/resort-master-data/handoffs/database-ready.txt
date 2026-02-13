@@ -1,10 +1,13 @@
 Database Ready!
-- 117 resorts prepared (62 Hilton, 40 Marriott, 15 Disney)
-- 351 unit types prepared
+- 117 resorts imported (62 Hilton, 40 Marriott, 15 Disney)
+- 351 unit types imported
 - All 3 brands configured
 - Migration file: supabase/migrations/20260211_resort_master_data.sql
 - Import script: scripts/import-resort-data.ts
 - TypeScript types updated in src/types/database.ts
 - RLS policies: public read, service_role write
 - Indexes on brand, location (GIN), resort_name, resort_id, bedrooms
-- Listing Engineer can proceed with frontend components
+
+Deployed to:
+- DEV: oukbxqnlxnkainnligfz (rentavacation-DEV) - IMPORTED
+- PROD: xzfllqndrlmhclqfybew (rentavacation-PROD) - IMPORTED
