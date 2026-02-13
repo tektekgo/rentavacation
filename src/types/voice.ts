@@ -36,6 +36,12 @@ export interface VoiceSearchResult {
   brand: string;
   amenities: string[];
   image_url: string | null;
+  // Resort master data (available when property has resort_id)
+  resort_name: string | null;
+  resort_rating: number | null;
+  resort_amenities: string[];
+  unit_type_name: string | null;
+  square_footage: number | null;
 }
 
 /** Full API response from the voice-search Edge Function */

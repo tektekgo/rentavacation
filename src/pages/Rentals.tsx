@@ -332,6 +332,16 @@ const Rentals = () => {
                       <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1">
                         {result.property_name}
                       </h3>
+                      {result.unit_type_name && (
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {result.unit_type_name}
+                          {result.resort_rating && (
+                            <span className="ml-2">
+                              <Star className="w-3 h-3 fill-warning text-warning inline" /> {result.resort_rating}
+                            </span>
+                          )}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mb-2">
                         {result.check_in} — {result.check_out}
                       </p>

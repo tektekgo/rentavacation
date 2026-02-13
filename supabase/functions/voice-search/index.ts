@@ -41,6 +41,12 @@ interface SearchResult {
   brand: string;
   amenities: string[];
   image_url: string | null;
+  // Resort master data fields
+  resort_name: string | null;
+  resort_rating: number | null;
+  resort_amenities: string[];
+  unit_type_name: string | null;
+  square_footage: number | null;
 }
 
 function getErrorMessage(err: unknown): string {
@@ -98,8 +104,7 @@ serve(async (req) => {
       auth: { persistSession: false },
     });
 
-    // Build query: listings joined with properties
-    // Actual DB schema: properties has resort_name, location, sleeps, brand (not name/city/state/max_guests/property_type)
+    // Build query: listings joined with properties, resorts, and unit types
     let query = supabase
       .from("listings")
       .select(
@@ -118,7 +123,21 @@ serve(async (req) => {
           bathrooms,
           sleeps,
           amenities,
-          images
+          images,
+          resort:resorts(
+            resort_name,
+            location,
+            guest_rating,
+            resort_amenities,
+            contact
+          ),
+          unit_type:resort_unit_types(
+            unit_type_name,
+            bedrooms,
+            bathrooms,
+            max_occupancy,
+            square_footage
+          )
         )
       `
       )
@@ -168,15 +187,26 @@ serve(async (req) => {
       }
     );
 
-    // Destination filter: search in the location field and resort_name
+    // Destination filter: search in property location, resort_name, and resort location (city/state)
     if (destination) {
       const dest = destination.toLowerCase();
       filtered = filtered.filter((listing: Record<string, unknown>) => {
         const prop = listing.property as Record<string, unknown>;
         const location = ((prop.location as string) ?? "").toLowerCase();
         const resortName = ((prop.resort_name as string) ?? "").toLowerCase();
-        // Search both location and resort name
-        return location.includes(dest) || resortName.includes(dest);
+        // Also search resort master data location (city, state, country)
+        const resort = prop.resort as Record<string, unknown> | null;
+        const resortLocation = resort?.location as Record<string, string> | null;
+        const resortCity = (resortLocation?.city ?? "").toLowerCase();
+        const resortState = (resortLocation?.state ?? "").toLowerCase();
+        const resortCountry = (resortLocation?.country ?? "").toLowerCase();
+        return (
+          location.includes(dest) ||
+          resortName.includes(dest) ||
+          resortCity.includes(dest) ||
+          resortState.includes(dest) ||
+          resortCountry.includes(dest)
+        );
       });
       logStep("Destination filter applied", {
         destination,
@@ -226,15 +256,21 @@ serve(async (req) => {
     // Limit to 20 results after all filtering
     const limited = filtered.slice(0, 20);
 
-    // Format results
+    // Format results — use resort master data when available, fallback to property fields
     const results: SearchResult[] = limited.map(
       (listing: Record<string, unknown>) => {
         const prop = listing.property as Record<string, unknown>;
         const images = (prop.images as string[]) ?? [];
+        const resort = prop.resort as Record<string, unknown> | null;
+        const unitType = prop.unit_type as Record<string, unknown> | null;
+        const resortLocation = resort?.location as Record<string, string> | null;
+
         return {
           listing_id: listing.id as string,
-          property_name: (prop.resort_name as string) ?? "",
-          location: (prop.location as string) ?? "",
+          property_name: (resort?.resort_name as string) ?? (prop.resort_name as string) ?? "",
+          location: resortLocation
+            ? `${resortLocation.city}, ${resortLocation.state}`
+            : (prop.location as string) ?? "",
           check_in: listing.check_in_date as string,
           check_out: listing.check_out_date as string,
           price: listing.final_price as number,
@@ -244,6 +280,12 @@ serve(async (req) => {
           brand: (prop.brand as string) ?? "",
           amenities: (prop.amenities as string[]) ?? [],
           image_url: images[0] ?? null,
+          // Resort master data
+          resort_name: (resort?.resort_name as string) ?? null,
+          resort_rating: (resort?.guest_rating as number) ?? null,
+          resort_amenities: ((resort?.resort_amenities as string[]) ?? []).slice(0, 5),
+          unit_type_name: (unitType?.unit_type_name as string) ?? null,
+          square_footage: (unitType?.square_footage as number) ?? null,
         };
       }
     );
