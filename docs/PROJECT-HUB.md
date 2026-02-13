@@ -1,34 +1,39 @@
 # 🏠 PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions  
-> **Last Updated:** February 13, 2026  
+> **Last Updated:** February 14, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
 
 ---
 
 ## 📍 CURRENT STATUS
 
-**Active Phase:** Phase 4 - UI Polish & Production Readiness  
-**Last Deployment:** Phase 2 (Resort Master Data) - February 12, 2026  
-**Production URL:** https://rent-a-vacation.com  
-**Working on TODAY:** Planning UI improvements and voice authentication
+**Active Phase:** Phase 4 - UI Polish & Production Readiness
+**Last Deployment:** Phase 1 Voice Auth Gate - February 14, 2026
+**Production URL:** https://rent-a-vacation.com
+**Working on TODAY:** Phase 2 - User Approval System
 
 ---
 
 ## 🎯 TOP 3 PRIORITIES THIS WEEK
 
-### 1. Gate Voice Search Behind Authentication
-**Status:** 🔴 Not Started  
-**Why:** Prevent API cost abuse from unauthenticated users (VAPI charges ~$0.10/search)  
-**Estimated:** 30-45 minutes  
-**Decision Needed:** Choose authentication strategy (see DEC-002)
+### 1. Gate Voice Search Behind Authentication ✅ COMPLETE
+**Status:** 🟢 Deployed
+**Completed:** February 14, 2026
 
-**Tasks:**
-- [ ] Add authentication check to voice search button
-- [ ] Show "Sign in to use voice search" for non-authenticated users
-- [ ] Implement graceful fallback with explanation
-- [ ] Update voice button component logic
-- [ ] Test with authenticated and non-authenticated users
+**Delivered:**
+- [x] Voice button disabled for unauthenticated users
+- [x] Tooltip shows "Sign in to use voice search"
+- [x] Authenticated users can use voice normally
+- [x] Manual search works for everyone
+- [x] Edge cases handled (logout during active session)
+- [x] TypeScript + build pass
+
+**Files Modified:**
+- `src/components/VoiceSearchButton.tsx` — Added `disabled` and `disabledReason` props
+- `src/pages/Rentals.tsx` — Added auth check, passes disabled state to voice button
+
+**Docs:** `handoffs/phase1-handoff.md`
 
 ---
 
@@ -115,12 +120,12 @@
 
 **Tracks:**
 
-#### Track A: Voice Authentication (30-45 min)
-- [ ] Decide authentication strategy (see DEC-002)
-- [ ] Implement login requirement
-- [ ] Add usage quotas (if needed)
-- [ ] Create graceful fallback
-- [ ] Test flows
+#### Track A: Voice Authentication ✅ COMPLETE
+- [x] Decided authentication strategy: Option B (logged-in users only) — see DEC-002
+- [x] Implemented login requirement (Phase 1 auth gate)
+- [ ] Add usage quotas (Phase 3 — future)
+- [x] Created graceful fallback (disabled button + tooltip)
+- [x] Tested flows (TS check + build pass)
 
 #### Track B: UI Fixes (2-3 hours)
 - [ ] Fix calendar component
@@ -200,29 +205,22 @@
 
 ---
 
-### DEC-002: Voice Search Access Control  
-**Date:** February 13, 2026  
-**Status:** 🟡 PENDING - Priority for Feb 14
+### DEC-002: Voice Search Access Control
+**Date:** February 13, 2026
+**Decision:** Option B — Logged-in users only
+**Status:** ✅ IMPLEMENTED (Phase 1 auth gate deployed Feb 14)
 
-**Options:**
+**Options considered:**
 - **A:** Voice for everyone (high cost risk)
-- **B:** Logged-in users only ⭐ RECOMMENDED
+- **B:** Logged-in users only ⭐ CHOSEN
 - **C:** Paid users only (limits growth)
 - **D:** Freemium (5/day free, unlimited paid)
 
-**Considerations:**
-- Current usage: 34% of searches
-- Cost: ~$0.10/search
-- Competitive advantage: Only platform with voice
-- User acquisition cost: $68
-- Lifetime value: $842
-
-**Recommendation:** Option B (logged-in users)
+**Rationale:**
 - Preserves competitive advantage
-- Manageable costs
+- Manageable costs (~$0.10/search)
 - Builds user base
-
-**Decide by:** February 14, 2026
+- Usage quotas deferred to Phase 3
 
 ---
 
@@ -288,7 +286,9 @@
 
 ### Features
 - **Voice Search:** `docs/features/voice-search/`
+- **Voice Auth & Approval:** `docs/features/voice-auth-approval/`
 - **Resort Data:** `docs/features/resort-master-data/`
+- **Handoffs:** `handoffs/`
 - **User Guides:** `docs/guides/`
 
 ### Infrastructure
@@ -337,6 +337,6 @@
 
 ---
 
-**Last updated:** February 13, 2026  
+**Last updated:** February 14, 2026
 **Maintained by:** Sujit  
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
