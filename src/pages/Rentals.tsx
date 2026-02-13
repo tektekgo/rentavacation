@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,6 +24,7 @@ import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
+import { useAuth } from "@/hooks/useAuth";
 
 const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
 
@@ -120,6 +121,10 @@ const Rentals = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Auth state for voice search gating
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+
   // Voice search integration
   const {
     status: voiceStatus,
@@ -131,6 +136,13 @@ const Rentals = () => {
     stopVoiceSearch,
     reset: resetVoice,
   } = useVoiceSearch();
+
+  // Stop voice session if user logs out
+  useEffect(() => {
+    if (!isAuthenticated && isCallActive) {
+      stopVoiceSearch();
+    }
+  }, [isAuthenticated, isCallActive, stopVoiceSearch]);
 
   const toggleLike = (id: number) => {
     setLiked((prev) =>
@@ -176,6 +188,8 @@ const Rentals = () => {
                     isCallActive={isCallActive}
                     onStart={startVoiceSearch}
                     onStop={stopVoiceSearch}
+                    disabled={!isAuthenticated}
+                    disabledReason={!isAuthenticated ? "Sign in to use voice search" : undefined}
                   />
                 )}
               </div>

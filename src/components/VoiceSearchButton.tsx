@@ -14,6 +14,8 @@ interface VoiceSearchButtonProps {
   onStart: () => void;
   onStop: () => void;
   className?: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 export function VoiceSearchButton({
@@ -22,6 +24,8 @@ export function VoiceSearchButton({
   onStart,
   onStop,
   className,
+  disabled,
+  disabledReason,
 }: VoiceSearchButtonProps) {
   const isProcessing = status === "processing";
 
@@ -56,15 +60,20 @@ export function VoiceSearchButton({
         <Button
           variant="outline"
           size="icon"
-          onClick={onStart}
-          className={cn("shrink-0", className)}
-          aria-label="Voice Search"
+          onClick={disabled ? undefined : onStart}
+          disabled={disabled}
+          className={cn(
+            "shrink-0",
+            disabled && "opacity-50 cursor-not-allowed",
+            className,
+          )}
+          aria-label={disabled && disabledReason ? disabledReason : "Voice Search"}
         >
           <Mic className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Voice Search</p>
+        <p>{disabled && disabledReason ? disabledReason : "Voice Search"}</p>
       </TooltipContent>
     </Tooltip>
   );
