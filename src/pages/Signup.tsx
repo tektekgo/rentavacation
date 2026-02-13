@@ -60,8 +60,8 @@ const Signup = () => {
       });
     } else {
       toast({
-        title: "Check your email",
-        description: "We sent you a confirmation link to complete your registration.",
+        title: "Account created!",
+        description: "Please check your email to confirm, then log in. Your account will be reviewed by our team.",
       });
       navigate("/login");
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,9 +14,23 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  const { signIn, isConfigured } = useAuth();
+  const { signIn, isConfigured, user, profile, isRavTeam } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect already-logged-in users based on approval status
+  useEffect(() => {
+    if (!user) return;
+    if (isRavTeam()) {
+      navigate("/");
+      return;
+    }
+    if (profile?.approval_status === "pending_approval") {
+      navigate("/pending-approval");
+    } else if (profile?.approval_status === "approved") {
+      navigate("/");
+    }
+  }, [user, profile, isRavTeam, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +59,7 @@ const Login = () => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      navigate("/");
+      // The useEffect above will handle redirect based on approval status
     }
   };
 
