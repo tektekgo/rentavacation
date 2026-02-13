@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Search,
   MapPin,
@@ -26,8 +34,11 @@ import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
 import { VoiceQuotaIndicator } from "@/components/VoiceQuotaIndicator";
 import { useAuth } from "@/hooks/useAuth";
+import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
+import { useToast } from "@/hooks/use-toast";
 
 const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
+const ITEMS_PER_PAGE = 6;
 
 const allListings = [
   {
@@ -117,14 +128,20 @@ const allListings = [
 ];
 
 const Rentals = () => {
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [liked, setLiked] = useState<number[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("location") || "");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Auth state for voice search gating
   const { user } = useAuth();
   const isAuthenticated = !!user;
+
+  // Favorites
+  const { data: favoriteIds = [] } = useFavoriteIds();
+  const toggleFavoriteMutation = useToggleFavorite();
+  const { toast } = useToast();
 
   // Voice search integration
   const {
@@ -146,10 +163,40 @@ const Rentals = () => {
   }, [isAuthenticated, isCallActive, stopVoiceSearch]);
 
   const toggleLike = (id: number) => {
-    setLiked((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save your favorites.",
+      });
+      return;
+    }
+    toggleFavoriteMutation.mutate(String(id));
   };
+
+  // Filter listings by search query
+  const filteredListings = searchQuery.trim()
+    ? allListings.filter((listing) => {
+        const q = searchQuery.toLowerCase();
+        return (
+          listing.location.toLowerCase().includes(q) ||
+          listing.name.toLowerCase().includes(q) ||
+          listing.resort.toLowerCase().includes(q)
+        );
+      })
+    : allListings;
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredListings.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedListings = filteredListings.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE
+  );
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -245,7 +292,7 @@ const Rentals = () => {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">
-                {allListings.length} properties found
+                {filteredListings.length} properties found
               </span>
               <div className="flex border rounded-lg overflow-hidden">
                 <button
@@ -396,7 +443,7 @@ const Rentals = () => {
                 : "flex flex-col gap-4"
             }
           >
-            {allListings.map((listing) => (
+            {paginatedListings.map((listing) => (
               <Link
                 key={listing.id}
                 to={`/property/${listing.id}`}
@@ -427,7 +474,7 @@ const Rentals = () => {
                   >
                     <Heart
                       className={`w-4 h-4 transition-colors ${
-                        liked.includes(listing.id)
+                        favoriteIds.includes(String(listing.id))
                           ? "fill-accent text-accent"
                           : "text-foreground"
                       }`}
@@ -481,15 +528,35 @@ const Rentals = () => {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-center mt-12">
-            <div className="flex gap-2">
-              <Button variant="outline" disabled>Previous</Button>
-              <Button variant="default">1</Button>
-              <Button variant="outline">2</Button>
-              <Button variant="outline">3</Button>
-              <Button variant="outline">Next</Button>
-            </div>
-          </div>
+          {totalPages > 1 && (
+            <Pagination className="mt-12">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={safePage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      isActive={page === safePage}
+                      onClick={() => setCurrentPage(page)}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className={safePage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </section>
 

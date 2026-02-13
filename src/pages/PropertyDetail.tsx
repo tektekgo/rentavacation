@@ -29,6 +29,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Resort, ResortUnitType } from "@/types/database";
+import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
@@ -84,7 +87,24 @@ const mockPropertyData = {
 const PropertyDetail = () => {
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+
+  // Favorites
+  const { user } = useAuth();
+  const { data: favoriteIds = [] } = useFavoriteIds();
+  const toggleFavoriteMutation = useToggleFavorite();
+  const { toast } = useToast();
+  const isLiked = id ? favoriteIds.includes(id) : false;
+
+  const handleToggleFavorite = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save your favorites.",
+      });
+      return;
+    }
+    if (id) toggleFavoriteMutation.mutate(id);
+  };
 
   // Resort data from database
   const [resortData, setResortData] = useState<Resort | null>(null);
@@ -198,7 +218,7 @@ const PropertyDetail = () => {
             </div>
             <div className="absolute top-4 right-4 flex gap-2">
               <button
-                onClick={() => setIsLiked(!isLiked)}
+                onClick={handleToggleFavorite}
                 className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
               >
                 <Heart className={`w-5 h-5 ${isLiked ? "fill-accent text-accent" : ""}`} />

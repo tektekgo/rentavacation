@@ -1,7 +1,9 @@
-import { Star, MapPin, ChevronLeft, ChevronRight, Heart } from "lucide-react";
-import { useState } from "react";
+import { Star, MapPin, ChevronRight, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
 import yellowstoneImage from "@/assets/yellowstone.jpg";
@@ -59,12 +61,20 @@ const resorts = [
 ];
 
 const FeaturedResorts = () => {
-  const [liked, setLiked] = useState<number[]>([]);
+  const { user } = useAuth();
+  const { data: favoriteIds = [] } = useFavoriteIds();
+  const toggleFavoriteMutation = useToggleFavorite();
+  const { toast } = useToast();
 
   const toggleLike = (id: number) => {
-    setLiked((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save your favorites.",
+      });
+      return;
+    }
+    toggleFavoriteMutation.mutate(String(id));
   };
 
   return (
@@ -118,7 +128,7 @@ const FeaturedResorts = () => {
                 >
                   <Heart
                     className={`w-4 h-4 transition-colors ${
-                      liked.includes(resort.id)
+                      favoriteIds.includes(String(resort.id))
                         ? "fill-accent text-accent"
                         : "text-foreground"
                     }`}

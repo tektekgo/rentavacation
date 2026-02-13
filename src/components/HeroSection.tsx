@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Calendar as CalendarIcon, MapPin, Sparkles, Gavel } from "lucide-react";
+import { Search, Calendar as CalendarIcon, MapPin, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
@@ -22,8 +23,16 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTab, setSearchTab] = useState<"flexible" | "calendar">("flexible");
   const [searchLocation, setSearchLocation] = useState("");
-  const [checkInDate, setCheckInDate] = useState<Date>();
-  const [checkOutDate, setCheckOutDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (searchLocation) params.set("location", searchLocation);
+    if (dateRange?.from) params.set("checkIn", format(dateRange.from, "yyyy-MM-dd"));
+    if (dateRange?.to) params.set("checkOut", format(dateRange.to, "yyyy-MM-dd"));
+    const query = params.toString();
+    navigate(`/rentals${query ? `?${query}` : ""}`);
+  };
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % destinations.length);
@@ -108,56 +117,95 @@ const HeroSection = () => {
             </div>
 
             {/* Search Fields */}
-            <div className="grid md:grid-cols-4 gap-3">
-              <div className="md:col-span-2">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Where do you want to go?"
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
+            {searchTab === "flexible" ? (
+              <div className="grid md:grid-cols-4 gap-3">
+                <div className="md:col-span-3">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Where do you want to go?"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      className="w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full h-12"
+                    onClick={handleSearch}
+                  >
+                    <Search className="w-5 h-5" />
+                    Search
+                  </Button>
                 </div>
               </div>
-              <div className="relative">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className={cn(
-                        "w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-left focus:outline-none focus:ring-2 focus:ring-primary/50",
-                        !checkInDate ? "text-muted-foreground" : "text-foreground"
-                      )}
-                    >
-                      {checkInDate ? format(checkInDate, "MMM d, yyyy") : "Check-in"}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={checkInDate}
-                      onSelect={setCheckInDate}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
+            ) : (
+              <div className="grid md:grid-cols-4 gap-3">
+                <div className="md:col-span-2">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Where do you want to go?"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      className="w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
-                  </PopoverContent>
-                </Popover>
+                  </div>
+                </div>
+                <div className="relative">
+                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        className={cn(
+                          "w-full h-12 pl-10 pr-4 rounded-lg border border-input bg-background text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary/50",
+                          !dateRange?.from ? "text-muted-foreground" : "text-foreground"
+                        )}
+                      >
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            `${format(dateRange.from, "MMM d")} - ${format(dateRange.to, "MMM d")}`
+                          ) : (
+                            format(dateRange.from, "MMM d, yyyy")
+                          )
+                        ) : (
+                          "Check-in — Check-out"
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="range"
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full h-12"
+                    onClick={handleSearch}
+                  >
+                    <Search className="w-5 h-5" />
+                    Search
+                  </Button>
+                </div>
               </div>
-              <div>
-                <Button 
-                  variant="hero" 
-                  size="lg" 
-                  className="w-full h-12"
-                  onClick={() => navigate(`/rentals${searchLocation ? `?location=${encodeURIComponent(searchLocation)}` : ''}`)}
-                >
-                  <Search className="w-5 h-5" />
-                  Search
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Slide Indicators */}

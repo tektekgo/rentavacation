@@ -739,6 +739,25 @@ export interface Database {
           updated_at?: string;
         };
       };
+      favorites: {
+        Row: {
+          id: string;
+          user_id: string;
+          property_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          property_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          property_id?: string;
+        };
+      };
       voice_search_usage: {
         Row: {
           id: string;
@@ -874,6 +893,7 @@ export type OwnerVerification = Database['public']['Tables']['owner_verification
 export type VerificationDocument = Database['public']['Tables']['verification_documents']['Row'];
 export type BookingConfirmation = Database['public']['Tables']['booking_confirmations']['Row'];
 export type CheckinConfirmation = Database['public']['Tables']['checkin_confirmations']['Row'];
+export type Favorite = Database['public']['Tables']['favorites']['Row'];
 
 // Extended types with joins
 export type ListingWithProperty = Listing & {
