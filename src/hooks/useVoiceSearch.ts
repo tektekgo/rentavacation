@@ -44,6 +44,8 @@ Other guidelines:
 - Don't mention technical details like function names or API calls`;
 
 const ASSISTANT_OVERRIDES: AssistantOverrides = {
+  firstMessage:
+    "Welcome to Rent-A-Vacation — voice-powered vacation search. Where are you looking to get away?",
   transcriber: {
     provider: "deepgram",
     model: "nova-2",
