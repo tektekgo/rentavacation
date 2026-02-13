@@ -739,6 +739,34 @@ export interface Database {
           updated_at?: string;
         };
       };
+      voice_search_usage: {
+        Row: {
+          id: string;
+          user_id: string;
+          search_date: string;
+          search_count: number;
+          last_search_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          search_date?: string;
+          search_count?: number;
+          last_search_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          search_date?: string;
+          search_count?: number;
+          last_search_at?: string | null;
+          updated_at?: string;
+        };
+      };
       platform_guarantee_fund: {
         Row: {
           id: string;
@@ -799,6 +827,22 @@ export interface Database {
       reject_user: {
         Args: { _user_id: string; _rejected_by: string; _reason?: string };
         Returns: boolean;
+      };
+      increment_voice_search_count: {
+        Args: { _user_id: string };
+        Returns: void;
+      };
+      get_voice_search_count: {
+        Args: { _user_id: string };
+        Returns: number;
+      };
+      can_use_voice_search: {
+        Args: { _user_id: string };
+        Returns: boolean;
+      };
+      get_voice_searches_remaining: {
+        Args: { _user_id: string };
+        Returns: number;
       };
     };
     Enums: {

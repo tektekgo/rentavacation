@@ -24,6 +24,7 @@ import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
+import { VoiceQuotaIndicator } from "@/components/VoiceQuotaIndicator";
 import { useAuth } from "@/hooks/useAuth";
 
 const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
@@ -204,6 +205,13 @@ const Rentals = () => {
                 error={voiceError}
                 onDismiss={voiceStatus === "success" || voiceStatus === "error" ? resetVoice : undefined}
               />
+            )}
+
+            {/* Voice Quota Indicator */}
+            {voiceEnabled && isAuthenticated && (
+              <div className="mt-3 flex justify-end">
+                <VoiceQuotaIndicator />
+              </div>
             )}
           </div>
         </div>

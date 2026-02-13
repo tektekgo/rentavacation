@@ -5,6 +5,8 @@ import type {
   VoiceSearchResult,
   VoiceSearchResponse,
 } from "@/types/voice";
+import { supabase } from "@/lib/supabase";
+import { useVoiceQuota } from "./useVoiceQuota";
 
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY as string;
 const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID as string;
@@ -28,6 +30,8 @@ export function useVoiceSearch() {
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
   const [isCallActive, setIsCallActive] = useState(false);
+
+  const { canSearch, remaining, isUnlimited, loading: quotaLoading, refresh: refreshQuota } = useVoiceQuota();
 
   const vapiRef = useRef<Vapi | null>(null);
 
@@ -87,6 +91,15 @@ export function useVoiceSearch() {
           if (data.success) {
             setResults(data.results);
             setStatus("success");
+
+            // Increment voice search counter
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              await supabase.rpc("increment_voice_search_count", {
+                _user_id: user.id,
+              });
+              refreshQuota();
+            }
           } else {
             setError(data.error ?? "Search failed");
             setStatus("error");
@@ -120,6 +133,13 @@ export function useVoiceSearch() {
       return;
     }
 
+    // Check quota before starting
+    if (!canSearch) {
+      setError("Daily voice search limit reached. Try again tomorrow.");
+      setStatus("error");
+      return;
+    }
+
     // Reset previous state
     setError(null);
     setResults([]);
@@ -135,7 +155,7 @@ export function useVoiceSearch() {
       );
       setStatus("error");
     }
-  }, []);
+  }, [canSearch]);
 
   const stopVoiceSearch = useCallback(() => {
     vapiRef.current?.stop();
@@ -159,5 +179,11 @@ export function useVoiceSearch() {
     startVoiceSearch,
     stopVoiceSearch,
     reset,
+    quota: {
+      remaining,
+      isUnlimited,
+      canSearch,
+      loading: quotaLoading,
+    },
   };
 }

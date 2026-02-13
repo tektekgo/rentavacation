@@ -23,7 +23,8 @@ import {
   FileCheck,
   ShieldCheck as EscrowIcon,
   MessageSquareWarning,
-  UserCheck
+  UserCheck,
+  Settings
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -36,6 +37,7 @@ import AdminVerifications from "@/components/admin/AdminVerifications";
 import AdminEscrow from "@/components/admin/AdminEscrow";
 import AdminCheckinIssues from "@/components/admin/AdminCheckinIssues";
 import { PendingApprovals } from "@/components/admin/PendingApprovals";
+import { SystemSettings } from "@/components/admin/SystemSettings";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -134,7 +136,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -184,6 +186,10 @@ const AdminDashboard = () => {
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -228,6 +234,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="pending-approvals">
             <PendingApprovals />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SystemSettings />
           </TabsContent>
         </Tabs>
       </main>
