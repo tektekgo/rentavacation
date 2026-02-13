@@ -12,9 +12,10 @@ const Footer = () => {
             <img
               src="/rav-logo.svg"
               alt="Rent-A-Vacation"
-              className="h-14 md:h-16 w-auto select-none brightness-0 invert"
+              className="h-14 md:h-16 w-auto select-none"
               draggable={false}
             />
+            <span className="font-display font-bold text-xl text-white">Rent-A-Vacation</span>
           </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
               The open marketplace for vacation rentals. Rent directly from verified timeshare owners, bid on properties, or post your travel plans and let owners compete for your booking.

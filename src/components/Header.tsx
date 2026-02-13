@@ -37,6 +37,7 @@ const Header = () => {
               className="h-14 md:h-16 w-auto select-none"
               draggable={false}
             />
+            <span className="font-display font-bold text-xl text-foreground">Rent-A-Vacation</span>
           </Link>
 
           {/* Desktop Navigation */}
