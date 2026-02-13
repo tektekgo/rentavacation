@@ -415,7 +415,10 @@ const Rentals = () => {
                   <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
                     {listing.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground mb-2">{listing.resort}</p>
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    {listing.resort}
+                  </p>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-warning text-warning" />
