@@ -20,16 +20,16 @@ import {
 
 const travelerSteps = [
   {
+    icon: Users,
+    title: "Sign Up & Get Approved",
+    description:
+      "Create a free account in seconds. Our team reviews new accounts quickly — you'll receive an approval email, usually within 24 hours.",
+  },
+  {
     icon: Search,
     title: "Search & Discover",
     description:
-      "Browse thousands of timeshare rentals at world-class resorts by Marriott, Hilton, Wyndham, and more. Filter by location, dates, price, and amenities.",
-  },
-  {
-    icon: Calendar,
-    title: "Book Your Dates",
-    description:
-      "Find availability that works for you. Use flexible dates or pick exact check-in and check-out dates. See real-time pricing and availability.",
+      "Browse timeshare rentals at resorts by Marriott, Hilton, Disney, and more. Use text or voice search to find properties by location, dates, price, and amenities.",
   },
   {
     icon: MessageSquare,
@@ -41,7 +41,7 @@ const travelerSteps = [
     icon: CreditCard,
     title: "Secure Payment",
     description:
-      "Pay securely through Rent-A-Vacation. Your payment is protected until you check in, giving you peace of mind.",
+      "Pay securely through Rent-A-Vacation. Your payment is protected in escrow until you check in, giving you peace of mind.",
   },
   {
     icon: Key,
@@ -222,24 +222,24 @@ const HowItWorksPage = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <Users className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="font-display text-4xl font-bold mb-1">50,000+</div>
-              <div className="opacity-80">Happy Travelers</div>
+              <Home className="w-10 h-10 mx-auto mb-3 opacity-80" />
+              <div className="font-display text-4xl font-bold mb-1">117</div>
+              <div className="opacity-80">Partner Resorts</div>
             </div>
             <div>
-              <Home className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="font-display text-4xl font-bold mb-1">10,000+</div>
-              <div className="opacity-80">Properties Listed</div>
+              <Users className="w-10 h-10 mx-auto mb-3 opacity-80" />
+              <div className="font-display text-4xl font-bold mb-1">3</div>
+              <div className="opacity-80">Major Brands</div>
             </div>
             <div>
               <Star className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="font-display text-4xl font-bold mb-1">4.8/5</div>
-              <div className="opacity-80">Average Rating</div>
+              <div className="font-display text-4xl font-bold mb-1">351</div>
+              <div className="opacity-80">Unit Types</div>
             </div>
             <div>
               <Clock className="w-10 h-10 mx-auto mb-3 opacity-80" />
-              <div className="font-display text-4xl font-bold mb-1">24/7</div>
-              <div className="opacity-80">Customer Support</div>
+              <div className="font-display text-4xl font-bold mb-1">10+</div>
+              <div className="opacity-80">Countries</div>
             </div>
           </div>
         </div>

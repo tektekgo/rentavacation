@@ -1150,6 +1150,8 @@ const Documentation = () => {
                   <div className="space-y-3">
                     {[
                       { type: "Welcome Email", recipient: "New Users", trigger: "On signup" },
+                      { type: "Account Approved", recipient: "New Users", trigger: "On admin approval" },
+                      { type: "Account Rejected", recipient: "New Users", trigger: "On admin rejection" },
                       { type: "New Booking Alert", recipient: "Owner", trigger: "When traveler books" },
                       { type: "Booking Confirmation", recipient: "Traveler", trigger: "After payment success" },
                       { type: "Confirmation Reminder", recipient: "Owner", trigger: "6-12h before deadline" },
@@ -1222,6 +1224,8 @@ const Documentation = () => {
                       { name: "Payouts", desc: "Payout processing", icon: DollarSign },
                       { name: "Financials", desc: "Revenue and commission reports", icon: CreditCard },
                       { name: "Escrow", desc: "Held funds management", icon: Shield },
+                      { name: "Pending Approvals", desc: "User approval queue", icon: UserCheck },
+                      { name: "Settings", desc: "Platform settings & voice limits", icon: Settings },
                     ].map((section) => {
                       const Icon = section.icon;
                       return (
@@ -1243,6 +1247,88 @@ const Documentation = () => {
                     Admin Dashboard is accessible only to users with <strong>rav_owner</strong> or <strong>rav_admin</strong> roles.
                     Access the dashboard at <code className="bg-muted px-2 py-1 rounded">/admin</code>
                   </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <UserCheck className="h-5 w-5 text-primary" />
+                    User Approval System (Pending Approvals Tab)
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      New user signups require admin approval before they can access the platform.
+                      The <strong>Pending Approvals</strong> tab shows all users awaiting review.
+                    </p>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Approval Flow</h4>
+                      <ol className="list-decimal list-inside space-y-2 text-sm">
+                        <li>New user signs up and sees a "Pending Approval" page</li>
+                        <li>Admin navigates to <strong>/admin</strong> → <strong>Pending Approvals</strong> tab</li>
+                        <li>Reviews the user's email and signup date</li>
+                        <li>Clicks <strong>Approve</strong> to grant platform access, or <strong>Reject</strong> with a reason</li>
+                        <li>An approval/rejection email is sent automatically via Resend</li>
+                        <li>Approved users can log in and access all platform features</li>
+                      </ol>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 border border-green-200 dark:border-green-900">
+                        <h4 className="font-medium text-green-800 dark:text-green-200 mb-2">Approve</h4>
+                        <p className="text-xs text-green-700 dark:text-green-300">
+                          Sets approval_status to "approved". User receives a welcome email and can access the full platform including voice search.
+                        </p>
+                      </div>
+                      <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-4 border border-red-200 dark:border-red-900">
+                        <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Reject</h4>
+                        <p className="text-xs text-red-700 dark:text-red-300">
+                          Requires a rejection reason. User receives an email explaining the decision. They cannot access protected routes.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-900">
+                      <p className="text-sm text-amber-800 dark:text-amber-200">
+                        <strong>Note:</strong> The approval requirement can be toggled on/off in the <strong>Settings</strong> tab using the
+                        "Require user approval" switch. When disabled, new signups are automatically approved.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-primary" />
+                    System Settings (Settings Tab)
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      The <strong>Settings</strong> tab (12th tab in the admin dashboard) provides platform-wide configuration options.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">User Approval Toggle</h4>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Require user approval for new signups</strong> — When enabled, all new users start in "pending_approval"
+                          status and must be manually approved. When disabled, users are auto-approved on signup.
+                        </p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Voice Search Daily Limit</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Currently set to <strong>10 searches per user per day</strong>. RAV team members (rav_owner, rav_admin, rav_staff)
+                          have unlimited voice searches (999 sentinel value). The limit resets at midnight UTC.
+                          Usage records older than 90 days are automatically cleaned up.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Voice Quota Technical Details</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• Counter increments only after a <strong>successful</strong> voice search (not on VAPI call start)</li>
+                        <li>• Users see a color-coded badge showing remaining searches (green/yellow/red)</li>
+                        <li>• When quota is exhausted, the voice button is disabled with a tooltip message</li>
+                        <li>• Manual text search is always unlimited for all users</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </section>
             )}
@@ -1276,6 +1362,7 @@ const Documentation = () => {
                   </h3>
                   <div className="space-y-3">
                     {[
+                      { task: "Review pending user approvals", path: "/admin → Pending Approvals tab", priority: "High" },
                       { task: "Review pending listing approvals", path: "/admin → Listings tab", priority: "High" },
                       { task: "Check new owner verification requests", path: "/admin → Verifications tab", priority: "High" },
                       { task: "Monitor booking confirmation deadlines", path: "/admin → Bookings tab", priority: "Critical" },

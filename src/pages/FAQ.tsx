@@ -45,6 +45,16 @@ const faqCategories = [
         answer:
           "Cancellation policies vary by listing. Most owners offer free cancellation up to 30-60 days before check-in. Always check the specific listing's cancellation policy before booking.",
       },
+      {
+        question: "Why can't I use voice search?",
+        answer:
+          "Voice search requires a logged-in, approved account. If the microphone icon is disabled, sign in first. If your account is pending approval, you'll need to wait for the approval email. If you've hit the daily limit of 10 searches, try again tomorrow or use the manual text search which has no limits.",
+      },
+      {
+        question: "What is the daily voice search limit?",
+        answer:
+          "Regular users can perform up to 10 voice searches per day, which resets at midnight. A badge near the search bar shows your remaining searches. This helps us manage costs while giving everyone fair access to this premium feature.",
+      },
     ],
   },
   {
@@ -113,7 +123,7 @@ const faqCategories = [
       {
         question: "How do I create an account?",
         answer:
-          "Click 'Sign Up' at the top of any page. You can register with your email address or use Google authentication. It takes less than a minute!",
+          "Click 'Sign Up' at the top of any page and register with your email address. After signing up, your account will be reviewed by our team. You'll receive an email once approved (typically within 24 hours). Until then, you'll see a 'Pending Approval' page when you log in.",
       },
       {
         question: "I forgot my password. What do I do?",

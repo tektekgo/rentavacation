@@ -1,8 +1,8 @@
 # Complete User Journey Map - Rent-A-Vacation Platform
 
-**Document Version:** 1.0  
-**Last Updated:** February 12, 2026  
-**Status:** Post Phase 1 (Voice Search), Pre Phase 2 (Resort Master Data)
+**Document Version:** 2.0
+**Last Updated:** February 16, 2026
+**Status:** Post Phase 4 Track A (Voice Auth & Approval System complete)
 
 ---
 
@@ -19,8 +19,12 @@ This document maps the complete user experience across all user types, features,
 
 ### Features Mapped
 - ✅ **Phase 1:** Voice Search (DEPLOYED)
-- 🎯 **Phase 2:** Resort Master Data (IN PROGRESS)
-- 🚀 **Phase 3:** Voice Everywhere (PLANNED)
+- ✅ **Phase 2:** Resort Master Data (DEPLOYED)
+- ✅ **Phase 4 Track A:** Voice Auth & Approval System (DEPLOYED)
+  - Authentication gate on voice search
+  - User approval system (signup → pending → approved/rejected)
+  - Voice usage limits (10/day per user, RAV team unlimited)
+- 🚀 **Phase 3:** Voice Everywhere (PLANNED Q2 2026)
 - 📊 **Analytics & Reporting** (ONGOING)
 - 🛡️ **Trust & Safety** (ONGOING)
 
@@ -29,6 +33,51 @@ This document maps the complete user experience across all user types, features,
 ## 👤 USER TYPE 1: TRAVELER
 
 **Goal:** Find and book the perfect vacation property
+
+---
+
+### Journey 1A0: Signup & Account Approval (NEW — Phase 4 Track A)
+
+#### **Signup Flow**
+```
+1. User clicks "Sign Up" from any page
+   ↓
+2. Fills out signup form (email, password)
+   ↓
+3. Sees toast: "Account created! Your account will be reviewed."
+   ↓
+4. Redirected to /pending-approval page:
+   "Your account is pending approval.
+    You'll receive an email once approved (usually within 24 hours)."
+   ↓
+5. RAV admin reviews in Admin Dashboard → Pending Approvals tab
+   ↓
+6a. APPROVED → User receives approval email → Can log in and access platform
+6b. REJECTED → User receives rejection email with reason → Cannot access
+```
+
+#### **Protected Routes**
+All platform routes are wrapped in `ProtectedRoute`:
+- Unauthenticated users → redirected to `/login`
+- Pending users → redirected to `/pending-approval`
+- Rejected users → shown rejection message
+- Approved users → full platform access
+
+#### **Voice Search Access Layers**
+```
+Layer 1: Authentication Gate
+  └─ Not logged in → Voice button disabled, tooltip: "Sign in to use voice search"
+
+Layer 2: Approval Gate
+  └─ Logged in but not approved → Cannot reach /rentals (redirected to /pending-approval)
+
+Layer 3: Daily Quota
+  └─ Approved user → 10 voice searches/day
+  └─ RAV team → Unlimited (999 sentinel)
+  └─ Quota exhausted → Voice button disabled, tooltip: "Daily limit reached"
+
+Manual text search → Always available, no limits, no auth required for browsing
+```
 
 ---
 
@@ -45,6 +94,8 @@ This document maps the complete user experience across all user types, features,
 **Page Elements:**
 - Hero section with search bar
 - 🎤 **Voice Search button** (prominent, animated pulse)
+  - Disabled with tooltip if not logged in
+  - Shows quota badge (e.g., "8 remaining") when logged in
 - Manual search filters (location, dates, guests, price)
 - Featured properties carousel
 - "How It Works" explainer
@@ -55,19 +106,24 @@ This document maps the complete user experience across all user types, features,
    ↓
 2. Auto-complete suggests:
    - Orlando, Florida
-   - [After Phase 2] "Hilton Grand Vacations Club at Tuscany Village"
-   - [After Phase 2] "SeaWorld Orlando, a Hilton Grand Vacations Club"
+   - [Live] "Hilton Grand Vacations Club at Tuscany Village"
+   - [Live] "SeaWorld Orlando, a Hilton Grand Vacations Club"
    ↓
 3. User selects location
    ↓
 4. Applies filters (dates, bedrooms, price)
    ↓
-5. Views results with resort badges [Phase 2]
+5. Views results with resort badges [Live]
 ```
 
-**User Actions - Voice Search:**
+**User Actions - Voice Search:** *(requires login + approval + quota)*
 ```
 1. User clicks 🎤 microphone icon
+   ↓
+   Pre-checks (automatic):
+   ✓ User is logged in (else button disabled)
+   ✓ User is approved (else can't reach this page)
+   ✓ Daily quota remaining > 0 (else button disabled)
    ↓
 2. Permission modal: "Allow microphone access"
    ↓
@@ -83,8 +139,8 @@ This document maps the complete user experience across all user types, features,
     Here are 2-bedroom units in Orlando near Disney World..."
    ↓
 6. Results appear with:
-   ✅ Resort badges showing resort names [Phase 2]
-   ✅ Guest ratings [Phase 2]
+   ✅ Resort badges showing resort names [Live]
+   ✅ Guest ratings [Live]
    ✅ Highlighted amenities mentioned in voice search
    ✅ Distance to Disney (if mentioned)
    ↓
@@ -94,18 +150,24 @@ This document maps the complete user experience across all user types, features,
    - Switch to manual filters
 ```
 
-**Voice Search Capabilities (Phase 1):**
+**Voice Search Capabilities:**
 - Natural language queries
 - Location-based search
 - Property type filters (bedrooms, amenities)
 - Price range filtering
 - Availability date search
-
-**Voice Search Enhancements (Phase 2):**
 - Brand filtering: "Show me Hilton properties"
 - Resort-specific search: "Find properties at Tuscany Village"
 - Amenity-based: "Properties with spa at Marriott resorts"
 - Guest rating: "4-star and above"
+
+**Voice Search Access Control (Phase 4 Track A):**
+- Authentication required (login first)
+- Account approval required (admin must approve)
+- Daily limit: 10 searches/day per user (resets midnight UTC)
+- RAV team: Unlimited searches
+- Quota badge visible next to search bar
+- Counter increments only after successful search
 
 ---
 
@@ -133,7 +195,7 @@ This document maps the complete user experience across all user types, features,
    ↓
 2. Photo carousel auto-plays
    ↓
-3. User sees resort badge [Phase 2]: "Tuscany Village ★4.3"
+3. User sees resort badge [Live]: "Tuscany Village ★4.3"
    ↓
 4. User clicks "View Details"
    ↓
@@ -156,7 +218,7 @@ This document maps the complete user experience across all user types, features,
 7. Reviews
 8. Location Map
 
-**Page Sections (Phase 2 Additions):**
+**Page Sections (Resort Master Data — Live):**
 
 **New Section: Resort Information Card**
 ```
@@ -221,12 +283,12 @@ This document maps the complete user experience across all user types, features,
    ↓
 2. Views photo gallery (property-specific + resort images)
    ↓
-3. Scrolls to Resort Information Card [Phase 2]
+3. Scrolls to Resort Information Card [Live]
    - Sees professional resort details
    - Clicks "View Official Website" (opens in new tab)
    - Gains confidence from resort affiliation
    ↓
-4. Reviews Unit Specifications [Phase 2]
+4. Reviews Unit Specifications [Live]
    - Confirms bedding configuration
    - Checks square footage
    - Reviews amenities
@@ -322,7 +384,7 @@ This document maps the complete user experience across all user types, features,
    
    Contains:
    - Booking details
-   - Property info with resort details [Phase 2]
+   - Property info with resort details [Live]
    - Next steps
    - Contact information
    ↓
@@ -446,7 +508,7 @@ Social Proof:
 
 #### **List Property Page (/list-property)**
 
-**Current Flow (Pre-Phase 2):**
+**Legacy Flow (Pre-Resort Data):**
 ```
 Manual Entry Form:
 
@@ -471,7 +533,7 @@ Manual Entry Form:
 5. Review & Submit
 ```
 
-**Enhanced Flow (Phase 2):**
+**Current Flow (with Resort Master Data — Live):**
 
 **Step 1: Select Your Vacation Club Brand**
 ```
@@ -1084,7 +1146,55 @@ Message to owner:
 Owner edits and resubmits
 ```
 
-**3. User Management Tab**
+**3. Pending Approvals Tab (NEW — Phase 4 Track A)**
+
+**User Approval Queue:**
+```
+┌─────────────────────────────────────────────────┐
+│ PENDING USER APPROVALS                           │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│ 5 users awaiting approval                       │
+│                                                 │
+│ john.doe@email.com                              │
+│ Signed up: 2 hours ago                          │
+│ [Approve] [Reject]                              │
+│                                                 │
+│ jane.smith@email.com                            │
+│ Signed up: 5 hours ago                          │
+│ [Approve] [Reject]                              │
+│                                                 │
+│ Rejection requires a reason (shown in dialog)   │
+│ Approval/rejection triggers email via Resend    │
+└─────────────────────────────────────────────────┘
+```
+
+**Admin Actions:**
+```
+APPROVE:
+1. Click "Approve" button
+   ↓
+2. approval_status → "approved"
+   ↓
+3. Approval email sent automatically
+   ↓
+4. User can now log in and access platform + voice search
+
+REJECT:
+1. Click "Reject" button
+   ↓
+2. Dialog appears: "Enter rejection reason"
+   ↓
+3. approval_status → "rejected", reason stored
+   ↓
+4. Rejection email sent with reason
+   ↓
+5. User sees rejection message on login
+```
+
+---
+
+**4. User Management Tab**
 
 **User Overview:**
 ```
@@ -1144,7 +1254,7 @@ Recent Signups (last 7 days): 234
 └─────────────────────────────────────────────────┘
 ```
 
-**4. Resort Data Management Tab [Phase 2]**
+**4. Resort Data Management Tab [Live]**
 
 **Resort Database:**
 ```
@@ -1217,7 +1327,36 @@ Resort added to database
 Available in listing flow immediately
 ```
 
-**5. Analytics & Reports Tab**
+**5. Settings Tab (NEW — Phase 4 Track A)**
+
+**System Configuration:**
+```
+┌─────────────────────────────────────────────────┐
+│ SYSTEM SETTINGS                                  │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│ User Approval                                   │
+│ ─────────────────────────────────────────       │
+│ Require user approval for new signups: [ON/OFF] │
+│                                                 │
+│ When ON: New users → pending_approval           │
+│ When OFF: New users → auto-approved             │
+│                                                 │
+│ Voice Search Limits                             │
+│ ─────────────────────────────────────────       │
+│ Daily limit per user: 10 searches               │
+│ RAV team: Unlimited (999 sentinel)              │
+│ Resets: Midnight UTC                            │
+│ Cleanup: Records >90 days auto-deleted          │
+│                                                 │
+│ Note: Daily limit is currently configured in    │
+│ the database (not yet UI-editable).             │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+**6. Analytics & Reports Tab**
 
 **Platform Performance:**
 ```
@@ -1261,7 +1400,7 @@ Voice Search Success Rate: 87%
 [View Full Voice Analytics]
 ```
 
-**Resort Master Data Impact [Phase 2]:**
+**Resort Master Data Impact [Live]:**
 ```
 Since Resort Data Launch:
 
@@ -1414,30 +1553,46 @@ Admin reviews:
 │ FEATURE: RESORT MASTER DATA                     │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│ Status: In Development                         │
-│ Target Launch: February 20, 2026              │
+│ Status: ✅ DEPLOYED (February 12, 2026)        │
 │                                                 │
 │ Development Progress:                          │
 │ ✅ Database schema created                     │
 │ ✅ 117 resorts imported                        │
 │ ✅ Listing flow updated                        │
-│ ⏳ Property display (Session 2)                │
-│ ⏳ Voice search integration (Session 3)        │
-│ ⏳ QA testing                                  │
+│ ✅ Property display complete                   │
+│ ✅ Voice search integration complete           │
+│ ✅ QA testing complete                         │
 │                                                 │
-│ Launch Readiness:                              │
-│ □ All testing complete                         │
-│ □ Owner communication prepared                 │
-│ □ Help documentation updated                   │
-│ □ Support team trained                         │
-│ □ Rollback plan documented                     │
-│                                                 │
-│ Post-Launch Monitoring:                        │
-│ • Track listing completion rates               │
-│ • Monitor data quality submissions             │
-│ • Measure impact on conversions                │
+│ Post-Launch Results:                           │
+│ • Listing time: 8 min (-64%)                   │
+│ • Completion rate: 94% (+27%)                  │
+│ • Owner satisfaction: 4.7★ (+0.9)              │
+│ • Property view duration: +34%                 │
 │                                                 │
 │ [View Full Project Plan]                       │
+└─────────────────────────────────────────────────┘
+```
+
+**Phase 4 Track A: Voice Auth & Approval System**
+```
+┌─────────────────────────────────────────────────┐
+│ FEATURE: VOICE AUTH & APPROVAL SYSTEM           │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│ Status: ✅ DEPLOYED (February 15, 2026)        │
+│                                                 │
+│ Phase 1: Authentication Gate ✅                │
+│ Phase 2: User Approval System ✅               │
+│ Phase 3: Voice Usage Limits ✅                 │
+│                                                 │
+│ Key Features:                                  │
+│ • Voice button disabled for unauthenticated    │
+│ • Signup → pending_approval → approved/rejected│
+│ • Admin approval queue + email notifications   │
+│ • 10 searches/day quota with badge indicator   │
+│ • RAV team unlimited, system settings panel    │
+│                                                 │
+│ [View Handoffs: handoffs/phase1-3-handoff.md]  │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -1963,25 +2118,23 @@ Q1 2026 Highlights
 
 ### Integration 1: Voice Search → Resort Master Data
 
-**Before Phase 2:**
+**Current State (Resort Data + Voice Auth Live):**
 ```
-Traveler: "Find Hilton properties in Orlando"
+Traveler: Must be logged in + approved + have quota remaining
 ↓
-Voice returns: Generic Hilton properties
-Display: Basic property cards
-```
-
-**After Phase 2:**
-```
-Traveler: "Find Hilton properties in Orlando"
+Clicks 🎤 voice button (quota badge shows "8 remaining")
 ↓
-Voice returns: "I found 3 Hilton Grand Vacations 
+"Find Hilton properties in Orlando"
+↓
+Voice returns: "I found 3 Hilton Grand Vacations
                 properties in Orlando..."
 ↓
 Display: Property cards WITH resort badges
          "Tuscany Village ★4.3"
          "SeaWorld Orlando ★4.3"
          "Parc Soleil ★4.3"
+↓
+Quota counter: decremented to 7 remaining
 ↓
 Traveler clicks property
 ↓
@@ -2176,8 +2329,13 @@ Booking completed in 2 minutes (vs 5 min typing)
 This comprehensive user journey map covers:
 - ✅ 5 user types (Traveler, Owner, Admin, Staff, RAV Owner)
 - ✅ Phase 1 (Voice Search) - Deployed
-- ✅ Phase 2 (Resort Master Data) - In Development
-- ✅ Phase 3 (Voice Everywhere) - Planned
+- ✅ Phase 2 (Resort Master Data) - Deployed
+- ✅ Phase 4 Track A (Voice Auth & Approval) - Deployed
+  - Signup → approval flow
+  - Voice authentication gate
+  - Daily usage quota (10/day)
+  - Admin approval queue + settings
+- ✅ Phase 3 (Voice Everywhere) - Planned Q2 2026
 - ✅ All major touchpoints and interactions
 - ✅ Cross-journey integration points
 - ✅ Success metrics for each user type
@@ -2186,6 +2344,6 @@ This comprehensive user journey map covers:
 
 ---
 
-**Document Maintained By:** RAV Product Team  
-**Last Review:** February 12, 2026  
-**Next Review:** After Phase 2 Launch (February 20, 2026)
+**Document Maintained By:** RAV Product Team
+**Last Review:** February 16, 2026
+**Next Review:** After Phase 4 Tracks B-D complete

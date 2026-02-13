@@ -216,6 +216,17 @@
 - [ ] Remove lorem ipsum
 - [ ] Add trust indicators
 
+#### Track D: Documentation Update ✅ COMPLETE
+**In-App Pages:**
+- [x] Update User Guide (`/user-guide`) — added signup/approval flow, voice auth requirement, daily quota
+- [x] Update FAQ (`/faq`) — added voice auth, approval, and quota FAQs
+- [x] Update How It Works (`/how-it-works`) — fixed fake stats, updated traveler steps with approval
+- [x] Update Admin Documentation (`/documentation`) — added approval system, settings tab, voice quota
+
+**Developer/Internal Docs:**
+- [x] Update `docs/guides/COMPLETE-USER-JOURNEY-MAP.md` — added auth gate, approval, quota layers
+- [x] Update `docs/guides/HOW-TO-SEARCH-WITH-VOICE.md` — added login prereq, quota info, removed stale placeholders
+
 ---
 
 ## 🗺️ PLANNED PHASES
