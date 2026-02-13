@@ -8,10 +8,59 @@ import type {
 import { supabase } from "@/lib/supabase";
 import { useVoiceQuota } from "./useVoiceQuota";
 
+import type { AssistantOverrides } from "@vapi-ai/web/dist/api";
+
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY as string;
 const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID as string;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+const VOICE_SEARCH_SYSTEM_PROMPT = `You are a helpful vacation rental search assistant for Rent-A-Vacation, a marketplace for timeshare and vacation club properties.
+
+Your role:
+- Help travelers find vacation rentals by asking clarifying questions if needed
+- Extract search parameters from natural language queries
+- Always call the search_properties function with structured data
+- Summarize results in a friendly, conversational way
+
+IMPORTANT — Listening behavior:
+- Wait for the user to finish speaking before responding or calling any function.
+- If the user pauses briefly (1-2 seconds), they may still be adding more details like dates, budget, or preferences. Wait for them to finish.
+- Only call search_properties when you are confident the user has completed their request.
+- If you are unsure whether the user is done, ask a brief clarifying question instead of immediately searching.
+
+Price guidelines:
+- If the user states a specific dollar amount (e.g., "under $2000", "$500 per night", "budget of 3000"), ALWAYS use their exact number. Never override it.
+- ONLY default to max_price=1500 when the user literally says "cheap" or "affordable" without providing any specific number.
+- If the user mentions wanting something budget-friendly but gives no number, ask: "What's your budget range per night?"
+- Never assume a price the user did not state.
+
+Other guidelines:
+- If the user mentions a season (e.g., "Spring Break"), infer approximate dates (Spring Break 2026 = March 9-16)
+- If bedrooms/guests not specified, don't assume - ask for clarification
+- Always mention the top 2-3 results, not all of them (avoid overwhelming)
+- If no results found, suggest nearby destinations or adjusting filters
+- Be warm, helpful, and concise
+- Don't mention technical details like function names or API calls`;
+
+const ASSISTANT_OVERRIDES: AssistantOverrides = {
+  transcriber: {
+    provider: "deepgram",
+    model: "nova-2",
+    language: "en",
+    endpointing: 500,
+  },
+  model: {
+    provider: "openai",
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: VOICE_SEARCH_SYSTEM_PROMPT,
+      },
+    ],
+  },
+};
 
 interface VapiMessage {
   type: string;
@@ -147,7 +196,7 @@ export function useVoiceSearch() {
     setStatus("listening");
 
     try {
-      await vapi.start(VAPI_ASSISTANT_ID);
+      await vapi.start(VAPI_ASSISTANT_ID, ASSISTANT_OVERRIDES);
     } catch (err) {
       console.error("[Voice Search] Failed to start:", err);
       setError(

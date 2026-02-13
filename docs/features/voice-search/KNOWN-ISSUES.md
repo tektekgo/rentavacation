@@ -1,13 +1,13 @@
 # Voice Search: Known Issues
 
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-02-16
 
 ---
 
 ## Issue 1: Assistant Interruption (Talks Over User)
 
 **Severity:** Medium
-**Status:** Open
+**Status:** Fixed (2026-02-16)
 **First Observed:** VAPI integration testing (Session 1)
 
 ### Description
@@ -65,18 +65,30 @@ Likely a combination of:
 5. **Test with longer utterances:**
    Record test sessions where the user deliberately pauses mid-sentence to measure how aggressive the interruption is.
 
+### Fix Applied (2026-02-16)
+
+Two changes applied via `assistantOverrides` in `src/hooks/useVoiceSearch.ts`:
+
+1. **Deepgram endpointing increased from 10ms (default) to 500ms (max)**
+   - This gives the user more time to pause mid-sentence without the transcriber declaring end-of-speech
+   - Configured in `ASSISTANT_OVERRIDES.transcriber.endpointing`
+
+2. **System prompt updated with explicit listening instructions**
+   - Added "IMPORTANT — Listening behavior" section telling the LLM to wait for complete input
+   - Instructs the assistant to ask a clarifying question instead of immediately searching when unsure
+
 ### VAPI Dashboard
 
 - Assistant ID: `af9159c9-d480-42c4-ad20-9b38431531e7`
-- Update via: `PATCH https://api.vapi.ai/assistant/{id}` with private key
-- Or use VAPI dashboard UI directly
+- Base config managed on VAPI, overrides applied at call start via SDK
+- Override source: `src/hooks/useVoiceSearch.ts` → `ASSISTANT_OVERRIDES`
 
 ---
 
 ## Issue 2: Budget Assumption ($1500 Before User Provides)
 
 **Severity:** Medium
-**Status:** Open
+**Status:** Fixed (2026-02-16)
 **First Observed:** VAPI integration testing (Session 1, Test 1)
 
 ### Description
@@ -126,19 +138,22 @@ From test logs:
 5. **Check Deepgram transcription:**
    Review raw transcripts in VAPI logs to confirm "2000" was correctly transcribed.
 
+### Fix Applied (2026-02-16)
+
+System prompt updated via `assistantOverrides` in `src/hooks/useVoiceSearch.ts`:
+
+1. **Price guideline made explicit and narrow:**
+   - Changed from broad "cheap/affordable = 1500" rule to: "ONLY default to 1500 when user literally says 'cheap' or 'affordable' without a number"
+   - Added: "If the user states a specific dollar amount, ALWAYS use their exact number. Never override it."
+   - Added: If user says budget-friendly without a number, ask "What's your budget range?" instead of assuming
+
+2. **Function parameter description updated:**
+   - The `max_price` field description in the VAPI function schema still says `'cheap' = 1500` — this is on VAPI's side and reinforces the narrowed rule. If issues persist, this description should also be updated via the VAPI API.
+
 ### VAPI System Prompt Location
 
-Current system prompt is in the VAPI assistant config. To update:
-```bash
-curl -X PATCH https://api.vapi.ai/assistant/af9159c9-d480-42c4-ad20-9b38431531e7 \
-  -H "Authorization: Bearer YOUR_VAPI_PRIVATE_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": {
-      "messages": [{"role": "system", "content": "UPDATED PROMPT HERE"}]
-    }
-  }'
-```
+The system prompt is now version-controlled in `src/hooks/useVoiceSearch.ts` as `VOICE_SEARCH_SYSTEM_PROMPT`.
+It is applied via `ASSISTANT_OVERRIDES` passed to `vapi.start()`, overriding the base prompt on VAPI's side.
 
 ---
 
@@ -157,6 +172,14 @@ curl -X PATCH https://api.vapi.ai/assistant/af9159c9-d480-42c4-ad20-9b38431531e7
 
 ## Resolution Priority
 
-1. **Budget assumption** — Fix the system prompt first (quick VAPI API call)
-2. **Interruption** — Adjust Deepgram endpointing + system prompt (requires testing)
+1. **Budget assumption** — ✅ Fixed (2026-02-16) — System prompt updated with explicit price rules
+2. **Interruption** — ✅ Fixed (2026-02-16) — Endpointing 500ms + system prompt listening instructions
 3. **Other issues** — Address in Phase 3 or as part of voice search v2
+
+## Fix Implementation Notes
+
+Both fixes were implemented by passing `assistantOverrides` to `vapi.start()` in `src/hooks/useVoiceSearch.ts`:
+- **Advantage:** System prompt is now version-controlled in our codebase (not just on VAPI dashboard)
+- **Advantage:** No VAPI private API key needed for updates
+- **Advantage:** Changes deploy with normal frontend deploys
+- **Note:** The base assistant on VAPI still has the original prompt/config — our overrides take precedence at call start

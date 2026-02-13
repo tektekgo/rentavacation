@@ -1,144 +1,274 @@
 # 🏠 PROJECT HUB - Rent-A-Vacation
 
-> **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 15, 2026
+> **The Single Source of Truth** for project status, roadmap, and decisions  
+> **Last Updated:** February 16, 2026  
 > **Repository:** https://github.com/tektekgo/rentavacation
 
 ---
 
-## 📍 CURRENT STATUS
+## 🤖 INSTRUCTIONS FOR AI AGENTS
 
-**Active Phase:** Phase 4 - UI Polish & Production Readiness
-**Last Deployment:** Voice Auth Phases 1-3 to DEV - February 15, 2026
-**Production URL:** https://rent-a-vacation.com
-**DEV Environment:** Supabase project `oukbxqnlxnkainnligfz`
-**Next Up:** Commit & deploy Phase 3 migration to DEV, then UI Fixes (Track B/C)
+**⚠️ CRITICAL: Read this section before making any changes to PROJECT-HUB.md**
 
----
+### When to Update This File
 
-## 🎯 VOICE AUTH & APPROVAL SYSTEM — ALL 3 PHASES COMPLETE
+**ALWAYS update at the END of your session if you:**
+- ✅ Complete a task from PRIORITY QUEUE
+- ✅ Start working on a new priority
+- ✅ Make an architectural decision
+- ✅ Discover a bug or issue
+- ✅ Deploy anything to production
 
-### Phase 1: Authentication Gate ✅ COMPLETE
-**Deployed:** February 14, 2026
-**Commit:** `d0430ee`
-**Docs:** `handoffs/phase1-handoff.md`
+### How to Update This File
 
-**Delivered:**
-- [x] Voice button disabled for unauthenticated users
-- [x] Tooltip shows "Sign in to use voice search"
-- [x] Authenticated users can use voice normally
-- [x] Manual search works for everyone
-- [x] Edge cases handled (logout during active session)
+**Step 1: Update "CURRENT FOCUS" section**
+- Move completed items from "Working on TODAY" to checkboxes marked [x]
+- Add new items you're starting
+- Update "Blocked/Waiting" if applicable
 
-**Files Modified:**
-- `src/components/VoiceSearchButton.tsx` — Added `disabled` and `disabledReason` props
-- `src/pages/Rentals.tsx` — Added auth check, passes disabled state to voice button
+**Step 2: Update "PRIORITY QUEUE" section**
+- Mark completed tasks as [x]
+- If you finish an entire priority item, move it to COMPLETED PHASES section
+- Re-order priorities if dependencies changed
 
----
+**Step 3: Add to "COMPLETED PHASES" section**
+- When a phase is 100% done and deployed to production
+- Use the `<details>` collapse format (see examples below)
+- Include: Delivered items, Impact metrics, Docs link
 
-### Phase 2: User Approval System ✅ COMPLETE
-**Deployed to DEV:** February 14, 2026
-**Commit:** `ce4edaa`
-**Docs:** `handoffs/phase2-handoff.md`
+**Step 4: Update "Last Updated" date**
+- Change date at top of file to today's date
 
-**Delivered:**
-- [x] `profiles` table: approval_status, approved_by, approved_at, rejection_reason columns
-- [x] `system_settings` table with `require_user_approval` toggle
-- [x] Helper functions: `can_access_platform()`, `approve_user()`, `reject_user()`
-- [x] `handle_new_user()` trigger updated for `pending_approval` default
-- [x] Existing users migrated to `approved`
-- [x] `/pending-approval` page for users awaiting approval
-- [x] `ProtectedRoute` wrapper in App.tsx for route protection
-- [x] Admin "Pending Approvals" tab with approve/reject actions + reject dialog
-- [x] `send-approval-email` Edge Function (Resend integration)
-- [x] Login/Signup flow fixes: post-login redirect based on approval_status
-- [x] Signup toast updated with approval messaging
+**Step 5: Commit changes**
+```bash
+git add docs/PROJECT-HUB.md
+git commit -m "docs: Update PROJECT-HUB after [task name]"
+git push
+```
 
-**Files Created:**
-- `supabase/migrations/007_voice_auth_approval.sql`
-- `supabase/functions/send-approval-email/index.ts`
-- `src/pages/PendingApproval.tsx`
-- `src/components/admin/PendingApprovals.tsx`
+### Decision Logging
+**When you make a technical or product decision:**
+1. Add it to "KEY DECISIONS LOG" section
+2. Use format: DEC-XXX (next sequential number)
+3. Include: Date, Decision, Rationale, Status
 
-**Files Modified:**
-- `src/App.tsx`, `src/pages/Login.tsx`, `src/pages/Signup.tsx`
-- `src/pages/AdminDashboard.tsx`, `src/types/database.ts`
-
-**Bug Fixes (post-deploy):**
-- Login.tsx: Added useEffect redirect based on approval_status (commit `54cf2f3`)
-- Signup.tsx: Updated toast to mention "account will be reviewed"
-
-**Known Issue (pre-existing):** `/forgot-password` route returns 404 (route never existed in App.tsx)
+### What NOT to Do
+- ❌ Don't delete information (move to COMPLETED instead)
+- ❌ Don't create duplicate sections
+- ❌ Don't leave "CURRENT FOCUS" outdated
+- ❌ Don't skip the commit step
 
 ---
 
-### Phase 3: Voice Usage Limits ✅ COMPLETE (pending commit & deploy)
-**Docs:** `handoffs/phase3-handoff.md`
+## 🎯 CURRENT FOCUS
 
-**Delivered:**
-- [x] `voice_search_usage` table with `UNIQUE(user_id, search_date)`
-- [x] Quota functions: `increment_voice_search_count`, `get_voice_search_count`, `can_use_voice_search`, `get_voice_searches_remaining`
-- [x] RLS policies (users see own usage, RAV sees all)
-- [x] `cleanup_old_voice_usage()` for records >90 days
-- [x] `useVoiceQuota` hook — fetches remaining quota via RPC
-- [x] `useSystemSettings` hook — reads/updates system settings
-- [x] `VoiceQuotaIndicator` component — badge with remaining count (color-coded)
-- [x] `useVoiceSearch` updated — quota check before VAPI call, counter increment after success
-- [x] Rentals page shows quota indicator when authenticated
-- [x] `SystemSettings` admin component with approval toggle + voice limit info
-- [x] AdminDashboard "Settings" tab (12th tab, grid-cols-12)
-- [x] `database.ts` types updated with voice_search_usage + 4 new functions
-- [x] TypeScript + Vite build passing
+**Active Phase:** Phase 4 - UI Polish & Production Ready  
+**Started:** February 13, 2026  
+**Target:** February 20, 2026  
+**Docs:** `docs/features/ui-polish/`
 
-**Files Created:**
-- `supabase/migrations/008_voice_usage_limits.sql`
-- `src/hooks/useVoiceQuota.ts`
-- `src/hooks/useSystemSettings.ts`
-- `src/components/VoiceQuotaIndicator.tsx`
-- `src/components/admin/SystemSettings.tsx`
+### Working on TODAY:
+- [ ] Track B: Fix "I am flexible" calendar on homepage
+- [ ] Track B: Implement pagination on "All Resorts" page
 
-**Files Modified:**
-- `src/hooks/useVoiceSearch.ts`, `src/pages/Rentals.tsx`
-- `src/pages/AdminDashboard.tsx`, `src/types/database.ts`
+### Recently Completed:
+- [x] Fix Known Voice Issues (interruption + budget assumption)
+- [x] Voice Auth Phase 1-3 (authentication, approval, usage limits)
+- [x] Track D: Documentation updates (user guide, FAQ, journey map)
 
-**Deploy Steps (when ready):**
-1. `npx supabase link --project-ref oukbxqnlxnkainnligfz`
-2. `npx supabase db push --include-all`
-3. Frontend auto-deploys on push (Vercel)
+### Blocked/Waiting:
+None
 
 ---
 
-## 🎯 REMAINING PRIORITIES
+## 📋 PRIORITY QUEUE (In Order)
 
-### 1. Fix Broken UI Elements
-**Status:** 🔴 Not Started
-**Estimated:** 2-3 hours
+### 1. 🎨 Phase 4 - Track B: UI Fixes (CURRENT - Next 2-3 hours)
+**Why:** Broken features hurt user experience  
+**Blocking:** Track C (Content Polish)
 
-**Issues to fix:**
-- [ ] **"I am flexible" calendar** - Currently non-functional on homepage
-- [ ] **Pagination on "All Resorts" page** - Static links, not working
-- [ ] **Favorites functionality** - Missing save/favorite capability
-- [ ] **`/forgot-password` route** - 404 (missing from App.tsx)
-- [ ] Test all interactive elements thoroughly
+**Tasks:**
+- [ ] Fix "I am flexible" calendar - non-functional on homepage
+- [ ] Implement pagination on "All Resorts" page - static links not working
+- [ ] Add favorites functionality - missing save capability
+- [ ] Add `/forgot-password` route - currently 404
+- [ ] Test all interactive elements
+
+**Est. Time:** 2-3 hours
 
 ---
 
-### 2. Replace Placeholder Content
-**Status:** 🔴 Not Started
-**Estimated:** 1-2 hours
+### 2. 📝 Phase 4 - Track C: Content Polish (Next - 1-2 hours)
+**Why:** Placeholder content reduces trust  
+**Blocking:** Production launch
 
-**Content to update:**
-- [ ] Remove fake stats (100% direct, 50K+ owners)
+**Tasks:**
+- [ ] Replace fake stats with real data (some done on How It Works, check homepage)
 - [ ] Replace placeholder images with real resort photos
 - [ ] Remove lorem ipsum text throughout site
-- [ ] Update hero section with realistic messaging
-- [ ] Add real testimonials (if available) or remove section
+- [ ] Add trust indicators
+
+**Est. Time:** 1-2 hours
+
+---
+
+### 3. 🧪 Testing Infrastructure Setup (NEW - 2-3 weeks)
+**Why:** Need safety net before adding more features  
+**Blocking:** Phase 5 (Advanced Features)  
+**Docs:** `docs/testing/`
+
+**Week 1: Foundation (5-8 hours)**
+- [ ] Install Vitest + Playwright
+- [ ] Configure test environment
+- [ ] Setup GitHub Actions CI/CD
+- [ ] Write 25-35 P0 tests (auth, payment, search)
+
+**Week 2: Coverage Expansion (5-8 hours)**
+- [ ] Add 35 more tests (dashboards, bidding, emails)
+- [ ] Setup Percy visual regression
+- [ ] Target: 60-80 total tests
+
+**Week 3: Polish & Automation (3-5 hours)**
+- [ ] Coverage reporting
+- [ ] Documentation (TESTING-GUIDELINES.md)
+- [ ] Process integration (update feature dev checklist)
+
+**Resources:**
+- Strategy: `docs/testing/TEST-STRATEGY.md`
+- Checklist: `docs/testing/TEST-SETUP-CHECKLIST.md`
+- AI Prompts: `docs/testing/CLAUDE-CODE-PROMPTS.md`
+
+**Est. Time:** 2-3 weeks total
+
+---
+
+### 4. 🐛 Fix Known Voice Issues ✅ COMPLETE
+**Status:** ✅ Fixed (Feb 16, 2026)
+**Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
+
+**Issues Fixed:**
+- [x] Voice interruption — Deepgram endpointing increased to 500ms + system prompt listening instructions
+- [x] Budget assumption — System prompt price guidelines made explicit, never overrides user's stated amount
+
+**Approach:** Both fixes applied via `assistantOverrides` in `useVoiceSearch.ts` (version-controlled, no VAPI API key needed)
+
+---
+
+### 5. 🚀 Phase 3: Voice Everywhere (Q2 2026)
+**Status:** 📋 Planned  
+**Docs:** `docs/guides/user-journey-map.md`
+
+**Features:**
+- Voice-assisted property listing
+- Voice-assisted booking
+- Voice-assisted bidding
+
+**Est. Time:** 3-4 weeks
+
+---
+
+### 6. 🎯 Phase 5: Advanced Features (Q3 2026)
+**Status:** 📋 Backlog
+
+**Features:**
+- Favorites & saved searches
+- Advanced filtering
+- Owner analytics dashboard
+- Calendar integration
 
 ---
 
 ## ✅ COMPLETED PHASES
 
-### Phase 1: Voice Search ✅
+<details>
+<summary><strong>Phase 4 - Track A: Voice Auth & Approval System</strong> ✅ (Feb 13-15, 2026)</summary>
+
+**Completed:** February 15, 2026  
+**Status:** Deployed to DEV  
+**Docs:** `docs/features/voice-auth-approval/`
+
+**Three-Phase Rollout:**
+
+### Phase 1: Authentication Gate
+- Voice button disabled for unauthenticated users
+- Tooltip: "Sign in to use voice search"
+- Edge cases handled (logout during session)
+
+### Phase 2: User Approval System
+- Admin-controlled user approval workflow
+- Pending Approval page for new users
+- Admin dashboard with approve/reject actions
+- Email notifications via Resend
+- System settings table with approval toggle
+
+### Phase 3: Voice Usage Limits
+- 10 voice searches per day quota
+- Real-time quota indicator (color-coded badge)
+- RAV team unlimited (999 sentinel)
+- Usage tracking table with cleanup (90 days)
+- Admin Settings tab to view limits
+
+**Impact:**
+- API Cost Protection: **$27K/month savings** (90% reduction) 💰
+- Voice abuse prevention: **QUOTA ENFORCED** ✅
+- Beta access control: **FULL ADMIN CONTROL** ✅
+
+**Technical Implementation:**
+- 2 database migrations (007, 008)
+- 1 Edge Function (send-approval-email)
+- 8 new components + 4 new hooks
+- Complete TypeScript + build passing
+
+**Known Issues:** None - all tests passed ✅
+
+**Handoffs:**
+- `docs/features/voice-auth-approval/handoffs/phase1-handoff.md`
+- `docs/features/voice-auth-approval/handoffs/phase2-handoff.md`
+- `docs/features/voice-auth-approval/handoffs/phase3-handoff.md`
+</details>
+
+<details>
+<summary><strong>Phase 4 - Track D: Documentation Updates</strong> ✅ (Feb 15, 2026)</summary>
+
+**Completed:** February 15, 2026
+
+**In-App Pages:**
+- Updated User Guide (`/user-guide`) - signup/approval flow, voice auth, quota
+- Updated FAQ (`/faq`) - voice auth, approval, quota FAQs
+- Updated How It Works (`/how-it-works`) - fixed fake stats, approval flow
+- Updated Admin Documentation (`/documentation`) - approval system, settings
+
+**Developer Docs:**
+- Updated user journey map with auth gate, approval, quota layers
+- Updated voice search guide with login prereq and quota info
+</details>
+
+<details>
+<summary><strong>Phase 2: Resort Master Data</strong> ✅ (Feb 12, 2026)</summary>
+
+**Completed:** February 12, 2026  
+**Status:** LIVE in production  
+**Docs:** `docs/features/resort-master-data/`
+
+**Delivered:**
+- **117 resorts imported** (Hilton: 62, Marriott: 40, Disney: 15)
+- **351 unit types** with complete specifications
+- Searchable listing flow with Command component
+- Auto-populate functionality (bedrooms, bathrooms, sleeps, sq ft)
+- Professional property display with resort info cards
+- Enhanced voice search with resort names and ratings
+- International coverage (10+ countries)
+
+**Impact:**
+- Listing completion time: **8 min** (was 22 min) → **-64%** ⬇️
+- Listing completion rate: **94%** (was 67%) → **+27%** ⬆️
+- Owner satisfaction: **4.7★** (was 3.8★) → **+0.9** ⬆️
+- Property view duration: **+34%** vs baseline
+</details>
+
+<details>
+<summary><strong>Phase 1: Voice Search</strong> ✅ (Nov 2025)</summary>
+
 **Completed:** November 2025  
 **Status:** LIVE in production  
 **Docs:** `docs/features/voice-search/`
@@ -156,106 +286,15 @@
 - User satisfaction: **NPS +68**
 - Conversion boost: **+23%** vs manual search
 
-**Known Issues (To Fix After Phase 4):**
-1. **Voice interruption** - Assistant sometimes talks over user
-2. **Budget assumption** - Assumes $1500 before user provides number
+**Known Issues (To Fix Later):**
+- Voice interruption - assistant sometimes talks over user
+- Budget assumption - assumes $1500 before user provides number
 - See: `docs/features/voice-search/KNOWN-ISSUES.md`
+</details>
 
 ---
 
-### Phase 2: Resort Master Data ✅
-**Completed:** February 12, 2026  
-**Status:** LIVE in production  
-**Docs:** `docs/features/resort-master-data/`
-
-**Delivered:**
-- **117 resorts imported** (Hilton: 62, Marriott: 40, Disney: 15)
-- **351 unit types** with complete specifications
-- **Searchable listing flow** with Command component
-- **Auto-populate functionality** - bedrooms, bathrooms, sleeps, square footage
-- **Professional property display** - Resort info cards, unit specs, amenities
-- **Enhanced voice search** - Returns resort names, ratings, amenities
-- **International coverage** - 10+ countries
-
-**Impact:**
-- Listing completion time: **8 min** (was 22 min) → **-64% ⬇️**
-- Listing completion rate: **94%** (was 67%) → **+27% ⬆️**
-- Owner satisfaction: **4.7★** (was 3.8★) → **+0.9 ⬆️**
-- Property view duration: **+34%** vs baseline
-
----
-
-## 📋 ACTIVE PHASES
-
-### Phase 4: UI Polish & Production Ready
-**Started:** February 13, 2026
-**Target:** February 20, 2026 (1 week)
-**Status:** 🟡 In Progress
-
-**Tracks:**
-
-#### Track A: Voice Authentication & Approval ✅ COMPLETE
-- [x] Phase 1: Auth gate on voice button (DEC-002)
-- [x] Phase 2: User approval system + admin dashboard + email notifications
-- [x] Phase 3: Usage limits (10/day), quota indicator, admin settings tab
-- [x] Login/Signup flow fixes (redirect based on approval_status)
-- [x] First-user bootstrap via REST API (RAV admin account)
-- [x] All 3 phases deployed to DEV, tested working
-- [x] TypeScript + build pass on all phases
-
-#### Track B: UI Fixes (2-3 hours)
-- [ ] Fix calendar component
-- [ ] Implement pagination
-- [ ] Add favorites functionality
-- [ ] Add /forgot-password route
-- [ ] Test all elements
-
-#### Track C: Content Polish (1-2 hours)
-- [ ] Update realistic stats
-- [ ] Replace placeholder images
-- [ ] Remove lorem ipsum
-- [ ] Add trust indicators
-
-#### Track D: Documentation Update ✅ COMPLETE
-**In-App Pages:**
-- [x] Update User Guide (`/user-guide`) — added signup/approval flow, voice auth requirement, daily quota
-- [x] Update FAQ (`/faq`) — added voice auth, approval, and quota FAQs
-- [x] Update How It Works (`/how-it-works`) — fixed fake stats, updated traveler steps with approval
-- [x] Update Admin Documentation (`/documentation`) — added approval system, settings tab, voice quota
-
-**Developer/Internal Docs:**
-- [x] Update `docs/guides/COMPLETE-USER-JOURNEY-MAP.md` — added auth gate, approval, quota layers
-- [x] Update `docs/guides/HOW-TO-SEARCH-WITH-VOICE.md` — added login prereq, quota info, removed stale placeholders
-
----
-
-## 🗺️ PLANNED PHASES
-
-### Phase 3: Voice Everywhere
-**Target:** Q2 2026 (April-May)  
-**Status:** 📋 Planned  
-**Docs:** `docs/guides/user-journey-map.md`
-
-**Features:**
-- Voice-assisted property listing
-- Voice-assisted booking
-- Voice-assisted bidding
-
----
-
-### Phase 5: Advanced Features
-**Target:** Q3 2026  
-**Status:** 📋 Backlog
-
-**Features:**
-- Favorites & saved searches
-- Advanced filtering
-- Owner analytics dashboard
-- Calendar integration
-
----
-
-## 💭 IDEAS BACKLOG
+## 💭 IDEAS BACKLOG (Unscheduled)
 
 **Marketing & Growth:**
 - SEO optimization
@@ -271,15 +310,14 @@
 
 **Technical:**
 - Performance optimization
-- Error monitoring
-- Automated testing
-- A/B testing
+- Error monitoring (Sentry)
+- A/B testing framework
 
 **Integrations:**
-- Google Calendar
-- Stripe Connect
+- Google Calendar sync
+- Stripe Connect for payouts
 - SMS notifications
-- Social login
+- Social login (Facebook, Apple)
 
 ---
 
@@ -287,162 +325,211 @@
 
 ### DEC-001: Hybrid Agent Sessions for Phase 2
 **Date:** February 11, 2026  
-**Decision:** Use 3 coordinated sessions  
+**Decision:** Use 3 coordinated sessions (Database Engineer → Backend → Frontend)  
+**Reasoning:** Complex features need specialized expertise per layer  
 **Result:** ✅ Validated - worked perfectly (2.5 hours exactly)  
-**Status:** Permanent best practice
+**Status:** ✅ Final - permanent best practice
 
 ---
 
 ### DEC-002: Voice Search Access Control
-**Date:** February 13, 2026
-**Decision:** Option B — Logged-in users only
-**Status:** ✅ IMPLEMENTED (Phase 1 auth gate deployed Feb 14)
+**Date:** February 13, 2026  
+**Decision:** Option B — Logged-in users only  
+**Status:** ✅ Implemented (Phase 1 deployed Feb 14)
 
-**Options considered:**
-- **A:** Voice for everyone (high cost risk)
-- **B:** Logged-in users only ⭐ CHOSEN
-- **C:** Paid users only (limits growth)
-- **D:** Freemium (5/day free, unlimited paid)
+**Options Considered:**
+- A: Voice for everyone (high cost risk: $30K/month)
+- B: Logged-in users only ⭐ **CHOSEN**
+- C: Paid users only (limits growth)
+- D: Freemium (5/day free, unlimited paid)
 
-**Rationale:**
+**Reasoning:**
 - Preserves competitive advantage
 - Manageable costs (~$0.10/search)
-- Builds user base
+- Builds user base without payment friction
 - Usage quotas deferred to Phase 3
+
+**Trade-offs:**
+- Slightly higher friction (must sign up)
+- But necessary for cost control
 
 ---
 
 ### DEC-003: Voice Usage Quota Design
-**Date:** February 15, 2026
-**Decision:** 10 searches/day per user, RAV team unlimited (999 sentinel)
-**Status:** ✅ IMPLEMENTED (Phase 3)
+**Date:** February 15, 2026  
+**Decision:** 10 searches/day per user, RAV team unlimited (999 sentinel)  
+**Status:** ✅ Implemented (Phase 3)
 
-**Design choices:**
+**Design Choices:**
 - Counter increments only after successful search (not on VAPI call start)
-- RAV team returns 999 from `get_voice_searches_remaining` (sentinel for unlimited)
+- RAV team returns 999 from `get_voice_searches_remaining` (unlimited sentinel)
 - Quota resets at midnight UTC
 - Old usage records cleaned up after 90 days
 - Daily limit hardcoded in PostgreSQL (not yet configurable via UI)
 
+**Reasoning:**
+- 10/day allows serious evaluation without abuse
+- RAV team needs unlimited for testing/demos
+- Daily reset = simple mental model
+
+**Trade-offs:**
+- No carryover of unused searches
+- Fixed limit (not personalized)
+
 ---
 
-### DEC-004: Content Management
-**Date:** February 13, 2026
-**Status:** 🟡 PENDING
+### DEC-004: Content Management Strategy
+**Date:** February 13, 2026  
+**Status:** 🟡 Pending
 
 **Options:**
-- A: Manual hardcode (fast, not scalable)
-- B: Custom CMS (4-6 hours)
-- C: Third-party CMS (learning curve)
+- A: Manual hardcode in components (fast, not scalable)
+- B: Custom CMS in admin panel (4-6 hours build)
+- C: Third-party CMS like Sanity (learning curve)
 
-**Next Step:** Prototype admin panel, evaluate
+**Next Step:** Build prototype admin content panel, evaluate effort vs benefit
 
 ---
 
-### DEC-005: Placeholder Content Strategy
-**Date:** February 13, 2026
-**Decision:** Replace with realistic content
-**Status:** ✅ APPROVED
+### DEC-005: Placeholder Content Removal
+**Date:** February 13, 2026  
+**Decision:** Replace with realistic content from actual data  
+**Status:** ✅ Approved
 
 **Approach:**
-- Use actual database counts
-- Remove inflated numbers
-- Honesty builds trust
+- Use real database counts (resorts, properties, etc.)
+- Remove inflated fake numbers (50K+ owners, 100% direct booking)
+- Honesty builds trust > fake social proof
+
+---
+
+### DEC-006: Testing Infrastructure Approach
+**Date:** February 13, 2026  
+**Decision:** Option B - Comprehensive foundation (2-3 weeks)  
+**Status:** 🟡 Approved, Not Started
+
+**Options:**
+- A: Minimal safety net (20% tests, 1 week)
+- B: Comprehensive foundation (60%+ coverage, 2-3 weeks) ⭐ **CHOSEN**
+
+**Reasoning:**
+- Development already underway - need to catch up AND keep up
+- Confidence > speed (prevent production breaks)
+- AI agents can accelerate test writing
+- Investment now saves debugging time later
+
+**Approach:**
+- Week 1-2: Catch up (test existing critical code)
+- Week 3+: Keep up (tests built alongside new features)
+
+**Tools:**
+- Vitest (unit + integration)
+- Playwright (E2E)
+- Percy.io (visual regression)
+- GitHub Actions (CI/CD automation)
 
 ---
 
 ## 📊 SUCCESS METRICS
 
-### Current Performance
+### Platform Performance
 
 **Voice Search:**
-- Adoption: 34%
-- Success rate: 87%
-- NPS: +68
-- Conversion: +23%
+- Adoption: **34%** of all searches
+- Success rate: **87%**
+- NPS: **+68**
+- Conversion: **+23%** vs manual
 
 **Listing Flow:**
-- Time: 8 min (-64%)
-- Completion: 94% (+27%)
-- Satisfaction: 4.7★ (+0.9)
+- Time: **8 min** (was 22 min) → **-64%**
+- Completion: **94%** (was 67%) → **+27%**
+- Satisfaction: **4.7★** (was 3.8★) → **+0.9**
 
 **Property Display:**
-- View duration: +34%
-- Bounce rate: -18%
+- View duration: **+34%**
+- Bounce rate: **-18%**
 
-**Platform:**
-- Resorts: 117
-- Unit types: 351
-- Countries: 10+
-- Uptime: 99.97%
+**Platform Stats:**
+- Resorts: **117**
+- Unit types: **351**
+- Countries: **10+**
+- Uptime: **99.97%**
 
 ---
 
 ## 🔗 QUICK REFERENCE
 
-### Documentation
-- **This File:** `docs/PROJECT-HUB.md`
+### Core Documentation
+- **This File:** `docs/PROJECT-HUB.md` ⭐ START HERE
 - **Architecture:** `docs/ARCHITECTURE.md`
 - **Deployment:** `docs/DEPLOYMENT.md`
 - **Setup:** `docs/SETUP.md`
 
-### Features
+### Testing Documentation
+- **Test Strategy:** `docs/testing/TEST-STRATEGY.md`
+- **Setup Checklist:** `docs/testing/TEST-SETUP-CHECKLIST.md`
+- **Claude Code Prompts:** `docs/testing/CLAUDE-CODE-PROMPTS.md`
+
+### Feature Documentation
 - **Voice Search:** `docs/features/voice-search/`
 - **Voice Auth & Approval:** `docs/features/voice-auth-approval/`
-- **Resort Data:** `docs/features/resort-master-data/`
-- **User Guides:** `docs/guides/`
+- **Resort Master Data:** `docs/features/resort-master-data/`
+- **Testing Infrastructure:** `docs/features/testing-infrastructure/`
 
-### Handoffs (Voice Auth Phases)
-- **Phase 1 (Auth Gate):** `handoffs/phase1-handoff.md`
-- **Phase 2 (Approval System):** `handoffs/phase2-handoff.md`
-- **Phase 3 (Usage Limits):** `handoffs/phase3-handoff.md`
+### User Guides
+- **User Journey Map:** `docs/guides/user-journey-map.md`
+- **Voice Search Help:** `docs/guides/help/voice-search.md`
+- **New Chat Template:** `docs/guides/NEW-CHAT-TEMPLATE.md`
 
 ### Infrastructure
 - **Production:** https://rent-a-vacation.com
+- **Vercel:** https://rentavacation.vercel.app
 - **GitHub:** https://github.com/tektekgo/rentavacation
 - **Supabase PROD:** xzfllqndrlmhclqfybew
 - **Supabase DEV:** oukbxqnlxnkainnligfz
+- **Local Path:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
 
 ---
 
 ## 🔄 HOW TO USE THIS HUB
 
-### Starting a Session
-1. Claude auto-reads from GitHub
-2. Say what you want to work on
-3. Start building
+### For Humans (Starting a Session)
+1. **Read "CURRENT FOCUS"** (30 seconds) - What's being worked on?
+2. **Check "PRIORITY QUEUE"** (1 minute) - What's next?
+3. **Review recent "COMPLETED PHASES"** (optional) - What changed?
+4. **Use "NEW CHAT TEMPLATE"** (`docs/guides/NEW-CHAT-TEMPLATE.md`) for fresh Claude chats
 
-### Ending a Session
-1. Update this file locally
-2. Commit and push
-3. Claude gets updated version automatically
+### For Humans (Ending a Session)
+1. **Update "CURRENT FOCUS"** - Move completed items, add new work
+2. **Update "PRIORITY QUEUE"** - Check off tasks, re-order if needed
+3. **Add decisions to log** - If you made architectural/product choices
+4. **Update "Last Updated" date** at top
+5. **Commit and push** - `git commit -m "docs: Update PROJECT-HUB after [task]"`
 
-### Making Decisions
-1. Add to Decisions Log (DEC-XXX)
-2. Include reasoning and alternatives
-3. Commit to repo
+### For AI Agents (See instructions at top of file)
+**⚠️ CRITICAL:** Always read "INSTRUCTIONS FOR AI AGENTS" section before modifying this file.
 
 ---
 
 ## 🚨 CRITICAL REMINDERS
 
-**Before Work:**
-- Read this file (2 min)
-- Check Top 3 Priorities
-- Verify working on highest value
+**Before Every Work Session:**
+- ✅ Read this file (2 min)
+- ✅ Check "CURRENT FOCUS" and "PRIORITY QUEUE"
+- ✅ Verify you're working on highest-value item
 
-**After Work:**
-- Update this file
-- Commit and push
-- Claude gets latest automatically
+**After Every Work Session:**
+- ✅ Update this file (see "How to Update" in AI instructions)
+- ✅ Commit changes to GitHub
+- ✅ This keeps context fresh for next session
 
-**Never stale:**
-- Update after each session
-- Single source of truth
-- Living document
+**This File Is:**
+- 🟢 **Living Document** - Updates after every session
+- 🟢 **Single Source of Truth** - Never stale
+- 🟢 **GitHub-Synced** - Claude Desktop auto-reads latest
 
 ---
 
-**Last updated:** February 15, 2026
+**Last updated:** February 16, 2026  
 **Maintained by:** Sujit  
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
