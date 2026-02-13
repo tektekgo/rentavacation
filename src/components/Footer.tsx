@@ -9,7 +9,7 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-6">
-            <img src="/rav-logo.png" alt="Rent-A-Vacation" className="h-10 w-10 rounded-xl object-contain" />
+            <img src="/rav-logo.png" alt="Rent-A-Vacation" className="h-[60px] w-auto object-contain" />
             <span className="font-display font-bold text-xl text-white">Rent-A-Vacation</span>
           </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
