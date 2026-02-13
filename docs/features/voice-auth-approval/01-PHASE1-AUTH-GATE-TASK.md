@@ -292,7 +292,14 @@ useEffect(() => {
 
 ## Deliverables (Handoff Package)
 
-Create `handoffs/phase1-handoff.md`:
+Create TWO files in the handoffs folder:
+
+1. **`handoffs/phase1-handoff.md`** - Detailed technical handoff (see template below)
+2. **`handoffs/phase1-hub-template.md`** - Copy-paste template for PROJECT-HUB.md update
+
+---
+
+### File 1: `handoffs/phase1-handoff.md`
 
 ```markdown
 # Phase 1: Authentication Gate - Handoff Package
@@ -421,6 +428,63 @@ export default function Rentals() {
 
 ---
 
+### File 2: `handoffs/phase1-hub-template.md`
+
+```markdown
+# PROJECT-HUB.md Update - Phase 1
+
+**Instructions:** Copy the sections below into PROJECT-HUB.md after reviewing phase1-handoff.md
+
+---
+
+## UPDATE: Current Status Section
+
+**Last Deployment:** Phase 1 (Voice Auth Gate) - [Today's Date]
+**Working on TODAY:** Phase 2 - User Approval System
+
+---
+
+## UPDATE: Top 3 Priorities Section
+
+### 1. Gate Voice Search Behind Authentication ✅ COMPLETE
+**Status:** 🟢 Deployed
+**Completed:** [Today's Date]
+**Duration:** [Actual time, e.g., "35 minutes"]
+
+**Delivered:**
+- ✅ Voice button disabled for unauthenticated users
+- ✅ Tooltip shows "Sign in to use voice search"
+- ✅ Authenticated users can use voice normally
+- ✅ Manual search works for everyone
+- ✅ Edge cases handled (logout during session)
+- ✅ All tests passed
+
+**Files Modified:**
+- `src/components/VoiceSearchButton.tsx` - Added disabled prop
+- `src/pages/Rentals.tsx` - Added auth check
+
+**Docs:** `docs/features/voice-auth-approval/handoffs/phase1-handoff.md`
+
+---
+
+### 2. User Approval System (Next - 2 hours)
+**Status:** 🟡 Ready to Start
+**Priority:** HIGH - Required for beta launch
+
+**Tasks:**
+- [ ] Database migration (approval_status column)
+- [ ] Pending Approval page
+- [ ] Admin approval dashboard
+- [ ] Email notifications
+- [ ] Route protection
+
+---
+
+[Keep remaining priorities as-is, renumber if needed]
+```
+
+---
+
 ## Success Criteria
 
 Before marking Phase 1 complete, verify:
@@ -432,7 +496,7 @@ Before marking Phase 1 complete, verify:
 - ✅ No console errors
 - ✅ Edge cases handled (logout during session)
 - ✅ All tests passed
-- ✅ Handoff document created
+- ✅ **Both handoff documents created** (phase1-handoff.md AND phase1-hub-template.md)
 - ✅ Code committed to git
 
 ---

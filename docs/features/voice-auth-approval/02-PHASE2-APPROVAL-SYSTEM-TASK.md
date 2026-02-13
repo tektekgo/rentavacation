@@ -1006,7 +1006,14 @@ export default function AdminDashboard() {
 
 ## Deliverables (Handoff Package)
 
-Create `handoffs/phase2-handoff.md`:
+Create TWO files in the handoffs folder:
+
+1. **`handoffs/phase2-handoff.md`** - Detailed technical handoff
+2. **`handoffs/phase2-hub-template.md`** - Copy-paste template for PROJECT-HUB.md update
+
+---
+
+### File 1: `handoffs/phase2-handoff.md`
 
 ```markdown
 # Phase 2: User Approval System - Handoff Package
@@ -1146,6 +1153,78 @@ Phase 3 will implement:
 
 ---
 
+### File 2: `handoffs/phase2-hub-template.md`
+
+```markdown
+# PROJECT-HUB.md Update - Phase 2
+
+**Instructions:** Copy the sections below into PROJECT-HUB.md after reviewing phase2-handoff.md
+
+---
+
+## UPDATE: Current Status Section
+
+**Last Deployment:** Phase 2 (User Approval System) - [Today's Date]
+**Working on TODAY:** Phase 3 - Voice Usage Limits & Admin Toggle
+
+---
+
+## UPDATE: Top 3 Priorities Section
+
+### 1. Gate Voice Search Behind Authentication ✅ COMPLETE
+[Keep Phase 1 summary as-is]
+
+---
+
+### 2. User Approval System ✅ COMPLETE
+**Status:** 🟢 Deployed
+**Completed:** [Today's Date]
+**Duration:** [Actual time, e.g., "2.5 hours"]
+
+**Delivered:**
+- ✅ Database schema with approval_status column
+- ✅ New signups require admin approval by default
+- ✅ Pending Approval page for waiting users
+- ✅ Admin dashboard with approval/reject actions
+- ✅ Email notifications (approved/rejected)
+- ✅ Route protection middleware
+- ✅ Existing users auto-approved (migration)
+
+**Impact:**
+- Beta access control: **ENABLED** ✅
+- Admin review workflow: **WORKING** ✅
+- Email notifications: **SENT VIA RESEND** ✅
+
+**Files Created:**
+- Migration: `007_voice_auth_approval.sql`
+- Edge Function: `send-approval-email/index.ts`
+- Page: `PendingApproval.tsx`
+- Component: `PendingApprovals.tsx`
+
+**Docs:** `docs/features/voice-auth-approval/handoffs/phase2-handoff.md`
+
+---
+
+### 3. Voice Usage Limits & Admin Toggle (Next - 2 hours)
+**Status:** 🟡 Ready to Start
+**Priority:** HIGH - Cost protection
+
+**Tasks:**
+- [ ] voice_search_usage table & quota functions
+- [ ] useVoiceQuota hook
+- [ ] Quota indicator (10 searches/day)
+- [ ] System Settings admin component
+- [ ] Toggle for approval ON/OFF
+
+**Expected Impact:** $27K/month cost savings (90% reduction)
+
+---
+
+[Keep remaining priorities as-is]
+```
+
+---
+
 ## Success Criteria
 
 Before marking Phase 2 complete, verify:
@@ -1161,7 +1240,7 @@ Before marking Phase 2 complete, verify:
 - ✅ Approved users get full access
 - ✅ RAV team bypasses approval
 - ✅ All tests passed
-- ✅ Handoff document created
+- ✅ **Both handoff documents created** (phase2-handoff.md AND phase2-hub-template.md)
 - ✅ Code committed to git
 
 ---

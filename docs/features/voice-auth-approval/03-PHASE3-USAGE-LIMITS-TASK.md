@@ -766,7 +766,14 @@ export default function AdminDashboard() {
 
 ## Deliverables (Handoff Package)
 
-Create `handoffs/phase3-handoff.md`:
+Create TWO files in the handoffs folder:
+
+1. **`handoffs/phase3-handoff.md`** - Detailed technical handoff
+2. **`handoffs/phase3-hub-template.md`** - Copy-paste template for PROJECT-HUB.md update
+
+---
+
+### File 1: `handoffs/phase3-handoff.md`
 
 ```markdown
 # Phase 3: Usage Limits & Admin Toggle - Handoff Package
@@ -955,6 +962,92 @@ Before deploying to production:
 
 ---
 
+### File 2: `handoffs/phase3-hub-template.md`
+
+```markdown
+# PROJECT-HUB.md Update - Phase 3
+
+**Instructions:** Copy the sections below into PROJECT-HUB.md after reviewing phase3-handoff.md
+
+---
+
+## UPDATE: Current Status Section
+
+**Last Deployment:** Phase 3 (Voice Usage Limits) - [Today's Date]
+**Working on TODAY:** UI Fixes & Content Polish
+
+---
+
+## MOVE TO: Completed Phases Section
+
+### Phase 4.1: Voice Auth & Approval System ✅
+**Completed:** [Today's Date]
+**Status:** LIVE in production
+**Docs:** `docs/features/voice-auth-approval/`
+
+**Three-Phase Rollout:**
+- **Phase 1:** Authentication gate for voice search (35 min)
+- **Phase 2:** Admin-controlled user approval system (2.5 hours)
+- **Phase 3:** Voice usage limits + system settings toggle (2.5 hours)
+
+**Delivered:**
+- ✅ Voice button disabled for unauthenticated users
+- ✅ New signups require admin approval
+- ✅ Pending Approval page + email notifications
+- ✅ Admin approval dashboard with approve/reject
+- ✅ 10 voice searches per day quota
+- ✅ Real-time quota indicator in UI
+- ✅ System Settings page with approval toggle
+- ✅ RAV team bypasses all restrictions
+
+**Impact:**
+- **API Cost Protection:** $27K/month savings (90% reduction) 💰
+- **Voice abuse prevention:** QUOTA ENFORCED ✅
+- **Beta access control:** FULL ADMIN CONTROL ✅
+- **User experience:** SEAMLESS (tooltips, quotas, notifications) ✅
+
+**Technical Implementation:**
+- 3 database migrations (007, 008)
+- 1 Edge Function (send-approval-email)
+- 6 new components (PendingApproval, PendingApprovals, SystemSettings, VoiceQuotaIndicator, + modified VoiceSearchButton)
+- 4 new hooks (useVoiceQuota, useSystemSettings, + modified useVoiceSearch + useAuth enhancements)
+- Comprehensive test coverage (all 3 phases)
+
+**Cost Analysis:**
+- Before: $30K/month (worst case, no limits)
+- After: $3K/month (realistic with quotas)
+- **Savings: $27K/month or 90%** 🎯
+
+**Known Issues:** None - all tests passed ✅
+
+---
+
+## UPDATE: Top 3 Priorities Section
+
+[Remove Voice Auth items 1-3, they're done]
+
+### 1. Fix Broken UI Elements (Next - 2-3 hours)
+**Status:** 🔴 Not Started
+**Priority:** HIGH
+
+**Issues to fix:**
+- [ ] "I am flexible" calendar - Currently non-functional
+- [ ] Pagination on "All Resorts" - Static links
+- [ ] Favorites functionality - Missing save capability
+
+---
+
+### 2. Replace Placeholder Content (1-2 hours)
+[Keep as-is]
+
+---
+
+### 3. [Next priority item]
+[Add if applicable]
+```
+
+---
+
 ## Success Criteria
 
 Before marking Phase 3 complete, verify:
@@ -969,7 +1062,7 @@ Before marking Phase 3 complete, verify:
 - ✅ Toggle works correctly
 - ✅ All test cases passed
 - ✅ Cost savings validated
-- ✅ Handoff document created
+- ✅ **Both handoff documents created** (phase3-handoff.md AND phase3-hub-template.md)
 - ✅ Code committed to git
 
 ---
