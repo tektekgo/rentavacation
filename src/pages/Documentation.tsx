@@ -410,16 +410,58 @@ const Documentation = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">Renter (Traveler)</h3>
-                        <p className="text-sm text-muted-foreground mb-3">Default role for all new users</p>
+                        <p className="text-sm text-muted-foreground mb-3">Default role for users who sign up as "I'm a Traveler"</p>
                         <ul className="text-sm space-y-1">
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Browse and search listings</li>
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Book properties via Stripe</li>
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Submit travel requests</li>
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Place bids on open listings</li>
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Confirm check-in on arrival</li>
+                          <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Request upgrade to Property Owner role</li>
                         </ul>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Signup Role Selection</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    During signup, users choose between "I'm a Traveler" and "I'm an Owner". This selection determines their initial role:
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-1">I'm a Traveler</h4>
+                      <p className="text-xs text-muted-foreground">Assigned the <code className="bg-muted px-1 rounded">renter</code> role. Can browse, book, bid, and submit travel requests.</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-1">I'm an Owner</h4>
+                      <p className="text-xs text-muted-foreground">Assigned the <code className="bg-muted px-1 rounded">property_owner</code> role. Gets immediate access to the Owner Dashboard.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Role Upgrade Requests</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Users can request additional roles without re-registering. The platform supports dual-role users (e.g., both renter and property owner).
+                  </p>
+                  <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                    <h4 className="font-medium mb-2">Upgrade Flow</h4>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>A renter visits the Owner Dashboard or reaches Step 3 of List Property</li>
+                      <li>Instead of a dead-end, they see a "Become a Property Owner" button</li>
+                      <li>They submit a role upgrade request with an optional reason</li>
+                      <li>Admin reviews in <strong>/admin</strong> → <strong>Pending Approvals</strong> tab</li>
+                      <li>On approval, the <code className="bg-muted px-1 rounded">property_owner</code> role is added and an email is sent</li>
+                      <li>The user can now access the Owner Dashboard without re-login</li>
+                    </ol>
+                  </div>
+                  <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-900">
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      <strong>Auto-approve:</strong> Admins can enable auto-approval in <strong>Settings</strong> → "Auto-approve role upgrade requests".
+                      When enabled, role upgrades are granted instantly without admin review.
+                    </p>
                   </div>
                 </div>
               </section>
@@ -1152,6 +1194,8 @@ const Documentation = () => {
                       { type: "Welcome Email", recipient: "New Users", trigger: "On signup" },
                       { type: "Account Approved", recipient: "New Users", trigger: "On admin approval" },
                       { type: "Account Rejected", recipient: "New Users", trigger: "On admin rejection" },
+                      { type: "Role Upgrade Approved", recipient: "Users", trigger: "On role upgrade approval" },
+                      { type: "Role Upgrade Rejected", recipient: "Users", trigger: "On role upgrade rejection" },
                       { type: "New Booking Alert", recipient: "Owner", trigger: "When traveler books" },
                       { type: "Booking Confirmation", recipient: "Traveler", trigger: "After payment success" },
                       { type: "Confirmation Reminder", recipient: "Owner", trigger: "6-12h before deadline" },
@@ -1224,8 +1268,8 @@ const Documentation = () => {
                       { name: "Payouts", desc: "Payout processing", icon: DollarSign },
                       { name: "Financials", desc: "Revenue and commission reports", icon: CreditCard },
                       { name: "Escrow", desc: "Held funds management", icon: Shield },
-                      { name: "Pending Approvals", desc: "User approval queue", icon: UserCheck },
-                      { name: "Settings", desc: "Platform settings & voice limits", icon: Settings },
+                      { name: "Pending Approvals", desc: "User & role upgrade approval queue", icon: UserCheck },
+                      { name: "Settings", desc: "Platform settings, voice limits & role upgrades", icon: Settings },
                     ].map((section) => {
                       const Icon = section.icon;
                       return (
@@ -1295,6 +1339,36 @@ const Documentation = () => {
 
                 <div className="bg-card rounded-xl p-6 border">
                   <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    Role Upgrade Requests (Pending Approvals Tab)
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Below the user approvals section, the <strong>Pending Approvals</strong> tab also shows role upgrade requests
+                      from existing users who want additional roles (e.g., a traveler requesting property owner access).
+                    </p>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Role Upgrade Review</h4>
+                      <ol className="list-decimal list-inside space-y-2 text-sm">
+                        <li>User submits a role upgrade request (with optional reason)</li>
+                        <li>Request appears in the "Pending Role Upgrade Requests" section</li>
+                        <li>Admin reviews the user's name, email, requested role, and reason</li>
+                        <li>Clicks <strong>Approve</strong> to grant the role, or <strong>Reject</strong> with an optional reason</li>
+                        <li>A role upgrade notification email is sent automatically</li>
+                        <li>The badge count on the Approvals tab includes both user and role upgrade requests</li>
+                      </ol>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 border border-amber-200 dark:border-amber-900">
+                      <p className="text-sm text-amber-800 dark:text-amber-200">
+                        <strong>Auto-approve:</strong> Toggle "Auto-approve role upgrade requests" in the <strong>Settings</strong> tab
+                        to skip manual review. When enabled, role upgrades are granted instantly.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
                     <Settings className="h-5 w-5 text-primary" />
                     System Settings (Settings Tab)
                   </h3>
@@ -1308,6 +1382,13 @@ const Documentation = () => {
                         <p className="text-sm text-muted-foreground">
                           <strong>Require user approval for new signups</strong> — When enabled, all new users start in "pending_approval"
                           status and must be manually approved. When disabled, users are auto-approved on signup.
+                        </p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Auto-Approve Role Upgrades</h4>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Auto-approve role upgrade requests</strong> — When enabled, users who request a role upgrade
+                          (e.g., renter to property owner) are granted the role instantly without admin review. Default: <strong>off</strong>.
                         </p>
                       </div>
                       <div className="bg-muted/50 rounded-lg p-4">
@@ -1363,6 +1444,7 @@ const Documentation = () => {
                   <div className="space-y-3">
                     {[
                       { task: "Review pending user approvals", path: "/admin → Pending Approvals tab", priority: "High" },
+                      { task: "Review pending role upgrade requests", path: "/admin → Pending Approvals tab", priority: "High" },
                       { task: "Review pending listing approvals", path: "/admin → Listings tab", priority: "High" },
                       { task: "Check new owner verification requests", path: "/admin → Verifications tab", priority: "High" },
                       { task: "Monitor booking confirmation deadlines", path: "/admin → Bookings tab", priority: "Critical" },
