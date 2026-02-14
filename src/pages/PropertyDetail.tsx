@@ -21,11 +21,18 @@ import {
   Home,
   ArrowLeft,
   Settings,
+  Flame,
+  Sparkles,
+  Clock,
+  ShieldCheck,
+  Shield,
 } from "lucide-react";
-import { useListing } from "@/hooks/useListings";
+import { Badge } from "@/components/ui/badge";
+import { useListing, useActiveListings } from "@/hooks/useListings";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -73,6 +80,10 @@ const PropertyDetail = () => {
 
   // Real listing data
   const { data: listing, isLoading, error } = useListing(id);
+  const { favoritesCount } = useListingSocialProof();
+
+  // Similar listings (same brand, excluding current)
+  const { data: allListings = [] } = useActiveListings();
 
   // Derived data
   const prop = listing?.property;
@@ -97,6 +108,15 @@ const PropertyDetail = () => {
 
   const brandLabel = prop ? (BRAND_LABELS[prop.brand] || prop.brand) : "";
   const isOwnListing = user && listing && listing.owner_id === user.id;
+  const favCount = id ? (favoritesCount.get(id) || 0) : 0;
+  const freshnessLabel = listing ? getFreshnessLabel(listing.created_at) : null;
+  const popularityLabel = getPopularityLabel(favCount);
+  const daysAgo = listing ? getDaysAgo(listing.created_at) : 0;
+  const similarListings = listing
+    ? allListings
+        .filter((l) => l.id !== listing.id && l.property.brand === listing.property.brand)
+        .slice(0, 3)
+    : [];
 
   const nextImage = () => {
     if (images.length > 0) setCurrentImage((prev) => (prev + 1) % images.length);
@@ -234,9 +254,36 @@ const PropertyDetail = () => {
                   <MapPin className="w-4 h-4" />
                   {location} {brandLabel && `• ${brandLabel}`}
                 </div>
-                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">
                   {displayName}
                 </h1>
+                {/* Social proof badges */}
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {popularityLabel && (
+                    <Badge className="bg-orange-500/90 text-white border-0">
+                      <Flame className="w-3 h-3 mr-1" />
+                      {popularityLabel}
+                    </Badge>
+                  )}
+                  {freshnessLabel && (
+                    <Badge className="bg-emerald-500/90 text-white border-0">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      {freshnessLabel}
+                    </Badge>
+                  )}
+                  {favCount > 0 && (
+                    <Badge variant="secondary">
+                      <Heart className="w-3 h-3 mr-1 fill-rose-400 text-rose-400" />
+                      {favCount} {favCount === 1 ? "person" : "people"} saved this
+                    </Badge>
+                  )}
+                  {daysAgo <= 14 && (
+                    <Badge variant="outline">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Listed {daysAgo === 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`}
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex flex-wrap items-center gap-4">
                   {resort?.guest_rating && (
                     <div className="flex items-center gap-1">
@@ -440,6 +487,37 @@ const PropertyDetail = () => {
                   </div>
                 </div>
 
+                {/* Trust Indicators */}
+                <div className="bg-card rounded-2xl p-5 shadow-card space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Verified Platform</p>
+                      <p className="text-xs text-muted-foreground">All owners are identity-verified</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Shield className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Secure Checkout</p>
+                      <p className="text-xs text-muted-foreground">Payments via Stripe — never shared with owners</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <Star className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Quality Guarantee</p>
+                      <p className="text-xs text-muted-foreground">Real resort stays at member prices</p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Resort Information Card */}
                 {resort && (
                   <ResortInfoCard resort={resort} />
@@ -448,6 +526,92 @@ const PropertyDetail = () => {
             </div>
           </div>
         </section>
+        {/* Similar Listings */}
+        {similarListings.length > 0 && (
+          <section className="container mx-auto px-4 pb-12">
+            <h2 className="font-display text-2xl font-bold text-foreground mb-6">
+              Similar Properties You May Like
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              {similarListings.map((sim) => {
+                const simNights = calculateNights(sim.check_in_date, sim.check_out_date);
+                const simPricePerNight = simNights > 0 ? Math.round(sim.final_price / simNights) : sim.final_price;
+                const simImage = sim.property.images?.[0] || sim.property.resort?.main_image_url || null;
+                const simName = sim.property.resort?.resort_name && sim.property.unit_type
+                  ? `${(sim.property.unit_type as any).unit_type_name} at ${sim.property.resort.resort_name}`
+                  : sim.property.resort?.resort_name || sim.property.resort_name;
+                const simLocation = sim.property.resort?.location
+                  ? `${sim.property.resort.location.city}, ${sim.property.resort.location.state}`
+                  : sim.property.location;
+                const simFavCount = favoritesCount.get(sim.id) || 0;
+
+                return (
+                  <Link
+                    key={sim.id}
+                    to={`/property/${sim.id}`}
+                    className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
+                  >
+                    <div className="relative h-44 overflow-hidden">
+                      {simImage ? (
+                        <img
+                          src={simImage}
+                          alt={simName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center">
+                          <Home className="w-10 h-10 text-primary/40" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                      <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+                        {BRAND_LABELS[sim.property.brand] || sim.property.brand}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {simLocation}
+                      </div>
+                      <h3 className="font-display font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                        {simName}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        {sim.property.resort?.guest_rating && (
+                          <>
+                            <Star className="w-3 h-3 fill-warning text-warning" />
+                            <span className="font-semibold">{sim.property.resort.guest_rating}</span>
+                          </>
+                        )}
+                        {simFavCount > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
+                            {simFavCount} saved
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <span className="text-lg font-bold">${sim.final_price.toLocaleString()}</span>
+                          <span className="text-muted-foreground text-sm"> total</span>
+                          {simNights > 0 && (
+                            <div className="text-muted-foreground text-xs">
+                              ${simPricePerNight}/night • {simNights} nights
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          <Users className="w-3 h-3 inline mr-1" />
+                          {sim.property.sleeps}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />

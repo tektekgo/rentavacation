@@ -77,7 +77,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto animate-fade-in">
-            Skip the middleman. Book luxury vacation club stays directly from members at up to 70% off. 
+            Skip the middleman. Book luxury vacation club stays directly from members and save big.
             Bid on properties or post your travel plans and let owners compete for your booking.
           </p>
 

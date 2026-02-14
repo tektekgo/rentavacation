@@ -26,7 +26,11 @@ import {
   X,
   Loader2,
   Home,
+  Flame,
+  Sparkles,
+  Clock,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
@@ -35,6 +39,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
+import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 
 const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
 const ITEMS_PER_PAGE = 6;
@@ -107,6 +112,7 @@ const Rentals = () => {
 
   // Real listings from database
   const { data: listings = [], isLoading, error: listingsError } = useActiveListings();
+  const { favoritesCount } = useListingSocialProof();
 
   // Voice search integration
   const {
@@ -507,6 +513,10 @@ const Rentals = () => {
               const location = getListingLocation(listing);
               const brandLabel = getListingBrandLabel(listing);
               const rating = listing.property.resort?.guest_rating;
+              const favCount = favoritesCount.get(listing.id) || 0;
+              const freshnessLabel = getFreshnessLabel(listing.created_at);
+              const popularityLabel = getPopularityLabel(favCount);
+              const daysAgo = getDaysAgo(listing.created_at);
 
               return (
                 <Link
@@ -518,7 +528,7 @@ const Rentals = () => {
                 >
                   {/* Image */}
                   <div
-                    className={`relative overflow-hidden bg-muted ${
+                    className={`relative overflow-hidden ${
                       viewMode === "list" ? "w-72 h-48" : "h-52"
                     }`}
                   >
@@ -529,13 +539,32 @@ const Rentals = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
-                        <Home className="w-12 h-12" />
+                      <div className="w-full h-full bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center">
+                        <Home className="w-12 h-12 text-primary/40" />
                       </div>
                     )}
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                     <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
                       {brandLabel}
                     </span>
+                    {/* Freshness / Popularity Badge */}
+                    {(freshnessLabel || popularityLabel) && (
+                      <Badge
+                        variant="secondary"
+                        className={`absolute bottom-3 left-3 text-xs font-medium ${
+                          popularityLabel
+                            ? "bg-orange-500/90 text-white border-0"
+                            : "bg-emerald-500/90 text-white border-0"
+                        }`}
+                      >
+                        {popularityLabel ? (
+                          <><Flame className="w-3 h-3 mr-1" />{popularityLabel}</>
+                        ) : (
+                          <><Sparkles className="w-3 h-3 mr-1" />{freshnessLabel}</>
+                        )}
+                      </Badge>
+                    )}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -555,9 +584,17 @@ const Rentals = () => {
 
                   {/* Content */}
                   <div className="p-4 flex-1">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {location}
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {location}
+                      </div>
+                      {daysAgo <= 14 && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo}d ago`}
+                        </span>
+                      )}
                     </div>
                     <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
                       {displayName}
@@ -567,6 +604,13 @@ const Rentals = () => {
                         <>
                           <Star className="w-3 h-3 fill-warning text-warning" />
                           <span className="font-semibold">{rating}</span>
+                          <span className="mx-1">•</span>
+                        </>
+                      )}
+                      {favCount > 0 && (
+                        <>
+                          <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
+                          <span>{favCount} saved</span>
                           <span className="mx-1">•</span>
                         </>
                       )}

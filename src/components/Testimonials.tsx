@@ -34,10 +34,10 @@ const Testimonials = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Loved by Travelers & Owners
+            What Our Community Says
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Join thousands of happy users who've discovered the Rent-A-Vacation difference
+            Real stories from travelers and owners in our growing community
           </p>
         </div>
 
@@ -46,10 +46,10 @@ const Testimonials = () => {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 relative"
+              className="bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 relative border border-transparent hover:border-primary/10"
             >
               {/* Quote Icon */}
-              <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/20" />
+              <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/10" />
 
               {/* Stars */}
               <div className="flex gap-1 mb-4">
@@ -65,7 +65,7 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-bold shadow-sm">
                   {testimonial.avatar}
                 </div>
                 <div>

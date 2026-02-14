@@ -7,7 +7,7 @@ const travelerSteps = [
   {
     icon: Search,
     title: "Browse or Bid",
-    description: "Search thousands of owner-listed timeshare rentals, or place bids on properties open for competitive pricing.",
+    description: "Search owner-listed timeshare rentals across 117+ resorts, or place bids on properties open for competitive pricing.",
   },
   {
     icon: Send,

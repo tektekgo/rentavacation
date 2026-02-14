@@ -1,4 +1,4 @@
-import { Shield, Users, Star, Gavel, Clock, Award } from "lucide-react";
+import { Shield, Users, Star, Gavel, Clock, Award, Building2, Globe } from "lucide-react";
 
 const badges = [
   {
@@ -7,9 +7,9 @@ const badges = [
     label: "Direct from Owners",
   },
   {
-    icon: Users,
-    value: "50,000+",
-    label: "Happy Travelers",
+    icon: Building2,
+    value: "117",
+    label: "Partner Resorts",
   },
   {
     icon: Gavel,
@@ -17,19 +17,19 @@ const badges = [
     label: "Bidding Marketplace",
   },
   {
-    icon: Clock,
-    value: "24/7",
-    label: "Customer Support",
+    icon: Globe,
+    value: "10+",
+    label: "Countries",
   },
   {
     icon: Award,
-    value: "5,000+",
-    label: "Verified Owners",
+    value: "Verified",
+    label: "Owner Identity",
   },
   {
     icon: Star,
-    value: "70%",
-    label: "Avg. Savings",
+    value: "Up to 70%",
+    label: "Savings vs. Resort",
   },
 ];
 
@@ -39,8 +39,10 @@ const TrustBadges = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           {badges.map((badge, index) => (
-            <div key={index} className="text-center">
-              <badge.icon className="w-8 h-8 mx-auto mb-3 opacity-80" />
+            <div key={index} className="text-center group">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                <badge.icon className="w-7 h-7 opacity-90" />
+              </div>
               <div className="font-display text-2xl md:text-3xl font-bold mb-1">{badge.value}</div>
               <div className="text-sm opacity-80">{badge.label}</div>
             </div>

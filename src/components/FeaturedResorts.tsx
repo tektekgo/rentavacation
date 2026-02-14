@@ -1,10 +1,12 @@
-import { Star, MapPin, ChevronRight, Heart, Home, Loader2, Users } from "lucide-react";
+import { Star, MapPin, ChevronRight, Heart, Home, Loader2, Users, Flame, Sparkles, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
+import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -53,6 +55,7 @@ const FeaturedResorts = () => {
   const toggleFavoriteMutation = useToggleFavorite();
   const { toast } = useToast();
   const { data: listings = [], isLoading } = useActiveListings();
+  const { favoritesCount } = useListingSocialProof();
 
   // Show up to 4 featured listings
   const featured = listings.slice(0, 4);
@@ -141,6 +144,10 @@ const FeaturedResorts = () => {
             const location = getLocation(listing);
             const brandLabel = BRAND_LABELS[listing.property.brand] || listing.property.brand;
             const rating = listing.property.resort?.guest_rating;
+            const favCount = favoritesCount.get(listing.id) || 0;
+            const freshnessLabel = getFreshnessLabel(listing.created_at);
+            const popularityLabel = getPopularityLabel(favCount);
+            const daysAgo = getDaysAgo(listing.created_at);
 
             return (
               <Link
@@ -158,14 +165,33 @@ const FeaturedResorts = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
-                      <Home className="w-12 h-12 text-muted-foreground" />
+                    <div className="w-full h-full bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center">
+                      <Home className="w-12 h-12 text-primary/40" />
                     </div>
                   )}
-                  {/* Badge */}
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                  {/* Brand Badge */}
                   <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
                     {brandLabel}
                   </span>
+                  {/* Freshness / Popularity Badge */}
+                  {(freshnessLabel || popularityLabel) && (
+                    <Badge
+                      variant="secondary"
+                      className={`absolute bottom-3 left-3 text-xs font-medium ${
+                        popularityLabel
+                          ? "bg-orange-500/90 text-white border-0"
+                          : "bg-emerald-500/90 text-white border-0"
+                      }`}
+                    >
+                      {popularityLabel ? (
+                        <><Flame className="w-3 h-3 mr-1" />{popularityLabel}</>
+                      ) : (
+                        <><Sparkles className="w-3 h-3 mr-1" />{freshnessLabel}</>
+                      )}
+                    </Badge>
+                  )}
                   {/* Like Button */}
                   <button
                     onClick={(e) => {
@@ -186,21 +212,35 @@ const FeaturedResorts = () => {
 
                 {/* Content */}
                 <div className="p-4">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {location}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {location}
+                    </div>
+                    {daysAgo <= 14 && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        {daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo}d ago`}
+                      </span>
+                    )}
                   </div>
                   <h3 className="font-display font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
                     {displayName}
                   </h3>
-                  {rating && (
-                    <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-3 mb-3">
+                    {rating && (
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-warning text-warning" />
                         <span className="font-semibold text-sm">{rating}</span>
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {favCount > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
+                        {favCount} saved
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-end justify-between">
                     <div>
                       <div className="text-foreground">
