@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -23,6 +23,8 @@ import {
   FileCheck
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
+import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
+import { useLatestRequestForRole } from "@/hooks/useRoleUpgrade";
 import OwnerProperties from "@/components/owner/OwnerProperties";
 import OwnerListings from "@/components/owner/OwnerListings";
 import OwnerBookings from "@/components/owner/OwnerBookings";
@@ -151,25 +153,55 @@ const OwnerDashboard = () => {
 
   // Check if user has property owner or RAV team role
   const canAccess = isPropertyOwner() || isRavTeam();
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const pendingRequest = useLatestRequestForRole('property_owner');
 
   if (!canAccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">Access Restricted</h1>
-        <p className="text-muted-foreground text-center mb-6 max-w-md">
-          You need to be a property owner to access this dashboard. 
-          Contact us if you'd like to list your vacation property.
-        </p>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
-          <Button onClick={() => navigate("/list-property")}>
-            Become an Owner
-          </Button>
-        </div>
+        {pendingRequest?.status === 'pending' ? (
+          <>
+            <p className="text-muted-foreground text-center mb-6 max-w-md">
+              Your request to become a property owner is under review.
+              We'll notify you once it's been approved.
+            </p>
+            <div className="flex gap-4">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+              <Button variant="secondary" onClick={() => setUpgradeDialogOpen(true)}>
+                <Clock className="mr-2 h-4 w-4" />
+                View Request Status
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-center mb-6 max-w-md">
+              You need the property owner role to access this dashboard.
+              Request an upgrade to start listing your vacation properties.
+            </p>
+            <div className="flex gap-4">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+              <Button onClick={() => setUpgradeDialogOpen(true)}>
+                Become a Property Owner
+              </Button>
+            </div>
+          </>
+        )}
+
+        <RoleUpgradeDialog
+          open={upgradeDialogOpen}
+          onOpenChange={setUpgradeDialogOpen}
+          requestedRole="property_owner"
+          context="access the Owner Dashboard and list properties"
+        />
       </div>
     );
   }

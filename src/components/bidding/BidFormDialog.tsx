@@ -15,8 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Gavel, DollarSign, Users, Clock } from 'lucide-react';
+import { Gavel, DollarSign, Users, Clock, LogIn } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
 import type { ListingWithBidding } from '@/types/bidding';
 
 interface BidFormDialogProps {
@@ -64,6 +65,33 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
   const timeRemaining = listing.bidding_ends_at 
     ? formatDistanceToNow(new Date(listing.bidding_ends_at), { addSuffix: true })
     : null;
+
+  // Defensive: if dialog opens without auth, show sign-in prompt
+  if (!user) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5 text-primary" />
+              Sign In Required
+            </DialogTitle>
+            <DialogDescription>
+              You need to sign in before placing a bid.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button asChild>
+              <Link to="/login">Sign In</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -10,6 +10,7 @@ import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
 import { TravelRequestCard } from '@/components/bidding/TravelRequestCard';
 import { BidFormDialog } from '@/components/bidding/BidFormDialog';
 import { VerifiedOwnerBadge, TravelerBadge } from '@/components/RoleBadge';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,13 +32,21 @@ import type { ListingWithBidding } from '@/types/bidding';
 
 const BiddingMarketplace = () => {
   const { user, isRenter } = useAuth();
+  const { toast } = useToast();
   const { data: biddableListings, isLoading: listingsLoading } = useListingsOpenForBidding();
   const { data: travelRequests, isLoading: requestsLoading } = useOpenTravelRequests();
-  
+
   const [selectedListing, setSelectedListing] = useState<ListingWithBidding | null>(null);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
 
   const handleBidClick = (listing: ListingWithBidding) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to place a bid on this listing.",
+      });
+      return;
+    }
     setSelectedListing(listing);
     setBidDialogOpen(true);
   };

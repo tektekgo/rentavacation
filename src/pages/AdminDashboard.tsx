@@ -37,6 +37,7 @@ import AdminVerifications from "@/components/admin/AdminVerifications";
 import AdminEscrow from "@/components/admin/AdminEscrow";
 import AdminCheckinIssues from "@/components/admin/AdminCheckinIssues";
 import { PendingApprovals } from "@/components/admin/PendingApprovals";
+import { RoleUpgradeRequests } from "@/components/admin/RoleUpgradeRequests";
 import { SystemSettings } from "@/components/admin/SystemSettings";
 
 const AdminDashboard = () => {
@@ -44,6 +45,7 @@ const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isRavTeam, isLoading: authLoading } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [roleRequestCount, setRoleRequestCount] = useState(0);
 
   const activeTab = searchParams.get("tab") || "overview";
 
@@ -58,21 +60,28 @@ const AdminDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Fetch pending approval count for badge
+  // Fetch pending approval count + role request count for badge
   useEffect(() => {
-    const fetchPendingCount = async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("approval_status", "pending_approval");
+    const fetchCounts = async () => {
+      const [{ count: userCount }, { count: roleCount }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("approval_status", "pending_approval"),
+        supabase
+          .from("role_upgrade_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+      ]);
 
-      setPendingCount(count || 0);
+      setPendingCount(userCount || 0);
+      setRoleRequestCount(roleCount || 0);
     };
 
-    fetchPendingCount();
+    fetchCounts();
 
     // Refresh every 30 seconds
-    const interval = setInterval(fetchPendingCount, 30000);
+    const interval = setInterval(fetchCounts, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -180,9 +189,9 @@ const AdminDashboard = () => {
             <TabsTrigger value="pending-approvals" className="gap-2">
               <UserCheck className="h-4 w-4" />
               <span className="hidden sm:inline">Approvals</span>
-              {pendingCount > 0 && (
+              {(pendingCount + roleRequestCount) > 0 && (
                 <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1 text-xs">
-                  {pendingCount}
+                  {pendingCount + roleRequestCount}
                 </Badge>
               )}
             </TabsTrigger>
@@ -233,7 +242,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="pending-approvals">
-            <PendingApprovals />
+            <div className="space-y-8">
+              <PendingApprovals />
+              <RoleUpgradeRequests />
+            </div>
           </TabsContent>
 
           <TabsContent value="settings">

@@ -251,15 +251,15 @@ const Rentals = () => {
                 <SlidersHorizontal className="w-4 h-4 mr-2" />
                 Filters
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowFilters(true)}>
                 Price
                 <ChevronDown className="w-4 h-4 ml-1" />
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowFilters(true)}>
                 Bedrooms
                 <ChevronDown className="w-4 h-4 ml-1" />
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowFilters(true)}>
                 Resort Brand
                 <ChevronDown className="w-4 h-4 ml-1" />
               </Button>

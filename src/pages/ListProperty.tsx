@@ -31,6 +31,7 @@ import {
 import type { VacationClubBrand, Resort, ResortUnitType } from "@/types/database";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
+import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
 
 const benefits = [
   {
@@ -97,8 +98,9 @@ type ResortSummary = Pick<
 
 const ListProperty = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isPropertyOwner } = useAuth();
   const [formStep, setFormStep] = useState(1);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   // Resort selection state
   const [selectedBrand, setSelectedBrand] = useState<VacationClubBrand | "">("");
@@ -569,17 +571,30 @@ const ListProperty = () => {
                     <Button
                       className="flex-1"
                       onClick={() => {
-                        if (user) {
+                        if (!user) {
+                          navigate("/signup");
+                        } else if (isPropertyOwner()) {
                           navigate("/owner-dashboard?tab=properties");
                         } else {
-                          navigate("/signup");
+                          setUpgradeDialogOpen(true);
                         }
                       }}
                     >
-                      {user ? "Go to Owner Dashboard" : "Create Account & List"}
+                      {!user
+                        ? "Create Account & List"
+                        : isPropertyOwner()
+                          ? "Go to Owner Dashboard"
+                          : "Become a Property Owner"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
+
+                  <RoleUpgradeDialog
+                    open={upgradeDialogOpen}
+                    onOpenChange={setUpgradeDialogOpen}
+                    requestedRole="property_owner"
+                    context="list your property"
+                  />
                 </div>
               )}
             </div>

@@ -11,7 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   isConfigured: boolean;
   // Auth methods
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName?: string, accountType?: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>;
@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isConfigured]);
 
   // Auth methods
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, accountType?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -138,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
+          account_type: accountType || 'traveler',
         },
       },
     });

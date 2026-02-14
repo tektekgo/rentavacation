@@ -13,8 +13,9 @@ import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { toast } from "sonner";
 
 export function SystemSettings() {
-  const { requireUserApproval, loading, updateSetting } = useSystemSettings();
+  const { requireUserApproval, autoApproveRoleUpgrades, loading, updateSetting } = useSystemSettings();
   const [updating, setUpdating] = useState(false);
+  const [updatingRole, setUpdatingRole] = useState(false);
 
   const handleToggleApproval = async (enabled: boolean) => {
     setUpdating(true);
@@ -74,6 +75,49 @@ export function SystemSettings() {
               checked={requireUserApproval}
               onCheckedChange={handleToggleApproval}
               disabled={updating}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Role Upgrade Requests</CardTitle>
+          <CardDescription>
+            Control how role upgrade requests are handled
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-approve-roles">
+                Auto-approve role upgrade requests
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                When enabled, role upgrade requests (e.g., renter to property
+                owner) are automatically approved without admin review.
+              </p>
+            </div>
+            <Switch
+              id="auto-approve-roles"
+              checked={autoApproveRoleUpgrades}
+              onCheckedChange={async (enabled) => {
+                setUpdatingRole(true);
+                try {
+                  await updateSetting("auto_approve_role_upgrades", { enabled });
+                  toast.success(
+                    enabled
+                      ? "Role upgrades will be auto-approved"
+                      : "Role upgrades require admin approval"
+                  );
+                } catch (error) {
+                  console.error("Failed to update setting:", error);
+                  toast.error("Failed to update setting");
+                } finally {
+                  setUpdatingRole(false);
+                }
+              }}
+              disabled={updatingRole}
             />
           </div>
         </CardContent>

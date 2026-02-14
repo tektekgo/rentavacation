@@ -20,6 +20,7 @@ import {
   Loader2,
   Home,
   ArrowLeft,
+  Settings,
 } from "lucide-react";
 import { useListing } from "@/hooks/useListings";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
@@ -95,6 +96,7 @@ const PropertyDetail = () => {
     : prop?.location || "";
 
   const brandLabel = prop ? (BRAND_LABELS[prop.brand] || prop.brand) : "";
+  const isOwnListing = user && listing && listing.owner_id === user.id;
 
   const nextImage = () => {
     if (images.length > 0) setCurrentImage((prev) => (prev + 1) % images.length);
@@ -402,13 +404,27 @@ const PropertyDetail = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full mb-4" size="lg" onClick={handleBookNow}>
-                    {user ? "Book Now" : "Sign In to Book"}
-                  </Button>
+                  {isOwnListing ? (
+                    <Button
+                      className="w-full mb-4"
+                      size="lg"
+                      variant="outline"
+                      onClick={() => navigate("/owner-dashboard?tab=listings")}
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      This is your listing — Manage in Dashboard
+                    </Button>
+                  ) : (
+                    <>
+                      <Button className="w-full mb-4" size="lg" onClick={handleBookNow}>
+                        {user ? "Book Now" : "Sign In to Book"}
+                      </Button>
 
-                  <p className="text-center text-sm text-muted-foreground mb-4">
-                    You won't be charged yet
-                  </p>
+                      <p className="text-center text-sm text-muted-foreground mb-4">
+                        You won't be charged yet
+                      </p>
+                    </>
+                  )}
 
                   <div className="border-t pt-4 space-y-2 text-sm">
                     <div className="flex justify-between">

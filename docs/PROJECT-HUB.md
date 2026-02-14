@@ -1,8 +1,9 @@
 # 🏠 PROJECT HUB - Rent-A-Vacation
 
-> **The Single Source of Truth** for project status, roadmap, and decisions  
-> **Last Updated:** February 16, 2026  
+> **The Single Source of Truth** for project status, roadmap, and decisions
+> **Last Updated:** February 14, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
+> **App Version:** v0.6.0 (build version visible in footer)
 
 ---
 
@@ -62,16 +63,20 @@ git push
 
 ## 🎯 CURRENT FOCUS
 
-**Active Phase:** Phase 4 - UI Polish & Production Ready  
-**Started:** February 13, 2026  
-**Target:** February 20, 2026  
-**Docs:** `docs/features/ui-polish/`
+**Active Phase:** Phase 6 — Role Upgrade System & Dead-End UX Prevention
+**Started:** February 14, 2026
+**Docs:** `docs/features/voice-auth-approval/`, `handoffs/`
 
 ### Working on TODAY:
-- [ ] Track B: Fix "I am flexible" calendar on homepage
-- [ ] Track B: Implement pagination on "All Resorts" page
+- [ ] Track C: Content Polish (replace placeholder images, fake stats, lorem ipsum)
+- [ ] Testing Infrastructure Setup (Week 1)
 
 ### Recently Completed:
+- [x] **Phase 6: Role Upgrade System & Dead-End UX** — signup role selection, role upgrade requests, dead-end fixes (Feb 14)
+- [x] **Phase 5: Core Business Flows** — real listings, checkout page, booking flow (Feb 13)
+- [x] **Version numbering system** — build version displayed in footer (Feb 13)
+- [x] **Phase 4 Track B: UI Fixes** — calendar tabs, pagination, favorites, forgot-password (Feb 13)
+- [x] **Voice branded first message** — custom greeting for voice assistant (Feb 13)
 - [x] Fix Known Voice Issues (interruption + budget assumption)
 - [x] Voice Auth Phase 1-3 (authentication, approval, usage limits)
 - [x] Track D: Documentation updates (user guide, FAQ, journey map)
@@ -83,23 +88,40 @@ None
 
 ## 📋 PRIORITY QUEUE (In Order)
 
-### 1. 🎨 Phase 4 - Track B: UI Fixes (CURRENT - Next 2-3 hours)
-**Why:** Broken features hurt user experience  
-**Blocking:** Track C (Content Polish)
+### 1. 🎨 Phase 4 - Track B: UI Fixes ✅ COMPLETE
+**Status:** ✅ Complete (Feb 13, 2026) — Commit `3858585`
 
-**Tasks:**
-- [ ] Fix "I am flexible" calendar - non-functional on homepage
-- [ ] Implement pagination on "All Resorts" page - static links not working
-- [ ] Add favorites functionality - missing save capability
-- [ ] Add `/forgot-password` route - currently 404
-- [ ] Test all interactive elements
-
-**Est. Time:** 2-3 hours
+**Tasks Completed:**
+- [x] Fix "I am flexible" calendar - tab-based date selection (specific dates, flexible, weekend getaway)
+- [x] Implement pagination on Rentals page - real pagination with page controls
+- [x] Add favorites functionality - heart toggle with Supabase persistence
+- [x] Add `/forgot-password` route - full forgot + reset password flow
 
 ---
 
-### 2. 📝 Phase 4 - Track C: Content Polish (Next - 1-2 hours)
-**Why:** Placeholder content reduces trust  
+### 2. 🚀 Phase 5: Core Business Flows ✅ COMPLETE
+**Status:** ✅ Complete (Feb 13, 2026) — Commit `2b094a4`
+**Docs:** See plan file and handoff below
+
+**Tracks Completed:**
+- [x] **Track A: Public Listing Discovery** — Rentals, PropertyDetail, FeaturedResorts query real DB
+- [x] **Track B: Booking & Payment Flow** — Checkout page, Stripe integration, bid/proposal→checkout
+- [x] **Track C: ListProperty Fix** — Redirects authenticated users to OwnerDashboard
+- [x] **Track D: UX Polish** — Empty marketplace states, voice search guard
+
+**Key Files Created/Modified:**
+- `src/hooks/useListings.ts` (NEW) — `useActiveListings()`, `useListing()`, `useActiveListingsCount()`
+- `src/pages/Checkout.tsx` (NEW) — Stripe checkout flow
+- `src/pages/Rentals.tsx` — Real DB queries replacing mock data
+- `src/pages/PropertyDetail.tsx` — Real listing data
+- `src/components/FeaturedResorts.tsx` — Real active listings
+- `src/pages/MyBidsDashboard.tsx` — "Proceed to Checkout" for accepted bids/proposals
+- `src/pages/ListProperty.tsx` — Redirect to OwnerDashboard
+
+---
+
+### 3. 📝 Phase 4 - Track C: Content Polish (NEXT - 1-2 hours)
+**Why:** Placeholder content reduces trust
 **Blocking:** Production launch
 
 **Tasks:**
@@ -112,7 +134,7 @@ None
 
 ---
 
-### 3. 🧪 Testing Infrastructure Setup (NEW - 2-3 weeks)
+### 4. 🧪 Testing Infrastructure Setup (2-3 weeks)
 **Why:** Need safety net before adding more features  
 **Blocking:** Phase 5 (Advanced Features)  
 **Docs:** `docs/testing/`
@@ -142,8 +164,8 @@ None
 
 ---
 
-### 4. 🐛 Fix Known Voice Issues ✅ COMPLETE
-**Status:** ✅ Fixed (Feb 16, 2026)
+### 5. 🐛 Fix Known Voice Issues ✅ COMPLETE
+**Status:** ✅ Fixed (Feb 13, 2026)
 **Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
 
 **Issues Fixed:**
@@ -154,7 +176,7 @@ None
 
 ---
 
-### 5. 🚀 Phase 3: Voice Everywhere (Q2 2026)
+### 6. 🚀 Phase 3: Voice Everywhere (Q2 2026)
 **Status:** 📋 Planned  
 **Docs:** `docs/guides/user-journey-map.md`
 
@@ -167,18 +189,133 @@ None
 
 ---
 
-### 6. 🎯 Phase 5: Advanced Features (Q3 2026)
+### 7. 🎯 Phase 6: Advanced Features (Q3 2026)
 **Status:** 📋 Backlog
 
 **Features:**
-- Favorites & saved searches
-- Advanced filtering
-- Owner analytics dashboard
-- Calendar integration
+- Saved searches & search alerts
+- Advanced filtering (price range, amenities, rating)
+- Owner analytics dashboard enhancements
+- Calendar integration (Google/Outlook sync)
 
 ---
 
 ## ✅ COMPLETED PHASES
+
+<details>
+<summary><strong>Phase 6: Role Upgrade System & Dead-End UX Prevention</strong> ✅ (Feb 14, 2026)</summary>
+
+**Completed:** February 14, 2026
+**Status:** Code complete, pending deploy
+
+**What Was Done:**
+
+Made user roles meaningful, added self-service role upgrade requests with admin approval, and eliminated dead-end UX flows.
+
+### Session 1: Database + Signup Fix + Dead-End UX
+- **Signup role selection** — `handle_new_user()` trigger now reads `account_type` from signup metadata; "owner" → `property_owner` role, "traveler" → `renter` role
+- **Role upgrade requests table** — `role_upgrade_requests` with RPC functions (`request_role_upgrade`, `approve_role_upgrade`, `reject_role_upgrade`)
+- **Auto-approve setting** — `auto_approve_role_upgrades` system setting (default off)
+- **BidFormDialog auth fix** — Two-layer defense: gate at marketplace + defensive sign-in prompt in dialog
+- **Rentals filter buttons** — Price/Bedrooms/Resort Brand now open filter panel (were no-ops)
+- **Own-listing booking prevention** — Owners see "Manage in Dashboard" instead of "Book Now" on their own listings
+
+### Session 2: Role Upgrade Frontend + Admin
+- `RoleUpgradeRequest` type added to `database.ts`
+- `useRoleUpgrade.ts` hook — `useMyRoleUpgradeRequests`, `useRequestRoleUpgrade`, `usePendingRoleUpgradeRequests`, admin approve/reject mutations
+- `RoleUpgradeDialog.tsx` — Reusable dialog with form, pending status, and approved states
+- `OwnerDashboard.tsx` — Non-owners see "Become a Property Owner" with upgrade dialog instead of dead-end
+- `ListProperty.tsx` — Step 3 gate: authenticated non-owners see upgrade dialog instead of silent redirect
+- `RoleUpgradeRequests.tsx` — Admin component for pending role requests
+- Embedded in AdminDashboard pending-approvals tab with combined badge count
+
+### Session 3: Email + Settings + Polish
+- `send-approval-email` edge function extended with `email_type` and `requested_role` fields
+- New email templates for role upgrade approved/rejected
+- SystemSettings UI — "Auto-approve role upgrades" toggle card added
+- `useSystemSettings` hook expanded to fetch both settings in one query
+
+**New Files:**
+- `supabase/migrations/010_role_upgrade_requests.sql`
+- `src/hooks/useRoleUpgrade.ts`
+- `src/components/RoleUpgradeDialog.tsx`
+- `src/components/admin/RoleUpgradeRequests.tsx`
+
+**Modified Files:**
+- `src/contexts/AuthContext.tsx` — `signUp()` accepts `accountType`
+- `src/pages/Signup.tsx` — Passes `accountType` to `signUp()`
+- `src/pages/BiddingMarketplace.tsx` — Auth gate before bid dialog
+- `src/components/bidding/BidFormDialog.tsx` — Defensive sign-in UI
+- `src/pages/Rentals.tsx` — Filter buttons open filter panel
+- `src/pages/PropertyDetail.tsx` — Own-listing detection
+- `src/pages/OwnerDashboard.tsx` — Role upgrade gate
+- `src/pages/ListProperty.tsx` — Step 3 role gate
+- `src/pages/AdminDashboard.tsx` — Role requests in approvals tab
+- `src/hooks/useSystemSettings.ts` — Fetches `auto_approve_role_upgrades`
+- `src/components/admin/SystemSettings.tsx` — Auto-approve toggle
+- `supabase/functions/send-approval-email/index.ts` — Role upgrade emails
+- `src/types/database.ts` — `RoleUpgradeRequest` type
+</details>
+
+<details>
+<summary><strong>Phase 5: Core Business Flows</strong> ✅ (Feb 13, 2026)</summary>
+
+**Completed:** February 13, 2026
+**Status:** Deployed to DEV + PROD
+**Commits:** `2b094a4`, `3a79186`
+
+**What Was Done:**
+
+The platform was wired from mock/hardcoded data to real Supabase queries, and a complete booking flow was built.
+
+### Track A: Public Listing Discovery
+- `Rentals.tsx` — Replaced 6 hardcoded mock listings with real Supabase query via `useActiveListings()`
+- `PropertyDetail.tsx` — Loads real listing by UUID with resort/unit type data
+- `FeaturedResorts.tsx` — Shows up to 4 real active listings on homepage
+- Empty marketplace states when no listings exist
+
+### Track B: Booking & Payment Flow
+- `Checkout.tsx` (NEW) — Full checkout page with property summary, guest info, Stripe redirect
+- PropertyDetail "Book Now" → `/checkout?listing=<id>&guests=N`
+- Calls `create-booking-checkout` edge function → Stripe hosted checkout
+- `MyBidsDashboard.tsx` — "Proceed to Checkout" buttons for accepted bids and proposals
+
+### Track C: ListProperty Fix
+- Authenticated users redirected to OwnerDashboard (avoids duplicate CRUD)
+- Fixed misleading pricing helper text
+
+### Track D: UX Polish
+- Empty marketplace messaging ("Our Marketplace is Launching Soon!")
+- Voice search guard when no listings exist
+
+### Version System
+- Build version displayed in footer: `v{major.minor.patch}.{commitCount} · {gitHash}`
+- Auto-increments with each commit/deploy
+- Quick deploy verification by matching footer hash to latest commit
+
+**New Files:**
+- `src/hooks/useListings.ts` — Central listing query hooks
+- `src/pages/Checkout.tsx` — Stripe checkout flow
+
+**Impact:**
+- Platform now queries **real database** instead of mock data
+- End-to-end flow: Search → View → Book → Pay → Confirmation
+- Bid-accepted and proposal-accepted both route to checkout
+- Deploy verification via footer version string
+</details>
+
+<details>
+<summary><strong>Phase 4 - Track B: UI Fixes</strong> ✅ (Feb 13, 2026)</summary>
+
+**Completed:** February 13, 2026
+**Commit:** `3858585`
+
+**Fixes:**
+- **Calendar tabs** — Homepage date picker with "Specific Dates", "Flexible", "Weekend Getaway" tabs
+- **Pagination** — Real pagination controls on Rentals page (was static non-functional links)
+- **Favorites** — Heart toggle with Supabase persistence via `useFavorites` hooks
+- **Forgot password** — Full `/forgot-password` + `/reset-password` routes with Supabase auth
+</details>
 
 <details>
 <summary><strong>Phase 4 - Track A: Voice Auth & Approval System</strong> ✅ (Feb 13-15, 2026)</summary>
@@ -403,6 +540,19 @@ None
 
 ---
 
+### DEC-007: Build Version System
+**Date:** February 13, 2026
+**Decision:** Inject git metadata at build time via Vite `define`, display in footer
+**Status:** ✅ Implemented
+
+**Format:** `v{semver}.{commitCount} · {shortSHA}`
+- Semver from `package.json` (bump manually for milestones)
+- Commit count auto-increments with each commit
+- Short SHA for instant deploy verification
+- Vercel needs `VERCEL_GIT_FETCH_DEPTH=0` env var for full clone
+
+---
+
 ### DEC-006: Testing Infrastructure Approach
 **Date:** February 13, 2026  
 **Decision:** Option B - Comprehensive foundation (2-3 weeks)  
@@ -530,6 +680,6 @@ None
 
 ---
 
-**Last updated:** February 16, 2026  
+**Last updated:** February 13, 2026
 **Maintained by:** Sujit  
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

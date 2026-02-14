@@ -39,6 +39,21 @@ export type EscrowStatus =
 
 export type ApprovalStatus = 'pending_approval' | 'approved' | 'rejected';
 
+export type RoleUpgradeStatus = 'pending' | 'approved' | 'rejected';
+
+export interface RoleUpgradeRequest {
+  id: string;
+  user_id: string;
+  requested_role: AppRole;
+  status: RoleUpgradeStatus;
+  reason: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type VacationClubBrand =
   | 'hilton_grand_vacations'
   | 'marriott_vacation_club'

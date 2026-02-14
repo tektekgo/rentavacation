@@ -49,7 +49,7 @@ const Signup = () => {
     }
     
     setIsLoading(true);
-    const { error } = await signUp(formData.email, formData.password, formData.name);
+    const { error } = await signUp(formData.email, formData.password, formData.name, formData.accountType);
     setIsLoading(false);
     
     if (error) {
