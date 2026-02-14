@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import type { VacationClubBrand, Resort, ResortUnitType } from "@/types/database";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 
 const benefits = [
   {
@@ -95,6 +96,8 @@ type ResortSummary = Pick<
 >;
 
 const ListProperty = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [formStep, setFormStep] = useState(1);
 
   // Resort selection state
@@ -182,8 +185,18 @@ const ListProperty = () => {
             List your vacation ownership for free. Rent out your unused weeks and
             offset your maintenance fees or earn extra income.
           </p>
-          <Button variant="hero" size="xl" onClick={() => document.getElementById('listing-form')?.scrollIntoView({ behavior: 'smooth' })}>
-            List Your Property Free
+          <Button
+            variant="hero"
+            size="xl"
+            onClick={() => {
+              if (user) {
+                navigate("/owner-dashboard?tab=properties");
+              } else {
+                document.getElementById('listing-form')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
+            {user ? "Go to Owner Dashboard" : "List Your Property Free"}
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
@@ -524,7 +537,7 @@ const ListProperty = () => {
                       <Input type="number" placeholder="e.g., 199" className="pl-10" />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Similar properties in your area rent for $180-$250/night
+                      Set your own price — you control your earnings
                     </p>
                   </div>
                   <div>
@@ -553,12 +566,19 @@ const ListProperty = () => {
                     <Button variant="outline" onClick={() => setFormStep(2)}>
                       Back
                     </Button>
-                    <Link to="/signup" className="flex-1">
-                      <Button className="w-full">
-                        Create Account & Submit
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        if (user) {
+                          navigate("/owner-dashboard?tab=properties");
+                        } else {
+                          navigate("/signup");
+                        }
+                      }}
+                    >
+                      {user ? "Go to Owner Dashboard" : "Create Account & List"}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
                   </div>
                 </div>
               )}

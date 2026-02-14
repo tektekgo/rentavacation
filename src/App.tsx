@@ -28,6 +28,7 @@ import UserGuide from "./pages/UserGuide";
 import PendingApproval from "./pages/PendingApproval";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -72,7 +73,7 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
-            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/property/:id" element={<ProtectedRoute><PropertyDetail /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/list-property" element={<ProtectedRoute><ListProperty /></ProtectedRoute>} />
             <Route path="/owner-dashboard" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="/bidding" element={<ProtectedRoute><BiddingMarketplace /></ProtectedRoute>} />
             <Route path="/my-bids" element={<ProtectedRoute><MyBidsDashboard /></ProtectedRoute>} />

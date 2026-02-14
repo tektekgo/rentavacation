@@ -1,72 +1,63 @@
-import { Star, MapPin, ChevronRight, Heart } from "lucide-react";
+import { Star, MapPin, ChevronRight, Heart, Home, Loader2, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import keralaImage from "@/assets/kerala-backwaters.jpg";
-import utahImage from "@/assets/utah-arches.jpg";
-import yellowstoneImage from "@/assets/yellowstone.jpg";
-import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
+import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 
-const resorts = [
-  {
-    id: 1,
-    name: "Kerala Backwaters Resort & Spa",
-    location: "Kerala, India",
-    image: keralaImage,
-    rating: 4.9,
-    reviews: 128,
-    pricePerNight: 189,
-    originalPrice: 450,
-    badge: "Top Rated",
-    sleeps: 6,
-  },
-  {
-    id: 2,
-    name: "Desert Arches Luxury Villas",
-    location: "Moab, Utah",
-    image: utahImage,
-    rating: 4.8,
-    reviews: 94,
-    pricePerNight: 225,
-    originalPrice: 520,
-    badge: "Popular",
-    sleeps: 4,
-  },
-  {
-    id: 3,
-    name: "Yellowstone Grand Lodge",
-    location: "West Yellowstone, Montana",
-    image: yellowstoneImage,
-    rating: 4.7,
-    reviews: 156,
-    pricePerNight: 275,
-    originalPrice: 680,
-    badge: "Featured",
-    sleeps: 8,
-  },
-  {
-    id: 4,
-    name: "Jacksonville Beach Resort",
-    location: "Jacksonville, Florida",
-    image: jacksonvilleImage,
-    rating: 4.6,
-    reviews: 87,
-    pricePerNight: 165,
-    originalPrice: 390,
-    badge: "Beach Front",
-    sleeps: 5,
-  },
-];
+const BRAND_LABELS: Record<string, string> = {
+  hilton_grand_vacations: "Hilton Grand Vacations",
+  marriott_vacation_club: "Marriott Vacation Club",
+  disney_vacation_club: "Disney Vacation Club",
+  wyndham_destinations: "Wyndham Destinations",
+  hyatt_residence_club: "Hyatt Residence Club",
+  bluegreen_vacations: "Bluegreen Vacations",
+  holiday_inn_club: "Holiday Inn Club",
+  worldmark: "Worldmark",
+  other: "Other",
+};
+
+function getDisplayName(listing: ActiveListing): string {
+  const prop = listing.property;
+  if (prop.resort?.resort_name && prop.unit_type) {
+    return `${(prop.unit_type as any).unit_type_name} at ${prop.resort.resort_name}`;
+  }
+  if (prop.resort?.resort_name) return prop.resort.resort_name;
+  return prop.resort_name;
+}
+
+function getLocation(listing: ActiveListing): string {
+  const prop = listing.property;
+  if (prop.resort?.location) {
+    return `${prop.resort.location.city}, ${prop.resort.location.state}`;
+  }
+  return prop.location;
+}
+
+function getImage(listing: ActiveListing): string | null {
+  if (listing.property.images?.length > 0) return listing.property.images[0];
+  if (listing.property.resort?.main_image_url) return listing.property.resort.main_image_url;
+  return null;
+}
+
+function calculateNights(checkIn: string, checkOut: string): number {
+  return Math.ceil(
+    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
+  );
+}
 
 const FeaturedResorts = () => {
   const { user } = useAuth();
   const { data: favoriteIds = [] } = useFavoriteIds();
   const toggleFavoriteMutation = useToggleFavorite();
   const { toast } = useToast();
+  const { data: listings = [], isLoading } = useActiveListings();
 
-  const toggleLike = (id: number) => {
+  // Show up to 4 featured listings
+  const featured = listings.slice(0, 4);
+
+  const toggleLike = (id: string) => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -74,8 +65,50 @@ const FeaturedResorts = () => {
       });
       return;
     }
-    toggleFavoriteMutation.mutate(String(id));
+    toggleFavoriteMutation.mutate(id);
   };
+
+  // Don't render section if loading or no listings
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+        </div>
+      </section>
+    );
+  }
+
+  if (featured.length === 0) {
+    return (
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Vacation Rentals Coming Soon
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
+              We're building a marketplace of amazing timeshare and vacation club properties.
+              Be the first to know when listings go live.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/list-property">
+                <Button size="lg">
+                  <Home className="w-4 h-4 mr-2" />
+                  List Your Property
+                </Button>
+              </Link>
+              <Link to="/how-it-works">
+                <Button variant="outline" size="lg">
+                  Learn How It Works
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-background">
@@ -100,81 +133,95 @@ const FeaturedResorts = () => {
 
         {/* Resort Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {resorts.map((resort, index) => (
-            <Link
-              to={`/property/${resort.id}`}
-              key={resort.id}
-              className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Image */}
-              <div className="relative h-52 overflow-hidden">
-                <img
-                  src={resort.image}
-                  alt={resort.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {/* Badge */}
-                <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
-                  {resort.badge}
-                </span>
-                {/* Like Button */}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toggleLike(resort.id);
-                  }}
-                  className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
-                >
-                  <Heart
-                    className={`w-4 h-4 transition-colors ${
-                      favoriteIds.includes(String(resort.id))
-                        ? "fill-accent text-accent"
-                        : "text-foreground"
-                    }`}
-                  />
-                </button>
-                {/* Discount Badge */}
-                <span className="absolute bottom-3 left-3 px-2 py-1 text-xs font-bold bg-accent text-accent-foreground rounded">
-                  Save {Math.round((1 - resort.pricePerNight / resort.originalPrice) * 100)}%
-                </span>
-              </div>
+          {featured.map((listing, index) => {
+            const nights = calculateNights(listing.check_in_date, listing.check_out_date);
+            const pricePerNight = nights > 0 ? Math.round(listing.final_price / nights) : listing.final_price;
+            const image = getImage(listing);
+            const displayName = getDisplayName(listing);
+            const location = getLocation(listing);
+            const brandLabel = BRAND_LABELS[listing.property.brand] || listing.property.brand;
+            const rating = listing.property.resort?.guest_rating;
 
-              {/* Content */}
-              <div className="p-4">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {resort.location}
-                </div>
-                <h3 className="font-display font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                  {resort.name}
-                </h3>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-warning text-warning" />
-                    <span className="font-semibold text-sm">{resort.rating}</span>
-                  </div>
-                  <span className="text-muted-foreground text-sm">
-                    ({resort.reviews} reviews)
-                  </span>
-                </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <span className="text-muted-foreground text-sm line-through">
-                      ${resort.originalPrice}
-                    </span>
-                    <div className="text-foreground">
-                      <span className="text-xl font-bold">${resort.pricePerNight}</span>
-                      <span className="text-muted-foreground text-sm"> / night</span>
+            return (
+              <Link
+                to={`/property/${listing.id}`}
+                key={listing.id}
+                className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Image */}
+                <div className="relative h-52 overflow-hidden">
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={displayName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <Home className="w-12 h-12 text-muted-foreground" />
                     </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    Sleeps {resort.sleeps}
+                  )}
+                  {/* Badge */}
+                  <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+                    {brandLabel}
                   </span>
+                  {/* Like Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleLike(listing.id);
+                    }}
+                    className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+                  >
+                    <Heart
+                      className={`w-4 h-4 transition-colors ${
+                        favoriteIds.includes(listing.id)
+                          ? "fill-accent text-accent"
+                          : "text-foreground"
+                      }`}
+                    />
+                  </button>
                 </div>
-              </div>
-            </Link>
-          ))}
+
+                {/* Content */}
+                <div className="p-4">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {location}
+                  </div>
+                  <h3 className="font-display font-semibold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                    {displayName}
+                  </h3>
+                  {rating && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-warning text-warning" />
+                        <span className="font-semibold text-sm">{rating}</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <div className="text-foreground">
+                        <span className="text-xl font-bold">${listing.final_price.toLocaleString()}</span>
+                        <span className="text-muted-foreground text-sm"> total</span>
+                      </div>
+                      {nights > 0 && (
+                        <span className="text-muted-foreground text-xs">
+                          ${pricePerNight}/night • {nights} nights
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      <Users className="w-3 h-3 inline mr-1" />
+                      {listing.property.sleeps}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

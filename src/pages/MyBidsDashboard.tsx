@@ -1,7 +1,7 @@
 // My Bids Dashboard - For travelers to track their bids and travel requests
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +31,7 @@ import {
   X,
   Eye,
   Home,
+  CreditCard,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { TravelRequest, TravelProposalWithDetails } from '@/types/bidding';
@@ -161,6 +162,16 @@ const MyBidsDashboard = () => {
                           <div className="mt-2 p-3 bg-accent/10 rounded-lg text-sm">
                             <p className="text-muted-foreground">Owner's response:</p>
                             <p>{bid.counter_offer_message}</p>
+                          </div>
+                        )}
+                        {bid.status === 'accepted' && bid.listing_id && (
+                          <div className="mt-4 pt-4 border-t">
+                            <Link to={`/checkout?listing=${bid.listing_id}&guests=${bid.guest_count || 1}`}>
+                              <Button className="w-full sm:w-auto">
+                                <CreditCard className="h-4 w-4 mr-2" />
+                                Proceed to Checkout
+                              </Button>
+                            </Link>
                           </div>
                         )}
                       </CardContent>
@@ -361,7 +372,7 @@ function ProposalsDialog({ request, open, onOpenChange }: ProposalsDialogProps) 
                   
                   {proposal.status === 'pending' && (
                     <div className="flex gap-2 mt-4 pt-4 border-t">
-                      <Button 
+                      <Button
                         onClick={() => handleAccept(proposal.id)}
                         disabled={updateStatus.isPending}
                         className="flex-1"
@@ -369,7 +380,7 @@ function ProposalsDialog({ request, open, onOpenChange }: ProposalsDialogProps) 
                         <Check className="h-4 w-4 mr-1" />
                         Accept
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         onClick={() => handleReject(proposal.id)}
                         disabled={updateStatus.isPending}
@@ -378,6 +389,16 @@ function ProposalsDialog({ request, open, onOpenChange }: ProposalsDialogProps) 
                         <X className="h-4 w-4 mr-1" />
                         Decline
                       </Button>
+                    </div>
+                  )}
+                  {proposal.status === 'accepted' && proposal.listing_id && (
+                    <div className="mt-4 pt-4 border-t">
+                      <Link to={`/checkout?listing=${proposal.listing_id}&guests=${request.guest_count || 1}`}>
+                        <Button className="w-full">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Proceed to Checkout
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </CardContent>

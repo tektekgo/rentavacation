@@ -24,11 +24,9 @@ import {
   List,
   ChevronDown,
   X,
+  Loader2,
+  Home,
 } from "lucide-react";
-import keralaImage from "@/assets/kerala-backwaters.jpg";
-import utahImage from "@/assets/utah-arches.jpg";
-import yellowstoneImage from "@/assets/yellowstone.jpg";
-import jacksonvilleImage from "@/assets/jacksonville-beach.jpg";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
@@ -36,102 +34,66 @@ import { VoiceQuotaIndicator } from "@/components/VoiceQuotaIndicator";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
+import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 
 const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
 const ITEMS_PER_PAGE = 6;
 
-const allListings = [
-  {
-    id: 1,
-    name: "Kerala Backwaters Resort & Spa",
-    location: "Kerala, India",
-    image: keralaImage,
-    rating: 4.9,
-    reviews: 128,
-    pricePerNight: 189,
-    originalPrice: 450,
-    badge: "Top Rated",
-    sleeps: 6,
-    bedrooms: 2,
-    resort: "Marriott Vacation Club",
-  },
-  {
-    id: 2,
-    name: "Desert Arches Luxury Villas",
-    location: "Moab, Utah",
-    image: utahImage,
-    rating: 4.8,
-    reviews: 94,
-    pricePerNight: 225,
-    originalPrice: 520,
-    badge: "Popular",
-    sleeps: 4,
-    bedrooms: 1,
-    resort: "Hilton Grand Vacations",
-  },
-  {
-    id: 3,
-    name: "Yellowstone Grand Lodge",
-    location: "West Yellowstone, Montana",
-    image: yellowstoneImage,
-    rating: 4.7,
-    reviews: 156,
-    pricePerNight: 275,
-    originalPrice: 680,
-    badge: "Featured",
-    sleeps: 8,
-    bedrooms: 3,
-    resort: "Wyndham Destinations",
-  },
-  {
-    id: 4,
-    name: "Jacksonville Beach Resort",
-    location: "Jacksonville, Florida",
-    image: jacksonvilleImage,
-    rating: 4.6,
-    reviews: 87,
-    pricePerNight: 165,
-    originalPrice: 390,
-    badge: "Beach Front",
-    sleeps: 5,
-    bedrooms: 2,
-    resort: "Diamond Resorts",
-  },
-  {
-    id: 5,
-    name: "Oceanfront Paradise Suite",
-    location: "Maui, Hawaii",
-    image: keralaImage,
-    rating: 4.9,
-    reviews: 203,
-    pricePerNight: 320,
-    originalPrice: 750,
-    badge: "Premium",
-    sleeps: 6,
-    bedrooms: 2,
-    resort: "Marriott Ko Olina",
-  },
-  {
-    id: 6,
-    name: "Mountain View Chalet",
-    location: "Park City, Utah",
-    image: utahImage,
-    rating: 4.8,
-    reviews: 112,
-    pricePerNight: 245,
-    originalPrice: 580,
-    badge: "Ski-In/Out",
-    sleeps: 8,
-    bedrooms: 3,
-    resort: "Vail Resorts",
-  },
-];
+// Brand enum to display label mapping
+const BRAND_LABELS: Record<string, string> = {
+  hilton_grand_vacations: "Hilton Grand Vacations",
+  marriott_vacation_club: "Marriott Vacation Club",
+  disney_vacation_club: "Disney Vacation Club",
+  wyndham_destinations: "Wyndham Destinations",
+  hyatt_residence_club: "Hyatt Residence Club",
+  bluegreen_vacations: "Bluegreen Vacations",
+  holiday_inn_club: "Holiday Inn Club",
+  worldmark: "Worldmark",
+  other: "Other",
+};
+
+function getListingDisplayName(listing: ActiveListing): string {
+  const prop = listing.property;
+  if (prop.resort?.resort_name && prop.unit_type) {
+    return `${(prop.unit_type as any).unit_type_name} at ${prop.resort.resort_name}`;
+  }
+  if (prop.resort?.resort_name) {
+    return prop.resort.resort_name;
+  }
+  return prop.resort_name;
+}
+
+function getListingLocation(listing: ActiveListing): string {
+  const prop = listing.property;
+  if (prop.resort?.location) {
+    const loc = prop.resort.location;
+    return `${loc.city}, ${loc.state}`;
+  }
+  return prop.location;
+}
+
+function getListingImage(listing: ActiveListing): string | null {
+  const prop = listing.property;
+  if (prop.images && prop.images.length > 0) return prop.images[0];
+  if (prop.resort?.main_image_url) return prop.resort.main_image_url;
+  return null;
+}
+
+function getListingBrandLabel(listing: ActiveListing): string {
+  return BRAND_LABELS[listing.property.brand] || listing.property.brand;
+}
+
+function calculateNights(checkIn: string, checkOut: string): number {
+  const start = new Date(checkIn);
+  const end = new Date(checkOut);
+  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 const Rentals = () => {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("location") || "");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("location") || searchParams.get("brand") || "");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Auth state for voice search gating
@@ -142,6 +104,9 @@ const Rentals = () => {
   const { data: favoriteIds = [] } = useFavoriteIds();
   const toggleFavoriteMutation = useToggleFavorite();
   const { toast } = useToast();
+
+  // Real listings from database
+  const { data: listings = [], isLoading, error: listingsError } = useActiveListings();
 
   // Voice search integration
   const {
@@ -162,7 +127,7 @@ const Rentals = () => {
     }
   }, [isAuthenticated, isCallActive, stopVoiceSearch]);
 
-  const toggleLike = (id: number) => {
+  const toggleLike = (id: string) => {
     if (!isAuthenticated) {
       toast({
         title: "Sign in required",
@@ -170,20 +135,23 @@ const Rentals = () => {
       });
       return;
     }
-    toggleFavoriteMutation.mutate(String(id));
+    toggleFavoriteMutation.mutate(id);
   };
 
   // Filter listings by search query
   const filteredListings = searchQuery.trim()
-    ? allListings.filter((listing) => {
+    ? listings.filter((listing) => {
         const q = searchQuery.toLowerCase();
+        const name = getListingDisplayName(listing).toLowerCase();
+        const location = getListingLocation(listing).toLowerCase();
+        const brand = getListingBrandLabel(listing).toLowerCase();
         return (
-          listing.location.toLowerCase().includes(q) ||
-          listing.name.toLowerCase().includes(q) ||
-          listing.resort.toLowerCase().includes(q)
+          location.includes(q) ||
+          name.includes(q) ||
+          brand.includes(q)
         );
       })
-    : allListings;
+    : listings;
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredListings.length / ITEMS_PER_PAGE));
@@ -236,8 +204,14 @@ const Rentals = () => {
                     isCallActive={isCallActive}
                     onStart={startVoiceSearch}
                     onStop={stopVoiceSearch}
-                    disabled={!isAuthenticated}
-                    disabledReason={!isAuthenticated ? "Sign in to use voice search" : undefined}
+                    disabled={!isAuthenticated || listings.length === 0}
+                    disabledReason={
+                      !isAuthenticated
+                        ? "Sign in to use voice search"
+                        : listings.length === 0
+                          ? "No listings available for voice search"
+                          : undefined
+                    }
                   />
                 )}
               </div>
@@ -292,7 +266,7 @@ const Rentals = () => {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">
-                {filteredListings.length} properties found
+                {filteredListings.length} {filteredListings.length === 1 ? "property" : "properties"} found
               </span>
               <div className="flex border rounded-lg overflow-hidden">
                 <button
@@ -435,6 +409,88 @@ const Rentals = () => {
             </div>
           )}
 
+          {/* Search context banner */}
+          {searchQuery.trim() && (
+            <div className="flex items-center gap-2 mb-6 p-3 bg-muted/50 rounded-lg">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Showing results for "<span className="font-medium text-foreground">{searchQuery}</span>"
+              </span>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="ml-auto text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-16">
+              <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading available properties...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {listingsError && !isLoading && (
+            <div className="text-center py-16">
+              <X className="w-12 h-12 text-destructive mx-auto mb-4" />
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                Unable to load listings
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Something went wrong loading properties. Please try again.
+              </p>
+            </div>
+          )}
+
+          {/* Empty State — No listings in DB */}
+          {!isLoading && !listingsError && listings.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Home className="w-10 h-10 text-primary" />
+              </div>
+              <h3 className="font-display text-2xl font-bold text-foreground mb-3">
+                Our Marketplace is Launching Soon!
+              </h3>
+              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+                We're onboarding property owners and building an amazing selection of vacation rentals.
+                Be among the first to list or browse when we launch.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/list-property">
+                  <Button size="lg">
+                    <Home className="w-4 h-4 mr-2" />
+                    List Your Property
+                  </Button>
+                </Link>
+                <Link to="/bidding">
+                  <Button variant="outline" size="lg">
+                    Browse Bidding Marketplace
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Empty search results */}
+          {!isLoading && !listingsError && listings.length > 0 && filteredListings.length === 0 ? (
+            <div className="text-center py-16">
+              <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                No properties found
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                We couldn't find any properties matching "{searchQuery}". Try a different location or browse all available rentals.
+              </p>
+              <Button variant="outline" onClick={() => setSearchQuery("")}>
+                View All Properties
+              </Button>
+            </div>
+          ) : !isLoading && !listingsError && filteredListings.length > 0 && (
+          <>
           {/* Results Grid */}
           <div
             className={
@@ -443,88 +499,105 @@ const Rentals = () => {
                 : "flex flex-col gap-4"
             }
           >
-            {paginatedListings.map((listing) => (
-              <Link
-                key={listing.id}
-                to={`/property/${listing.id}`}
-                className={`group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${
-                  viewMode === "list" ? "flex" : ""
-                }`}
-              >
-                {/* Image */}
-                <div
-                  className={`relative overflow-hidden ${
-                    viewMode === "list" ? "w-72 h-48" : "h-52"
+            {paginatedListings.map((listing) => {
+              const nights = calculateNights(listing.check_in_date, listing.check_out_date);
+              const pricePerNight = nights > 0 ? Math.round(listing.final_price / nights) : listing.final_price;
+              const image = getListingImage(listing);
+              const displayName = getListingDisplayName(listing);
+              const location = getListingLocation(listing);
+              const brandLabel = getListingBrandLabel(listing);
+              const rating = listing.property.resort?.guest_rating;
+
+              return (
+                <Link
+                  key={listing.id}
+                  to={`/property/${listing.id}`}
+                  className={`group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${
+                    viewMode === "list" ? "flex" : ""
                   }`}
                 >
-                  <img
-                    src={listing.image}
-                    alt={listing.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
-                    {listing.badge}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleLike(listing.id);
-                    }}
-                    className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+                  {/* Image */}
+                  <div
+                    className={`relative overflow-hidden bg-muted ${
+                      viewMode === "list" ? "w-72 h-48" : "h-52"
+                    }`}
                   >
-                    <Heart
-                      className={`w-4 h-4 transition-colors ${
-                        favoriteIds.includes(String(listing.id))
-                          ? "fill-accent text-accent"
-                          : "text-foreground"
-                      }`}
-                    />
-                  </button>
-                  <span className="absolute bottom-3 left-3 px-2 py-1 text-xs font-bold bg-accent text-accent-foreground rounded">
-                    Save {Math.round((1 - listing.pricePerNight / listing.originalPrice) * 100)}%
-                  </span>
-                </div>
-
-                {/* Content */}
-                <div className="p-4 flex-1">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {listing.location}
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
-                    {listing.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-primary text-primary" />
-                    {listing.resort}
-                  </p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-warning text-warning" />
-                      <span className="font-semibold text-sm">{listing.rating}</span>
-                    </div>
-                    <span className="text-muted-foreground text-sm">
-                      ({listing.reviews} reviews)
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={displayName}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
+                        <Home className="w-12 h-12" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 left-3 px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+                      {brandLabel}
                     </span>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleLike(listing.id);
+                      }}
+                      className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-colors ${
+                          favoriteIds.includes(listing.id)
+                            ? "fill-accent text-accent"
+                            : "text-foreground"
+                        }`}
+                      />
+                    </button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-muted-foreground text-sm line-through">
-                        ${listing.originalPrice}
+
+                  {/* Content */}
+                  <div className="p-4 flex-1">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {location}
+                    </div>
+                    <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+                      {displayName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                      {rating && (
+                        <>
+                          <Star className="w-3 h-3 fill-warning text-warning" />
+                          <span className="font-semibold">{rating}</span>
+                          <span className="mx-1">•</span>
+                        </>
+                      )}
+                      {new Date(listing.check_in_date).toLocaleDateString()} — {new Date(listing.check_out_date).toLocaleDateString()}
+                    </p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs text-muted-foreground">
+                        {nights} nights
                       </span>
-                      <div className="text-foreground">
-                        <span className="font-display text-xl font-bold">${listing.pricePerNight}</span>
-                        <span className="text-muted-foreground text-sm"> / night</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-foreground">
+                          <span className="font-display text-xl font-bold">${listing.final_price.toLocaleString()}</span>
+                          <span className="text-muted-foreground text-sm"> total</span>
+                        </div>
+                        {nights > 0 && (
+                          <span className="text-muted-foreground text-xs">
+                            ${pricePerNight}/night
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        <Users className="w-3 h-3 inline mr-1" />
+                        {listing.property.sleeps} guests • {listing.property.bedrooms} BR
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      <Users className="w-3 h-3 inline mr-1" />
-                      {listing.sleeps} guests • {listing.bedrooms} BR
-                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Pagination */}
@@ -556,6 +629,8 @@ const Rentals = () => {
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
+          )}
+          </>
           )}
         </div>
       </section>
