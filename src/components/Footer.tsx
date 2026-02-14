@@ -98,6 +98,11 @@ const Footer = () => {
               <Link to="/terms" className="text-white/50 hover:text-white transition-colors">Terms of Service</Link>
             </div>
           </div>
+          <div className="text-center mt-4">
+            <span className="text-xs text-white/30 font-mono">
+              v{__APP_VERSION__}.{__BUILD_NUMBER__} · {__BUILD_HASH__}
+            </span>
+          </div>
         </div>
       </div>
     </footer>
