@@ -25,7 +25,8 @@ mermaid.initialize({
     fontFamily: 'Roboto, sans-serif',
     fontSize: '14px',
     // Edge label styling — dark text on a visible background
-    edgeLabelBackground: '#e2e8f0',
+    edgeLabelBackground: '#cbd5e1',
+    edgeLabelColor: '#1e293b',
   },
   flowchart: {
     htmlLabels: true,
