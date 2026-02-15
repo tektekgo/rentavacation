@@ -63,25 +63,20 @@ git push
 
 ## 🎯 CURRENT FOCUS
 
-**Active Phase:** Phase 8 — Testing Infrastructure ✅
+**Active Phase:** Phase 9 — Voice Toggles, Membership Tiers & Commission ✅
 **Started:** February 14, 2026
 
 ### Working on TODAY:
-- [x] Install dependencies (Vitest coverage, Playwright, Percy, Husky, Lighthouse CI) ✅
-- [x] Configure vitest.config.ts with coverage, Qase reporter ✅
-- [x] Create Playwright + Lighthouse configs ✅
-- [x] Set up Husky pre-commit hooks with lint-staged ✅
-- [x] Create test helpers (renderWithProviders, supabase mock, fixtures) ✅
-- [x] Write P0 unit tests (cancellation, social proof, utils — 53 tests) ✅
-- [x] Write P0 integration tests (useListings, useFavorites, AuthContext — 18 tests) ✅
-- [x] Create GitHub Actions CI pipeline (lint, test, e2e, visual, lighthouse) ✅
-- [x] Create E2E smoke tests (homepage, rentals) ✅
-- [x] Create Percy visual regression tests ✅
-- [x] Create CLAUDE.md with mandatory testing rules ✅
-- [x] Write testing documentation (guidelines, operational guide) ✅
+- [x] Track A: Database migration (voice toggles, membership tiers, user memberships, RPCs) ✅
+- [x] Track B: Voice toggle admin UI + DB-controlled enforcement (replace env var) ✅
+- [x] Track C: Membership tier data model + display (types, hooks, components, admin/owner tabs) ✅
+- [x] Track D: Commission visibility + configuration (tier-based discounts, edge function) ✅
+- [x] Track E: Quota tier integration (tier-based voice quotas replacing hardcoded 10/day) ✅
+- [x] Tests: useMembership + useVoiceFeatureFlags tests (78 total tests passing) ✅
+- [x] Migration deployed to DEV Supabase ✅
 
 ### Recently Completed:
-- [x] **TypeScript Build Fixes & Architecture Diagrams** — Supabase v2 type fixes, flow manifests, Architecture page (Feb 14)
+- [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
 - [x] **Phase 8: Testing Infrastructure** — 71 tests, CI/CD, E2E, Percy, Lighthouse (Feb 14)
 - [x] **Phase 7: UI Excellence & Social Proof** — all 4 tracks complete (Feb 14)
 - [x] **Phase 6: Role Upgrade System & Dead-End UX** — signup role selection, role upgrade requests, dead-end fixes (Feb 14)
@@ -162,7 +157,30 @@ None
 
 ---
 
-### 4. 🧪 Testing Infrastructure Setup ✅ COMPLETE
+### 4. 🔊 Phase 9: Voice Toggles, Membership Tiers & Commission ✅ COMPLETE
+**Status:** ✅ Complete (Feb 14, 2026) — Commit `b88e108`
+**Docs:** Migration `011_voice_toggles_membership_tiers.sql`
+
+**Tracks Completed:**
+- [x] **Track A: Database Migration** — Voice toggle settings, membership_tiers (6 tiers), user_memberships, RLS, tier-aware RPCs, updated handle_new_user trigger
+- [x] **Track B: Voice Toggle Admin UI** — Admin voice feature toggles (master + per-section), replaced env var with DB-controlled enforcement
+- [x] **Track C: Membership Tier Display** — TypeScript types, hooks, MembershipBadge, MembershipTierCard, MembershipPlans, AdminMemberships tab, Owner Membership tab
+- [x] **Track D: Commission Configuration** — Configurable platform commission (15% base), tier-based discounts (Pro -2%, Business -5%), updated edge function
+- [x] **Track E: Quota Tier Integration** — Tier-based voice quotas (5/25/unlimited) replacing hardcoded 10/day
+
+**Key Files Created/Modified:**
+- `supabase/migrations/011_voice_toggles_membership_tiers.sql` (NEW) — Full migration
+- `src/hooks/useVoiceFeatureFlags.ts` (NEW) — Lightweight voice toggle hook
+- `src/hooks/useMembership.ts` (NEW) — Membership tier & user membership hooks
+- `src/hooks/useOwnerCommission.ts` (NEW) — Owner commission rate hook
+- `src/components/MembershipBadge.tsx`, `MembershipTierCard.tsx`, `MembershipPlans.tsx` (NEW)
+- `src/components/admin/AdminMemberships.tsx` (NEW) — Admin membership overview
+- `src/components/admin/SystemSettings.tsx` — Voice toggles card, commission card, tier quota table
+- `supabase/functions/create-booking-checkout/index.ts` — Tier-aware commission calculation
+
+---
+
+### 5. 🧪 Testing Infrastructure Setup ✅ COMPLETE
 **Status:** ✅ Complete (Feb 14, 2026)
 **Docs:** `docs/testing/`, `CLAUDE.md`
 
@@ -216,6 +234,78 @@ None
 ---
 
 ## ✅ COMPLETED PHASES
+
+<details>
+<summary><strong>Phase 9: Voice Toggles, Membership Tiers & Commission</strong> ✅ (Feb 14, 2026)</summary>
+
+**Completed:** February 14, 2026
+**Status:** Deployed to DEV Supabase
+**Commit:** `b88e108` (22 files changed, 1,927 insertions)
+
+**What Was Done:**
+
+Built infrastructure for admin-controlled voice feature toggles, a membership tier system, configurable platform commission, and tier-aware voice quotas.
+
+### Track A: Database Migration
+- `011_voice_toggles_membership_tiers.sql` with:
+  - 4 voice toggle settings in `system_settings` (master + search + listing + bidding)
+  - `platform_commission_rate` setting (15% base, 2% Pro discount, 5% Business discount)
+  - `membership_tiers` table with 6 seed tiers (3 traveler: Free/Plus/Premium, 3 owner: Free/Pro/Business)
+  - `user_memberships` table (one active membership per user)
+  - RLS policies for both tables
+  - `get_user_voice_quota()` — returns daily limit from tier (-1=unlimited)
+  - Updated `can_use_voice_search()` and `get_voice_searches_remaining()` to use tier quota
+  - `get_owner_commission_rate()` — agreement override > base rate - tier discount
+  - Updated `handle_new_user()` trigger to auto-assign default free tier on signup
+
+### Track B: Voice Toggle Admin UI + Enforcement
+- `useVoiceFeatureFlags.ts` — lightweight hook for any component to check DB-controlled voice toggles
+- `SystemSettings.tsx` — Voice Features card with master switch + 3 sub-toggles (listing/bidding "Coming Soon")
+- `Rentals.tsx` — replaced `VITE_FEATURE_VOICE_ENABLED` env var with `isFeatureActive('search')`
+- `useVoiceSearch.ts` — added DB toggle guard before VAPI call
+
+### Track C: Membership Tier Display
+- TypeScript types: `MembershipTier`, `UserMembership`, `UserMembershipWithTier`
+- `useMembership.ts` — `useMembershipTiers()`, `useMyMembership()`, `useTravelerTiers()`, `useOwnerTiers()`
+- `MembershipBadge.tsx` — tier-colored badge (gray/blue/amber)
+- `MembershipTierCard.tsx` — full card with price, features, voice quota, commission, listing limit
+- `MembershipPlans.tsx` — 3-card pricing grid, auto-detects role, highlights current tier
+- `AdminMemberships.tsx` — admin table with tier distribution summary
+- `OwnerDashboard.tsx` — 9th tab "Membership" with owner tier plans
+- `AdminDashboard.tsx` — 13th tab "Memberships"
+
+### Track D: Commission Configuration
+- `useOwnerCommission.ts` — calls `get_owner_commission_rate` RPC
+- `SystemSettings.tsx` — Platform Commission card with editable rate + effective rates summary
+- `OwnerDashboard.tsx` — 5th stat card "Commission Rate" with upgrade prompt
+- `OwnerEarnings.tsx` — commission summary card at top
+- `create-booking-checkout/index.ts` — tier-aware commission (replaces hardcoded `|| 15`)
+
+### Track E: Quota Tier Integration
+- `useVoiceQuota.ts` — fetches both remaining + daily limit, `isUnlimited = dailyLimit === -1`
+- `VoiceQuotaIndicator.tsx` — "X of Y remaining today" / "Unlimited searches" / "Daily limit reached"
+- `SystemSettings.tsx` — Voice Quotas by Tier table from `membership_tiers`
+
+### Tests
+- `useMembership.test.ts` — 5 tests
+- `useVoiceFeatureFlags.test.ts` — 2 tests
+- Total: 78 tests passing
+
+**New Files (10):**
+- `supabase/migrations/011_voice_toggles_membership_tiers.sql`
+- `src/hooks/useVoiceFeatureFlags.ts`, `src/hooks/useMembership.ts`, `src/hooks/useOwnerCommission.ts`
+- `src/components/MembershipBadge.tsx`, `MembershipTierCard.tsx`, `MembershipPlans.tsx`
+- `src/components/admin/AdminMemberships.tsx`
+- `src/test/fixtures/memberships.ts`
+- `src/hooks/useMembership.test.ts`, `src/hooks/useVoiceFeatureFlags.test.ts`
+
+**Modified Files (12):**
+- `src/types/database.ts`, `src/hooks/useSystemSettings.ts`, `src/hooks/useVoiceQuota.ts`, `src/hooks/useVoiceSearch.ts`
+- `src/components/admin/SystemSettings.tsx`, `src/components/VoiceQuotaIndicator.tsx`
+- `src/pages/Rentals.tsx`, `src/pages/OwnerDashboard.tsx`, `src/pages/AdminDashboard.tsx`
+- `src/components/owner/OwnerEarnings.tsx`
+- `supabase/functions/create-booking-checkout/index.ts`
+</details>
 
 <details>
 <summary><strong>TypeScript Build Fixes & Architecture Diagrams</strong> ✅ (Feb 14, 2026)</summary>
@@ -651,25 +741,26 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 ---
 
 ### DEC-003: Voice Usage Quota Design
-**Date:** February 15, 2026  
-**Decision:** 10 searches/day per user, RAV team unlimited (999 sentinel)  
-**Status:** ✅ Implemented (Phase 3)
+**Date:** February 15, 2026 (Updated Feb 14, 2026 — Phase 9)
+**Decision:** Tier-based quotas: Free=5/day, Plus/Pro=25/day, Premium/Business/RAV=unlimited
+**Status:** ✅ Implemented (Phase 3 → upgraded in Phase 9)
 
 **Design Choices:**
 - Counter increments only after successful search (not on VAPI call start)
-- RAV team returns 999 from `get_voice_searches_remaining` (unlimited sentinel)
+- RAV team returns -1 from `get_user_voice_quota` (unlimited)
 - Quota resets at midnight UTC
 - Old usage records cleaned up after 90 days
-- Daily limit hardcoded in PostgreSQL (not yet configurable via UI)
+- **Phase 9 upgrade:** Quotas now driven by `membership_tiers.voice_quota_daily` instead of hardcoded 10
+- Auto-assigned free tier on signup via `handle_new_user()` trigger
 
 **Reasoning:**
-- 10/day allows serious evaluation without abuse
-- RAV team needs unlimited for testing/demos
-- Daily reset = simple mental model
+- Tier-based quotas incentivize upgrades
+- Free tier (5/day) balances access with cost control
+- Paid tiers (25/unlimited) reward commitment
 
 **Trade-offs:**
 - No carryover of unused searches
-- Fixed limit (not personalized)
+- Billing/subscription not yet implemented (tier assignment is manual for paid tiers)
 
 ---
 
@@ -708,6 +799,36 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 - Commit count auto-increments with each commit
 - Short SHA for instant deploy verification
 - Vercel needs `VERCEL_GIT_FETCH_DEPTH=0` env var for full clone
+
+---
+
+### DEC-008: Membership Tier & Commission Architecture
+**Date:** February 14, 2026
+**Decision:** 6-tier system (3 traveler + 3 owner) with configurable commission and DB-controlled voice toggles
+**Status:** ✅ Implemented (Phase 9)
+
+**Design Choices:**
+- `membership_tiers` as reference table (not hardcoded) — admin can add/modify tiers
+- One active membership per user (`user_memberships.user_id` UNIQUE)
+- Commission: per-owner agreement override > platform base rate - tier discount
+- Voice toggles: master kill switch + per-feature toggles in `system_settings`
+- Free tier auto-assigned on signup via trigger
+- Billing deferred — tier assignment is manual for paid tiers until Stripe Subscriptions integrated
+
+**Tier Structure:**
+| Tier | Voice/day | Commission Discount | Listing Limit |
+|------|-----------|--------------------|----|
+| Traveler Free | 5 | - | - |
+| Traveler Plus ($5/mo) | 25 | - | - |
+| Traveler Premium ($15/mo) | unlimited | - | - |
+| Owner Free | 5 | 0% | 3 |
+| Owner Pro ($10/mo) | 25 | 2% | 10 |
+| Owner Business ($25/mo) | unlimited | 5% | unlimited |
+
+**Reasoning:**
+- Infrastructure-first approach: build data model before billing
+- Configurable commission allows A/B testing and per-owner deals
+- DB-controlled toggles eliminate deploy cycles for feature flags
 
 ---
 
