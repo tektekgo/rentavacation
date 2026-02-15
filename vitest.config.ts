@@ -9,6 +9,20 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      include: ["src/lib/**", "src/hooks/**", "src/contexts/**"],
+      exclude: ["src/hooks/use-mobile.tsx", "src/hooks/use-toast.ts"],
+      thresholds: {
+        statements: 25,
+        branches: 25,
+        functions: 30,
+        lines: 25,
+      },
+    },
+    reporters: process.env.QASE_MODE === "testops"
+      ? ["default", "vitest-qase-reporter"]
+      : ["default"],
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },

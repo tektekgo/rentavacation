@@ -103,3 +103,96 @@ See `src/flows/types.ts` for the complete TypeScript interfaces:
 - Deploy via Supabase CLI (not in-editor)
 - Shared email template in `supabase/functions/_shared/`
 - Required secrets: `RESEND_API_KEY`, `STRIPE_SECRET_KEY`
+
+---
+
+## Testing Requirements (MANDATORY)
+
+### Before Completing Any Task
+
+1. **Run tests**: `npm test` — all tests must pass
+2. **Run type check**: `npx tsc --noEmit` — no type errors
+3. **Run build**: `npm run build` — build must succeed
+
+### When Writing New Code
+
+- **New utility/lib function** → Write unit tests in the same directory (`*.test.ts`)
+- **New hook** → Write integration tests with mocked supabase (`*.test.ts`)
+- **New component with logic** → Write render tests (`*.test.tsx`)
+- **Bug fix** → Write a regression test that fails without the fix
+
+### Test Patterns
+
+```typescript
+// Unit test (pure functions)
+import { describe, it, expect } from "vitest";
+import { myFunction } from "./myModule";
+
+describe("myFunction", () => {
+  it("does the expected thing", () => {
+    expect(myFunction(input)).toBe(expected);
+  });
+});
+
+// Hook test (with providers)
+import { renderHook, waitFor } from "@testing-library/react";
+import { createHookWrapper } from "@/test/helpers/render";
+
+const { result } = renderHook(() => useMyHook(), {
+  wrapper: createHookWrapper(),
+});
+await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+// Supabase mocking
+vi.mock("@/lib/supabase", () => ({
+  supabase: { from: vi.fn() },
+  isSupabaseConfigured: () => true,
+}));
+```
+
+### Coverage Thresholds (Enforced by CI)
+
+| Metric     | Minimum |
+|------------|---------|
+| Statements | 25%     |
+| Branches   | 25%     |
+| Functions  | 30%     |
+| Lines      | 25%     |
+
+Coverage applies to: `src/lib/**`, `src/hooks/**`, `src/contexts/**`
+
+### Test File Locations
+
+| Source | Test |
+|--------|------|
+| `src/lib/foo.ts` | `src/lib/foo.test.ts` |
+| `src/hooks/useFoo.ts` | `src/hooks/useFoo.test.ts` |
+| `src/contexts/FooContext.tsx` | `src/contexts/FooContext.test.tsx` |
+
+### Test Helpers Available
+
+- `src/test/helpers/render.tsx` — `renderWithProviders()`, `createHookWrapper()`
+- `src/test/helpers/supabase-mock.ts` — `createSupabaseMock()`, `emptyResponse()`, `errorResponse()`
+- `src/test/fixtures/listings.ts` — `mockListing()`, `mockListings(count)`
+- `src/test/fixtures/users.ts` — `mockUser()`, `mockSession()`, `mockAuthContext()`
+
+### Definition of Done
+
+A task is only done when ALL of the following are true:
+
+- [ ] Feature code is written
+- [ ] Tests are written and passing (`npm test`)
+- [ ] Types check (`npx tsc --noEmit`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] No lint errors (`npm run lint`)
+
+### Commands Reference
+
+| Command | Purpose |
+|---------|---------|
+| `npm test` | Run all unit + integration tests |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint check |

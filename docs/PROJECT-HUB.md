@@ -3,7 +3,7 @@
 > **The Single Source of Truth** for project status, roadmap, and decisions
 > **Last Updated:** February 14, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
-> **App Version:** v0.7.0 (build version visible in footer)
+> **App Version:** v0.8.0 (build version visible in footer)
 
 ---
 
@@ -63,16 +63,26 @@ git push
 
 ## 🎯 CURRENT FOCUS
 
-**Active Phase:** Phase 7 — UI Excellence & Social Proof
+**Active Phase:** Phase 8 — Testing Infrastructure ✅
 **Started:** February 14, 2026
 
 ### Working on TODAY:
-- [x] Track A: Social Proof (favorites count, freshness badges, popularity indicators) ✅
-- [x] Track B: Content Replacement (honest stats, remove fake numbers) ✅
-- [x] Track C: Visual Polish (card enhancements, verified badges, gradient overlays) ✅
-- [x] Track D: Discovery (similar listings, "you may also like") ✅
+- [x] Install dependencies (Vitest coverage, Playwright, Percy, Husky, Lighthouse CI) ✅
+- [x] Configure vitest.config.ts with coverage, Qase reporter ✅
+- [x] Create Playwright + Lighthouse configs ✅
+- [x] Set up Husky pre-commit hooks with lint-staged ✅
+- [x] Create test helpers (renderWithProviders, supabase mock, fixtures) ✅
+- [x] Write P0 unit tests (cancellation, social proof, utils — 53 tests) ✅
+- [x] Write P0 integration tests (useListings, useFavorites, AuthContext — 18 tests) ✅
+- [x] Create GitHub Actions CI pipeline (lint, test, e2e, visual, lighthouse) ✅
+- [x] Create E2E smoke tests (homepage, rentals) ✅
+- [x] Create Percy visual regression tests ✅
+- [x] Create CLAUDE.md with mandatory testing rules ✅
+- [x] Write testing documentation (guidelines, operational guide) ✅
 
 ### Recently Completed:
+- [x] **TypeScript Build Fixes & Architecture Diagrams** — Supabase v2 type fixes, flow manifests, Architecture page (Feb 14)
+- [x] **Phase 8: Testing Infrastructure** — 71 tests, CI/CD, E2E, Percy, Lighthouse (Feb 14)
 - [x] **Phase 7: UI Excellence & Social Proof** — all 4 tracks complete (Feb 14)
 - [x] **Phase 6: Role Upgrade System & Dead-End UX** — signup role selection, role upgrade requests, dead-end fixes (Feb 14)
 - [x] **Phase 5: Core Business Flows** — real listings, checkout page, booking flow (Feb 13)
@@ -152,33 +162,20 @@ None
 
 ---
 
-### 4. 🧪 Testing Infrastructure Setup (2-3 weeks)
-**Why:** Need safety net before adding more features  
-**Blocking:** Phase 5 (Advanced Features)  
-**Docs:** `docs/testing/`
+### 4. 🧪 Testing Infrastructure Setup ✅ COMPLETE
+**Status:** ✅ Complete (Feb 14, 2026)
+**Docs:** `docs/testing/`, `CLAUDE.md`
 
-**Week 1: Foundation (5-8 hours)**
-- [ ] Install Vitest + Playwright
-- [ ] Configure test environment
-- [ ] Setup GitHub Actions CI/CD
-- [ ] Write 25-35 P0 tests (auth, payment, search)
-
-**Week 2: Coverage Expansion (5-8 hours)**
-- [ ] Add 35 more tests (dashboards, bidding, emails)
-- [ ] Setup Percy visual regression
-- [ ] Target: 60-80 total tests
-
-**Week 3: Polish & Automation (3-5 hours)**
-- [ ] Coverage reporting
-- [ ] Documentation (TESTING-GUIDELINES.md)
-- [ ] Process integration (update feature dev checklist)
-
-**Resources:**
-- Strategy: `docs/testing/TEST-STRATEGY.md`
-- Checklist: `docs/testing/TEST-SETUP-CHECKLIST.md`
-- AI Prompts: `docs/testing/CLAUDE-CODE-PROMPTS.md`
-
-**Est. Time:** 2-3 weeks total
+**Delivered:**
+- [x] 71 automated tests (53 unit + 18 integration)
+- [x] Vitest + coverage (v8) with Qase reporter
+- [x] Playwright E2E smoke tests (homepage, rentals)
+- [x] Percy visual regression (4 page snapshots)
+- [x] Lighthouse CI (performance + accessibility)
+- [x] GitHub Actions CI pipeline (5 jobs)
+- [x] Husky pre-commit hooks + lint-staged
+- [x] CLAUDE.md mandatory testing rules
+- [x] Test helpers, fixtures, and documentation
 
 ---
 
@@ -219,6 +216,100 @@ None
 ---
 
 ## ✅ COMPLETED PHASES
+
+<details>
+<summary><strong>TypeScript Build Fixes & Architecture Diagrams</strong> ✅ (Feb 14, 2026)</summary>
+
+**Completed:** February 14, 2026
+
+**What Was Done:**
+
+Resolved TypeScript `never` type inference errors with Supabase v2, built a declarative architecture diagram system, and updated the traveler lifecycle flow.
+
+### TypeScript Build Fixes
+- Added `Relationships: []` to all table definitions in `src/types/database.ts`
+- Added missing RPC function signatures to fix Supabase v2 type inference
+- Applied pragmatic `as any` casts on Supabase query calls across 9 hook/component files
+- All files: `useListings.ts`, `useBidding.ts`, `useFavorites.ts`, `useRoleUpgrade.ts`, `useSystemSettings.ts`, `useVoiceQuota.ts`, `AuthContext.tsx`, `AdminUsers.tsx`, `RoleUpgradeRequests.tsx`, `OwnerVerification.tsx`
+
+### Architecture Page & Flow Manifests
+- Created `/architecture` page with auto-generated Mermaid diagrams
+- Created declarative flow manifest system in `src/flows/`:
+  - `types.ts` — `FlowDefinition`, `FlowStep`, `FlowBranch` types + `flowToMermaid()` converter
+  - `owner-lifecycle.ts` — Property Owner Journey (signup → payout)
+  - `traveler-lifecycle.ts` — Traveler Journey with 3-path booking model (direct, bidding, travel requests)
+  - `admin-lifecycle.ts` — RAV Admin Operations (approvals → financials)
+  - `index.ts` — Re-exports all flows
+- Fixed Mermaid edge label visibility: `edgeLabelBackground: '#cbd5e1'`, `edgeLabelColor: '#1e293b'`
+
+### CLAUDE.md Flow Manifest Convention
+- Added mandatory rules for updating flow manifests when adding routes/components
+- Schema reference and examples for AI agents
+
+**New Files:**
+- `src/flows/types.ts`, `src/flows/owner-lifecycle.ts`, `src/flows/traveler-lifecycle.ts`, `src/flows/admin-lifecycle.ts`, `src/flows/index.ts`
+- `src/pages/Architecture.tsx`
+
+**Modified Files:**
+- `src/types/database.ts` — Relationships + RPC signatures
+- `CLAUDE.md` — Flow manifest conventions
+- 9 hook/component files — `as any` type casts
+</details>
+
+<details>
+<summary><strong>Phase 8: Testing Infrastructure</strong> ✅ (Feb 14, 2026)</summary>
+
+**Completed:** February 14, 2026
+
+**What Was Done:**
+
+Built a comprehensive testing infrastructure from scratch with automated CI/CD, pre-commit hooks, and AI-integrated testing rules.
+
+### Foundation
+- Vitest 3.2.4 with v8 coverage provider
+- Coverage thresholds: 30% statements, 25% branches, 30% functions, 30% lines
+- Qase.io reporter integration (project RAV)
+- Test helpers: `renderWithProviders()`, `createHookWrapper()`, supabase mock factory
+- Fixtures: `mockListing()`, `mockListings()`, `mockUser()`, `mockSession()`, `mockAuthContext()`
+
+### Unit Tests (53 tests)
+- `cancellation.test.ts` — 31 tests: all 4 policies × boundary days, getDaysUntilCheckin, getRefundDescription, estimatePayoutDate
+- `useListingSocialProof.test.ts` — 15 tests: getDaysAgo, getFreshnessLabel, getPopularityLabel
+- `utils.test.ts` — 7 tests: cn() tailwind merge
+
+### Integration Tests (18 tests)
+- `useListings.test.ts` — 6 tests: useActiveListings, useListing, useActiveListingsCount
+- `useFavorites.test.ts` — 6 tests: useFavoriteIds, useToggleFavorite (add/remove)
+- `AuthContext.test.tsx` — 6 tests: unauthenticated state, role checks, signOut, signUp, signIn
+
+### E2E Tests (Playwright)
+- Homepage smoke tests (hero, featured, trust badges, navigation, footer version)
+- Rentals page smoke tests (page load, filters, listings/empty state)
+
+### Visual Regression (Percy)
+- 4 Percy snapshots: Homepage, Rentals, Login, Signup
+
+### CI/CD (GitHub Actions)
+- 5-job pipeline: lint+typecheck → unit tests → e2e → visual regression → lighthouse
+- Qase reporting, coverage artifacts, Playwright reports
+- Percy runs on PRs only
+
+### Developer Experience
+- Husky pre-commit hook with lint-staged
+- `CLAUDE.md` — mandatory testing rules for AI agents
+- Testing guidelines and operational guide documentation
+
+**New Files:**
+- `CLAUDE.md`, `playwright.config.ts`, `lighthouserc.json`
+- `.github/workflows/ci.yml`, `.husky/pre-commit`
+- `src/test/setup.ts` (modified), `src/test/helpers/render.tsx`, `src/test/helpers/supabase-mock.ts`
+- `src/test/fixtures/listings.ts`, `src/test/fixtures/users.ts`
+- `src/lib/cancellation.test.ts`, `src/lib/utils.test.ts`
+- `src/hooks/useListings.test.ts`, `src/hooks/useFavorites.test.ts`, `src/hooks/useListingSocialProof.test.ts`
+- `src/contexts/AuthContext.test.tsx`
+- `e2e/smoke/homepage.spec.ts`, `e2e/smoke/rentals.spec.ts`, `e2e/visual/pages.spec.ts`
+- `docs/testing/TESTING-GUIDELINES.md`, `docs/testing/OPERATIONAL-GUIDE.md`
+</details>
 
 <details>
 <summary><strong>Phase 7: UI Excellence & Social Proof</strong> ✅ (Feb 14, 2026)</summary>
