@@ -161,17 +161,29 @@ function StepTable({ flow }: { flow: FlowDefinition }) {
 }
 
 export default function Architecture() {
-  const { isRavTeam, isLoading } = useAuth();
+  const { user, roles, isRavTeam, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [rolesChecked, setRolesChecked] = useState(false);
 
+  // Wait for roles to load — they arrive async after isLoading goes false
   useEffect(() => {
-    if (!isLoading && !isRavTeam()) {
+    if (isLoading) return;
+    if (!user) {
+      navigate('/login', { state: { from: '/architecture' } });
+      return;
+    }
+    // Give roles time to load (they're fetched in setTimeout in AuthContext)
+    if (roles.length === 0 && !rolesChecked) {
+      const timer = setTimeout(() => setRolesChecked(true), 1500);
+      return () => clearTimeout(timer);
+    }
+    if ((roles.length > 0 || rolesChecked) && !isRavTeam()) {
       navigate('/');
     }
-  }, [isLoading, isRavTeam, navigate]);
+  }, [isLoading, user, roles, rolesChecked, isRavTeam, navigate]);
 
-  if (isLoading) return null;
-  if (!isRavTeam()) return null;
+  if (isLoading || (!rolesChecked && roles.length === 0)) return null;
+  if (!user || !isRavTeam()) return null;
 
   return (
     <div className="min-h-screen bg-background">
