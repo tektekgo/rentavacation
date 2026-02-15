@@ -3,7 +3,7 @@ import type { FlowDefinition } from './types';
 export const travelerLifecycle: FlowDefinition = {
   id: 'traveler-lifecycle',
   label: 'Traveler Journey',
-  description: 'End-to-end lifecycle from browsing to check-in for travelers booking vacation rentals.',
+  description: 'End-to-end lifecycle from browsing to check-in. Travelers can book directly, bid on listings, or post travel requests for owners to propose against.',
   primaryRole: 'renter',
   roleEmoji: '🧳',
   direction: 'TD',
@@ -43,8 +43,8 @@ export const travelerLifecycle: FlowDefinition = {
       description: 'Browse, filter, and search active listings',
       tables: ['listings', 'properties'],
       branches: [
-        { condition: 'Found listing', targetStepId: 'view_property' },
-        { condition: 'Post travel request', targetStepId: 'post_travel_request' },
+        { condition: 'Found listing', targetStepId: 'view_property', label: 'View listing' },
+        { condition: 'Post travel request', targetStepId: 'post_travel_request', label: 'Request vacation' },
       ],
     },
     {
@@ -52,11 +52,11 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/property/:id',
       label: 'View Property',
       component: 'PropertyDetail',
-      description: 'View listing details, photos, amenities, pricing',
+      description: 'View listing details, photos, amenities, pricing. Owner decides at listing time whether bidding is open.',
       tables: ['listings', 'properties'],
       branches: [
-        { condition: 'Book now', targetStepId: 'checkout' },
-        { condition: 'Place bid', targetStepId: 'place_bid' },
+        { condition: 'Listing allows direct booking', targetStepId: 'checkout', label: 'Book directly' },
+        { condition: 'Listing is open to bidding', targetStepId: 'place_bid', label: 'Place bid' },
       ],
     },
     {
@@ -64,10 +64,10 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/property/:id',
       label: 'Place Bid',
       component: 'BidFormDialog',
-      description: 'Submit a bid offer on a biddable listing',
+      description: 'Submit a bid offer on a biddable listing (owner opted in at listing time)',
       tables: ['listing_bids', 'notifications'],
       branches: [
-        { condition: 'Bid accepted', targetStepId: 'checkout', label: 'Accepted' },
+        { condition: 'Bid accepted', targetStepId: 'checkout', label: 'Accepted → Pay' },
         { condition: 'Counter-offer', targetStepId: 'place_bid', label: 'Counter', edgeStyle: 'dashed' },
         { condition: 'Rejected', targetStepId: 'search_listings', label: 'Rejected', edgeStyle: 'dashed' },
       ],
@@ -77,10 +77,10 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/bidding',
       label: 'Post Travel Request',
       component: 'TravelRequestForm',
-      description: 'Create a reverse-auction travel request for owners to bid on',
+      description: 'Traveler posts a reverse-auction request specifying destination, dates, budget — owners respond with proposals',
       tables: ['travel_requests'],
       branches: [
-        { condition: 'Proposal received', targetStepId: 'review_proposals' },
+        { condition: 'Proposal received', targetStepId: 'review_proposals', label: 'Proposals in' },
       ],
     },
     {
@@ -88,11 +88,11 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/my-bids',
       label: 'Review Proposals',
       component: 'MyBidsDashboard',
-      description: 'Review owner proposals on travel request',
+      description: 'Review owner proposals on travel request and accept or reject',
       tables: ['travel_proposals'],
       branches: [
-        { condition: 'Accept proposal', targetStepId: 'checkout' },
-        { condition: 'Reject all', targetStepId: 'search_listings', edgeStyle: 'dashed' },
+        { condition: 'Accept proposal', targetStepId: 'checkout', label: 'Accept → Pay' },
+        { condition: 'Reject all', targetStepId: 'search_listings', label: 'Reject all', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -101,7 +101,7 @@ export const travelerLifecycle: FlowDefinition = {
       label: 'Stripe Checkout',
       component: 'Checkout',
       nodeStyle: 'external',
-      description: 'Secure payment via Stripe Checkout',
+      description: 'Secure payment via Stripe Checkout — full payment captured at booking',
       edgeFunctions: ['create-booking-checkout'],
       tables: ['bookings'],
     },
@@ -110,7 +110,7 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/booking-success',
       label: 'Booking Confirmed',
       component: 'BookingSuccess',
-      description: 'Payment confirmed, reservation details shown',
+      description: 'Payment confirmed, reservation details shown, funds held in escrow',
       edgeFunctions: ['verify-booking-payment'],
       tables: ['bookings', 'booking_confirmations'],
     },
