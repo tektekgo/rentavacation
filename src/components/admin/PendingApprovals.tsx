@@ -66,7 +66,7 @@ export function PendingApprovals() {
   const handleApprove = async (userId: string) => {
     setActionLoading(userId);
     try {
-      const { error: approveError } = await supabase.rpc("approve_user", {
+      const { error: approveError } = await (supabase.rpc as any)("approve_user", {
         _user_id: userId,
         _approved_by: user?.id,
       });
@@ -100,7 +100,7 @@ export function PendingApprovals() {
 
     setActionLoading(rejectDialog.userId);
     try {
-      const { error: rejectError } = await supabase.rpc("reject_user", {
+      const { error: rejectError } = await (supabase.rpc as any)("reject_user", {
         _user_id: rejectDialog.userId,
         _rejected_by: user?.id,
         _reason: rejectionReason || null,

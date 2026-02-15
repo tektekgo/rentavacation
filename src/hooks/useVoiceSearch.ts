@@ -146,7 +146,7 @@ export function useVoiceSearch() {
             // Increment voice search counter
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              await supabase.rpc("increment_voice_search_count", {
+              await (supabase.rpc as any)("increment_voice_search_count", {
                 _user_id: user.id,
               });
               refreshQuota();

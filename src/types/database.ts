@@ -15,10 +15,9 @@ export type CancellationPolicy = 'flexible' | 'moderate' | 'strict' | 'super_str
 
 export type CancellationStatus = 'pending' | 'approved' | 'denied' | 'counter_offer' | 'completed';
 
-// Owner trust & verification types
 export type OwnerTrustLevel = 'new' | 'verified' | 'trusted' | 'premium';
 
-export type VerificationDocType = 
+export type VerificationDocType =
   | 'timeshare_deed'
   | 'membership_certificate'
   | 'resort_contract'
@@ -29,7 +28,7 @@ export type VerificationDocType =
 
 export type VerificationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'expired';
 
-export type EscrowStatus = 
+export type EscrowStatus =
   | 'pending_confirmation'
   | 'confirmation_submitted'
   | 'verified'
@@ -160,6 +159,7 @@ export interface Database {
           rejection_reason?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       user_roles: {
         Row: {
@@ -179,6 +179,7 @@ export interface Database {
           user_id?: string;
           role?: AppRole;
         };
+        Relationships: [];
       };
       properties: {
         Row: {
@@ -231,13 +232,14 @@ export interface Database {
           unit_type_id?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       owner_agreements: {
         Row: {
           id: string;
           owner_id: string;
           status: AgreementStatus;
-          commission_rate: number; // Percentage RAV takes
+          commission_rate: number;
           markup_allowed: boolean;
           max_markup_percent: number | null;
           terms_accepted_at: string | null;
@@ -271,6 +273,7 @@ export interface Database {
           expiry_date?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       listings: {
         Row: {
@@ -280,9 +283,9 @@ export interface Database {
           status: ListingStatus;
           check_in_date: string;
           check_out_date: string;
-          owner_price: number; // Price owner wants
-          rav_markup: number; // RAV's markup amount
-          final_price: number; // What renter pays
+          owner_price: number;
+          rav_markup: number;
+          final_price: number;
           notes: string | null;
           cancellation_policy: CancellationPolicy;
           approved_by: string | null;
@@ -323,6 +326,7 @@ export interface Database {
           approved_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       cancellation_requests: {
         Row: {
@@ -378,6 +382,7 @@ export interface Database {
           refund_reference?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       bookings: {
         Row: {
@@ -436,6 +441,7 @@ export interface Database {
           payout_notes?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       owner_verifications: {
         Row: {
@@ -524,6 +530,7 @@ export interface Database {
           security_deposit_paid_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       verification_documents: {
         Row: {
@@ -579,6 +586,7 @@ export interface Database {
           expires_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       booking_confirmations: {
         Row: {
@@ -646,6 +654,7 @@ export interface Database {
           escrow_refunded_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       checkin_confirmations: {
         Row: {
@@ -707,6 +716,7 @@ export interface Database {
           resolution_notes?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       resorts: {
         Row: Resort;
@@ -716,6 +726,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Omit<Resort, 'id' | 'created_at'>>;
+        Relationships: [];
       };
       resort_unit_types: {
         Row: ResortUnitType;
@@ -725,6 +736,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Omit<ResortUnitType, 'id' | 'created_at'>>;
+        Relationships: [];
       };
       system_settings: {
         Row: {
@@ -753,6 +765,7 @@ export interface Database {
           updated_by?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       favorites: {
         Row: {
@@ -772,6 +785,7 @@ export interface Database {
           user_id?: string;
           property_id?: string;
         };
+        Relationships: [];
       };
       voice_search_usage: {
         Row: {
@@ -800,6 +814,7 @@ export interface Database {
           last_search_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       platform_guarantee_fund: {
         Row: {
@@ -834,9 +849,10 @@ export interface Database {
           claimed_at?: string | null;
           claim_reason?: string | null;
         };
+        Relationships: [];
       };
     };
-    Views: {};
+    Views: Record<string, never>;
     Functions: {
       has_role: {
         Args: { _user_id: string; _role: AppRole };
@@ -859,7 +875,19 @@ export interface Database {
         Returns: boolean;
       };
       reject_user: {
-        Args: { _user_id: string; _rejected_by: string; _reason?: string };
+        Args: { _user_id: string; _rejected_by: string; _reason: string };
+        Returns: boolean;
+      };
+      request_role_upgrade: {
+        Args: { _requested_role: AppRole; _reason: string | null };
+        Returns: string;
+      };
+      approve_role_upgrade: {
+        Args: { _request_id: string; _approved_by: string };
+        Returns: boolean;
+      };
+      reject_role_upgrade: {
+        Args: { _request_id: string; _rejected_by: string; _reason: string | null };
         Returns: boolean;
       };
       increment_voice_search_count: {
