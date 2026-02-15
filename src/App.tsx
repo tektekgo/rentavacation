@@ -29,6 +29,7 @@ import PendingApproval from "./pages/PendingApproval";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
+import Architecture from "./pages/Architecture";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/documentation" element={<Documentation />} />
             <Route path="/user-guide" element={<UserGuide />} />
+            <Route path="/architecture" element={<Architecture />} />
 
             {/* Protected routes — require approved account */}
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
