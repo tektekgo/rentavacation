@@ -13,10 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, Loader2, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, Loader2, Calendar, Percent } from "lucide-react";
 import { format, addDays, startOfMonth, subMonths, isAfter } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import type { Booking, Listing, Property, PayoutStatus } from "@/types/database";
+import { useOwnerCommission } from "@/hooks/useOwnerCommission";
 
 interface BookingWithListing extends Booking {
   listing: Listing & { property: Property };
@@ -64,12 +65,12 @@ const getPayoutStatusBadge = (booking: BookingWithListing) => {
           Failed
         </Badge>
       );
-    default:
+    default: {
       // For pending, show expected date based on checkout
       const checkoutDate = new Date(booking.listing.check_out_date);
       const expectedPayoutDate = addDays(checkoutDate, PAYOUT_PROCESSING_DAYS);
       const isUpcoming = isAfter(expectedPayoutDate, new Date());
-      
+
       return (
         <div className="flex flex-col">
           <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
@@ -83,11 +84,13 @@ const getPayoutStatusBadge = (booking: BookingWithListing) => {
           )}
         </div>
       );
+    }
   }
 };
 
 const OwnerEarnings = () => {
   const { user } = useAuth();
+  const { effectiveRate, tierDiscount, tierName, loading: commissionLoading } = useOwnerCommission();
   const [bookings, setBookings] = useState<BookingWithListing[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
     totalEarnings: 0,
@@ -233,6 +236,24 @@ const OwnerEarnings = () => {
           Track your earnings, payout status, and performance
         </p>
       </div>
+
+      {/* Commission Rate Card */}
+      <Card className="mb-6">
+        <CardContent className="flex items-center gap-4 py-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Percent className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">
+              Your Commission Rate: {commissionLoading ? "..." : `${effectiveRate}%`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {tierName} tier
+              {tierDiscount > 0 && ` (${tierDiscount}% discount applied)`}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">

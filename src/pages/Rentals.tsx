@@ -40,8 +40,7 @@ import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
-
-const voiceEnabled = import.meta.env.VITE_FEATURE_VOICE_ENABLED === "true";
+import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -60,6 +59,7 @@ const BRAND_LABELS: Record<string, string> = {
 function getListingDisplayName(listing: ActiveListing): string {
   const prop = listing.property;
   if (prop.resort?.resort_name && prop.unit_type) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return `${(prop.unit_type as any).unit_type_name} at ${prop.resort.resort_name}`;
   }
   if (prop.resort?.resort_name) {
@@ -104,6 +104,10 @@ const Rentals = () => {
   // Auth state for voice search gating
   const { user } = useAuth();
   const isAuthenticated = !!user;
+
+  // Voice feature flags (DB-controlled)
+  const { isFeatureActive } = useVoiceFeatureFlags();
+  const voiceEnabled = isFeatureActive("search");
 
   // Favorites
   const { data: favoriteIds = [] } = useFavoriteIds();

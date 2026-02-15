@@ -24,7 +24,8 @@ import {
   ShieldCheck as EscrowIcon,
   MessageSquareWarning,
   UserCheck,
-  Settings
+  Settings,
+  Crown
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -39,6 +40,7 @@ import AdminCheckinIssues from "@/components/admin/AdminCheckinIssues";
 import { PendingApprovals } from "@/components/admin/PendingApprovals";
 import { RoleUpgradeRequests } from "@/components/admin/RoleUpgradeRequests";
 import { SystemSettings } from "@/components/admin/SystemSettings";
+import { AdminMemberships } from "@/components/admin/AdminMemberships";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -145,7 +147,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -194,6 +196,10 @@ const AdminDashboard = () => {
                   {pendingCount + roleRequestCount}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="memberships" className="gap-2">
+              <Crown className="h-4 w-4" />
+              <span className="hidden sm:inline">Memberships</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="h-4 w-4" />
@@ -246,6 +252,10 @@ const AdminDashboard = () => {
               <PendingApprovals />
               <RoleUpgradeRequests />
             </div>
+          </TabsContent>
+
+          <TabsContent value="memberships">
+            <AdminMemberships />
           </TabsContent>
 
           <TabsContent value="settings">

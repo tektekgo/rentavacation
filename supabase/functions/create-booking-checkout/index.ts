@@ -66,7 +66,9 @@ serve(async (req) => {
       property: listing.property?.resort_name 
     });
 
-    // Fetch owner agreement to get commission rate (default 15% if not set)
+    // Determine commission rate:
+    // 1. Check per-owner agreement override
+    // 2. Fall back to platform base rate minus tier discount
     const { data: agreement } = await supabaseClient
       .from("owner_agreements")
       .select("commission_rate")
@@ -74,7 +76,35 @@ serve(async (req) => {
       .eq("status", "active")
       .single();
 
-    const commissionRate = agreement?.commission_rate || 15;
+    let commissionRate: number;
+
+    if (agreement?.commission_rate) {
+      commissionRate = agreement.commission_rate;
+      logStep("Using per-owner agreement rate", { commissionRate });
+    } else {
+      // Get platform base rate from system_settings
+      const { data: commissionSetting } = await supabaseClient
+        .from("system_settings")
+        .select("setting_value")
+        .eq("setting_key", "platform_commission_rate")
+        .single();
+
+      const settingVal = commissionSetting?.setting_value as Record<string, unknown> | undefined;
+      const baseRate = (settingVal?.rate as number) ?? 15;
+
+      // Get owner's tier discount
+      const { data: membership } = await supabaseClient
+        .from("user_memberships")
+        .select("tier:membership_tiers(commission_discount_pct)")
+        .eq("user_id", listing.owner_id)
+        .eq("status", "active")
+        .single();
+
+      const tierData = membership?.tier as Record<string, unknown> | undefined;
+      const tierDiscount = (tierData?.commission_discount_pct as number) ?? 0;
+      commissionRate = baseRate - tierDiscount;
+      logStep("Using tier-aware commission rate", { baseRate, tierDiscount, commissionRate });
+    }
     const totalAmount = listing.final_price;
     const ravCommission = Math.round(totalAmount * (commissionRate / 100) * 100) / 100;
     const ownerPayout = totalAmount - ravCommission;

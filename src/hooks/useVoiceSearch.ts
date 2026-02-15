@@ -146,9 +146,8 @@ export function useVoiceSearch() {
             // Increment voice search counter
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              await (supabase.rpc as any)("increment_voice_search_count", {
-                _user_id: user.id,
-              });
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              await (supabase.rpc as any)("increment_voice_search_count", { _user_id: user.id });
               refreshQuota();
             }
           } else {
@@ -182,6 +181,28 @@ export function useVoiceSearch() {
       setError("Voice search is not available. Check configuration.");
       setStatus("error");
       return;
+    }
+
+    // Check if voice search is enabled via DB toggle
+    try {
+      const { data: flags } = await supabase
+        .from("system_settings")
+        .select("setting_key, setting_value")
+        .in("setting_key", ["voice_enabled", "voice_search_enabled"]);
+
+      const flagMap: Record<string, boolean> = {};
+      for (const row of flags || []) {
+        const val = row.setting_value as Record<string, unknown>;
+        flagMap[row.setting_key] = val.enabled as boolean;
+      }
+
+      if (flagMap.voice_enabled === false || flagMap.voice_search_enabled === false) {
+        setError("Voice search is currently disabled.");
+        setStatus("error");
+        return;
+      }
+    } catch {
+      // If we can't check, proceed (fail-open for better UX)
     }
 
     // Check quota before starting

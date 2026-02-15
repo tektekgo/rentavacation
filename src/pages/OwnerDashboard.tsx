@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Home, 
-  Building2, 
-  Calendar, 
-  DollarSign, 
+import {
+  Home,
+  Building2,
+  Calendar,
+  DollarSign,
   Plus,
   ArrowLeft,
   TrendingUp,
@@ -20,7 +20,9 @@ import {
   AlertCircle,
   MessageSquare,
   Shield,
-  FileCheck
+  FileCheck,
+  Crown,
+  Percent
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
@@ -32,6 +34,8 @@ import OwnerBookingConfirmations from "@/components/owner/OwnerBookingConfirmati
 import OwnerEarnings from "@/components/owner/OwnerEarnings";
 import { OwnerProposals } from "@/components/owner/OwnerProposals";
 import { OwnerVerification } from "@/components/owner/OwnerVerification";
+import { MembershipPlans } from "@/components/MembershipPlans";
+import { useOwnerCommission } from "@/hooks/useOwnerCommission";
 
 interface DashboardStats {
   totalProperties: number;
@@ -54,7 +58,11 @@ const OwnerDashboard = () => {
     completedBookings: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+
+  const pendingRequest = useLatestRequestForRole('property_owner');
+  const { effectiveRate, tierName, loading: commissionLoading } = useOwnerCommission();
+
   const activeTab = searchParams.get("tab") || "overview";
 
   const setActiveTab = (tab: string) => {
@@ -153,8 +161,6 @@ const OwnerDashboard = () => {
 
   // Check if user has property owner or RAV team role
   const canAccess = isPropertyOwner() || isRavTeam();
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-  const pendingRequest = useLatestRequestForRole('property_owner');
 
   if (!canAccess) {
     return (
@@ -234,7 +240,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -267,11 +273,15 @@ const OwnerDashboard = () => {
               <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Verification</span>
             </TabsTrigger>
+            <TabsTrigger value="membership" className="gap-2">
+              <Crown className="h-4 w-4" />
+              <span className="hidden sm:inline">Membership</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               {/* Properties Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -342,6 +352,32 @@ const OwnerDashboard = () => {
                   )}
                   <p className="text-xs text-muted-foreground">
                     From {stats.completedBookings} completed bookings
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Commission Rate Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Commission Rate</CardTitle>
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  {commissionLoading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <div className="text-2xl font-bold">{effectiveRate}%</div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {tierName} tier
+                    {tierName === "Free" && (
+                      <span
+                        className="text-primary cursor-pointer ml-1"
+                        onClick={() => setActiveTab("membership")}
+                      >
+                        Upgrade to save
+                      </span>
+                    )}
                   </p>
                 </CardContent>
               </Card>
@@ -483,6 +519,17 @@ const OwnerDashboard = () => {
               </p>
             </div>
             <OwnerVerification />
+          </TabsContent>
+
+          {/* Membership Tab */}
+          <TabsContent value="membership" className="mt-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold">Membership Plan</h2>
+              <p className="text-muted-foreground">
+                Your current plan, commission rate, voice quota, and listing limits
+              </p>
+            </div>
+            <MembershipPlans category="owner" />
           </TabsContent>
         </Tabs>
       </main>

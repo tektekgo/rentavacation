@@ -40,6 +40,45 @@ export type ApprovalStatus = 'pending_approval' | 'approved' | 'rejected';
 
 export type RoleUpgradeStatus = 'pending' | 'approved' | 'rejected';
 
+export type MembershipStatus = 'active' | 'cancelled' | 'expired' | 'pending';
+
+export type RoleCategory = 'traveler' | 'owner';
+
+export interface MembershipTier {
+  id: string;
+  tier_key: string;
+  role_category: RoleCategory;
+  tier_name: string;
+  tier_level: number;
+  monthly_price_cents: number;
+  voice_quota_daily: number;
+  commission_discount_pct: number;
+  max_active_listings: number | null;
+  features: string[];
+  description: string | null;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserMembership {
+  id: string;
+  user_id: string;
+  tier_id: string;
+  status: MembershipStatus;
+  started_at: string;
+  expires_at: string | null;
+  stripe_subscription_id: string | null;
+  stripe_customer_id: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserMembershipWithTier extends UserMembership {
+  tier: MembershipTier;
+}
+
 export interface RoleUpgradeRequest {
   id: string;
   user_id: string;
@@ -787,6 +826,45 @@ export interface Database {
         };
         Relationships: [];
       };
+      membership_tiers: {
+        Row: MembershipTier;
+        Insert: Omit<MembershipTier, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<MembershipTier, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
+      user_memberships: {
+        Row: UserMembership;
+        Insert: {
+          id?: string;
+          user_id: string;
+          tier_id: string;
+          status?: MembershipStatus;
+          started_at?: string;
+          expires_at?: string | null;
+          stripe_subscription_id?: string | null;
+          stripe_customer_id?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          tier_id?: string;
+          status?: MembershipStatus;
+          started_at?: string;
+          expires_at?: string | null;
+          stripe_subscription_id?: string | null;
+          stripe_customer_id?: string | null;
+          cancelled_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       voice_search_usage: {
         Row: {
           id: string;
@@ -904,6 +982,14 @@ export interface Database {
       };
       get_voice_searches_remaining: {
         Args: { _user_id: string };
+        Returns: number;
+      };
+      get_user_voice_quota: {
+        Args: { _user_id: string };
+        Returns: number;
+      };
+      get_owner_commission_rate: {
+        Args: { _owner_id: string };
         Returns: number;
       };
     };

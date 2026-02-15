@@ -2,17 +2,48 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./useAuth";
 
+interface CommissionRateSettings {
+  rate: number;
+  proDiscount: number;
+  businessDiscount: number;
+}
+
 interface SystemSettings {
   requireUserApproval: boolean;
   autoApproveRoleUpgrades: boolean;
+  voiceEnabled: boolean;
+  voiceSearchEnabled: boolean;
+  voiceListingEnabled: boolean;
+  voiceBiddingEnabled: boolean;
+  platformCommissionRate: CommissionRateSettings;
   loading: boolean;
   updateSetting: (key: string, value: Record<string, unknown>) => Promise<void>;
+  isVoiceFeatureActive: (feature: "search" | "listing" | "bidding") => boolean;
 }
+
+const ALL_SETTING_KEYS = [
+  "require_user_approval",
+  "auto_approve_role_upgrades",
+  "voice_enabled",
+  "voice_search_enabled",
+  "voice_listing_enabled",
+  "voice_bidding_enabled",
+  "platform_commission_rate",
+];
 
 export function useSystemSettings(): SystemSettings {
   const { isRavTeam } = useAuth();
   const [requireUserApproval, setRequireUserApproval] = useState(true);
   const [autoApproveRoleUpgrades, setAutoApproveRoleUpgrades] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceSearchEnabled, setVoiceSearchEnabled] = useState(true);
+  const [voiceListingEnabled, setVoiceListingEnabled] = useState(false);
+  const [voiceBiddingEnabled, setVoiceBiddingEnabled] = useState(false);
+  const [platformCommissionRate, setPlatformCommissionRate] = useState<CommissionRateSettings>({
+    rate: 15,
+    proDiscount: 2,
+    businessDiscount: 5,
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchSettings = useCallback(async () => {
@@ -20,16 +51,38 @@ export function useSystemSettings(): SystemSettings {
       const { data, error } = await supabase
         .from("system_settings")
         .select("setting_key, setting_value")
-        .in("setting_key", ["require_user_approval", "auto_approve_role_upgrades"]);
+        .in("setting_key", ALL_SETTING_KEYS);
 
       if (error) throw error;
 
       for (const row of data || []) {
         const val = row.setting_value as Record<string, unknown>;
-        if (row.setting_key === "require_user_approval") {
-          setRequireUserApproval(val.enabled as boolean);
-        } else if (row.setting_key === "auto_approve_role_upgrades") {
-          setAutoApproveRoleUpgrades(val.enabled as boolean);
+        switch (row.setting_key) {
+          case "require_user_approval":
+            setRequireUserApproval(val.enabled as boolean);
+            break;
+          case "auto_approve_role_upgrades":
+            setAutoApproveRoleUpgrades(val.enabled as boolean);
+            break;
+          case "voice_enabled":
+            setVoiceEnabled(val.enabled as boolean);
+            break;
+          case "voice_search_enabled":
+            setVoiceSearchEnabled(val.enabled as boolean);
+            break;
+          case "voice_listing_enabled":
+            setVoiceListingEnabled(val.enabled as boolean);
+            break;
+          case "voice_bidding_enabled":
+            setVoiceBiddingEnabled(val.enabled as boolean);
+            break;
+          case "platform_commission_rate":
+            setPlatformCommissionRate({
+              rate: (val.rate as number) ?? 15,
+              proDiscount: (val.pro_discount as number) ?? 2,
+              businessDiscount: (val.business_discount as number) ?? 5,
+            });
+            break;
         }
       }
     } catch (error) {
@@ -55,8 +108,8 @@ export function useSystemSettings(): SystemSettings {
       throw new Error("Only RAV team can update system settings");
     }
 
-    const { error } = await (supabase
-      .from("system_settings") as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("system_settings") as any)
       .update({
         setting_value: value,
         updated_at: new Date().toISOString(),
@@ -68,10 +121,25 @@ export function useSystemSettings(): SystemSettings {
     await fetchSettings();
   };
 
+  const isVoiceFeatureActive = (feature: "search" | "listing" | "bidding") => {
+    if (!voiceEnabled) return false;
+    switch (feature) {
+      case "search": return voiceSearchEnabled;
+      case "listing": return voiceListingEnabled;
+      case "bidding": return voiceBiddingEnabled;
+    }
+  };
+
   return {
     requireUserApproval,
     autoApproveRoleUpgrades,
+    voiceEnabled,
+    voiceSearchEnabled,
+    voiceListingEnabled,
+    voiceBiddingEnabled,
+    platformCommissionRate,
     loading,
     updateSetting,
+    isVoiceFeatureActive,
   };
 }
