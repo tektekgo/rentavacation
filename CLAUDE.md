@@ -1,0 +1,105 @@
+# CLAUDE.md — Rent-A-Vacation AI Agent Instructions
+
+> This file is automatically loaded by Claude Code at session start.  
+> It defines mandatory conventions for maintaining code quality and documentation.
+
+---
+
+## Flow Manifest Convention (MANDATORY)
+
+The application uses declarative **Flow Manifests** in `src/flows/` to auto-generate interactive architecture diagrams at `/architecture`. This keeps system documentation synchronized with code without manual Mermaid authoring.
+
+### When to update manifests
+
+You MUST update the relevant manifest in `src/flows/` when:
+
+1. **Adding a new route** in `App.tsx` → Add a step to the appropriate lifecycle manifest
+2. **Adding a new page/component** that represents a user-facing workflow step
+3. **Adding conditional business logic** (status checks, approval gates) → Add `branches` to the relevant step
+4. **Adding a new edge function** → Add it to the `edgeFunctions` array on the relevant step
+5. **Adding/modifying database tables** → Update the `tables` array on affected steps
+
+### Manifest structure
+
+Flow manifests live in `src/flows/` with this structure:
+
+```
+src/flows/
+├── types.ts              # FlowDefinition, FlowStep, FlowBranch types + flowToMermaid()
+├── owner-lifecycle.ts    # Property Owner Journey (signup → payout)
+├── traveler-lifecycle.ts # Traveler Journey (browse → check-in)
+├── admin-lifecycle.ts    # RAV Admin Operations (approvals → financials)
+└── index.ts              # Re-exports all flows + allFlows array
+```
+
+### Adding a step — example
+
+When adding a new "Verification" step to the owner lifecycle:
+
+```typescript
+// In src/flows/owner-lifecycle.ts, add to the steps array:
+{
+  id: 'new_step_id',
+  route: '/the-route',
+  label: 'Human-Readable Label',
+  component: 'ComponentName',
+  tab: 'optional-tab',
+  roles: ['property_owner'],
+  description: 'What this step does',
+  tables: ['affected_tables'],
+  edgeFunctions: ['edge-function-name'],
+  branches: [
+    { condition: 'If approved', targetStepId: 'next_step_id', label: 'Approved' },
+    { condition: 'If rejected', targetStepId: 'previous_step_id', label: 'Rejected', edgeStyle: 'dashed' },
+  ],
+}
+```
+
+### Adding a new flow
+
+If creating an entirely new user journey:
+
+1. Create `src/flows/new-flow-name.ts` exporting a `FlowDefinition`
+2. Add it to `src/flows/index.ts` in the `allFlows` array
+3. The `/architecture` page auto-renders it — no other changes needed
+
+### Schema reference
+
+See `src/flows/types.ts` for the complete TypeScript interfaces:
+- `FlowDefinition` — a complete user journey
+- `FlowStep` — a single step with route, component, tables, branches
+- `FlowBranch` — a conditional edge between steps
+
+### What NOT to do
+
+- ❌ Do NOT hand-author Mermaid strings — the `flowToMermaid()` function generates them
+- ❌ Do NOT modify `/architecture` page for content — it reads from manifests
+- ❌ Do NOT skip manifest updates when adding routes — the diagram will have orphan gaps
+
+---
+
+## Project Conventions
+
+### Tech Stack
+- React 18 + TypeScript + Vite
+- Tailwind CSS + shadcn/ui (semantic design tokens only — never hardcode colors)
+- Supabase (Auth, PostgreSQL with RLS, Edge Functions)
+- TanStack React Query v5 for server state
+
+### File Organization
+- Pages in `src/pages/` (default exports)
+- Components in `src/components/` (named exports, colocated by feature)
+- Hooks in `src/hooks/` (custom data hooks)
+- Types in `src/types/`
+- Flow manifests in `src/flows/`
+
+### Auth & Roles
+- RBAC via `user_roles` table (never on profiles)
+- Roles: `rav_owner`, `rav_admin`, `rav_staff`, `property_owner`, `renter`
+- Use `isRavTeam()` for admin access checks
+- Security definer functions prevent RLS recursion
+
+### Edge Functions
+- Deploy via Supabase CLI (not in-editor)
+- Shared email template in `supabase/functions/_shared/`
+- Required secrets: `RESEND_API_KEY`, `STRIPE_SECRET_KEY`
