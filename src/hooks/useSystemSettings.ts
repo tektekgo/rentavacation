@@ -55,8 +55,8 @@ export function useSystemSettings(): SystemSettings {
       throw new Error("Only RAV team can update system settings");
     }
 
-    const { error } = await supabase
-      .from("system_settings")
+    const { error } = await (supabase
+      .from("system_settings") as any)
       .update({
         setting_value: value,
         updated_at: new Date().toISOString(),

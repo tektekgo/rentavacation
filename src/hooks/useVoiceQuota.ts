@@ -29,7 +29,7 @@ export function useVoiceQuota(): VoiceQuota {
         return;
       }
 
-      const { data, error } = await supabase.rpc(
+      const { data, error } = await (supabase.rpc as any)(
         "get_voice_searches_remaining",
         { _user_id: user.id }
       );

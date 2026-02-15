@@ -44,7 +44,7 @@ export function useRequestRoleUpgrade() {
 
   return useMutation({
     mutationFn: async ({ role, reason }: { role: AppRole; reason?: string }) => {
-      const { data, error } = await supabase.rpc('request_role_upgrade', {
+      const { data, error } = await (supabase.rpc as any)('request_role_upgrade', {
         _requested_role: role,
         _reason: reason || null,
       });
@@ -89,7 +89,7 @@ export function useApproveRoleUpgrade() {
 
   return useMutation({
     mutationFn: async (requestId: string) => {
-      const { data, error } = await supabase.rpc('approve_role_upgrade', {
+      const { data, error } = await (supabase.rpc as any)('approve_role_upgrade', {
         _request_id: requestId,
         _approved_by: user?.id,
       });
@@ -114,7 +114,7 @@ export function useRejectRoleUpgrade() {
 
   return useMutation({
     mutationFn: async ({ requestId, reason }: { requestId: string; reason?: string }) => {
-      const { data, error } = await supabase.rpc('reject_role_upgrade', {
+      const { data, error } = await (supabase.rpc as any)('reject_role_upgrade', {
         _request_id: requestId,
         _rejected_by: user?.id,
         _reason: reason || null,

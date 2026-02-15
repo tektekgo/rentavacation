@@ -133,9 +133,9 @@ const ListProperty = () => {
 
     if (data) {
       setResortDetails(data as Resort);
-      setResortName(data.resort_name);
-      setLocation(data.location?.full_address || `${data.location?.city}, ${data.location?.state}`);
-      setDescription(data.description || "");
+      setResortName((data as any).resort_name);
+      setLocation((data as any).location?.full_address || `${(data as any).location?.city}, ${(data as any).location?.state}`);
+      setDescription((data as any).description || "");
     }
   }
 
