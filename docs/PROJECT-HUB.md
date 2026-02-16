@@ -78,23 +78,22 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Phase 10 — Link Audit Fixes & Support Infrastructure
+**Active Phase:** Mobile App Readiness (PWA + Capacitor)
 **Started:** February 15, 2026
 
 ### Working on TODAY:
-- [x] Track A: Fix dead interactions (Contact Support button, footer email/phone, social icons, FAQ live chat claim)
-- [x] Track B: Footer link consolidation (Owner Resources, Pricing & Fees, Success Stories redirects)
-- [x] Track C: Contact/Support page (`/contact` with form, edge function email)
-- [ ] Track D: AI Support Agent (design decision — deferred)
+- [x] DevOps cleanup — sync `dev` branch, delete stale branches, branch protection on `main`
+- [ ] Phase 11: PWA implementation
+- [ ] Phase 12: Capacitor setup (after PWA)
 
 ### Recently Completed:
+- [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection, CLAUDE.md documented (Feb 15)
 - [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page + edge function deployed (Feb 15)
 - [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
 - [x] **Phase 8: Testing Infrastructure** — 78 tests, CI/CD, E2E, Percy, Lighthouse (Feb 14)
-- [x] **Phase 7: UI Excellence & Social Proof** — all 4 tracks complete (Feb 14)
 
 ### Blocked/Waiting:
-- Track D (AI Support Agent) — awaiting design decision (DEC-009)
+- Phase 10 Track D (AI Support Agent) — awaiting design decision (DEC-009)
 
 ---
 
