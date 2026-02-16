@@ -78,14 +78,19 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** CI/CD Fix — Unblock Qase Test Reporting
+**Active Phase:** CI fully green, ready for next feature work
 **Started:** February 16, 2026
 
 ### Working on TODAY:
-- [ ] Fix all 58 ESLint `no-explicit-any` errors to unblock CI pipeline
-- [ ] Phase 12: Capacitor setup (after CI green)
+- [x] Fix all 58 ESLint errors to unblock CI pipeline
+- [x] Add Supabase secrets to GitHub Actions (E2E + Lighthouse)
+- [x] Update brand logo and favicon assets
+- [ ] Phase 12: Capacitor setup
 
 ### Recently Completed:
+- [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
+- [x] **CI fully green** — all 4 jobs passing (lint, tests, E2E, Lighthouse), Qase receiving results (Feb 16)
+- [x] **58 ESLint errors fixed** — `any` types replaced across 17 files, unblocked CI pipeline (Feb 16)
 - [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags, 11 new tests (Feb 16)
 - [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection, CLAUDE.md documented (Feb 15)
 - [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page + edge function deployed (Feb 15)
@@ -98,34 +103,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## PRIORITY QUEUE (In Order)
 
-### 1. Fix ESLint Errors — CRITICAL (CI Blocker)
-**Status:** In Progress (Feb 16, 2026)
-**Impact:** All CI runs failing → Qase test reporting inactive, no automated quality gate
-
-**Problem:** 58 `@typescript-eslint/no-explicit-any` errors cause `npm run lint` to exit non-zero, failing the "Lint & Type Check" CI job. Tests never execute in CI, so Qase receives no results.
-
-**Fix:** Replace all `any` types with proper TypeScript types across ~15 files.
-
-**Files affected:**
-- `scripts/import-resort-data.ts` (2 errors)
-- `src/components/FeaturedResorts.tsx` (1)
-- `src/components/admin/PendingApprovals.tsx` (2)
-- `src/components/owner/OwnerListings.tsx` (6)
-- `src/components/owner/OwnerProperties.tsx` (4)
-- `src/components/owner/OwnerVerification.tsx` (2)
-- `src/hooks/useBidding.ts` (18)
-- `src/hooks/useFavorites.ts` (5)
-- `src/hooks/useRoleUpgrade.ts` (6)
-- `src/lib/email.ts` (2)
-- `src/pages/ListProperty.tsx` (5)
-- `src/pages/PropertyDetail.tsx` (2)
-- `supabase/functions/send-approval-email/index.ts` (1)
-- `supabase/functions/send-email/index.ts` (1)
-- `tailwind.config.ts` (1)
-
----
-
-### 2. Phase 10: Link Audit Fixes & Support Infrastructure — IN PROGRESS
+### 1. Phase 10: Link Audit Fixes & Support Infrastructure — IN PROGRESS
 **Status:** Tracks A-C complete, Track D deferred (Feb 15, 2026)
 **Audit:** 68 internal links verified working, 7 issues found and fixed
 
@@ -139,7 +117,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 2. Phase 3: Voice Everywhere (Q2 2026)
+### 3. Phase 3: Voice Everywhere (Q2 2026)
 **Status:** Planned
 **Docs:** `docs/guides/user-journey-map.md`
 
@@ -152,7 +130,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 3. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 2. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks
 **Decision:** DEC-011
@@ -422,6 +400,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 16, 2026
+**Last updated:** February 16, 2026 (evening)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
