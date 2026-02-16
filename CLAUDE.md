@@ -78,6 +78,50 @@ See `src/flows/types.ts` for the complete TypeScript interfaces:
 
 ---
 
+## Git Branching & Deployment (MANDATORY)
+
+### Branch Strategy: `dev` → `main`
+
+```
+feature/* (optional)
+    ↓ PR
+  dev   →  Vercel Preview Deploy  →  Supabase DEV
+    ↓ PR (release)
+  main  →  Vercel Production      →  Supabase PROD
+```
+
+### Rules
+
+- **`dev`** is the working branch. All new code goes here first.
+- **`main`** is the production branch. Protected — requires PR + 1 review + CI passing.
+- **Never push directly to `main`**. Always create a PR from `dev` (or a feature branch).
+- Feature branches are optional for small changes but recommended for larger work.
+- Local `.env.local` points to **Supabase DEV**.
+- Vercel production points to **Supabase PROD**.
+
+### Workflow
+
+1. Work locally on `dev` (or a feature branch off `dev`)
+2. Push to `dev` → Vercel creates a preview deploy → test against Supabase DEV
+3. When ready for production: create PR `dev` → `main`
+4. CI runs, reviewer approves, merge → Vercel auto-deploys to PROD
+
+### Supabase Deployment
+
+- Test migrations on **DEV** first: `npx supabase db push --project-ref oukbxqnlxnkainnligfz`
+- Test edge functions on **DEV** first: `npx supabase functions deploy <name> --project-ref oukbxqnlxnkainnligfz`
+- Only after staging validation, deploy to **PROD**: `--project-ref xzfllqndrlmhclqfybew`
+
+### Environment References
+
+| Environment | Supabase | Vercel | Branch |
+|-------------|----------|--------|--------|
+| Local Dev | DEV (`oukb...`) | n/a | `dev` |
+| Staging | DEV (`oukb...`) | Preview URL | `dev` |
+| Production | PROD (`xzfl...`) | rentavacation.com | `main` |
+
+---
+
 ## Project Conventions
 
 ### Tech Stack

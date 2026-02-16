@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 15, 2026
+> **Last Updated:** February 16, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,23 +78,21 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Phase 10 — Link Audit Fixes & Support Infrastructure
+**Active Phase:** Mobile App Readiness (PWA + Capacitor)
 **Started:** February 15, 2026
 
 ### Working on TODAY:
-- [x] Track A: Fix dead interactions (Contact Support button, footer email/phone, social icons, FAQ live chat claim)
-- [x] Track B: Footer link consolidation (Owner Resources, Pricing & Fees, Success Stories redirects)
-- [x] Track C: Contact/Support page (`/contact` with form, edge function email)
-- [ ] Track D: AI Support Agent (design decision — deferred)
+- [x] Phase 11: PWA implementation
+- [ ] Phase 12: Capacitor setup (after PWA)
 
 ### Recently Completed:
+- [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags, 11 new tests (Feb 16)
+- [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection, CLAUDE.md documented (Feb 15)
 - [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page + edge function deployed (Feb 15)
 - [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
-- [x] **Phase 8: Testing Infrastructure** — 78 tests, CI/CD, E2E, Percy, Lighthouse (Feb 14)
-- [x] **Phase 7: UI Excellence & Social Proof** — all 4 tracks complete (Feb 14)
 
 ### Blocked/Waiting:
-- Track D (AI Support Agent) — awaiting design decision (DEC-009)
+- Phase 10 Track D (AI Support Agent) — awaiting design decision (DEC-009)
 
 ---
 
@@ -127,25 +125,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 3. Phase 11: Progressive Web App (PWA)
-**Status:** Planned — High priority (user feedback: mobile app demand)
-**Est. Time:** 1-2 days
-**Decision:** DEC-011
-
-**Objective:** Make Rent-A-Vacation installable on mobile devices as a PWA, eliminating the "website in a browser" friction. Quick win that validates mobile demand before investing in native app shells.
-
-**Tasks:**
-- [ ] Add `manifest.json` (app name, icons, theme color, display: standalone)
-- [ ] Generate app icons (192x192, 512x512) from existing RAV logo
-- [ ] Add service worker for offline shell (Vite PWA plugin or Workbox)
-- [ ] Add "Install App" / "Add to Home Screen" prompt banner
-- [ ] Configure `<meta>` tags for iOS (`apple-mobile-web-app-capable`, status bar)
-- [ ] Test on Android Chrome + iOS Safari
-- [ ] Splash screen configuration
-
----
-
-### 4. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 3. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks
 **Decision:** DEC-011
@@ -170,7 +150,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 5. Phase 6: Advanced Features (Q3 2026)
+### 4. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
 
 **Features:**
@@ -184,6 +164,25 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Phase 11: Progressive Web App (PWA)</strong> — Completed Feb 16, 2026</summary>
+
+**What:** Full PWA support using `vite-plugin-pwa` with Workbox auto-generated service worker.
+
+**Key deliverables:**
+- Service worker with precaching (59 entries) + runtime caching (Google Fonts, Unsplash)
+- Web app manifest generated from Vite config (standalone, portrait, themed)
+- Install prompt banner (Android Chrome) with 14-day dismiss, standalone detection
+- Offline detection banner with `useSyncExternalStore`
+- iOS meta tags (`apple-mobile-web-app-capable`, status bar, title)
+- 11 new tests (4 useOnlineStatus + 7 usePWAInstall), total 89 tests passing
+
+**Files:** 6 modified, 6 created, 1 deleted (`public/site.webmanifest` → VitePWA generates it)
+
+**New hooks:** `useOnlineStatus`, `usePWAInstall`
+**New components:** `OfflineBanner`, `PWAInstallBanner`
+</details>
 
 - **Phase 9:** Voice toggles, membership tiers (6 tiers), commission config, tier-aware quotas — [details](COMPLETED-PHASES.md#phase-9-voice-toggles-membership-tiers--commission)
 - **Phase 8:** Testing infrastructure — 78 tests, Vitest, Playwright E2E, Percy, GitHub Actions CI — [details](COMPLETED-PHASES.md#phase-8-testing-infrastructure)
@@ -396,6 +395,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 15, 2026
+**Last updated:** February 16, 2026
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

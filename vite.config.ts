@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { execSync } from "child_process";
 import { componentTagger } from "lovable-tagger";
+import { VitePWA } from "vite-plugin-pwa";
 
 function getGitInfo() {
   try {
@@ -36,7 +37,63 @@ export default defineConfig(({ mode }) => {
       __BUILD_HASH__: JSON.stringify(commitHash),
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [
+      react(),
+      mode === "development" && componentTagger(),
+      VitePWA({
+        registerType: "autoUpdate",
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "google-fonts-cache",
+                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "gstatic-fonts-cache",
+                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "unsplash-image-cache",
+                expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+        manifest: {
+          name: "Rent-A-Vacation",
+          short_name: "RAV",
+          description: "Name Your Price. Book Your Paradise. Rent vacation club and timeshare weeks directly from owners at up to 70% off.",
+          theme_color: "#1C7268",
+          background_color: "#F8F6F3",
+          display: "standalone",
+          orientation: "portrait-primary",
+          start_url: "/",
+          scope: "/",
+          categories: ["travel", "lifestyle"],
+          icons: [
+            { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+            { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+            { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          ],
+        },
+      }),
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

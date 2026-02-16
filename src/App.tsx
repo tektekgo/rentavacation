@@ -31,6 +31,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
 import Architecture from "./pages/Architecture";
 import Contact from "./pages/Contact";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <OfflineBanner />
+        <PWAInstallBanner />
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
