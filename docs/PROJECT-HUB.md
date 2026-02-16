@@ -53,8 +53,24 @@ git push
 2. Use format: DEC-XXX (next sequential number)
 3. Include: Date, Decision, Rationale, Status
 
+### Document Size Management
+
+To keep PROJECT-HUB.md focused and scannable:
+
+**Completed Phases → `docs/COMPLETED-PHASES.md`**
+- When a phase has been complete for 2+ weeks, move its `<details>` block from the "COMPLETED PHASES" section into `docs/COMPLETED-PHASES.md`
+- Leave a one-line summary with a link in PROJECT-HUB: `- Phase X: [summary] → [details](COMPLETED-PHASES.md#phase-x)`
+- Keep the 2-3 most recent completed phases inline for quick reference
+
+**Decisions Log → `docs/DECISIONS.md`**
+- When a decision is 1+ month old and status is final (✅), move it to `docs/DECISIONS.md`
+- Leave a one-line entry in PROJECT-HUB: `- DEC-XXX: [title] → [details](DECISIONS.md#dec-xxx)`
+- Keep recent/pending decisions inline
+
+**Target:** PROJECT-HUB.md should stay under ~600 lines. Archive when it exceeds ~800 lines.
+
 ### What NOT to Do
-- ❌ Don't delete information (move to COMPLETED instead)
+- ❌ Don't delete information (move to COMPLETED or archive instead)
 - ❌ Don't create duplicate sections
 - ❌ Don't leave "CURRENT FOCUS" outdated
 - ❌ Don't skip the commit step
@@ -263,7 +279,78 @@ git push
 
 ---
 
-### 9. 🎯 Phase 6: Advanced Features (Q3 2026)
+### 9. 📱 Phase 11: Progressive Web App (PWA)
+**Status:** 📋 Planned — High priority (user feedback: mobile app demand)
+**Est. Time:** 1-2 days
+**Decision:** DEC-011
+
+**Objective:** Make Rent-A-Vacation installable on mobile devices as a PWA, eliminating the "website in a browser" friction. Quick win that validates mobile demand before investing in native app shells.
+
+**Tasks:**
+- [ ] Add `manifest.json` (app name, icons, theme color, display: standalone)
+- [ ] Generate app icons (192x192, 512x512) from existing RAV logo
+- [ ] Add service worker for offline shell (Vite PWA plugin or Workbox)
+- [ ] Add "Install App" / "Add to Home Screen" prompt banner
+- [ ] Configure `<meta>` tags for iOS (`apple-mobile-web-app-capable`, status bar)
+- [ ] Test on Android Chrome + iOS Safari
+- [ ] Splash screen configuration
+
+**What Users Get:**
+- App icon on home screen (Android + iOS)
+- Full-screen experience (no browser chrome)
+- Faster load times (service worker caching)
+- Works offline (cached shell + "no connection" message)
+
+---
+
+### 10. 📱 Phase 12: Native App Shells (Capacitor) — Android + iOS
+**Status:** 📋 Planned — After PWA validates demand
+**Est. Time:** 2-3 weeks
+**Decision:** DEC-011
+**Prerequisite:** Phase 11 (PWA) complete
+
+**Objective:** Wrap the existing React app in native shells using Capacitor for publishing to **Google Play Store** and **Apple App Store**. One codebase → two app stores.
+
+**Capacitor supports:**
+- Google Play Store (Android APK/AAB)
+- Apple App Store (iOS IPA via Xcode)
+- All existing React components, hooks, Supabase integration carry over
+
+**Track A: Project Setup (~2 days)**
+- [ ] Install Capacitor (`@capacitor/core`, `@capacitor/cli`)
+- [ ] Initialize Android + iOS projects (`npx cap init`)
+- [ ] Configure `capacitor.config.ts` (app ID, server URL, plugins)
+- [ ] Set up Android Studio + Xcode build environments
+
+**Track B: Native Features (~1 week)**
+- [ ] Push notifications (`@capacitor/push-notifications`) — booking confirmations, bid updates
+- [ ] Camera access (`@capacitor/camera`) — property photo uploads
+- [ ] Haptic feedback (`@capacitor/haptics`) — button taps, voice search activation
+- [ ] Status bar theming (`@capacitor/status-bar`) — match RAV brand colors
+- [ ] Deep linking — `rentavacation.com/property/:id` opens in app
+- [ ] Biometric auth (`@capacitor/biometrics`) — fingerprint/Face ID login (optional)
+
+**Track C: App Store Publishing (~1 week)**
+- [ ] Apple Developer Account ($99/year) — enroll if not already
+- [ ] Google Play Console ($25 one-time) — enroll if not already
+- [ ] App Store assets: screenshots, descriptions, privacy policy, app preview video
+- [ ] Android: generate signed AAB, submit to Google Play
+- [ ] iOS: archive in Xcode, submit to App Store Connect, TestFlight beta
+- [ ] App review process (Apple: 1-3 days, Google: 1-7 days)
+
+**Track D: CI/CD for Mobile (~2-3 days)**
+- [ ] GitHub Actions workflow: build → test → deploy to app stores
+- [ ] Fastlane or EAS for automated signing and submission
+- [ ] Version management: sync `package.json` version with app store versions
+
+**Requirements:**
+- Apple Developer Account ($99/year)
+- Google Play Console ($25 one-time)
+- Mac for iOS builds (or cloud CI like GitHub Actions macOS runners)
+
+---
+
+### 11. 🎯 Phase 6: Advanced Features (Q3 2026)
 **Status:** 📋 Backlog
 
 **Features:**
@@ -774,7 +861,6 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 - Referral program
 
 **Platform Enhancements:**
-- Mobile app improvements
 - Instant booking
 - Dynamic pricing
 - Multi-property management
@@ -915,6 +1001,39 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 - Infrastructure-first approach: build data model before billing
 - Configurable commission allows A/B testing and per-owner deals
 - DB-controlled toggles eliminate deploy cycles for feature flags
+
+---
+
+### DEC-011: Mobile App Strategy
+**Date:** February 15, 2026
+**Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
+**Status:** ✅ Approved
+
+**Context:**
+Early user feedback indicates that having a mobile app (Android + iOS) is a key factor for quick adoption. Users expect app-store presence and the ease-of-use of a native app experience.
+
+**Options Considered:**
+- A: PWA only — fast, no app store, limited native features
+- B: Capacitor (wrap existing React app) — 1 codebase → 2 app stores ⭐ **CHOSEN**
+- C: React Native / Expo — full UI rewrite, better native feel, 2-3 months
+- D: Native Swift + Kotlin — 2 codebases, 4-6 months, not justified at current stage
+
+**Decision:** Two-phase approach:
+1. **Phase 11: PWA** (1-2 days) — immediate mobile experience, validates demand
+2. **Phase 12: Capacitor** (2-3 weeks) — app store presence on both Google Play and Apple App Store
+
+**Reasoning:**
+- Existing React + Vite + Tailwind stack is Capacitor-ready
+- All hooks, components, Supabase integration, voice search carry over unchanged
+- Capacitor supports both Google Play Store AND Apple App Store from one codebase
+- PWA first is a quick win that proves mobile demand before the larger investment
+- React Native would require rewriting all UI components — not justified for the ROI
+- Native development (Swift/Kotlin) only makes sense at much larger scale
+
+**Requirements:**
+- Apple Developer Account: $99/year
+- Google Play Console: $25 one-time
+- Mac for iOS builds (or GitHub Actions macOS runner)
 
 ---
 
