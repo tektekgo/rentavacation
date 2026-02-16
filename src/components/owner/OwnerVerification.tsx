@@ -259,7 +259,7 @@ export const OwnerVerification = () => {
         verification_status: "under_review" as VerificationStatus,
       });
 
-      toast.success("Verification submitted! Our team will review your documents.");
+      toast.success("Verification submitted! Our team will review your documents within 1-2 business days. You'll receive an email when the review is complete.");
     } catch (error) {
       console.error("Error submitting verification:", error);
       toast.error("Failed to submit verification");

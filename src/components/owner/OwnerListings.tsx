@@ -42,6 +42,8 @@ import type { Property, Listing, ListingStatus, CancellationPolicy, Database } f
 import { CANCELLATION_POLICY_LABELS, CANCELLATION_POLICY_DESCRIPTIONS } from "@/types/database";
 import { OpenForBiddingDialog } from "@/components/bidding/OpenForBiddingDialog";
 import { BidsManagerDialog } from "@/components/bidding/BidsManagerDialog";
+import { ActionSuccessCard } from "@/components/ActionSuccessCard";
+import { sendListingSubmittedEmail } from "@/lib/email";
 
 type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 type ListingUpdate = Database['public']['Tables']['listings']['Update'];
@@ -101,7 +103,8 @@ const OwnerListings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editingListing, setEditingListing] = useState<ListingWithProperty | null>(null);
   const [formData, setFormData] = useState<ListingFormData>(initialFormData);
-  
+  const [listingSuccess, setListingSuccess] = useState(false);
+
   // Bidding dialog states
   const [biddingDialogOpen, setBiddingDialogOpen] = useState(false);
   const [bidsManagerOpen, setBidsManagerOpen] = useState(false);
@@ -189,7 +192,6 @@ const OwnerListings = () => {
           .eq("id", editingListing.id);
 
         if (error) throw error;
-        toast.success("Listing updated and submitted for approval");
       } else {
         // Create new
         const insertData: ListingInsert = {
@@ -210,12 +212,25 @@ const OwnerListings = () => {
           .insert(insertData as never);
 
         if (error) throw error;
-        toast.success("Listing created and submitted for approval");
       }
 
-      setIsDialogOpen(false);
-      setEditingListing(null);
-      setFormData(initialFormData);
+      // Fire confirmation email (fire-and-forget)
+      const selectedProperty = properties.find(p => p.id === formData.property_id);
+      if (user.email && selectedProperty) {
+        sendListingSubmittedEmail(
+          user.email,
+          user.user_metadata?.full_name || "",
+          {
+            resortName: selectedProperty.resort_name,
+            location: selectedProperty.location,
+            checkIn: formData.check_in_date,
+            checkOut: formData.check_out_date,
+            price: formData.owner_price,
+          }
+        ).catch(console.error);
+      }
+
+      setListingSuccess(true);
       fetchData();
     } catch (error: unknown) {
       console.error("Error saving listing:", error);
@@ -284,6 +299,7 @@ const OwnerListings = () => {
     if (!open) {
       setEditingListing(null);
       setFormData(initialFormData);
+      setListingSuccess(false);
     }
   };
 
@@ -322,6 +338,15 @@ const OwnerListings = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
+            {listingSuccess ? (
+              <ActionSuccessCard
+                title={editingListing ? "Listing Updated & Resubmitted!" : "Listing Submitted for Review!"}
+                description="Our team reviews listings within 24 hours. You'll receive an email when your listing is approved and goes live."
+                emailSent
+                actions={[{ label: "Done", onClick: () => handleDialogChange(false) }]}
+              />
+            ) : (
+            <>
             <DialogHeader>
               <DialogTitle>
                 {editingListing ? "Edit Listing" : "Create New Listing"}
@@ -451,6 +476,8 @@ const OwnerListings = () => {
                 </Button>
               </DialogFooter>
             </form>
+            </>
+            )}
           </DialogContent>
         </Dialog>
       </div>

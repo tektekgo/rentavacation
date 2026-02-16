@@ -109,6 +109,81 @@ export const sendWelcomeEmail = async (to: string, userName: string): Promise<Em
 /**
  * Send a contact form submission notification
  */
+/**
+ * Send confirmation email when a listing is submitted for review
+ */
+export const sendListingSubmittedEmail = async (
+  to: string,
+  ownerName: string,
+  details: { resortName: string; location: string; checkIn: string; checkOut: string; price: number }
+): Promise<EmailResponse> => {
+  return sendEmail({
+    to,
+    subject: 'Listing Submitted for Review - Rent-A-Vacation',
+    type: 'notification',
+    html: wrapEmail({
+      recipientName: ownerName || undefined,
+      heading: 'Listing Submitted for Review',
+      body: `
+        <p>Your listing has been submitted and is now pending review.</p>
+        <div style="background: #f7fafc; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
+          <p style="margin: 0 0 6px 0;"><strong>Resort:</strong> ${details.resortName}</p>
+          <p style="margin: 0 0 6px 0;"><strong>Location:</strong> ${details.location}</p>
+          <p style="margin: 0 0 6px 0;"><strong>Dates:</strong> ${details.checkIn} — ${details.checkOut}</p>
+          <p style="margin: 0;"><strong>Your Price:</strong> $${details.price.toLocaleString()}</p>
+        </div>
+        <div style="background: #ebf8ff; padding: 16px 20px; border-radius: 6px; border-left: 4px solid ${BRAND_COLOR}; margin: 16px 0;">
+          <p style="margin: 0 0 8px 0; font-weight: 600;">What happens next?</p>
+          <ul style="margin: 0; padding-left: 18px; line-height: 1.8;">
+            <li>Our team reviews listings within 24 hours</li>
+            <li>You'll receive an email when your listing is approved</li>
+            <li>Once approved, your listing goes live for travelers to book</li>
+          </ul>
+        </div>
+      `,
+      ctaLabel: 'View Your Listings',
+      ctaUrl: `${SITE_URL}/owner-dashboard?tab=listings`,
+    }),
+  });
+};
+
+/**
+ * Send confirmation email when a property is registered
+ */
+export const sendPropertyRegisteredEmail = async (
+  to: string,
+  ownerName: string,
+  details: { brand: string; resortName: string; location: string; bedrooms: number }
+): Promise<EmailResponse> => {
+  return sendEmail({
+    to,
+    subject: 'Property Registered - Rent-A-Vacation',
+    type: 'notification',
+    html: wrapEmail({
+      recipientName: ownerName || undefined,
+      heading: 'Property Registered Successfully',
+      body: `
+        <p>Your vacation club property has been registered on Rent-A-Vacation.</p>
+        <div style="background: #f7fafc; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
+          <p style="margin: 0 0 6px 0;"><strong>Brand:</strong> ${details.brand}</p>
+          <p style="margin: 0 0 6px 0;"><strong>Resort:</strong> ${details.resortName}</p>
+          <p style="margin: 0 0 6px 0;"><strong>Location:</strong> ${details.location}</p>
+          <p style="margin: 0;"><strong>Bedrooms:</strong> ${details.bedrooms}</p>
+        </div>
+        <div style="background: #ebf8ff; padding: 16px 20px; border-radius: 6px; border-left: 4px solid ${BRAND_COLOR}; margin: 16px 0;">
+          <p style="margin: 0 0 8px 0; font-weight: 600;">Next step: Create a listing</p>
+          <p style="margin: 0;">Now that your property is registered, create a listing with your available dates and pricing to start accepting bookings.</p>
+        </div>
+      `,
+      ctaLabel: 'Create a Listing',
+      ctaUrl: `${SITE_URL}/owner-dashboard?tab=listings`,
+    }),
+  });
+};
+
+/**
+ * Send a contact form submission notification
+ */
 export const sendContactFormEmail = async (
   name: string,
   email: string,

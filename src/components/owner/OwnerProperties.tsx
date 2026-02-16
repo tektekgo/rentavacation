@@ -38,6 +38,8 @@ import {
 import { toast } from "sonner";
 import { Plus, Building2, MapPin, Bed, Bath, Users, Edit, Trash2 } from "lucide-react";
 import type { Property, VacationClubBrand, Database } from "@/types/database";
+import { ActionSuccessCard } from "@/components/ActionSuccessCard";
+import { sendPropertyRegisteredEmail } from "@/lib/email";
 
 type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
@@ -89,6 +91,7 @@ const OwnerProperties = () => {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
   const [amenitiesInput, setAmenitiesInput] = useState("");
+  const [propertySuccess, setPropertySuccess] = useState(false);
 
   // Fetch properties
   const fetchProperties = async () => {
@@ -144,6 +147,11 @@ const OwnerProperties = () => {
 
         if (error) throw error;
         toast.success("Property updated successfully");
+        setIsDialogOpen(false);
+        setEditingProperty(null);
+        setFormData(initialFormData);
+        setAmenitiesInput("");
+        fetchProperties();
       } else {
         // Create new
         const insertData: PropertyInsert = {
@@ -163,14 +171,25 @@ const OwnerProperties = () => {
           .insert(insertData as never);
 
         if (error) throw error;
-        toast.success("Property added successfully");
-      }
 
-      setIsDialogOpen(false);
-      setEditingProperty(null);
-      setFormData(initialFormData);
-      setAmenitiesInput("");
-      fetchProperties();
+        // Fire confirmation email (fire-and-forget)
+        if (user.email) {
+          const brandLabel = VACATION_CLUB_BRANDS.find(b => b.value === formData.brand)?.label || formData.brand;
+          sendPropertyRegisteredEmail(
+            user.email,
+            user.user_metadata?.full_name || "",
+            {
+              brand: brandLabel,
+              resortName: formData.resort_name,
+              location: formData.location,
+              bedrooms: formData.bedrooms,
+            }
+          ).catch(console.error);
+        }
+
+        setPropertySuccess(true);
+        fetchProperties();
+      }
     } catch (error: unknown) {
       console.error("Error saving property:", error);
       toast.error(error instanceof Error ? error.message : "Failed to save property");
@@ -220,6 +239,7 @@ const OwnerProperties = () => {
       setEditingProperty(null);
       setFormData(initialFormData);
       setAmenitiesInput("");
+      setPropertySuccess(false);
     }
   };
 
@@ -258,6 +278,28 @@ const OwnerProperties = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            {propertySuccess ? (
+              <ActionSuccessCard
+                title="Property Added Successfully!"
+                description="Your property has been registered. Next step: create a listing to make it available for booking."
+                emailSent
+                actions={[
+                  {
+                    label: "Create a Listing",
+                    onClick: () => {
+                      handleDialogChange(false);
+                      // Navigate to listings tab via URL param
+                      const url = new URL(window.location.href);
+                      url.searchParams.set("tab", "listings");
+                      window.history.replaceState({}, "", url.toString());
+                      window.dispatchEvent(new PopStateEvent("popstate"));
+                    },
+                  },
+                  { label: "Done", variant: "outline", onClick: () => handleDialogChange(false) },
+                ]}
+              />
+            ) : (
+            <>
             <DialogHeader>
               <DialogTitle>
                 {editingProperty ? "Edit Property" : "Add New Property"}
@@ -395,6 +437,8 @@ const OwnerProperties = () => {
                 </Button>
               </DialogFooter>
             </form>
+            </>
+            )}
           </DialogContent>
         </Dialog>
       </div>

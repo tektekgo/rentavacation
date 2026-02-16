@@ -126,7 +126,6 @@ export function useCreateBid() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bids'] });
-      toast.success('Bid submitted successfully!');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to submit bid');
