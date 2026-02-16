@@ -109,15 +109,15 @@ export function useCreateBid() {
     mutationFn: async (input: CreateBidInput) => {
       if (!user) throw new Error('Must be logged in');
       
-      const { data, error } = await (supabase
-        .from('listing_bids') as any)
+      const { data, error } = await supabase
+        .from('listing_bids')
         .insert({
           listing_id: input.listing_id,
           bidder_id: user.id,
           bid_amount: input.bid_amount,
           message: input.message || null,
           guest_count: input.guest_count,
-        })
+        } as never)
         .select()
         .single();
 
@@ -128,7 +128,7 @@ export function useCreateBid() {
       queryClient.invalidateQueries({ queryKey: ['bids'] });
       toast.success('Bid submitted successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to submit bid');
     },
   });
@@ -150,9 +150,9 @@ export function useUpdateBidStatus() {
       counterOfferAmount?: number;
       counterOfferMessage?: string;
     }) => {
-      const updateData: any = { 
-        status, 
-        responded_at: new Date().toISOString() 
+      const updateData: Record<string, unknown> = {
+        status,
+        responded_at: new Date().toISOString()
       };
       
       if (counterOfferAmount !== undefined) {
@@ -160,9 +160,9 @@ export function useUpdateBidStatus() {
         updateData.counter_offer_message = counterOfferMessage || null;
       }
 
-      const { data, error } = await (supabase
-        .from('listing_bids') as any)
-        .update(updateData)
+      const { data, error } = await supabase
+        .from('listing_bids')
+        .update(updateData as never)
         .eq('id', bidId)
         .select()
         .single();
@@ -179,7 +179,7 @@ export function useUpdateBidStatus() {
           : 'Bid updated';
       toast.success(message);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update bid');
     },
   });
@@ -191,15 +191,15 @@ export function useOpenListingForBidding() {
 
   return useMutation({
     mutationFn: async (input: OpenListingForBiddingInput) => {
-      const { data, error } = await (supabase
-        .from('listings') as any)
+      const { data, error } = await supabase
+        .from('listings')
         .update({
           open_for_bidding: true,
           bidding_ends_at: input.bidding_ends_at,
           min_bid_amount: input.min_bid_amount || null,
           reserve_price: input.reserve_price || null,
           allow_counter_offers: input.allow_counter_offers ?? true,
-        })
+        } as never)
         .eq('id', input.listing_id)
         .select()
         .single();
@@ -211,7 +211,7 @@ export function useOpenListingForBidding() {
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast.success('Listing is now open for bidding!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to open listing for bidding');
     },
   });
@@ -273,12 +273,12 @@ export function useCreateTravelRequest() {
     mutationFn: async (input: CreateTravelRequestInput) => {
       if (!user) throw new Error('Must be logged in');
 
-      const { data, error } = await (supabase
-        .from('travel_requests') as any)
+      const { data, error } = await supabase
+        .from('travel_requests')
         .insert({
           traveler_id: user.id,
           ...input,
-        })
+        } as never)
         .select()
         .single();
 
@@ -289,7 +289,7 @@ export function useCreateTravelRequest() {
       queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
       toast.success('Travel request posted!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create travel request');
     },
   });
@@ -307,9 +307,9 @@ export function useUpdateTravelRequestStatus() {
       requestId: string; 
       status: TravelRequestStatus;
     }) => {
-      const { data, error } = await (supabase
-        .from('travel_requests') as any)
-        .update({ status })
+      const { data, error } = await supabase
+        .from('travel_requests')
+        .update({ status } as never)
         .eq('id', requestId)
         .select()
         .single();
@@ -321,7 +321,7 @@ export function useUpdateTravelRequestStatus() {
       queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
       toast.success('Request updated');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update request');
     },
   });
@@ -390,12 +390,12 @@ export function useCreateProposal() {
     mutationFn: async (input: CreateProposalInput) => {
       if (!user) throw new Error('Must be logged in');
 
-      const { data, error } = await (supabase
-        .from('travel_proposals') as any)
+      const { data, error } = await supabase
+        .from('travel_proposals')
         .insert({
           ...input,
           owner_id: user.id,
-        })
+        } as never)
         .select()
         .single();
 
@@ -406,7 +406,7 @@ export function useCreateProposal() {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       toast.success('Proposal submitted!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to submit proposal');
     },
   });
@@ -424,12 +424,12 @@ export function useUpdateProposalStatus() {
       proposalId: string; 
       status: ProposalStatus;
     }) => {
-      const { data, error } = await (supabase
-        .from('travel_proposals') as any)
-        .update({ 
-          status, 
-          responded_at: new Date().toISOString() 
-        })
+      const { data, error } = await supabase
+        .from('travel_proposals')
+        .update({
+          status,
+          responded_at: new Date().toISOString()
+        } as never)
         .eq('id', proposalId)
         .select()
         .single();
@@ -445,7 +445,7 @@ export function useUpdateProposalStatus() {
         : 'Proposal updated';
       toast.success(message);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update proposal');
     },
   });
@@ -508,9 +508,9 @@ export function useMarkNotificationRead() {
 
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      const { error } = await (supabase
-        .from('notifications') as any)
-        .update({ read_at: new Date().toISOString() })
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read_at: new Date().toISOString() } as never)
         .eq('id', notificationId);
 
       if (error) throw error;
@@ -530,9 +530,9 @@ export function useMarkAllNotificationsRead() {
     mutationFn: async () => {
       if (!user) throw new Error('Must be logged in');
       
-      const { error } = await (supabase
-        .from('notifications') as any)
-        .update({ read_at: new Date().toISOString() })
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read_at: new Date().toISOString() } as never)
         .eq('user_id', user.id)
         .is('read_at', null);
 
@@ -575,12 +575,12 @@ export function useUpdateNotificationPreferences() {
     mutationFn: async (preferences: Partial<NotificationPreferences>) => {
       if (!user) throw new Error('Must be logged in');
 
-      const { data, error } = await (supabase
-        .from('notification_preferences') as any)
+      const { data, error } = await supabase
+        .from('notification_preferences')
         .upsert({
           user_id: user.id,
           ...preferences,
-        })
+        } as never)
         .select()
         .single();
 

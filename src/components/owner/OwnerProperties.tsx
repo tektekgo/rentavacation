@@ -137,9 +137,9 @@ const OwnerProperties = () => {
           amenities: amenitiesList,
         };
 
-        const { error } = await (supabase
-          .from("properties") as any)
-          .update(updateData)
+        const { error } = await supabase
+          .from("properties")
+          .update(updateData as never)
           .eq("id", editingProperty.id);
 
         if (error) throw error;
@@ -158,9 +158,9 @@ const OwnerProperties = () => {
           amenities: amenitiesList,
         };
 
-        const { error } = await (supabase
-          .from("properties") as any)
-          .insert(insertData);
+        const { error } = await supabase
+          .from("properties")
+          .insert(insertData as never);
 
         if (error) throw error;
         toast.success("Property added successfully");
@@ -171,9 +171,9 @@ const OwnerProperties = () => {
       setFormData(initialFormData);
       setAmenitiesInput("");
       fetchProperties();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving property:", error);
-      toast.error(error.message || "Failed to save property");
+      toast.error(error instanceof Error ? error.message : "Failed to save property");
     } finally {
       setIsSaving(false);
     }
@@ -207,9 +207,9 @@ const OwnerProperties = () => {
       if (error) throw error;
       toast.success("Property deleted");
       fetchProperties();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting property:", error);
-      toast.error(error.message || "Failed to delete property");
+      toast.error(error instanceof Error ? error.message : "Failed to delete property");
     }
   };
 

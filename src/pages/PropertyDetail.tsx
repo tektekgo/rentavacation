@@ -88,7 +88,7 @@ const PropertyDetail = () => {
   // Derived data
   const prop = listing?.property;
   const resort = prop?.resort;
-  const unitType = prop?.unit_type as any;
+  const unitType = prop?.unit_type as Record<string, string> | undefined;
   const nights = listing ? calculateNights(listing.check_in_date, listing.check_out_date) : 0;
   const pricePerNight = nights > 0 && listing ? Math.round(listing.final_price / nights) : 0;
 
@@ -538,7 +538,7 @@ const PropertyDetail = () => {
                 const simPricePerNight = simNights > 0 ? Math.round(sim.final_price / simNights) : sim.final_price;
                 const simImage = sim.property.images?.[0] || sim.property.resort?.main_image_url || null;
                 const simName = sim.property.resort?.resort_name && sim.property.unit_type
-                  ? `${(sim.property.unit_type as any).unit_type_name} at ${sim.property.resort.resort_name}`
+                  ? `${(sim.property.unit_type as Record<string, string>).unit_type_name} at ${sim.property.resort.resort_name}`
                   : sim.property.resort?.resort_name || sim.property.resort_name;
                 const simLocation = sim.property.resort?.location
                   ? `${sim.property.resort.location.city}, ${sim.property.resort.location.state}`

@@ -23,7 +23,7 @@ const BRAND_LABELS: Record<string, string> = {
 function getDisplayName(listing: ActiveListing): string {
   const prop = listing.property;
   if (prop.resort?.resort_name && prop.unit_type) {
-    return `${(prop.unit_type as any).unit_type_name} at ${prop.resort.resort_name}`;
+    return `${(prop.unit_type as Record<string, string>).unit_type_name} at ${prop.resort.resort_name}`;
   }
   if (prop.resort?.resort_name) return prop.resort.resort_name;
   return prop.resort_name;

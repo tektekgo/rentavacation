@@ -12,9 +12,9 @@ export function useFavoriteIds() {
       const { data, error } = await supabase
         .from("favorites")
         .select("property_id")
-        .eq("user_id", user.id) as any;
+        .eq("user_id", user.id);
       if (error) throw error;
-      return (data || []).map((f: any) => f.property_id);
+      return (data || []).map((f: { property_id: string }) => f.property_id);
     },
     enabled: !!user,
   });
@@ -34,19 +34,19 @@ export function useToggleFavorite() {
         .select("id")
         .eq("user_id", user.id)
         .eq("property_id", propertyId)
-        .maybeSingle() as any;
+        .maybeSingle();
 
       if (existing) {
         const { error } = await supabase
           .from("favorites")
           .delete()
-          .eq("id", existing.id) as any;
+          .eq("id", existing.id);
         if (error) throw error;
         return { action: "removed" as const, propertyId };
       } else {
-        const { error } = await (supabase
-          .from("favorites") as any)
-          .insert({ user_id: user.id, property_id: propertyId });
+        const { error } = await supabase
+          .from("favorites")
+          .insert({ user_id: user.id, property_id: propertyId } as never);
         if (error) throw error;
         return { action: "added" as const, propertyId };
       }
