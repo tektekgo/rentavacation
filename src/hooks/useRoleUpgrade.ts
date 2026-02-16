@@ -44,10 +44,10 @@ export function useRequestRoleUpgrade() {
 
   return useMutation({
     mutationFn: async ({ role, reason }: { role: AppRole; reason?: string }) => {
-      const { data, error } = await (supabase.rpc as any)('request_role_upgrade', {
+      const { data, error } = await supabase.rpc('request_role_upgrade' as never, {
         _requested_role: role,
         _reason: reason || null,
-      });
+      } as never);
 
       if (error) throw error;
       return data;
@@ -57,7 +57,7 @@ export function useRequestRoleUpgrade() {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
       toast.success('Role upgrade request submitted!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to submit role upgrade request');
     },
   });
@@ -89,10 +89,10 @@ export function useApproveRoleUpgrade() {
 
   return useMutation({
     mutationFn: async (requestId: string) => {
-      const { data, error } = await (supabase.rpc as any)('approve_role_upgrade', {
+      const { data, error } = await supabase.rpc('approve_role_upgrade' as never, {
         _request_id: requestId,
         _approved_by: user?.id,
-      });
+      } as never);
 
       if (error) throw error;
       return data;
@@ -101,7 +101,7 @@ export function useApproveRoleUpgrade() {
       queryClient.invalidateQueries({ queryKey: ['role-upgrade-requests'] });
       toast.success('Role upgrade approved!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to approve role upgrade');
     },
   });
@@ -114,11 +114,11 @@ export function useRejectRoleUpgrade() {
 
   return useMutation({
     mutationFn: async ({ requestId, reason }: { requestId: string; reason?: string }) => {
-      const { data, error } = await (supabase.rpc as any)('reject_role_upgrade', {
+      const { data, error } = await supabase.rpc('reject_role_upgrade' as never, {
         _request_id: requestId,
         _rejected_by: user?.id,
         _reason: reason || null,
-      });
+      } as never);
 
       if (error) throw error;
       return data;
@@ -127,7 +127,7 @@ export function useRejectRoleUpgrade() {
       queryClient.invalidateQueries({ queryKey: ['role-upgrade-requests'] });
       toast.success('Role upgrade rejected');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to reject role upgrade');
     },
   });

@@ -78,12 +78,12 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Mobile App Readiness (PWA + Capacitor)
-**Started:** February 15, 2026
+**Active Phase:** CI/CD Fix — Unblock Qase Test Reporting
+**Started:** February 16, 2026
 
 ### Working on TODAY:
-- [x] Phase 11: PWA implementation
-- [ ] Phase 12: Capacitor setup (after PWA)
+- [ ] Fix all 58 ESLint `no-explicit-any` errors to unblock CI pipeline
+- [ ] Phase 12: Capacitor setup (after CI green)
 
 ### Recently Completed:
 - [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags, 11 new tests (Feb 16)
@@ -98,7 +98,34 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## PRIORITY QUEUE (In Order)
 
-### 1. Phase 10: Link Audit Fixes & Support Infrastructure — IN PROGRESS
+### 1. Fix ESLint Errors — CRITICAL (CI Blocker)
+**Status:** In Progress (Feb 16, 2026)
+**Impact:** All CI runs failing → Qase test reporting inactive, no automated quality gate
+
+**Problem:** 58 `@typescript-eslint/no-explicit-any` errors cause `npm run lint` to exit non-zero, failing the "Lint & Type Check" CI job. Tests never execute in CI, so Qase receives no results.
+
+**Fix:** Replace all `any` types with proper TypeScript types across ~15 files.
+
+**Files affected:**
+- `scripts/import-resort-data.ts` (2 errors)
+- `src/components/FeaturedResorts.tsx` (1)
+- `src/components/admin/PendingApprovals.tsx` (2)
+- `src/components/owner/OwnerListings.tsx` (6)
+- `src/components/owner/OwnerProperties.tsx` (4)
+- `src/components/owner/OwnerVerification.tsx` (2)
+- `src/hooks/useBidding.ts` (18)
+- `src/hooks/useFavorites.ts` (5)
+- `src/hooks/useRoleUpgrade.ts` (6)
+- `src/lib/email.ts` (2)
+- `src/pages/ListProperty.tsx` (5)
+- `src/pages/PropertyDetail.tsx` (2)
+- `supabase/functions/send-approval-email/index.ts` (1)
+- `supabase/functions/send-email/index.ts` (1)
+- `tailwind.config.ts` (1)
+
+---
+
+### 2. Phase 10: Link Audit Fixes & Support Infrastructure — IN PROGRESS
 **Status:** Tracks A-C complete, Track D deferred (Feb 15, 2026)
 **Audit:** 68 internal links verified working, 7 issues found and fixed
 

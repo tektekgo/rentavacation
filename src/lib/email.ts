@@ -11,7 +11,7 @@ interface SendEmailParams {
 
 interface EmailResponse {
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: string;
 }
 
@@ -74,9 +74,9 @@ export const sendEmail = async (params: SendEmailParams): Promise<EmailResponse>
     }
 
     return data as EmailResponse;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Email send error:', err);
-    return { success: false, error: err.message };
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
   }
 };
 

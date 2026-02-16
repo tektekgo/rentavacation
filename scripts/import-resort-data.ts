@@ -142,7 +142,7 @@ async function importUnitTypes(insertedResorts: Array<{ id: string; resort_name:
   insertedResorts.forEach(r => resortMap.set(r.resort_name, r.id));
 
   // Transform unit types with resort_id
-  const unitTypesWithIds = resortData.unit_types.map((ut: any) => {
+  const unitTypesWithIds = resortData.unit_types.map((ut: Record<string, unknown>) => {
     const resortId = resortMap.get(ut.resort_name);
     if (!resortId) {
       console.warn(`Warning: No resort found for "${ut.resort_name}"`);
@@ -224,7 +224,7 @@ async function verifyData() {
     .limit(5);
 
   console.log('\nSample: First 5 Hilton resorts with unit type counts:');
-  sample?.forEach((r: any) => {
+  sample?.forEach((r: { resort_name: string; resort_unit_types?: { count: number }[] }) => {
     const utCount = r.resort_unit_types?.[0]?.count || 0;
     console.log(`  ${r.resort_name}: ${utCount} unit types`);
   });

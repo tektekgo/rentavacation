@@ -183,9 +183,9 @@ const OwnerListings = () => {
           status: "pending_approval",
         };
 
-        const { error } = await (supabase
-          .from("listings") as any)
-          .update(updateData)
+        const { error } = await supabase
+          .from("listings")
+          .update(updateData as never)
           .eq("id", editingListing.id);
 
         if (error) throw error;
@@ -205,9 +205,9 @@ const OwnerListings = () => {
           status: "pending_approval",
         };
 
-        const { error } = await (supabase
-          .from("listings") as any)
-          .insert(insertData);
+        const { error } = await supabase
+          .from("listings")
+          .insert(insertData as never);
 
         if (error) throw error;
         toast.success("Listing created and submitted for approval");
@@ -217,9 +217,9 @@ const OwnerListings = () => {
       setEditingListing(null);
       setFormData(initialFormData);
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving listing:", error);
-      toast.error(error.message || "Failed to save listing");
+      toast.error(error instanceof Error ? error.message : "Failed to save listing");
     } finally {
       setIsSaving(false);
     }
@@ -247,17 +247,17 @@ const OwnerListings = () => {
   // Handle cancel listing
   const handleCancel = async (listingId: string) => {
     try {
-      const { error } = await (supabase
-        .from("listings") as any)
-        .update({ status: "cancelled" })
+      const { error } = await supabase
+        .from("listings")
+        .update({ status: "cancelled" } as never)
         .eq("id", listingId);
 
       if (error) throw error;
       toast.success("Listing cancelled");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error cancelling listing:", error);
-      toast.error(error.message || "Failed to cancel listing");
+      toast.error(error instanceof Error ? error.message : "Failed to cancel listing");
     }
   };
 
@@ -272,9 +272,9 @@ const OwnerListings = () => {
       if (error) throw error;
       toast.success("Listing deleted");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting listing:", error);
-      toast.error(error.message || "Failed to delete listing");
+      toast.error(error instanceof Error ? error.message : "Failed to delete listing");
     }
   };
 
