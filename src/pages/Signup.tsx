@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { ActionSuccessCard } from "@/components/ActionSuccessCard";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +18,8 @@ const Signup = () => {
     accountType: "traveler",
   });
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [isSignupComplete, setIsSignupComplete] = useState(false);
+
   const { signUp, isConfigured } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -59,11 +61,7 @@ const Signup = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Account created!",
-        description: "Please check your email to confirm, then log in. Your account will be reviewed by our team.",
-      });
-      navigate("/login");
+      setIsSignupComplete(true);
     }
   };
 
@@ -90,6 +88,20 @@ const Signup = () => {
             </div>
 
             <div className="bg-card rounded-2xl shadow-card-hover p-8">
+              {isSignupComplete ? (
+                <ActionSuccessCard
+                  title="Account Created!"
+                  description={
+                    <>
+                      <p>We've sent a verification email to <strong>{formData.email}</strong>.</p>
+                      <p className="mt-2">Click the link in the email to verify your account, then log in to get started.</p>
+                    </>
+                  }
+                  emailSent
+                  actions={[{ label: "Go to Login", onClick: () => navigate("/login") }]}
+                />
+              ) : (
+              <>
               {/* Account Type Toggle */}
               <div className="flex bg-muted p-1 rounded-lg mb-6">
                 <button
@@ -256,6 +268,8 @@ const Signup = () => {
                   Log in
                 </Link>
               </p>
+              </>
+              )}
             </div>
           </div>
         </div>

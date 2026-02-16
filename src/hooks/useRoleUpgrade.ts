@@ -55,7 +55,6 @@ export function useRequestRoleUpgrade() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['role-upgrade-requests'] });
       queryClient.invalidateQueries({ queryKey: ['roles'] });
-      toast.success('Role upgrade request submitted!');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to submit role upgrade request');

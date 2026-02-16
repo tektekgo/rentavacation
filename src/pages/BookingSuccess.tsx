@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, ArrowLeft, Calendar, MapPin, Users, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Calendar, MapPin, Users, Loader2, XCircle, Mail, Clock } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, Listing, Property } from "@/types/database";
 
@@ -173,6 +173,51 @@ const BookingSuccess = () => {
               <div className="flex justify-between items-center">
                 <span className="font-medium">Total Paid</span>
                 <span className="text-2xl font-bold">${booking.total_amount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Booking Reference</span>
+                <span className="font-mono font-semibold tracking-wider">
+                  {booking.id.slice(0, 8).toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* What Happens Next */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">What Happens Next</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Confirmation Email</p>
+                <p className="text-sm text-muted-foreground">
+                  Check your inbox for booking details and receipt.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Owner Confirmation</p>
+                <p className="text-sm text-muted-foreground">
+                  The property owner will confirm your reservation with the resort (usually within 48 hours).
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Check-in Details</p>
+                <p className="text-sm text-muted-foreground">
+                  You'll receive check-in instructions before your arrival date.
+                </p>
               </div>
             </div>
           </CardContent>

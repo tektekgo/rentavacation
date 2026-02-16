@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, Loader2, Clock, CheckCircle } from 'lucide-react';
+import { ActionSuccessCard } from '@/components/ActionSuccessCard';
 import {
   useRequestRoleUpgrade,
   useLatestRequestForRole,
@@ -45,6 +46,7 @@ export function RoleUpgradeDialog({
   context,
 }: RoleUpgradeDialogProps) {
   const [reason, setReason] = useState('');
+  const [requestSuccess, setRequestSuccess] = useState(false);
   const requestUpgrade = useRequestRoleUpgrade();
   const latestRequest = useLatestRequestForRole(requestedRole);
 
@@ -59,12 +61,20 @@ export function RoleUpgradeDialog({
   const handleSubmit = async () => {
     await requestUpgrade.mutateAsync({ role: requestedRole, reason: reason || undefined });
     setReason('');
+    setRequestSuccess(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    if (!open) {
+      setRequestSuccess(false);
+    }
   };
 
   // If there's a pending request, show status
   if (latestRequest?.status === 'pending') {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -101,7 +111,7 @@ export function RoleUpgradeDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
               Close
             </Button>
           </DialogFooter>
@@ -113,7 +123,7 @@ export function RoleUpgradeDialog({
   // If approved (shouldn't normally show, but handle gracefully)
   if (latestRequest?.status === 'approved') {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -125,7 +135,7 @@ export function RoleUpgradeDialog({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => { onOpenChange(false); window.location.reload(); }}>
+            <Button onClick={() => { handleOpenChange(false); window.location.reload(); }}>
               Refresh Page
             </Button>
           </DialogFooter>
@@ -134,10 +144,18 @@ export function RoleUpgradeDialog({
     );
   }
 
-  // Default: show the request form
+  // Default: show the request form (or success state)
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
+        {requestSuccess ? (
+          <ActionSuccessCard
+            title="Request Submitted!"
+            description="Our team will review your request within 1-2 business days. You'll receive an email notification once a decision has been made."
+            actions={[{ label: "Close", onClick: () => handleOpenChange(false) }]}
+          />
+        ) : (
+        <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon className="h-5 w-5 text-primary" />
@@ -166,7 +184,7 @@ export function RoleUpgradeDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={requestUpgrade.isPending}>
@@ -180,6 +198,8 @@ export function RoleUpgradeDialog({
             )}
           </Button>
         </DialogFooter>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );

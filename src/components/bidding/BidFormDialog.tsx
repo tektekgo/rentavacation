@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Gavel, DollarSign, Users, Clock, LogIn } from 'lucide-react';
+import { ActionSuccessCard } from '@/components/ActionSuccessCard';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import type { ListingWithBidding } from '@/types/bidding';
@@ -33,6 +34,8 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
   const [bidAmount, setBidAmount] = useState<number>(listing.min_bid_amount || listing.owner_price);
   const [guestCount, setGuestCount] = useState<number>(1);
   const [message, setMessage] = useState('');
+  const [bidSuccess, setBidSuccess] = useState(false);
+  const [submittedBidAmount, setSubmittedBidAmount] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +55,9 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
         guest_count: guestCount,
         message: message || undefined,
       });
-      
-      onOpenChange(false);
-      setBidAmount(listing.min_bid_amount || listing.owner_price);
-      setGuestCount(1);
-      setMessage('');
+
+      setSubmittedBidAmount(bidAmount);
+      setBidSuccess(true);
     } catch {
       // Error handled in hook
     }
@@ -93,9 +94,31 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
     );
   }
 
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    if (!open) {
+      setBidSuccess(false);
+      setBidAmount(listing.min_bid_amount || listing.owner_price);
+      setGuestCount(1);
+      setMessage('');
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
+        {bidSuccess ? (
+          <ActionSuccessCard
+            icon={Gavel}
+            iconClassName="text-primary"
+            title="Bid Submitted!"
+            description="The property owner will review your bid and respond. You'll be notified when they accept, reject, or counter your offer."
+            referenceLabel="Bid Amount"
+            referenceValue={`$${submittedBidAmount.toLocaleString()}`}
+            actions={[{ label: "Done", onClick: () => handleOpenChange(false) }]}
+          />
+        ) : (
+        <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gavel className="h-5 w-5 text-primary" />
@@ -198,17 +221,19 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={createBid.isPending || (listing.min_bid_amount ? bidAmount < listing.min_bid_amount : false)}
             >
               {createBid.isPending ? 'Submitting...' : 'Submit Bid'}
             </Button>
           </DialogFooter>
         </form>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );
