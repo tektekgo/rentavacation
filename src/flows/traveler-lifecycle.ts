@@ -128,6 +128,14 @@ export const travelerLifecycle: FlowDefinition = {
       ],
     },
     {
+      id: 'contact_support',
+      route: '/contact',
+      label: 'Contact Support',
+      component: 'Contact',
+      description: 'Submit a support inquiry via contact form. Sends email notification to support team and confirmation to user.',
+      edgeFunctions: ['send-contact-form'],
+    },
+    {
       id: 'issue_resolution',
       route: '/admin',
       label: 'Issue Resolution',

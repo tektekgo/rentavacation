@@ -1,9 +1,9 @@
 # 🏠 PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 14, 2026
+> **Last Updated:** February 15, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
-> **App Version:** v0.8.0 (build version visible in footer)
+> **App Version:** v0.9.0 (build version visible in footer)
 
 ---
 
@@ -63,19 +63,17 @@ git push
 
 ## 🎯 CURRENT FOCUS
 
-**Active Phase:** Phase 9 — Voice Toggles, Membership Tiers & Commission ✅
-**Started:** February 14, 2026
+**Active Phase:** Phase 10 — Link Audit Fixes & Support Infrastructure
+**Started:** February 15, 2026
 
 ### Working on TODAY:
-- [x] Track A: Database migration (voice toggles, membership tiers, user memberships, RPCs) ✅
-- [x] Track B: Voice toggle admin UI + DB-controlled enforcement (replace env var) ✅
-- [x] Track C: Membership tier data model + display (types, hooks, components, admin/owner tabs) ✅
-- [x] Track D: Commission visibility + configuration (tier-based discounts, edge function) ✅
-- [x] Track E: Quota tier integration (tier-based voice quotas replacing hardcoded 10/day) ✅
-- [x] Tests: useMembership + useVoiceFeatureFlags tests (78 total tests passing) ✅
-- [x] Migration deployed to DEV Supabase ✅
+- [ ] Track A: Fix dead interactions (Contact Support button, footer email/phone, social icons, FAQ live chat claim)
+- [ ] Track B: Footer link consolidation (Owner Resources, Pricing & Fees, Success Stories redirects)
+- [ ] Track C: Contact/Support page (`/contact` with form, edge function email)
+- [ ] Track D: AI Support Agent (design decision — deferred)
 
 ### Recently Completed:
+- [x] **Phase 10 link audit** — 68 internal links verified, 7 issues identified (Feb 15)
 - [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
 - [x] **Phase 8: Testing Infrastructure** — 71 tests, CI/CD, E2E, Percy, Lighthouse (Feb 14)
 - [x] **Phase 7: UI Excellence & Social Proof** — all 4 tracks complete (Feb 14)
@@ -89,7 +87,7 @@ git push
 - [x] Track D: Documentation updates (user guide, FAQ, journey map)
 
 ### Blocked/Waiting:
-None
+- Track D (AI Support Agent) — awaiting design decision (DEC-009)
 
 ---
 
@@ -209,8 +207,51 @@ None
 
 ---
 
-### 6. 🚀 Phase 3: Voice Everywhere (Q2 2026)
-**Status:** 📋 Planned  
+### 6. 🔗 Phase 10: Link Audit Fixes & Support Infrastructure 🔄 IN PROGRESS
+**Status:** 🔄 In Progress (Feb 15, 2026)
+**Audit:** 68 internal links verified working, 7 issues found
+
+**Link Audit Findings:**
+
+| # | Issue | File | Severity |
+|---|-------|------|----------|
+| 1 | "Contact Support" button does nothing | `FAQ.tsx:274` — `<Button>` with no handler | HIGH |
+| 2 | FAQ claims "live chat feature" exists | `FAQ.tsx:136` — no live chat on site | HIGH |
+| 3 | Social media icons are `href="#"` | `Footer.tsx:24-35` — 4 placeholder links | MEDIUM |
+| 4 | Footer email not clickable | `Footer.tsx:70` — plain text, no `mailto:` | MEDIUM |
+| 5 | Footer phone not clickable | `Footer.tsx:74` — plain text, no `tel:` | LOW |
+| 6 | 3 owner footer links all → same page | `Footer.tsx:57-60` — Owner Resources, Pricing, Success Stories all → `/how-it-works` | MEDIUM |
+
+**Track A: Fix Dead Interactions (quick wins, ~30 min)**
+- [ ] FAQ "Contact Support" → `mailto:support@rentavacation.com` (interim) or link to `/contact` page
+- [ ] Footer email → `<a href="mailto:support@rentavacation.com">`
+- [ ] Footer phone → `<a href="tel:+18007280800">`
+- [ ] Footer social icons → remove placeholders or add real URLs when available
+- [ ] FAQ answer → remove false "live chat feature" claim
+
+**Track B: Footer Link Consolidation (~1-2 hours)**
+- [ ] Option 1: Add anchor sections to How It Works → `/how-it-works#pricing`, `#owner-resources`, `#success-stories`
+- [ ] Option 2: Create dedicated `/owner-resources` page covering pricing, success stories, and owner guides
+- [ ] Option 3: Combine into a single owner-focused info page
+- [ ] Update footer links to point to resolved destinations
+
+**Track C: Contact/Support Page (~2-3 hours)**
+- [ ] Create `/contact` page with: contact form, email, phone, address, FAQ link
+- [ ] Edge function to send contact form submissions via Resend
+- [ ] Wire all "Contact Support" buttons site-wide to `/contact`
+- [ ] Add `/contact` route to `App.tsx`
+- [ ] Update flow manifests if applicable
+
+**Track D: AI Support Agent (future — needs design decision DEC-009)**
+- [ ] Research: VAPI chat widget vs Anthropic API vs simple rule-based chatbot
+- [ ] Design: scope of support queries (FAQs, booking help, account issues)
+- [ ] Design: chat widget UX vs voice support vs both
+- [ ] Implementation: TBD after decision
+
+---
+
+### 8. 🚀 Phase 3: Voice Everywhere (Q2 2026)
+**Status:** 📋 Planned
 **Docs:** `docs/guides/user-journey-map.md`
 
 **Features:**
@@ -222,7 +263,7 @@ None
 
 ---
 
-### 7. 🎯 Phase 6: Advanced Features (Q3 2026)
+### 9. 🎯 Phase 6: Advanced Features (Q3 2026)
 **Status:** 📋 Backlog
 
 **Features:**
@@ -679,6 +720,51 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 
 ---
 
+## 🔬 RESEARCH SPIKES
+
+### RS-001: LiveKit Voice Agents SDK Evaluation
+**Date Added:** February 15, 2026
+**Status:** 📋 Not Started
+**Priority:** High — could reshape voice architecture
+**Docs:** https://docs.livekit.io/agents/start/voice-ai-quickstart/
+
+**Objective:** Evaluate LiveKit Agents SDK as a platform for building a full voice agent experience on RAV — potentially replacing or complementing the current VAPI integration.
+
+**Why LiveKit:**
+- Open-source, self-hostable voice AI infrastructure
+- Built-in support for STT, LLM, TTS pipeline orchestration
+- Real-time WebRTC transport (lower latency than WebSocket-based alternatives)
+- Python & Node SDKs for agent logic
+- Function calling / tool use for live data queries (search listings, check availability, place bids)
+- LiveKit Cloud option for managed hosting
+
+**Research Tasks:**
+- [ ] Read LiveKit Agents quickstart & architecture docs
+- [ ] Compare LiveKit vs VAPI: cost model, latency, flexibility, vendor lock-in
+- [ ] Evaluate STT/TTS provider options (Deepgram, ElevenLabs, OpenAI, etc.)
+- [ ] Assess LLM integration options (Anthropic Claude, OpenAI, custom)
+- [ ] Prototype: minimal voice agent that can answer "find me a resort in Orlando"
+- [ ] Evaluate hosting: LiveKit Cloud vs self-hosted on Cloudflare/Fly.io
+- [ ] Determine migration path from VAPI → LiveKit (if viable)
+- [ ] Assess impact on existing voice toggles, quotas, and auth gates
+
+**Current Voice Stack (VAPI):**
+- VAPI handles STT + LLM + TTS as managed service
+- `useVoiceSearch.ts` → VAPI Web SDK → voice-search edge function
+- Voice toggles, quotas, auth gates all in place
+- Cost: ~$0.10/search (VAPI per-minute pricing)
+
+**LiveKit Could Enable:**
+- Full voice agent (not just search — booking, bidding, support, property listing)
+- Custom agent logic with tool calling (query Supabase directly)
+- Lower per-interaction cost at scale (self-hosted option)
+- Multi-modal: voice + text chat from same agent
+- Potential to unify DEC-009 (AI Support Agent) with voice agent
+
+**Decision:** See DEC-010
+
+---
+
 ## 💭 IDEAS BACKLOG (Unscheduled)
 
 **Marketing & Growth:**
@@ -832,6 +918,68 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 
 ---
 
+### DEC-010: Voice Platform — VAPI vs LiveKit Agents SDK
+**Date:** February 15, 2026
+**Decision:** TBD — Research spike RS-001 required first
+**Status:** 🟡 Pending
+
+**Context:**
+Currently using VAPI as managed voice AI service for property search. LiveKit Agents SDK offers an open-source, self-hostable alternative with deeper customization, function calling, and potentially lower cost at scale.
+
+**Options:**
+- A: Stay with VAPI — proven, working, managed service, but limited to search use case
+- B: Migrate fully to LiveKit — more control, lower cost at scale, but migration effort + hosting responsibility
+- C: Hybrid — keep VAPI for voice search, use LiveKit for new voice features (support agent, booking assistant)
+- D: LiveKit for everything new — build all future voice features on LiveKit, sunset VAPI when ready
+
+**Key Comparison Points:**
+| Factor | VAPI | LiveKit Agents |
+|--------|------|----------------|
+| Hosting | Managed | Cloud or self-hosted |
+| Cost model | Per-minute | Per-minute (Cloud) or infrastructure cost (self-hosted) |
+| Customization | Config + overrides | Full agent code control |
+| Function calling | Limited | Native tool use / function calling |
+| STT/TTS choice | Preset providers | Any provider (Deepgram, ElevenLabs, etc.) |
+| LLM choice | OpenAI default | Any LLM (Claude, OpenAI, etc.) |
+| Transport | WebSocket | WebRTC (lower latency) |
+| Multi-modal | Voice only | Voice + text + video |
+
+**Impact on Existing Work:**
+- Voice toggles, quotas, auth gates are infrastructure-level — would work with either platform
+- `useVoiceSearch.ts` would need rewrite for LiveKit Web SDK
+- Edge function `voice-search` may be replaceable with LiveKit agent tool calls
+
+**Next Step:** Complete RS-001 research spike, then revisit this decision
+
+---
+
+### DEC-009: AI Support Agent Strategy
+**Date:** February 15, 2026
+**Decision:** TBD — Needs design decision
+**Status:** 🟡 Pending
+
+**Context:**
+Site-wide link audit (Feb 15) revealed that "Contact Support" buttons are non-functional and the FAQ falsely claims a "live chat feature" exists. Rather than just adding a simple contact form, considering an AI-powered support agent.
+
+**Options:**
+- A: Simple contact form only (email via Resend edge function) — quick, but passive support
+- B: Rule-based chatbot from FAQ content — answers common questions, low cost
+- C: AI chat widget (Anthropic API) — smart, handles nuanced queries, moderate cost
+- D: VAPI voice support agent — extends existing voice infrastructure, premium UX
+- E: LiveKit voice agent — open-source, function calling, could unify search + support (see DEC-010, RS-001)
+- F: Hybrid (contact form now + AI agent later) ⭐ Likely best approach
+
+**Considerations:**
+- Already have VAPI integration for voice search — can extend
+- LiveKit Agents SDK is a strong alternative — see RS-001 research spike
+- FAQ content provides good training data for rule-based or AI agent
+- Cost implications: Anthropic API vs VAPI vs LiveKit per-interaction pricing
+- User expectations: chat widget is standard, voice support is differentiator
+
+**Next Step:** Implement Track C (contact form) as interim, then decide AI approach for Track D
+
+---
+
 ### DEC-006: Testing Infrastructure Approach
 **Date:** February 13, 2026  
 **Decision:** Option B - Comprehensive foundation (2-3 weeks)  
@@ -959,6 +1107,6 @@ The platform was wired from mock/hardcoded data to real Supabase queries, and a 
 
 ---
 
-**Last updated:** February 14, 2026
+**Last updated:** February 15, 2026
 **Maintained by:** Sujit  
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

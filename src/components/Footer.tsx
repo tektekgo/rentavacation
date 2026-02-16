@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Gavel } from "lucide-react";
+import { Mail, Phone, MapPin, Gavel } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -20,20 +20,6 @@ const Footer = () => {
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
               The open marketplace for vacation rentals. Rent directly from verified timeshare owners, bid on properties, or post your travel plans and let owners compete for your booking.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -54,10 +40,10 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-white mb-6">For Owners</h4>
             <ul className="space-y-3">
               <li><Link to="/list-property" className="hover:text-white transition-colors">List Your Property</Link></li>
-              <li><Link to="/owner-resources" className="hover:text-white transition-colors">Owner Resources</Link></li>
-              <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing & Fees</Link></li>
-              <li><Link to="/success-stories" className="hover:text-white transition-colors">Success Stories</Link></li>
-              <li><Link to="/owner-faq" className="hover:text-white transition-colors">Owner FAQs</Link></li>
+              <li><Link to="/how-it-works#for-owners" className="hover:text-white transition-colors">Owner Resources</Link></li>
+              <li><Link to="/how-it-works#pricing" className="hover:text-white transition-colors">Pricing & Fees</Link></li>
+              <li><Link to="/how-it-works#success-stories" className="hover:text-white transition-colors">Success Stories</Link></li>
+              <li><Link to="/faq" className="hover:text-white transition-colors">Owner FAQs</Link></li>
             </ul>
           </div>
 
@@ -65,17 +51,26 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-semibold text-white mb-6">Contact Us</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Mail className="w-5 h-5 mt-0.5 text-primary" />
-                <span>support@rentavacation.com</span>
+              <li>
+                <a href="mailto:support@rentavacation.com" className="flex items-start gap-3 hover:text-white transition-colors">
+                  <Mail className="w-5 h-5 mt-0.5 text-primary" />
+                  <span>support@rentavacation.com</span>
+                </a>
               </li>
-              <li className="flex items-start gap-3">
-                <Phone className="w-5 h-5 mt-0.5 text-primary" />
-                <span>1-800-RAV-0800</span>
+              <li>
+                <a href="tel:+18007280800" className="flex items-start gap-3 hover:text-white transition-colors">
+                  <Phone className="w-5 h-5 mt-0.5 text-primary" />
+                  <span>1-800-RAV-0800</span>
+                </a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-0.5 text-primary" />
                 <span>7874 Chase Meadows Dr W<br />Jacksonville, FL 32256</span>
+              </li>
+              <li>
+                <Link to="/contact" className="inline-flex items-center gap-2 text-primary hover:text-white transition-colors text-sm font-medium mt-2">
+                  Contact Form →
+                </Link>
               </li>
             </ul>
           </div>

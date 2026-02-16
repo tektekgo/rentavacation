@@ -133,7 +133,7 @@ const faqCategories = [
       {
         question: "How do I contact customer support?",
         answer:
-          "You can reach us via email at support@rentavacation.com, by phone at 1-800-RENT-VAC, or through the live chat feature on our website. We're available 24/7.",
+          "You can reach us via email at support@rentavacation.com, by phone at 1-800-RAV-0800, or through the Contact Us page on our website. We're available 24/7.",
       },
     ],
   },
@@ -271,10 +271,12 @@ const FAQ = () => {
             as soon as possible.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button>
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Contact Support
-            </Button>
+            <Link to="/contact">
+              <Button>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Contact Support
+              </Button>
+            </Link>
             <Link to="/how-it-works">
               <Button variant="outline">Learn How It Works</Button>
             </Link>

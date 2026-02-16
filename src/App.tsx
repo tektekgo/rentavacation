@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Rentals from "./pages/Rentals";
@@ -30,6 +30,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
 import Architecture from "./pages/Architecture";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/documentation" element={<Documentation />} />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/architecture" element={<Architecture />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Protected routes — require approved account */}
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
@@ -99,12 +101,12 @@ const App = () => (
             <Route path="/my-bids" element={<ProtectedRoute><MyBidsDashboard /></ProtectedRoute>} />
             <Route path="/checkin" element={<ProtectedRoute><TravelerCheckin /></ProtectedRoute>} />
 
-            {/* Legacy routes - redirect to new paths */}
-            <Route path="/deals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
-            <Route path="/owner-resources" element={<HowItWorksPage />} />
-            <Route path="/pricing" element={<HowItWorksPage />} />
-            <Route path="/success-stories" element={<HowItWorksPage />} />
-            <Route path="/owner-faq" element={<FAQ />} />
+            {/* Legacy routes - redirect to proper sections */}
+            <Route path="/deals" element={<Navigate to="/rentals" replace />} />
+            <Route path="/owner-resources" element={<Navigate to="/how-it-works#for-owners" replace />} />
+            <Route path="/pricing" element={<Navigate to="/how-it-works#pricing" replace />} />
+            <Route path="/success-stories" element={<Navigate to="/how-it-works#success-stories" replace />} />
+            <Route path="/owner-faq" element={<Navigate to="/faq" replace />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
