@@ -191,7 +191,7 @@ export default function Architecture() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="container mx-auto px-4 pt-28 pb-8 max-w-7xl">
         {/* Branded header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
