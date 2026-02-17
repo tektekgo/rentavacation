@@ -245,7 +245,7 @@ const AdminCheckinIssues = () => {
             <div>
               <CardTitle>Check-in Issues</CardTitle>
               <CardDescription>
-                Review and resolve traveler-reported issues
+                Review and resolve renter-reported issues
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ const AdminCheckinIssues = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Property</TableHead>
-                  <TableHead>Traveler</TableHead>
+                  <TableHead>Renter</TableHead>
                   <TableHead>Issue Type</TableHead>
                   <TableHead>Reported</TableHead>
                   <TableHead>Status</TableHead>
@@ -397,9 +397,9 @@ const AdminCheckinIssues = () => {
                 </div>
               </div>
 
-              {/* Traveler Info */}
+              {/* Renter Info */}
               <div className="space-y-2">
-                <Label className="text-muted-foreground">Traveler</Label>
+                <Label className="text-muted-foreground">Renter</Label>
                 <div className="bg-muted/50 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

@@ -78,16 +78,19 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** CI fully green, ready for next feature work
+**Active Phase:** UX feedback improvements shipped, ready for next feature work
 **Started:** February 16, 2026
 
 ### Working on TODAY:
 - [x] Fix all 58 ESLint errors to unblock CI pipeline
 - [x] Add Supabase secrets to GitHub Actions (E2E + Lighthouse)
 - [x] Update brand logo and favicon assets
+- [x] UX feedback improvements — inline success states across all key workflows
+- [x] Fix admin dashboard tab layout (grid-cols-13 bug)
 - [ ] Phase 12: Capacitor setup
 
 ### Recently Completed:
+- [x] **UX Feedback Improvements** — ActionSuccessCard component, inline success states in 6 dialogs/pages, 2 email confirmations, BookingSuccess "What Happens Next" section, admin dashboard tab layout fix. 96 tests passing (Feb 16)
 - [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
 - [x] **CI fully green** — all 4 jobs passing (lint, tests, E2E, Lighthouse), Qase receiving results (Feb 16)
 - [x] **58 ESLint errors fixed** — `any` types replaced across 17 files, unblocked CI pipeline (Feb 16)
@@ -98,6 +101,9 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ### Blocked/Waiting:
 - Phase 10 Track D (AI Support Agent) — awaiting design decision (DEC-009)
+
+### Known Issues:
+- Admin dashboard console errors (400 Bad Request) — `bookings` table FK constraints (`bookings_renter_id_fkey`) may not exist on PROD. Affects Bookings, Financials, and Escrow tabs. Needs DB migration.
 
 ---
 
@@ -169,6 +175,23 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>UX Feedback Improvements</strong> — Completed Feb 16, 2026</summary>
+
+**What:** Replace fleeting toasts with persistent inline success states across all key user workflows.
+
+**Key deliverables:**
+- `ActionSuccessCard` reusable component (icon, title, description, reference box, email indicator, action buttons)
+- 7 new tests for ActionSuccessCard, total 96 tests passing
+- 6 dialog/page flows enhanced: OwnerListings, OwnerProperties, BidFormDialog, RoleUpgradeDialog, Signup, BookingSuccess
+- 2 email confirmation functions: `sendListingSubmittedEmail()`, `sendPropertyRegisteredEmail()`
+- BookingSuccess: booking reference number + "What Happens Next" timeline (email, owner confirmation, check-in)
+- Admin dashboard: fixed tab layout (invalid `grid-cols-13` → `flex flex-wrap`)
+- Removed redundant `toast.success` from `useCreateBid` and `useRequestRoleUpgrade` hooks
+
+**Files:** 11 modified, 2 created
+</details>
 
 <details>
 <summary><strong>Phase 11: Progressive Web App (PWA)</strong> — Completed Feb 16, 2026</summary>
@@ -400,6 +423,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 16, 2026 (evening)
+**Last updated:** February 16, 2026 (late evening)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

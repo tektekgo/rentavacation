@@ -20,7 +20,7 @@ export function useMembershipTiers() {
   });
 }
 
-export function useTravelerTiers() {
+export function useRenterTiers() {
   return useQuery<MembershipTier[]>({
     queryKey: ["membership-tiers", "traveler"],
     queryFn: async () => {
@@ -53,6 +53,9 @@ export function useOwnerTiers() {
     staleTime: 10 * 60 * 1000,
   });
 }
+
+/** @deprecated Use useRenterTiers instead */
+export const useTravelerTiers = useRenterTiers;
 
 export function useMyMembership() {
   const { user } = useAuth();

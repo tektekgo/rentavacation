@@ -33,8 +33,8 @@ const ROLE_INFO: Record<string, { title: string; description: string; icon: type
     icon: Building2,
   },
   renter: {
-    title: 'Add Traveler Access',
-    description: 'As a traveler, you can browse and book vacation rentals, place bids on listings, and submit travel requests.',
+    title: 'Add Renter Access',
+    description: 'As a renter, you can browse and book vacation rentals, place bids on listings, and submit travel requests.',
     icon: Users,
   },
 };

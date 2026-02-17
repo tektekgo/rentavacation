@@ -241,7 +241,7 @@ const Documentation = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     This Administrator Manual provides comprehensive documentation of the Rent-A-Vacation platform, 
                     including all features, workflows, and operational procedures. It is intended for RAV Owners and 
-                    Administrators who manage the marketplace and oversee transactions between property owners and travelers.
+                    Administrators who manage the marketplace and oversee transactions between property owners and renters.
                   </p>
                 </div>
               </section>
@@ -254,14 +254,14 @@ const Documentation = () => {
                   <h1 className="text-4xl font-bold text-foreground mb-4">Platform Overview</h1>
                   <p className="text-xl text-muted-foreground leading-relaxed">
                     Rent-A-Vacation is a premier vacation rental marketplace connecting vacation club and timeshare owners 
-                    directly with travelers seeking authentic resort experiences at competitive prices.
+                    directly with renters seeking authentic resort experiences at competitive prices.
                   </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl p-8 border">
                   <h2 className="text-2xl font-semibold mb-4">Name Your Price. Book Your Paradise.</h2>
                   <p className="text-muted-foreground">
-                    Unlike traditional vacation rental platforms, Rent-A-Vacation empowers both owners and travelers 
+                    Unlike traditional vacation rental platforms, Rent-A-Vacation empowers both owners and renters 
                     through innovative price discovery mechanisms including reverse auctions and competitive bidding.
                   </p>
                 </div>
@@ -273,7 +273,7 @@ const Documentation = () => {
                     </div>
                     <h3 className="font-semibold mb-2">Bidding Marketplace</h3>
                     <p className="text-sm text-muted-foreground">
-                      Travelers submit travel requests; owners compete with proposals. Or owners open listings for competitive bidding.
+                      Renters submit travel requests; owners compete with proposals. Or owners open listings for competitive bidding.
                     </p>
                   </div>
                   <div className="bg-card rounded-xl p-6 border shadow-sm">
@@ -409,8 +409,8 @@ const Documentation = () => {
                         <span className="text-2xl">🧳</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">Renter (Traveler)</h3>
-                        <p className="text-sm text-muted-foreground mb-3">Default role for users who sign up as "I'm a Traveler"</p>
+                        <h3 className="font-semibold text-lg">Renter</h3>
+                        <p className="text-sm text-muted-foreground mb-3">Default role for users who sign up as "I'm a Renter"</p>
                         <ul className="text-sm space-y-1">
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Browse and search listings</li>
                           <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Book properties via Stripe</li>
@@ -427,11 +427,11 @@ const Documentation = () => {
                 <div className="bg-card rounded-xl p-6 border">
                   <h3 className="font-semibold text-lg mb-4">Signup Role Selection</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    During signup, users choose between "I'm a Traveler" and "I'm an Owner". This selection determines their initial role:
+                    During signup, users choose between "I'm a Renter" and "I'm an Owner". This selection determines their initial role:
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-muted/50 rounded-lg p-4">
-                      <h4 className="font-medium mb-1">I'm a Traveler</h4>
+                      <h4 className="font-medium mb-1">I'm a Renter</h4>
                       <p className="text-xs text-muted-foreground">Assigned the <code className="bg-muted px-1 rounded">renter</code> role. Can browse, book, bid, and submit travel requests.</p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">
@@ -583,7 +583,7 @@ const Documentation = () => {
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                        <span>Travelers submit competing bids</span>
+                        <span>Renters submit competing bids</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
@@ -597,10 +597,10 @@ const Documentation = () => {
                       <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
                         <MapPin className="h-5 w-5 text-purple-600" />
                       </div>
-                      <h3 className="font-semibold text-lg">Traveler Travel Requests</h3>
+                      <h3 className="font-semibold text-lg">Travel Requests</h3>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Travelers post where they want to go, when, and their budget. Owners respond with proposals.
+                      Renters post where they want to go, when, and their budget. Owners respond with proposals.
                     </p>
                     <ul className="text-sm space-y-2">
                       <li className="flex items-start gap-2">
@@ -728,7 +728,7 @@ const Documentation = () => {
                       </li>
                       <li className="flex items-start gap-3">
                         <Clock className="h-4 w-4 text-amber-500 mt-0.5" />
-                        <span><strong>24h Check-in</strong> - Traveler confirms arrival</span>
+                        <span><strong>24h Check-in</strong> - Renter confirms arrival</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <DollarSign className="h-4 w-4 text-green-500 mt-0.5" />
@@ -745,7 +745,7 @@ const Documentation = () => {
                       <h3 className="font-semibold text-amber-900 dark:text-amber-100">Important: Confirmation Deadlines</h3>
                       <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
                         If the owner fails to submit their resort confirmation number within 48 hours, 
-                        the booking may be automatically cancelled and the traveler refunded in full.
+                        the booking may be automatically cancelled and the renter refunded in full.
                       </p>
                     </div>
                   </div>
@@ -896,7 +896,7 @@ const Documentation = () => {
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                        <span><strong>Check-in Verification</strong> - Traveler confirms arrival</span>
+                        <span><strong>Check-in Verification</strong> - Renter confirms arrival</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
@@ -910,7 +910,7 @@ const Documentation = () => {
                   <h3 className="font-semibold mb-4">Issue Resolution Process</h3>
                   <div className="grid md:grid-cols-4 gap-4">
                     {[
-                      { step: 1, title: "Report", desc: "Traveler reports issue at check-in" },
+                      { step: 1, title: "Report", desc: "Renter reports issue at check-in" },
                       { step: 2, title: "Review", desc: "Admin reviews with evidence" },
                       { step: 3, title: "Resolve", desc: "Mediation or refund decision" },
                       { step: 4, title: "Close", desc: "Resolution and payout adjustment" },
@@ -985,7 +985,7 @@ const Documentation = () => {
                     <ul className="space-y-2 text-sm text-green-800 dark:text-green-200">
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Verified badge on listings</li>
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Higher search ranking</li>
-                      <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Increased traveler trust</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Increased renter trust</li>
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Priority support</li>
                     </ul>
                   </div>
@@ -1032,7 +1032,7 @@ const Documentation = () => {
                     </p>
                     <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3">
                       <p className="text-xs text-amber-800 dark:text-amber-200">
-                        <strong>Failure to confirm:</strong> Booking cancelled, full refund to traveler
+                        <strong>Failure to confirm:</strong> Booking cancelled, full refund to renter
                       </p>
                     </div>
                   </div>
@@ -1043,12 +1043,12 @@ const Documentation = () => {
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Traveler Check-in</h3>
+                        <h3 className="font-semibold">Renter Check-in</h3>
                         <p className="text-xs text-muted-foreground">24 hours after arrival</p>
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Traveler confirms successful check-in or reports any issues encountered at the property.
+                      Renter confirms successful check-in or reports any issues encountered at the property.
                     </p>
                     <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
                       <p className="text-xs text-green-800 dark:text-green-200">
@@ -1090,7 +1090,7 @@ const Documentation = () => {
                         </tr>
                         <tr>
                           <td className="py-3">Check-in Reminder</td>
-                          <td>Traveler</td>
+                          <td>Renter</td>
                           <td>Around check-in time</td>
                         </tr>
                       </tbody>
@@ -1171,7 +1171,7 @@ const Documentation = () => {
                   <h3 className="font-semibold mb-3">Special Circumstances</h3>
                   <p className="text-sm text-muted-foreground">
                     In cases where the standard policy doesn't apply (e.g., owner-initiated cancellation, property issues, 
-                    natural disasters), travelers and owners can negotiate directly with admin mediation available.
+                    natural disasters), renters and owners can negotiate directly with admin mediation available.
                   </p>
                 </div>
               </section>
@@ -1196,11 +1196,11 @@ const Documentation = () => {
                       { type: "Account Rejected", recipient: "New Users", trigger: "On admin rejection" },
                       { type: "Role Upgrade Approved", recipient: "Users", trigger: "On role upgrade approval" },
                       { type: "Role Upgrade Rejected", recipient: "Users", trigger: "On role upgrade rejection" },
-                      { type: "New Booking Alert", recipient: "Owner", trigger: "When traveler books" },
-                      { type: "Booking Confirmation", recipient: "Traveler", trigger: "After payment success" },
+                      { type: "New Booking Alert", recipient: "Owner", trigger: "When renter books" },
+                      { type: "Booking Confirmation", recipient: "Renter", trigger: "After payment success" },
                       { type: "Confirmation Reminder", recipient: "Owner", trigger: "6-12h before deadline" },
                       { type: "Urgent Reminder", recipient: "Owner", trigger: "< 6h before deadline" },
-                      { type: "Check-in Reminder", recipient: "Traveler", trigger: "Around check-in time" },
+                      { type: "Check-in Reminder", recipient: "Renter", trigger: "Around check-in time" },
                       { type: "Verification Approved", recipient: "Owner", trigger: "On document approval" },
                       { type: "Payout Sent", recipient: "Owner", trigger: "After payout processed" },
                     ].map((email, idx) => (
@@ -1345,7 +1345,7 @@ const Documentation = () => {
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Below the user approvals section, the <strong>Pending Approvals</strong> tab also shows role upgrade requests
-                      from existing users who want additional roles (e.g., a traveler requesting property owner access).
+                      from existing users who want additional roles (e.g., a renter requesting property owner access).
                     </p>
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h4 className="font-medium mb-2">Role Upgrade Review</h4>
@@ -1545,7 +1545,7 @@ const Documentation = () => {
                       <li>Review bookings with "Ready for Payout" status</li>
                       <li>Confirm the following before processing:
                         <ul className="list-disc list-inside ml-4 mt-2 text-muted-foreground">
-                          <li>Traveler confirmed check-in successfully</li>
+                          <li>Renter confirmed check-in successfully</li>
                           <li>No disputes or issues reported</li>
                           <li>5 days have passed since checkout</li>
                         </ul>
@@ -1572,7 +1572,7 @@ const Documentation = () => {
                   </h3>
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Travelers can report issues during check-in. These require immediate attention.
+                      Renters can report issues during check-in. These require immediate attention.
                     </p>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -1628,7 +1628,7 @@ const Documentation = () => {
                           <li><strong>rav_admin</strong> — Administrative access without role management</li>
                           <li><strong>rav_staff</strong> — Support staff with view access</li>
                           <li><strong>property_owner</strong> — Can list and manage properties</li>
-                          <li><strong>renter</strong> — Default traveler role</li>
+                          <li><strong>renter</strong> — Default renter role</li>
                         </ul>
                       </li>
                       <li>Save changes and confirm the role update</li>
@@ -1686,7 +1686,7 @@ const Documentation = () => {
                       <ol className="list-decimal list-inside text-xs text-red-700 space-y-1">
                         <li>Immediately suspend the listing and owner account</li>
                         <li>Identify all active bookings for the property</li>
-                        <li>Contact affected travelers with resolution options</li>
+                        <li>Contact affected renters with resolution options</li>
                         <li>Process refunds from Guarantee Fund if needed</li>
                         <li>Document incident for legal review</li>
                       </ol>
@@ -1697,7 +1697,7 @@ const Documentation = () => {
                         <li>System sends automated reminders at 12h and 6h before deadline</li>
                         <li>If deadline passes, booking auto-cancels with full refund</li>
                         <li>Owner receives warning; repeated failures may result in suspension</li>
-                        <li>Help traveler find alternative accommodation</li>
+                        <li>Help renter find alternative accommodation</li>
                       </ol>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">

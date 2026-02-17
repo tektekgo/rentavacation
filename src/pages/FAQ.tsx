@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 
 const faqCategories = [
   {
-    name: "For Travelers",
+    name: "For Renters",
     faqs: [
       {
         question: "What is a timeshare rental?",
         answer:
-          "A timeshare rental is when an owner of vacation property (like a resort condo) rents out their allotted time to travelers. Instead of booking directly with the resort at full price, you rent from an owner at a significant discount—often 50-70% less.",
+          "A timeshare rental is when an owner of vacation property (like a resort condo) rents out their allotted time to renters. Instead of booking directly with the resort at full price, you rent from an owner at a significant discount—often 50-70% less.",
       },
       {
         question: "Is it safe to rent from a stranger?",
@@ -23,7 +23,7 @@ const faqCategories = [
       {
         question: "How much can I save compared to booking directly?",
         answer:
-          "On average, our travelers save 50-70% compared to booking the same room directly through the resort. This is because owners have already paid for their timeshare and are looking to recoup costs, not make a profit.",
+          "On average, our renters save 50-70% compared to booking the same room directly through the resort. This is because owners have already paid for their timeshare and are looking to recoup costs, not make a profit.",
       },
       {
         question: "Do I get access to all resort amenities?",
@@ -88,7 +88,7 @@ const faqCategories = [
       {
         question: "Do I have to accept every booking request?",
         answer:
-          "No, you have full control. You can review each booking request and choose to accept or decline. You can also set up instant booking for qualified travelers if you prefer.",
+          "No, you have full control. You can review each booking request and choose to accept or decline. You can also set up instant booking for qualified renters if you prefer.",
       },
     ],
   },
@@ -98,7 +98,7 @@ const faqCategories = [
       {
         question: "How are payments protected?",
         answer:
-          "All payments are processed through our secure, PCI-compliant payment system. Funds are held in escrow until check-in, protecting both travelers and owners.",
+          "All payments are processed through our secure, PCI-compliant payment system. Funds are held in escrow until check-in, protecting both renters and owners.",
       },
       {
         question: "What payment methods do you accept?",
@@ -142,7 +142,7 @@ const faqCategories = [
 const FAQ = () => {
   const [openItems, setOpenItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("For Travelers");
+  const [activeCategory, setActiveCategory] = useState("For Renters");
 
   const toggleItem = (question: string) => {
     setOpenItems((prev) =>

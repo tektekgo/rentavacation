@@ -34,26 +34,11 @@ import {
 import { Users, Search, Shield, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import type { Profile, AppRole } from "@/types/database";
+import { ROLE_LABELS, ROLE_COLORS } from "@/types/database";
 
 interface UserWithRoles extends Profile {
   roles: AppRole[];
 }
-
-const ROLE_LABELS: Record<AppRole, string> = {
-  rav_owner: "RAV Owner",
-  rav_admin: "RAV Admin",
-  rav_staff: "RAV Staff",
-  property_owner: "Property Owner",
-  renter: "Renter",
-};
-
-const ROLE_COLORS: Record<AppRole, string> = {
-  rav_owner: "bg-purple-500",
-  rav_admin: "bg-blue-500",
-  rav_staff: "bg-cyan-500",
-  property_owner: "bg-green-500",
-  renter: "bg-gray-500",
-};
 
 const AdminUsers = () => {
   const { user: currentUser, hasRole } = useAuth();

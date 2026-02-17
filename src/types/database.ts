@@ -1090,3 +1090,30 @@ export const VERIFICATION_STATUS_LABELS: Record<VerificationStatus, string> = {
   rejected: 'Rejected',
   expired: 'Expired',
 };
+
+// ── Role display constants (single source of truth) ──────────────────────
+
+/** User-facing role labels */
+export const ROLE_LABELS: Record<AppRole, string> = {
+  rav_owner: 'RAV Owner',
+  rav_admin: 'RAV Admin',
+  rav_staff: 'RAV Staff',
+  property_owner: 'Property Owner',
+  renter: 'Renter',
+};
+
+/** Badge colors per role (Tailwind bg classes) */
+export const ROLE_COLORS: Record<AppRole, string> = {
+  rav_owner: 'bg-purple-500',
+  rav_admin: 'bg-blue-500',
+  rav_staff: 'bg-cyan-500',
+  property_owner: 'bg-green-500',
+  renter: 'bg-gray-500',
+};
+
+/**
+ * Signup account types map to DB roles via the `handle_new_user()` trigger:
+ *   'renter'  → renter role,          role_category 'traveler'
+ *   'owner'   → property_owner role,  role_category 'owner'
+ */
+export type AccountType = 'renter' | 'owner';

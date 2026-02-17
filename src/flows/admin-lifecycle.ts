@@ -110,7 +110,7 @@ export const adminLifecycle: FlowDefinition = {
       component: 'AdminCheckinIssues',
       tab: 'issues',
       roles: ['rav_admin', 'rav_staff'],
-      description: 'Resolve traveler check-in complaints and disputes',
+      description: 'Resolve renter check-in complaints and disputes',
       tables: ['checkin_confirmations'],
     },
     {

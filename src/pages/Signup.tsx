@@ -15,7 +15,7 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
-    accountType: "traveler",
+    accountType: "renter",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSignupComplete, setIsSignupComplete] = useState(false);
@@ -106,14 +106,14 @@ const Signup = () => {
               <div className="flex bg-muted p-1 rounded-lg mb-6">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, accountType: "traveler" })}
+                  onClick={() => setFormData({ ...formData, accountType: "renter" })}
                   className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-                    formData.accountType === "traveler"
+                    formData.accountType === "renter"
                       ? "bg-card shadow-sm text-foreground"
                       : "text-muted-foreground"
                   }`}
                 >
-                  I'm a Traveler
+                  I'm a Renter
                 </button>
                 <button
                   type="button"

@@ -40,8 +40,8 @@ const ROLE_CONFIG: Record<AppRole, {
     className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-400",
   },
   renter: {
-    label: "Traveler",
-    shortLabel: "Traveler",
+    label: "Renter",
+    shortLabel: "Renter",
     icon: User,
     className: "bg-gradient-to-r from-sky-500 to-blue-500 text-white border-sky-400",
   },
@@ -101,15 +101,18 @@ export function VerifiedOwnerBadge({ className = "" }: { className?: string }) {
   );
 }
 
-// Traveler badge for bidding context
-export function TravelerBadge({ className = "" }: { className?: string }) {
+// Renter badge for bidding context
+export function RenterBadge({ className = "" }: { className?: string }) {
   return (
-    <Badge 
-      variant="outline" 
+    <Badge
+      variant="outline"
       className={`bg-sky-500/10 text-sky-600 border-sky-200 text-xs font-medium ${className}`}
     >
       <User className="h-3 w-3 mr-1" />
-      Traveler
+      Renter
     </Badge>
   );
 }
+
+/** @deprecated Use RenterBadge instead */
+export const TravelerBadge = RenterBadge;

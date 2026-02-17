@@ -2,8 +2,8 @@ import type { FlowDefinition } from './types';
 
 export const travelerLifecycle: FlowDefinition = {
   id: 'traveler-lifecycle',
-  label: 'Traveler Journey',
-  description: 'End-to-end lifecycle from browsing to check-in. Travelers can book directly, bid on listings, or post travel requests for owners to propose against.',
+  label: 'Renter Journey',
+  description: 'End-to-end lifecycle from browsing to check-in. Renters can book directly, bid on listings, or post travel requests for owners to propose against.',
   primaryRole: 'renter',
   roleEmoji: '🧳',
   direction: 'TD',
@@ -14,7 +14,7 @@ export const travelerLifecycle: FlowDefinition = {
       label: 'Browse Landing',
       component: 'Index',
       nodeStyle: 'start',
-      description: 'Traveler discovers the marketplace via landing page',
+      description: 'Renter discovers the marketplace via landing page',
     },
     {
       id: 'signup',
@@ -77,7 +77,7 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/bidding',
       label: 'Post Travel Request',
       component: 'TravelRequestForm',
-      description: 'Traveler posts a reverse-auction request specifying destination, dates, budget — owners respond with proposals',
+      description: 'Renter posts a reverse-auction request specifying destination, dates, budget — owners respond with proposals',
       tables: ['travel_requests'],
       branches: [
         { condition: 'Proposal received', targetStepId: 'review_proposals', label: 'Proposals in' },

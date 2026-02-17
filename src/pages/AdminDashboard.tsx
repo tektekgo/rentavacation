@@ -25,7 +25,8 @@ import {
   MessageSquareWarning,
   UserCheck,
   Settings,
-  Crown
+  Crown,
+  Network
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -45,7 +46,7 @@ import { AdminMemberships } from "@/components/admin/AdminMemberships";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isRavTeam, isLoading: authLoading } = useAuth();
+  const { user, isRavTeam, hasRole, isLoading: authLoading } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
   const [roleRequestCount, setRoleRequestCount] = useState(0);
 
@@ -136,10 +137,18 @@ const AdminDashboard = () => {
                 </p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => navigate("/documentation")}>
-              <FileCheck className="h-4 w-4 mr-2" />
-              Documentation
-            </Button>
+            <div className="flex items-center gap-2">
+              {hasRole("rav_owner") && (
+                <Button variant="outline" onClick={() => navigate("/architecture")}>
+                  <Network className="h-4 w-4 mr-2" />
+                  Architecture
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => navigate("/documentation")}>
+                <FileCheck className="h-4 w-4 mr-2" />
+                Documentation
+              </Button>
+            </div>
           </div>
         </div>
       </header>

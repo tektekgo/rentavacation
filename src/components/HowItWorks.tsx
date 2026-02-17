@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const travelerSteps = [
+const renterSteps = [
   {
     icon: Search,
     title: "Browse or Bid",
@@ -35,12 +35,12 @@ const ownerSteps = [
   {
     icon: Gavel,
     title: "Accept Bids & Proposals",
-    description: "Open your listing for competitive bidding, or respond to traveler requests with personalized proposals.",
+    description: "Open your listing for competitive bidding, or respond to renter requests with personalized proposals.",
   },
   {
     icon: Shield,
     title: "Get Verified",
-    description: "Our team verifies your ownership to build trust with travelers and protect your listing.",
+    description: "Our team verifies your ownership to build trust with renters and protect your listing.",
   },
   {
     icon: DollarSign,
@@ -50,8 +50,8 @@ const ownerSteps = [
 ];
 
 const HowItWorks = () => {
-  const [activeTab, setActiveTab] = useState<"travelers" | "owners">("travelers");
-  const steps = activeTab === "travelers" ? travelerSteps : ownerSteps;
+  const [activeTab, setActiveTab] = useState<"renters" | "owners">("renters");
+  const steps = activeTab === "renters" ? renterSteps : ownerSteps;
 
   return (
     <section className="py-20 bg-gradient-warm">
@@ -69,14 +69,14 @@ const HowItWorks = () => {
           {/* Tab Toggle */}
           <div className="inline-flex bg-muted p-1 rounded-xl">
             <button
-              onClick={() => setActiveTab("travelers")}
+              onClick={() => setActiveTab("renters")}
               className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                activeTab === "travelers"
+                activeTab === "renters"
                   ? "bg-card text-foreground shadow-card"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              For Travelers
+              For Renters
             </button>
             <button
               onClick={() => setActiveTab("owners")}
@@ -126,9 +126,9 @@ const HowItWorks = () => {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Link to={activeTab === "travelers" ? "/rentals" : "/list-property"}>
+          <Link to={activeTab === "renters" ? "/rentals" : "/list-property"}>
             <Button variant="hero" size="xl">
-              {activeTab === "travelers" ? "Start Searching" : "List Your Property"}
+              {activeTab === "renters" ? "Start Searching" : "List Your Property"}
             </Button>
           </Link>
         </div>
