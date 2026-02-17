@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 16, 2026
+> **Last Updated:** February 17, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,18 +78,17 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** UX feedback improvements shipped, ready for next feature work
-**Started:** February 16, 2026
+**Active Phase:** Role terminology standardization shipped, ready for next feature work
+**Started:** February 17, 2026
 
 ### Working on TODAY:
-- [x] Fix all 58 ESLint errors to unblock CI pipeline
-- [x] Add Supabase secrets to GitHub Actions (E2E + Lighthouse)
-- [x] Update brand logo and favicon assets
-- [x] UX feedback improvements — inline success states across all key workflows
-- [x] Fix admin dashboard tab layout (grid-cols-13 bug)
+- [x] Role terminology standardization — "Traveler" → "Renter" across 27 files
+- [x] Centralized role constants (ROLE_LABELS, ROLE_COLORS, AccountType)
+- [x] Architecture link added for rav_owner in admin dashboard
 - [ ] Phase 12: Capacitor setup
 
 ### Recently Completed:
+- [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files: UI labels, flow manifests, documentation, user guides, admin components. Centralized ROLE_LABELS/ROLE_COLORS in database.ts. Architecture link for rav_owner. 96 tests passing (Feb 17)
 - [x] **UX Feedback Improvements** — ActionSuccessCard component, inline success states in 6 dialogs/pages, 2 email confirmations, BookingSuccess "What Happens Next" section, admin dashboard tab layout fix. 96 tests passing (Feb 16)
 - [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
 - [x] **CI fully green** — all 4 jobs passing (lint, tests, E2E, Lighthouse), Qase receiving results (Feb 16)
@@ -175,6 +174,25 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Role Terminology Standardization</strong> — Completed Feb 17, 2026</summary>
+
+**What:** Standardize all UI-facing role terminology from "Traveler" to "Renter" across the entire application to clearly convey the role function.
+
+**Key deliverables:**
+- Centralized `ROLE_LABELS`, `ROLE_COLORS`, `AccountType` in `src/types/database.ts`
+- 27 files updated: components, pages, flows, hooks, tests, documentation
+- Renamed `useTravelerTiers` → `useRenterTiers`, `TravelerBadge` → `RenterBadge` (deprecated aliases kept)
+- Signup default `accountType` changed from `"traveler"` to `"renter"`
+- Flow manifests: "Traveler Journey" → "Renter Journey" with updated descriptions
+- All documentation pages (Documentation, UserGuide, FAQ, HowItWorks) updated
+- Admin dashboard: Architecture link added for `rav_owner` role
+- DB-level `role_category = 'traveler'` intentionally unchanged (database schema)
+
+**Files:** 27 modified, 0 created
+**Tests:** 96/96 passing, 0 type errors, 0 lint errors
+</details>
 
 <details>
 <summary><strong>UX Feedback Improvements</strong> — Completed Feb 16, 2026</summary>
@@ -423,6 +441,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 16, 2026 (late evening)
+**Last updated:** February 17, 2026
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
