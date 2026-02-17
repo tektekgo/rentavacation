@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
-          account_type: accountType || 'traveler',
+          account_type: accountType || 'renter',
         },
       },
     });

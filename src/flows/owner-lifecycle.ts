@@ -86,7 +86,7 @@ export const ownerLifecycle: FlowDefinition = {
       route: '/rentals',
       label: 'Listing Live',
       component: 'Rentals',
-      description: 'Listing visible to travelers on the marketplace',
+      description: 'Listing visible to renters on the marketplace',
       tables: ['listings'],
       branches: [
         { condition: 'Direct booking', targetStepId: 'booking_confirmed' },
@@ -99,7 +99,7 @@ export const ownerLifecycle: FlowDefinition = {
       label: 'Manage Bids',
       component: 'OwnerDashboard',
       tab: 'proposals',
-      description: 'Owner reviews and responds to traveler bids',
+      description: 'Owner reviews and responds to renter bids',
       tables: ['listing_bids'],
       branches: [
         { condition: 'Bid accepted', targetStepId: 'booking_confirmed' },
@@ -112,7 +112,7 @@ export const ownerLifecycle: FlowDefinition = {
       label: 'Booking Confirmed',
       component: 'OwnerBookings',
       tab: 'bookings',
-      description: 'Traveler payment captured, booking created',
+      description: 'Renter payment captured, booking created',
       tables: ['bookings', 'booking_confirmations'],
       edgeFunctions: ['verify-booking-payment'],
     },

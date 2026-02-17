@@ -115,9 +115,9 @@ export function ProposalFormDialog({ request, open, onOpenChange }: ProposalForm
   const getBudgetHint = () => {
     switch (request.budget_preference) {
       case 'range':
-        return `Traveler's budget: $${request.budget_min?.toLocaleString()} - $${request.budget_max?.toLocaleString()}`;
+        return `Renter's budget: $${request.budget_min?.toLocaleString()} - $${request.budget_max?.toLocaleString()}`;
       case 'ceiling':
-        return `Traveler's max budget: $${request.budget_max?.toLocaleString()}`;
+        return `Renter's max budget: $${request.budget_max?.toLocaleString()}`;
       default:
         return 'Budget not disclosed - price competitively!';
     }
@@ -247,7 +247,7 @@ export function ProposalFormDialog({ request, open, onOpenChange }: ProposalForm
 
           {/* Message */}
           <div className="space-y-2">
-            <Label htmlFor="message">Message to Traveler</Label>
+            <Label htmlFor="message">Message to Renter</Label>
             <Textarea
               id="message"
               value={message}
@@ -269,7 +269,7 @@ export function ProposalFormDialog({ request, open, onOpenChange }: ProposalForm
               required
             />
             <p className="text-xs text-muted-foreground">
-              Traveler must accept before this date
+              Renter must accept before this date
             </p>
           </div>
 

@@ -32,7 +32,7 @@ const UserGuide = () => {
   const [activeSection, setActiveSection] = useState("getting-started");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [activeRole, setActiveRole] = useState<"owner" | "traveler">("owner");
+  const [activeRole, setActiveRole] = useState<"owner" | "renter">("owner");
   const navigate = useNavigate();
 
   const handlePrint = () => {
@@ -53,17 +53,17 @@ const UserGuide = () => {
     { id: "owner-faq", label: "Owner FAQ", icon: MessageSquare },
   ];
 
-  const travelerSections = [
+  const renterSections = [
     { id: "getting-started", label: "Getting Started", icon: Home },
     { id: "search-book", label: "Search & Book", icon: Search },
     { id: "travel-requests", label: "Submit Travel Requests", icon: Plane },
     { id: "place-bids", label: "Place Bids on Listings", icon: Gavel },
     { id: "checkin", label: "Check-In Process", icon: Key },
-    { id: "protection", label: "Traveler Protection", icon: Shield },
-    { id: "traveler-faq", label: "Traveler FAQ", icon: MessageSquare },
+    { id: "protection", label: "Renter Protection", icon: Shield },
+    { id: "renter-faq", label: "Renter FAQ", icon: MessageSquare },
   ];
 
-  const sections = activeRole === "owner" ? ownerSections : travelerSections;
+  const sections = activeRole === "owner" ? ownerSections : renterSections;
 
   const currentDate = new Date().toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -134,16 +134,16 @@ const UserGuide = () => {
                 </button>
                 <button
                   onClick={() => {
-                    setActiveRole("traveler");
+                    setActiveRole("renter");
                     setActiveSection("getting-started");
                   }}
                   className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                    activeRole === "traveler" 
+                    activeRole === "renter" 
                       ? "bg-primary text-primary-foreground" 
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Traveler
+                  Renter
                 </button>
               </div>
             </div>
@@ -188,7 +188,7 @@ const UserGuide = () => {
                   <img src="/rav-logo.png" alt="RAV Logo" className="h-24 w-24 mb-8" />
                   <h1 className="text-5xl font-bold text-foreground mb-4">Rent-A-Vacation</h1>
                   <p className="text-2xl text-primary font-medium mb-2">
-                    {activeRole === "owner" ? "Property Owner Guide" : "Traveler Guide"}
+                    {activeRole === "owner" ? "Property Owner Guide" : "Renter Guide"}
                   </p>
                   <p className="text-xl text-muted-foreground mb-8">Name Your Price. Book Your Paradise.</p>
                   <div className="bg-muted/50 rounded-xl p-6 max-w-md">
@@ -213,7 +213,7 @@ const UserGuide = () => {
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Welcome, Property Owner!</h1>
                   <p className="text-xl text-muted-foreground leading-relaxed">
-                    Turn your vacation club or timeshare ownership into income by renting directly to travelers 
+                    Turn your vacation club or timeshare ownership into income by renting directly to renters 
                     on the Rent-A-Vacation marketplace.
                   </p>
                 </div>
@@ -341,7 +341,7 @@ const UserGuide = () => {
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Create a Listing</h1>
                   <p className="text-xl text-muted-foreground">
-                    Once your property is registered, create listings for specific date ranges to attract travelers.
+                    Once your property is registered, create listings for specific date ranges to attract renters.
                   </p>
                 </div>
 
@@ -375,7 +375,7 @@ const UserGuide = () => {
                     <li className="flex gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <strong>Optionally enable bidding</strong> — Allow travelers to submit competitive bids
+                        <strong>Optionally enable bidding</strong> — Allow renters to submit competitive bids
                       </div>
                     </li>
                     <li className="flex gap-3">
@@ -391,7 +391,7 @@ const UserGuide = () => {
                   <div className="bg-muted/50 rounded-xl p-6">
                     <h4 className="font-semibold mb-3">Standard Listing</h4>
                     <p className="text-sm text-muted-foreground">
-                      Set a fixed price. Travelers book directly at your listed rate through Stripe secure checkout.
+                      Set a fixed price. Renters book directly at your listed rate through Stripe secure checkout.
                     </p>
                   </div>
                   <div className="bg-primary/5 rounded-xl p-6 border border-primary/20">
@@ -414,7 +414,7 @@ const UserGuide = () => {
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Manage Bids & Proposals</h1>
                   <p className="text-xl text-muted-foreground">
-                    The RAV marketplace offers two ways to connect with travelers through price negotiation.
+                    The RAV marketplace offers two ways to connect with renters through price negotiation.
                   </p>
                 </div>
 
@@ -424,7 +424,7 @@ const UserGuide = () => {
                     Receiving Bids on Your Listings
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    When you enable "Open for Bidding" on a listing, travelers can submit offers below your asking price.
+                    When you enable "Open for Bidding" on a listing, renters can submit offers below your asking price.
                   </p>
                   <ol className="space-y-3 text-sm">
                     <li className="flex gap-3">
@@ -433,7 +433,7 @@ const UserGuide = () => {
                     </li>
                     <li className="flex gap-3">
                       <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">2</span>
-                      <span>Review incoming bids with traveler details and offer amounts</span>
+                      <span>Review incoming bids with renter details and offer amounts</span>
                     </li>
                     <li className="flex gap-3">
                       <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">3</span>
@@ -452,7 +452,7 @@ const UserGuide = () => {
                     Responding to Travel Requests
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Travelers can post "Travel Requests" specifying their destination, dates, and budget. 
+                    Renters can post "Travel Requests" specifying their destination, dates, and budget. 
                     You can submit proposals offering your property.
                   </p>
                   <ol className="space-y-3 text-sm">
@@ -470,7 +470,7 @@ const UserGuide = () => {
                     </li>
                     <li className="flex gap-3">
                       <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">4</span>
-                      <span>If the traveler accepts, you'll be notified to confirm</span>
+                      <span>If the renter accepts, you'll be notified to confirm</span>
                     </li>
                   </ol>
                 </div>
@@ -483,7 +483,7 @@ const UserGuide = () => {
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Confirm Bookings</h1>
                   <p className="text-xl text-muted-foreground">
-                    After a traveler books, you must confirm you can fulfill the reservation within 48 hours.
+                    After a renter books, you must confirm you can fulfill the reservation within 48 hours.
                   </p>
                 </div>
 
@@ -494,7 +494,7 @@ const UserGuide = () => {
                   </h4>
                   <p className="text-sm text-red-700">
                     You have 48 hours from booking to confirm. Unconfirmed bookings are automatically cancelled 
-                    with a full refund to the traveler. Repeated failures may result in account suspension.
+                    with a full refund to the renter. Repeated failures may result in account suspension.
                   </p>
                 </div>
 
@@ -527,7 +527,7 @@ const UserGuide = () => {
                 <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                   <h4 className="font-medium text-green-800 mb-2">After Confirmation</h4>
                   <ul className="text-sm text-green-700 space-y-1">
-                    <li>• Traveler receives confirmation email with your contact info</li>
+                    <li>• Renter receives confirmation email with your contact info</li>
                     <li>• Provide check-in instructions 24 hours before arrival</li>
                     <li>• Funds remain in escrow until 5 days after checkout</li>
                   </ul>
@@ -551,7 +551,7 @@ const UserGuide = () => {
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
                     {[
                       { stage: "Booking", desc: "Payment collected and held in escrow" },
-                      { stage: "Check-in", desc: "Traveler confirms arrival at property" },
+                      { stage: "Check-in", desc: "Renter confirms arrival at property" },
                       { stage: "Checkout", desc: "Stay completes successfully" },
                       { stage: "+5 Days", desc: "Funds released to your account" },
                     ].map((item, i) => (
@@ -612,8 +612,8 @@ const UserGuide = () => {
                     { q: "How do I get the verified badge?", a: "Upload your government ID and vacation club membership documentation in Owner Dashboard → Verification tab." },
                     { q: "Can I set a minimum bid amount?", a: "Yes, when enabling bidding you can set a 'reserve price' - the minimum you'll accept. Bids below this are marked accordingly." },
                     { q: "What cancellation policy should I choose?", a: "Flexible policies attract more bookings but carry more risk. Strict policies protect your income but may reduce bookings. Start with Moderate." },
-                    { q: "How do I provide check-in instructions?", a: "After confirming a booking, you can add check-in details that are shared with the traveler 24 hours before arrival." },
-                    { q: "What if the traveler reports an issue?", a: "RAV support will contact you to resolve. Maintain accurate listings and prompt communication to avoid disputes." },
+                    { q: "How do I provide check-in instructions?", a: "After confirming a booking, you can add check-in details that are shared with the renter 24 hours before arrival." },
+                    { q: "What if the renter reports an issue?", a: "RAV support will contact you to resolve. Maintain accurate listings and prompt communication to avoid disputes." },
                   ].map((item, i) => (
                     <div key={i} className="bg-card rounded-xl p-6 border">
                       <h4 className="font-medium mb-2">{item.q}</h4>
@@ -626,11 +626,11 @@ const UserGuide = () => {
 
             {/* ============ TRAVELER SECTIONS ============ */}
 
-            {/* Traveler Getting Started */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "getting-started") && (
+            {/* Renter Getting Started */}
+            {activeRole === "renter" && (isPrinting || activeSection === "getting-started") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground mb-4">Welcome, Traveler!</h1>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Welcome, Renter!</h1>
                   <p className="text-xl text-muted-foreground leading-relaxed">
                     Discover premium vacation club resorts at prices you name. Book directly from verified owners 
                     and enjoy protected transactions.
@@ -706,7 +706,7 @@ const UserGuide = () => {
             )}
 
             {/* Search & Book */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "search-book") && (
+            {activeRole === "renter" && (isPrinting || activeSection === "search-book") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Search & Book</h1>
@@ -782,7 +782,7 @@ const UserGuide = () => {
             )}
 
             {/* Travel Requests */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "travel-requests") && (
+            {activeRole === "renter" && (isPrinting || activeSection === "travel-requests") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Submit Travel Requests</h1>
@@ -840,7 +840,7 @@ const UserGuide = () => {
             )}
 
             {/* Place Bids */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "place-bids") && (
+            {activeRole === "renter" && (isPrinting || activeSection === "place-bids") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Place Bids on Listings</h1>
@@ -888,7 +888,7 @@ const UserGuide = () => {
             )}
 
             {/* Check-in Process */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "checkin") && (
+            {activeRole === "renter" && (isPrinting || activeSection === "checkin") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Check-In Process</h1>
@@ -946,11 +946,11 @@ const UserGuide = () => {
               </section>
             )}
 
-            {/* Traveler Protection */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "protection") && (
+            {/* Renter Protection */}
+            {activeRole === "renter" && (isPrinting || activeSection === "protection") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground mb-4">Traveler Protection</h1>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Renter Protection</h1>
                   <p className="text-xl text-muted-foreground">
                     Your booking is protected from payment to checkout.
                   </p>
@@ -991,13 +991,13 @@ const UserGuide = () => {
               </section>
             )}
 
-            {/* Traveler FAQ */}
-            {activeRole === "traveler" && (isPrinting || activeSection === "traveler-faq") && (
+            {/* Renter FAQ */}
+            {activeRole === "renter" && (isPrinting || activeSection === "renter-faq") && (
               <section className="space-y-8 print:break-after-page">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground mb-4">Traveler FAQ</h1>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Renter FAQ</h1>
                   <p className="text-xl text-muted-foreground">
-                    Common questions from travelers.
+                    Common questions from renters.
                   </p>
                 </div>
 

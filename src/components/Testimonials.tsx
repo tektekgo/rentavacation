@@ -3,7 +3,7 @@ import { Star, Quote } from "lucide-react";
 const testimonials = [
   {
     name: "Sarah Mitchell",
-    role: "Traveler",
+    role: "Renter",
     location: "San Francisco, CA",
     avatar: "S",
     rating: 5,
@@ -19,7 +19,7 @@ const testimonials = [
   },
   {
     name: "Emily Chen",
-    role: "Traveler",
+    role: "Renter",
     location: "Seattle, WA",
     avatar: "E",
     rating: 5,

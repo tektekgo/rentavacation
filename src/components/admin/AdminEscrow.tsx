@@ -250,7 +250,7 @@ const AdminEscrow = () => {
 
       toast({
         title: "Refund Initiated",
-        description: "Escrow funds have been marked for refund to the traveler.",
+        description: "Escrow funds have been marked for refund to the renter.",
       });
 
       fetchEscrows();
@@ -436,7 +436,7 @@ const AdminEscrow = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Owner / Property</TableHead>
-                  <TableHead>Traveler</TableHead>
+                  <TableHead>Renter</TableHead>
                   <TableHead>Confirmation #</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>

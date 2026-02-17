@@ -66,19 +66,19 @@ const ownerSteps = [
     icon: Shield,
     title: "Get Verified",
     description:
-      "Our team verifies your ownership documents to build trust with travelers and protect your listing from fraud.",
+      "Our team verifies your ownership documents to build trust with renters and protect your listing from fraud.",
   },
   {
     icon: MessageSquare,
     title: "Manage Inquiries",
     description:
-      "Respond to traveler messages, accept or decline booking requests, and manage your calendar all in one dashboard.",
+      "Respond to renter messages, accept or decline booking requests, and manage your calendar all in one dashboard.",
   },
   {
     icon: CreditCard,
     title: "Receive Bookings",
     description:
-      "When a traveler books, you'll be notified immediately. Review the booking details and prepare for your guest.",
+      "When a renter books, you'll be notified immediately. Review the booking details and prepare for your guest.",
   },
   {
     icon: DollarSign,
@@ -121,7 +121,7 @@ const successStories = [
   {
     quote: "We booked a 2-bedroom suite at a Marriott resort for half the price of a hotel room. The kids loved the full kitchen and pool access.",
     name: "Sarah & David T.",
-    role: "Travelers from Austin, TX",
+    role: "Renters from Austin, TX",
     metric: "Saved 55% vs. direct booking",
   },
   {
@@ -141,7 +141,7 @@ const faqs = [
   {
     question: "How much can I save compared to booking directly?",
     answer:
-      "On average, our travelers save 50-70% compared to booking the same room directly through the resort.",
+      "On average, our renters save 50-70% compared to booking the same room directly through the resort.",
   },
   {
     question: "What if something goes wrong with my booking?",
@@ -190,12 +190,12 @@ const HowItWorksPage = () => {
         </div>
       </section>
 
-      {/* For Travelers */}
+      {/* For Renters */}
       <section id="for-travelers" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-              For Travelers
+              For Renters
             </span>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
               Book Your Dream Vacation
@@ -298,14 +298,14 @@ const HowItWorksPage = () => {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            {/* Traveler pricing */}
+            {/* Renter pricing */}
             <div className="bg-card rounded-xl p-8 shadow-card mb-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Users className="w-5 h-5 text-primary" />
                 </div>
                 <h3 className="font-display text-xl font-bold text-foreground">
-                  For Travelers
+                  For Renters
                 </h3>
               </div>
               <div className="grid sm:grid-cols-2 gap-6">
@@ -395,7 +395,7 @@ const HowItWorksPage = () => {
               Success Stories
             </h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Hear from owners and travelers who are making the most of Rent-A-Vacation.
+              Hear from owners and renters who are making the most of Rent-A-Vacation.
             </p>
           </div>
 

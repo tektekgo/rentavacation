@@ -69,13 +69,13 @@ describe("useMembership hooks", () => {
     });
   });
 
-  describe("useTravelerTiers", () => {
-    it("fetches traveler tiers only", async () => {
+  describe("useRenterTiers", () => {
+    it("fetches renter tiers only", async () => {
       const tiers = mockTravelerTiers();
       mockFrom.mockReturnValue(createChainedMock(tiers));
 
-      const { useTravelerTiers } = await import("./useMembership");
-      const { result } = renderHook(() => useTravelerTiers(), {
+      const { useRenterTiers } = await import("./useMembership");
+      const { result } = renderHook(() => useRenterTiers(), {
         wrapper: createHookWrapper(),
       });
 

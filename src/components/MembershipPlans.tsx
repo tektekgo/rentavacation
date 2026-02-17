@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { MembershipTierCard } from "@/components/MembershipTierCard";
 import { MembershipBadge } from "@/components/MembershipBadge";
-import { useMyMembership, useTravelerTiers, useOwnerTiers } from "@/hooks/useMembership";
+import { useMyMembership, useRenterTiers, useOwnerTiers } from "@/hooks/useMembership";
 import { useAuth } from "@/hooks/useAuth";
 import type { MembershipTier } from "@/types/database";
 
@@ -13,14 +13,14 @@ export function MembershipPlans({ category }: MembershipPlansProps) {
   const { isPropertyOwner } = useAuth();
   const resolvedCategory = category ?? (isPropertyOwner() ? "owner" : "traveler");
 
-  const { data: travelerTiers, isLoading: loadingTraveler } = useTravelerTiers();
+  const { data: renterTiers, isLoading: loadingRenter } = useRenterTiers();
   const { data: ownerTiers, isLoading: loadingOwner } = useOwnerTiers();
   const { data: membership, isLoading: loadingMembership } = useMyMembership();
 
   const tiers: MembershipTier[] =
-    resolvedCategory === "owner" ? ownerTiers || [] : travelerTiers || [];
+    resolvedCategory === "owner" ? ownerTiers || [] : renterTiers || [];
   const isLoading =
-    resolvedCategory === "owner" ? loadingOwner : loadingTraveler;
+    resolvedCategory === "owner" ? loadingOwner : loadingRenter;
 
   if (isLoading || loadingMembership) {
     return (

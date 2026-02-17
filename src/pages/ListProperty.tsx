@@ -46,7 +46,7 @@ const benefits = [
   },
   {
     icon: Users,
-    title: "Verified Travelers",
+    title: "Verified Renters",
     description: "All renters go through our verification process for your peace of mind.",
   },
   {
@@ -80,7 +80,7 @@ const steps = [
   {
     number: 5,
     title: "Start Earning",
-    description: "Your listing goes live and travelers can book your property!",
+    description: "Your listing goes live and renters can book your property!",
   },
 ];
 

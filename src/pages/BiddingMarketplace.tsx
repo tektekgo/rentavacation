@@ -9,7 +9,7 @@ import { useListingsOpenForBidding, useOpenTravelRequests } from '@/hooks/useBid
 import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
 import { TravelRequestCard } from '@/components/bidding/TravelRequestCard';
 import { BidFormDialog } from '@/components/bidding/BidFormDialog';
-import { VerifiedOwnerBadge, TravelerBadge } from '@/components/RoleBadge';
+import { VerifiedOwnerBadge, RenterBadge } from '@/components/RoleBadge';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -157,7 +157,7 @@ const BiddingMarketplace = () => {
                 <div>
                   <h2 className="text-2xl font-bold">Open Travel Requests</h2>
                   <p className="text-muted-foreground">
-                    Travelers looking for vacation rentals - submit your proposal!
+                    Renters looking for vacation rentals - submit your proposal!
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-lg px-4 py-2">
@@ -213,13 +213,13 @@ const BiddingMarketplace = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-12">How the Marketplace Works</h2>
           <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {/* Traveler Flow */}
+            {/* Renter Flow */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
                   <Users className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <h3 className="text-xl font-bold">For Travelers</h3>
+                <h3 className="text-xl font-bold">For Renters</h3>
               </div>
               <div className="space-y-4">
                 <div className="flex gap-4">
@@ -266,14 +266,14 @@ const BiddingMarketplace = () => {
                   <div className="flex-shrink-0 h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">2</div>
                   <div>
                     <p className="font-medium">Browse Travel Requests</p>
-                    <p className="text-sm text-muted-foreground">Find travelers looking for properties like yours</p>
+                    <p className="text-sm text-muted-foreground">Find renters looking for properties like yours</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">3</div>
                   <div>
                     <p className="font-medium">Submit Proposals</p>
-                    <p className="text-sm text-muted-foreground">Send competitive offers directly to interested travelers</p>
+                    <p className="text-sm text-muted-foreground">Send competitive offers directly to interested renters</p>
                   </div>
                 </div>
               </div>

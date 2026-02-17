@@ -27,14 +27,7 @@ import {
 } from "@/hooks/useRoleUpgrade";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-
-const ROLE_LABELS: Record<string, string> = {
-  property_owner: "Property Owner",
-  renter: "Traveler",
-  rav_admin: "RAV Admin",
-  rav_staff: "RAV Staff",
-  rav_owner: "RAV Owner",
-};
+import { ROLE_LABELS } from "@/types/database";
 
 export function RoleUpgradeRequests() {
   const { user } = useAuth();
