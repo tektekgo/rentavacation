@@ -36,6 +36,24 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
+/**
+ * Handles auth events that require navigation (e.g., PASSWORD_RECOVERY).
+ * Must be rendered inside BrowserRouter since AuthProvider is outside it.
+ */
+function AuthEventHandler() {
+  const { isPasswordRecovery, clearPasswordRecovery } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (isPasswordRecovery && location.pathname !== '/reset-password') {
+      navigate('/reset-password', { replace: true });
+    }
+  }, [isPasswordRecovery, navigate, location.pathname, clearPasswordRecovery]);
+
+  return null;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, profile, isRavTeam, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -75,6 +93,7 @@ const App = () => (
         <OfflineBanner />
         <PWAInstallBanner />
         <BrowserRouter>
+          <AuthEventHandler />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />

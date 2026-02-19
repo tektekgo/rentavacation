@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Lock, Eye, EyeOff, Loader2, Check, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const passwordRequirements = [
   { label: "At least 8 characters", test: (pw: string) => pw.length >= 8 },
@@ -23,6 +24,7 @@ const ResetPassword = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { clearPasswordRecovery } = useAuth();
 
   const allRequirementsMet = passwordRequirements.every((req) => req.test(password));
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
@@ -43,6 +45,7 @@ const ResetPassword = () => {
         variant: "destructive",
       });
     } else {
+      clearPasswordRecovery();
       toast({
         title: "Password updated",
         description: "Your password has been reset successfully.",

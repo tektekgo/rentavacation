@@ -14,13 +14,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  const { signIn, isConfigured, user, profile, isRavTeam } = useAuth();
+  const { signIn, isConfigured, user, profile, isRavTeam, isPasswordRecovery } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Redirect already-logged-in users based on approval status
+  // Skip redirect during password recovery — user should stay on /reset-password
   useEffect(() => {
-    if (!user) return;
+    if (!user || isPasswordRecovery) return;
     if (isRavTeam()) {
       navigate("/");
       return;
@@ -30,7 +31,7 @@ const Login = () => {
     } else if (profile?.approval_status === "approved") {
       navigate("/");
     }
-  }, [user, profile, isRavTeam, navigate]);
+  }, [user, profile, isRavTeam, isPasswordRecovery, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
