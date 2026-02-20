@@ -361,8 +361,9 @@ const Rentals = () => {
                 }
               >
                 {voiceResults.map((result) => (
-                  <div
+                  <Link
                     key={result.listing_id}
+                    to={`/property/${result.listing_id}`}
                     className={`group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${
                       viewMode === "list" ? "flex flex-col sm:flex-row" : ""
                     }`}
@@ -377,7 +378,7 @@ const Rentals = () => {
                         <img
                           src={result.image_url}
                           alt={result.property_name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -397,7 +398,7 @@ const Rentals = () => {
                         <MapPin className="w-3.5 h-3.5" />
                         {result.location}
                       </div>
-                      <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1">
+                      <h3 className="font-display font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
                         {result.property_name}
                       </h3>
                       {result.unit_type_name && (
@@ -426,7 +427,7 @@ const Rentals = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 

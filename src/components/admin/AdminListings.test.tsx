@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
 
 // Mock supabase
 const mockUpdate = vi.fn();
@@ -32,32 +33,35 @@ vi.mock("@/hooks/use-toast", () => ({
   }),
 }));
 
+function setupMocks(listingData: unknown[] = []) {
+  mockFrom.mockReturnValue({
+    select: mockSelect.mockReturnValue({
+      order: mockOrder.mockResolvedValue({
+        data: listingData,
+        error: null,
+      }),
+    }),
+    update: mockUpdate.mockReturnValue({
+      eq: mockEq.mockResolvedValue({ error: null }),
+    }),
+  });
+  mockInvoke.mockResolvedValue({ data: { success: true }, error: null });
+}
+
 describe("AdminListings email notifications", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setupMocks();
+  });
 
-    // Default: from().select()...order() for initial fetch
-    mockFrom.mockReturnValue({
-      select: mockSelect.mockReturnValue({
-        order: mockOrder.mockResolvedValue({
-          data: [],
-          error: null,
-        }),
-      }),
-      update: mockUpdate.mockReturnValue({
-        eq: mockEq.mockResolvedValue({ error: null }),
-      }),
-    });
-
-    mockInvoke.mockResolvedValue({ data: { success: true }, error: null });
+  afterEach(() => {
+    cleanup();
   });
 
   it("calls send-approval-email after approving a listing", async () => {
-    // Import dynamically so mocks are in place
     const { default: AdminListings } = await import("./AdminListings");
     const { renderWithProviders } = await import("@/test/helpers/render");
 
-    // Simulate listings data being loaded
     const listingData = [
       {
         id: "listing-1",
@@ -72,25 +76,13 @@ describe("AdminListings email notifications", () => {
       },
     ];
 
-    mockFrom.mockReturnValue({
-      select: mockSelect.mockReturnValue({
-        order: mockOrder.mockResolvedValue({
-          data: listingData,
-          error: null,
-        }),
-      }),
-      update: mockUpdate.mockReturnValue({
-        eq: mockEq.mockResolvedValue({ error: null }),
-      }),
-    });
+    setupMocks(listingData);
 
     const { findByText } = renderWithProviders(<AdminListings />);
 
-    // Wait for data to load and click approve
     const approveBtn = await findByText("Approve");
     approveBtn.click();
 
-    // The email invoke should be called with the owner's user_id
     await vi.waitFor(() => {
       expect(mockInvoke).toHaveBeenCalledWith("send-approval-email", {
         body: {
@@ -120,17 +112,7 @@ describe("AdminListings email notifications", () => {
       },
     ];
 
-    mockFrom.mockReturnValue({
-      select: mockSelect.mockReturnValue({
-        order: mockOrder.mockResolvedValue({
-          data: listingData,
-          error: null,
-        }),
-      }),
-      update: mockUpdate.mockReturnValue({
-        eq: mockEq.mockResolvedValue({ error: null }),
-      }),
-    });
+    setupMocks(listingData);
 
     const { findByText } = renderWithProviders(<AdminListings />);
 

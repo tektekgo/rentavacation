@@ -85,6 +85,8 @@ export function useVoiceSearch() {
   const { canSearch, remaining, isUnlimited, loading: quotaLoading, refresh: refreshQuota } = useVoiceQuota();
 
   const vapiRef = useRef<Vapi | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const lastSearchTimestampRef = useRef<number>(0);
 
   useEffect(() => {
     if (!VAPI_PUBLIC_KEY) {
@@ -121,8 +123,20 @@ export function useVoiceSearch() {
         message.type === "function-call" &&
         message.functionCall?.name === "search_properties"
       ) {
+        // Deduplicate rapid-fire calls (VAPI may fire twice in quick succession)
+        const now = Date.now();
+        if (now - lastSearchTimestampRef.current < 2000) {
+          console.warn("[Voice Search] Duplicate search call suppressed");
+          return;
+        }
+        lastSearchTimestampRef.current = now;
+
         setStatus("processing");
         const params = message.functionCall.parameters;
+
+        // Abort any in-flight request before starting a new one
+        abortControllerRef.current?.abort();
+        abortControllerRef.current = new AbortController();
 
         try {
           const response = await fetch(
@@ -134,6 +148,7 @@ export function useVoiceSearch() {
                 Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
               },
               body: JSON.stringify(params),
+              signal: abortControllerRef.current.signal,
             },
           );
 
@@ -155,6 +170,11 @@ export function useVoiceSearch() {
             setStatus("error");
           }
         } catch (err) {
+          // Don't treat abort as an error
+          if (err instanceof DOMException && err.name === "AbortError") {
+            console.log("[Voice Search] Previous request aborted");
+            return;
+          }
           console.error("[Voice Search] Edge Function call failed:", err);
           setError("Failed to search. Please try again.");
           setStatus("error");
@@ -170,6 +190,7 @@ export function useVoiceSearch() {
     });
 
     return () => {
+      abortControllerRef.current?.abort();
       vapi.stop();
       vapiRef.current = null;
     };
@@ -230,10 +251,12 @@ export function useVoiceSearch() {
   }, [canSearch]);
 
   const stopVoiceSearch = useCallback(() => {
+    abortControllerRef.current?.abort();
     vapiRef.current?.stop();
   }, []);
 
   const reset = useCallback(() => {
+    abortControllerRef.current?.abort();
     vapiRef.current?.stop();
     setStatus("idle");
     setResults([]);
