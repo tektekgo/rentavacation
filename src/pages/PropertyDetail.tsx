@@ -299,7 +299,7 @@ const PropertyDetail = () => {
                       <span className="text-muted-foreground">Guest Rating</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-4 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
                       {unitType ? unitType.max_occupancy : prop?.sleeps} guests
@@ -326,16 +326,16 @@ const PropertyDetail = () => {
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">
                   Available Dates
                 </h2>
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary" />
+                    <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
                     <span>
                       {new Date(listing.check_in_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                     </span>
                   </div>
                   <span className="text-muted-foreground">to</span>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary" />
+                    <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
                     <span>
                       {new Date(listing.check_out_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                     </span>

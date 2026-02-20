@@ -71,7 +71,7 @@ const HeroSection = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-slide-up">
             Rent <span className="text-accent">Direct from Owners</span>{" "}
             — Name Your Price
           </h1>
@@ -118,7 +118,7 @@ const HeroSection = () => {
 
             {/* Search Fields */}
             {searchTab === "flexible" ? (
-              <div className="grid md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="md:col-span-3">
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -145,7 +145,7 @@ const HeroSection = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="md:col-span-2">
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -185,7 +185,7 @@ const HeroSection = () => {
                         mode="range"
                         selected={dateRange}
                         onSelect={setDateRange}
-                        numberOfMonths={2}
+                        numberOfMonths={typeof window !== "undefined" && window.innerWidth < 640 ? 1 : 2}
                         disabled={(date) => date < new Date()}
                         initialFocus
                         className={cn("p-3 pointer-events-auto")}

@@ -190,7 +190,7 @@ const Rentals = () => {
 
           {/* Search Bar */}
           <div className="bg-card rounded-xl shadow-card p-4">
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2 relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -319,7 +319,7 @@ const Rentals = () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="grid md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Price Range</label>
                   <div className="flex gap-2">
@@ -364,13 +364,13 @@ const Rentals = () => {
                   <div
                     key={result.listing_id}
                     className={`group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 ${
-                      viewMode === "list" ? "flex" : ""
+                      viewMode === "list" ? "flex flex-col sm:flex-row" : ""
                     }`}
                   >
                     {/* Image */}
                     <div
                       className={`relative overflow-hidden bg-muted ${
-                        viewMode === "list" ? "w-72 h-48" : "h-52"
+                        viewMode === "list" ? "w-full sm:w-72 h-48" : "h-52"
                       }`}
                     >
                       {result.image_url ? (
@@ -548,7 +548,7 @@ const Rentals = () => {
                   {/* Image */}
                   <div
                     className={`relative overflow-hidden ${
-                      viewMode === "list" ? "w-72 h-48" : "h-52"
+                      viewMode === "list" ? "w-full sm:w-72 h-48" : "h-52"
                     }`}
                   >
                     {image ? (

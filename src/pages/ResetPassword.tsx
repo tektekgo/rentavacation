@@ -70,7 +70,7 @@ const ResetPassword = () => {
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl shadow-card-hover p-8">
+            <div className="bg-card rounded-2xl shadow-card-hover p-4 sm:p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">New Password</label>
@@ -87,7 +87,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-2"
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4 text-muted-foreground" />
@@ -132,7 +132,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-2"
                     >
                       {showConfirm ? (
                         <EyeOff className="w-4 h-4 text-muted-foreground" />

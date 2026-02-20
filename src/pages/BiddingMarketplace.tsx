@@ -99,14 +99,14 @@ const BiddingMarketplace = () => {
 
             {/* Listings Open for Bidding */}
             <TabsContent value="listings" className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold">Owner Listings Open for Bidding</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold">Owner Listings Open for Bidding</h2>
                   <p className="text-muted-foreground">
                     Submit your best offer directly to verified property owners
                   </p>
                 </div>
-                <Badge variant="secondary" className="text-lg px-4 py-2">
+                <Badge variant="secondary" className="text-lg px-4 py-2 flex-shrink-0">
                   {biddableListings?.length || 0} available
                 </Badge>
               </div>
@@ -153,14 +153,14 @@ const BiddingMarketplace = () => {
 
             {/* Travel Requests */}
             <TabsContent value="requests" className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold">Open Travel Requests</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold">Open Travel Requests</h2>
                   <p className="text-muted-foreground">
                     Renters looking for vacation rentals - submit your proposal!
                   </p>
                 </div>
-                <Badge variant="secondary" className="text-lg px-4 py-2">
+                <Badge variant="secondary" className="text-lg px-4 py-2 flex-shrink-0">
                   {travelRequests?.length || 0} requests
                 </Badge>
               </div>
@@ -212,7 +212,7 @@ const BiddingMarketplace = () => {
       <section className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-12">How the Marketplace Works</h2>
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
             {/* Renter Flow */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
