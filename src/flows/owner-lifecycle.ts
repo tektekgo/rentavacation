@@ -117,6 +117,21 @@ export const ownerLifecycle: FlowDefinition = {
       edgeFunctions: ['verify-booking-payment'],
     },
     {
+      id: 'owner_confirmation',
+      route: '/owner-dashboard',
+      label: 'Owner Confirmation',
+      component: 'OwnerConfirmationTimer',
+      tab: 'confirmations',
+      roles: ['property_owner'],
+      nodeStyle: 'decision',
+      description: 'Owner confirms they can fulfill the booking within configurable time window. Can request time extensions.',
+      tables: ['booking_confirmations'],
+      branches: [
+        { condition: 'Owner confirms', targetStepId: 'submit_confirmation', label: 'Confirmed' },
+        { condition: 'Owner declines or times out', targetStepId: 'booking_confirmed', label: 'Cancelled', edgeStyle: 'dashed' },
+      ],
+    },
+    {
       id: 'submit_confirmation',
       route: '/owner-dashboard',
       label: 'Submit Resort Confirmation',

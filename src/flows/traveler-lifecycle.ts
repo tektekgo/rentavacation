@@ -115,6 +115,18 @@ export const travelerLifecycle: FlowDefinition = {
       tables: ['bookings', 'booking_confirmations'],
     },
     {
+      id: 'awaiting_owner_confirmation',
+      route: '/booking-success',
+      label: 'Awaiting Owner Confirmation',
+      component: 'BookingSuccess',
+      description: 'Owner has a configurable time window to confirm they can fulfill the booking. Extensions may be requested.',
+      tables: ['booking_confirmations'],
+      branches: [
+        { condition: 'Owner confirms', targetStepId: 'checkin', label: 'Confirmed' },
+        { condition: 'Owner declines/times out', targetStepId: 'search_listings', label: 'Refunded', edgeStyle: 'dashed' },
+      ],
+    },
+    {
       id: 'checkin',
       route: '/checkin',
       label: 'Check In',

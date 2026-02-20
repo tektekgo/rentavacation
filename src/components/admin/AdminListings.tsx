@@ -81,8 +81,24 @@ const AdminListings = () => {
     fetchListings();
   }, []);
 
+  const sendApprovalEmail = async (ownerId: string, action: "approved" | "rejected") => {
+    try {
+      await supabase.functions.invoke("send-approval-email", {
+        body: {
+          user_id: ownerId,
+          action,
+          email_type: "user_approval",
+        },
+      });
+    } catch (err) {
+      console.error("Failed to send listing approval email:", err);
+    }
+  };
+
   const handleApprove = async (listingId: string) => {
     try {
+      const listing = listings.find((l) => l.id === listingId);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from("listings")
@@ -94,6 +110,11 @@ const AdminListings = () => {
         .eq("id", listingId);
 
       if (error) throw error;
+
+      // Send approval email to listing owner (non-blocking)
+      if (listing?.owner?.id) {
+        sendApprovalEmail(listing.owner.id, "approved");
+      }
 
       toast({
         title: "Listing Approved",
@@ -113,6 +134,8 @@ const AdminListings = () => {
 
   const handleReject = async (listingId: string) => {
     try {
+      const listing = listings.find((l) => l.id === listingId);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from("listings")
@@ -122,6 +145,11 @@ const AdminListings = () => {
         .eq("id", listingId);
 
       if (error) throw error;
+
+      // Send rejection email to listing owner (non-blocking)
+      if (listing?.owner?.id) {
+        sendApprovalEmail(listing.owner.id, "rejected");
+      }
 
       toast({
         title: "Listing Rejected",

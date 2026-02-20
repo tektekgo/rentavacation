@@ -36,6 +36,12 @@ export type EscrowStatus =
   | 'refunded'
   | 'disputed';
 
+export type OwnerConfirmationStatus =
+  | 'pending_owner'
+  | 'owner_confirmed'
+  | 'owner_timed_out'
+  | 'owner_declined';
+
 export type ApprovalStatus = 'pending_approval' | 'approved' | 'rejected';
 
 export type RoleUpgradeStatus = 'pending' | 'approved' | 'rejected';
@@ -647,6 +653,12 @@ export interface Database {
           escrow_amount: number;
           escrow_released_at: string | null;
           escrow_refunded_at: string | null;
+          owner_confirmation_status: OwnerConfirmationStatus | null;
+          owner_confirmation_deadline: string | null;
+          extensions_used: number;
+          owner_extension_requested_at: string[] | null;
+          owner_confirmed_at: string | null;
+          owner_declined_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -669,6 +681,12 @@ export interface Database {
           escrow_amount: number;
           escrow_released_at?: string | null;
           escrow_refunded_at?: string | null;
+          owner_confirmation_status?: OwnerConfirmationStatus | null;
+          owner_confirmation_deadline?: string | null;
+          extensions_used?: number;
+          owner_extension_requested_at?: string[] | null;
+          owner_confirmed_at?: string | null;
+          owner_declined_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -691,6 +709,12 @@ export interface Database {
           escrow_amount?: number;
           escrow_released_at?: string | null;
           escrow_refunded_at?: string | null;
+          owner_confirmation_status?: OwnerConfirmationStatus | null;
+          owner_confirmation_deadline?: string | null;
+          extensions_used?: number;
+          owner_extension_requested_at?: string[] | null;
+          owner_confirmed_at?: string | null;
+          owner_declined_at?: string | null;
           updated_at?: string;
         };
         Relationships: [];

@@ -23,7 +23,8 @@ import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { useMembershipTiers } from "@/hooks/useMembership";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { toast } from "sonner";
-import { Infinity as InfinityIcon } from "lucide-react";
+import { Infinity as InfinityIcon, Timer } from "lucide-react";
+import { useConfirmationTimerSettings } from "@/hooks/useOwnerConfirmation";
 
 export function SystemSettings() {
   const {
@@ -39,10 +40,13 @@ export function SystemSettings() {
   } = useSystemSettings();
   const { data: tiers } = useMembershipTiers();
 
+  const { data: timerSettings } = useConfirmationTimerSettings();
+
   const [updating, setUpdating] = useState(false);
   const [updatingRole, setUpdatingRole] = useState(false);
   const [updatingVoice, setUpdatingVoice] = useState<string | null>(null);
   const [updatingCommission, setUpdatingCommission] = useState(false);
+  const [updatingTimer, setUpdatingTimer] = useState<string | null>(null);
 
   const handleToggleApproval = async (enabled: boolean) => {
     setUpdating(true);
@@ -329,6 +333,93 @@ export function SystemSettings() {
               Membership tiers not configured yet.
             </p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Owner Confirmation Timer */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Timer className="h-5 w-5" />
+            Owner Confirmation Timer
+          </CardTitle>
+          <CardDescription>
+            After a renter pays, owners must confirm they can fulfill the booking within a time window
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Label htmlFor="confirmation-window">Confirmation window (minutes)</Label>
+            <Input
+              id="confirmation-window"
+              type="number"
+              className="w-24"
+              value={timerSettings?.windowMinutes ?? 60}
+              onChange={async (e) => {
+                const val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1) return;
+                setUpdatingTimer("window");
+                try {
+                  await updateSetting("owner_confirmation_window_minutes", { value: val });
+                  toast.success(`Confirmation window set to ${val} minutes`);
+                } catch {
+                  toast.error("Failed to update");
+                } finally {
+                  setUpdatingTimer(null);
+                }
+              }}
+              disabled={updatingTimer === "window"}
+              min={1}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="extension-duration">Extension duration (minutes)</Label>
+            <Input
+              id="extension-duration"
+              type="number"
+              className="w-24"
+              value={timerSettings?.extensionMinutes ?? 30}
+              onChange={async (e) => {
+                const val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1) return;
+                setUpdatingTimer("extension");
+                try {
+                  await updateSetting("owner_confirmation_extension_minutes", { value: val });
+                  toast.success(`Extension duration set to ${val} minutes`);
+                } catch {
+                  toast.error("Failed to update");
+                } finally {
+                  setUpdatingTimer(null);
+                }
+              }}
+              disabled={updatingTimer === "extension"}
+              min={1}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="max-extensions">Max extensions per booking</Label>
+            <Input
+              id="max-extensions"
+              type="number"
+              className="w-24"
+              value={timerSettings?.maxExtensions ?? 2}
+              onChange={async (e) => {
+                const val = parseInt(e.target.value);
+                if (isNaN(val) || val < 0) return;
+                setUpdatingTimer("max");
+                try {
+                  await updateSetting("owner_confirmation_max_extensions", { value: val });
+                  toast.success(`Max extensions set to ${val}`);
+                } catch {
+                  toast.error("Failed to update");
+                } finally {
+                  setUpdatingTimer(null);
+                }
+              }}
+              disabled={updatingTimer === "max"}
+              min={0}
+            />
+          </div>
         </CardContent>
       </Card>
 

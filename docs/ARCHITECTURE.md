@@ -84,8 +84,8 @@ src/
 │   │   ├── AdminBookings.tsx       # All bookings view
 │   │   ├── AdminProperties.tsx     # Property oversight
 │   │   ├── AdminVerifications.tsx  # Owner document review
-│   │   ├── AdminEscrow.tsx         # Escrow status management
-│   │   ├── AdminPayouts.tsx        # Owner payout tracking
+│   │   ├── AdminEscrow.tsx         # Escrow status management + owner confirmation status
+│   │   ├── AdminPayouts.tsx        # Owner payout tracking & processing
 │   │   ├── AdminFinancials.tsx     # Revenue reports
 │   │   └── AdminCheckinIssues.tsx  # Traveler issue resolution
 │   ├── bidding/               # Bidding marketplace components
@@ -100,9 +100,12 @@ src/
 │   │   ├── OwnerProperties.tsx     # CRUD properties
 │   │   ├── OwnerListings.tsx       # Manage listings
 │   │   ├── OwnerBookings.tsx       # View bookings on owned listings
-│   │   ├── OwnerBookingConfirmations.tsx # Submit resort confirmation
+│   │   ├── OwnerBookingConfirmations.tsx # Submit resort confirmation (2-phase: owner acceptance + resort)
+│   │   ├── OwnerConfirmationTimer.tsx   # Owner acceptance countdown timer with extensions
 │   │   ├── OwnerEarnings.tsx       # Revenue & payout tracking
+│   │   ├── OwnerPayouts.tsx        # Payout history view
 │   │   ├── OwnerProposals.tsx      # Sent proposals to travelers
+│   │   ├── PropertyImageUpload.tsx # Drag-and-drop image upload
 │   │   └── OwnerVerification.tsx   # Upload verification docs
 │   ├── Header.tsx             # Main navigation bar
 │   ├── Footer.tsx             # Site footer
@@ -120,6 +123,9 @@ src/
 ├── hooks/
 │   ├── useAuth.ts             # Re-exports from AuthContext
 │   ├── useBidding.ts          # All bidding queries & mutations (~600 lines)
+│   ├── useOwnerConfirmation.ts # Owner acceptance timer, extensions, confirm/decline
+│   ├── usePayouts.ts          # Owner & admin payout data hooks
+│   ├── usePropertyImages.ts   # Upload, list, delete, reorder property images
 │   └── use-mobile.tsx         # Responsive breakpoint hook
 ├── lib/
 │   ├── supabase.ts            # Supabase client initialization
@@ -159,16 +165,17 @@ supabase/
     ├── create-booking-checkout/   # Stripe checkout session creation
     ├── verify-booking-payment/    # Stripe webhook → update booking + send confirmation email
     ├── send-email/                # Generic email dispatch via Resend
-    ├── send-booking-confirmation-reminder/  # Owner deadline reminders
+    ├── send-booking-confirmation-reminder/  # Owner deadline reminders + owner confirmation notifications
+    ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
     ├── send-cancellation-email/   # Traveler cancellation notifications
     ├── send-verification-notification/     # Admin notification on doc upload
-    └── process-deadline-reminders/         # CRON: scan & send overdue reminders
+    └── process-deadline-reminders/         # CRON: scan & send overdue reminders + owner confirmation timeouts
 
 docs/
 ├── SETUP.md                   # Local dev setup guide
 ├── DEPLOYMENT.md              # CI/CD, env vars, CRON setup
 ├── ARCHITECTURE.md            # This file
-└── supabase-migrations/       # SQL migration scripts (001-006)
+└── supabase-migrations/       # SQL migration scripts (001-006, 012)
 ```
 
 ---
@@ -282,7 +289,7 @@ auth.users (Supabase managed)
 | `owner_agreements` | Commission contracts | `owner_id`, `commission_rate`, `markup_allowed`, `max_markup_percent`, `status` |
 | `listings` | Available rental periods | `property_id`, `owner_id`, `check_in_date`, `check_out_date`, `owner_price`, `rav_markup`, `final_price`, `status`, `cancellation_policy` |
 | `bookings` | Confirmed reservations | `listing_id`, `renter_id`, `total_amount`, `rav_commission`, `owner_payout`, `payment_intent_id`, `payout_status` |
-| `booking_confirmations` | Resort confirmation tracking | `booking_id`, `resort_confirmation_number`, `confirmation_deadline`, `escrow_status`, `escrow_amount` |
+| `booking_confirmations` | Resort confirmation + owner acceptance tracking | `booking_id`, `resort_confirmation_number`, `confirmation_deadline`, `escrow_status`, `escrow_amount`, `owner_confirmation_status`, `owner_confirmation_deadline`, `extensions_used` |
 | `checkin_confirmations` | Arrival verification | `booking_id`, `traveler_id`, `confirmed_arrival`, `issue_reported`, `issue_type` |
 | `cancellation_requests` | Cancellation workflow | `booking_id`, `requester_id`, `status`, `policy_refund_amount`, `final_refund_amount` |
 | `owner_verifications` | Trust & KYC | `owner_id`, `trust_level` (new→verified→trusted→premium), `kyc_verified`, `verification_status` |
@@ -300,7 +307,7 @@ auth.users (Supabase managed)
 
 ### Enums (defined in DB and mirrored in `src/types/database.ts`)
 
-`app_role`, `listing_status`, `booking_status`, `payout_status`, `agreement_status`, `vacation_club_brand`, `cancellation_policy`, `cancellation_status`, `owner_trust_level`, `verification_doc_type`, `verification_status`, `escrow_status`
+`app_role`, `listing_status`, `booking_status`, `payout_status`, `agreement_status`, `vacation_club_brand`, `cancellation_policy`, `cancellation_status`, `owner_trust_level`, `verification_doc_type`, `verification_status`, `escrow_status`, `owner_confirmation_status`
 
 ### Migrations
 
@@ -314,6 +321,7 @@ Run in order via Supabase SQL Editor:
 | 004 | `payout_tracking.sql` | Payout fields on bookings, booking_confirmations, checkin_confirmations |
 | 005 | `cancellation_policies.sql` | cancellation_requests, policy enum, refund calculation function |
 | 006 | `owner_verification.sql` | owner_verifications, verification_documents, trust levels, platform_guarantee_fund |
+| 012 | `phase13_core_business.sql` | property-images storage bucket, owner confirmation columns on booking_confirmations, owner confirmation system_settings, `extend_owner_confirmation_deadline` RPC |
 
 ---
 
@@ -334,7 +342,11 @@ Stripe Checkout → payment captured → webhook: verify-booking-payment
         ↓
 Booking created (status: confirmed) + booking_confirmation created
         ↓
-Owner submits resort confirmation # before deadline
+Owner Acceptance (configurable timer, default 60 min, up to 2 extensions of 30 min)
+  → Owner confirms → proceed to resort confirmation
+  → Owner times out or declines → auto-cancel, full refund
+        ↓
+Owner submits resort confirmation # before 48h deadline
         ↓
 RAV verifies → escrow_status: verified → released after checkout + 5 days
 ```
@@ -392,12 +404,13 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | Function | Trigger | Purpose |
 |----------|---------|---------|
 | `create-booking-checkout` | Client call | Creates Stripe Checkout session with listing details |
-| `verify-booking-payment` | Stripe webhook | Validates payment, updates booking status, creates booking_confirmation, **sends traveler confirmation email** |
+| `verify-booking-payment` | Stripe webhook | Validates payment, updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
 | `send-email` | Client call | Generic email dispatch via Resend API |
-| `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation |
+| `send-approval-email` | Client call | Sends approval/rejection emails for listings and users (4 variants) |
+| `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |
 | `send-cancellation-email` | Internal | Notifies traveler of cancellation status (submitted, approved, denied, counter_offer) |
 | `send-verification-notification` | Client call | Alerts admin when owner uploads verification docs |
-| `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails |
+| `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails, processes owner confirmation timeouts (auto-cancel + refund) |
 
 ### Required Secrets (set in Supabase Dashboard)
 
@@ -445,6 +458,13 @@ infoBox(content, variant): string // Colored info/warning/success/error box
 | Cancellation Approved | Owner approves | Traveler |
 | Cancellation Denied | Owner denies | Traveler |
 | Cancellation Counter-Offer | Owner counter-offers | Traveler |
+| Owner Confirmation Request | Payment verified | Owner |
+| Owner Extension Notification | Owner requests extension | Renter |
+| Owner Confirmation Timeout | Owner times out | Owner + Renter |
+| Listing Approved | Admin approves listing | Owner |
+| Listing Rejected | Admin rejects listing | Owner |
+| User Approved | Admin approves user | User |
+| User Rejected | Admin rejects user | User |
 | Verification Doc Uploaded | Doc upload | RAV admin |
 | Contact Form | Form submission | support@rentavacation.com |
 
@@ -609,7 +629,7 @@ Lovable Editor → GitHub main → Vercel auto-deploy → Production
 
 | Bucket | Access | Structure |
 |--------|--------|-----------|
-| `property-images` | Private | `{owner_id}/{filename}` |
+| `property-images` | Public read, owner write | `{owner_id}/{filename}` |
 | `verification-documents` | Private | `{owner_id}/{filename}` |
 
 ---

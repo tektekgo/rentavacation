@@ -15,7 +15,10 @@ type NotificationType =
   | "new_booking"
   | "confirmation_reminder"
   | "deadline_urgent"
-  | "checkin_reminder";
+  | "checkin_reminder"
+  | "owner_confirmation_request"
+  | "owner_extension_notification"
+  | "owner_confirmation_timeout";
 
 interface NotificationRequest {
   type: NotificationType;
@@ -126,6 +129,155 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       logStep("Reminder email sent", { ownerEmail, hoursRemaining });
+    }
+
+    if (type === "owner_confirmation_request" && bookingConfirmationId) {
+      const { data: confirmation, error } = await supabaseClient
+        .from("booking_confirmations")
+        .select(`*, booking:bookings(*, listing:listings(*, property:properties(*)), renter:profiles(*)), owner:profiles!booking_confirmations_owner_id_fkey(*)`)
+        .eq("id", bookingConfirmationId)
+        .single();
+
+      if (error || !confirmation) throw new Error("Booking confirmation not found");
+
+      const ownerEmail = confirmation.owner?.email;
+      const ownerName = confirmation.owner?.full_name || "Owner";
+      const resortName = confirmation.booking?.listing?.property?.resort_name;
+      const guestName = confirmation.booking?.renter?.full_name || "Guest";
+      const checkIn = new Date(confirmation.booking?.listing?.check_in_date).toLocaleDateString();
+      const checkOut = new Date(confirmation.booking?.listing?.check_out_date).toLocaleDateString();
+      const deadline = confirmation.owner_confirmation_deadline
+        ? new Date(confirmation.owner_confirmation_deadline).toLocaleString()
+        : "soon";
+
+      if (!ownerEmail) throw new Error("Owner email not found");
+
+      const html = buildEmailHtml({
+        recipientName: ownerName,
+        heading: "Action Required: Confirm Your Booking",
+        body: `
+          <p>A renter has booked your property at <strong>${resortName}</strong> and payment has been received.</p>
+          <p>Please confirm that you can fulfill this booking:</p>
+          <div style="background: #f7fafc; padding: 16px 20px; border-radius: 6px; margin: 16px 0;">
+            ${detailRow("Guest", guestName)}
+            ${detailRow("Check-in", checkIn)}
+            ${detailRow("Check-out", checkOut)}
+            ${detailRow("Payout Amount", `$${confirmation.escrow_amount?.toLocaleString()}`)}
+          </div>
+          ${infoBox(`<strong>You must confirm by:</strong> ${deadline}. If you cannot fulfill this booking, please decline so the renter can be refunded.`, "warning")}
+        `,
+        cta: { label: "Confirm Booking", url: "https://rentavacation.lovable.app/owner-dashboard?tab=confirmations" },
+      });
+
+      await resend.emails.send({
+        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        to: [ownerEmail],
+        subject: `Action Required: Confirm booking – ${resortName}`,
+        html,
+      });
+
+      logStep("Owner confirmation request email sent", { ownerEmail });
+    }
+
+    if (type === "owner_extension_notification" && bookingConfirmationId) {
+      const { data: confirmation, error } = await supabaseClient
+        .from("booking_confirmations")
+        .select(`*, booking:bookings(*, listing:listings(*, property:properties(*)), renter:profiles(*)), owner:profiles!booking_confirmations_owner_id_fkey(*)`)
+        .eq("id", bookingConfirmationId)
+        .single();
+
+      if (error || !confirmation) throw new Error("Booking confirmation not found");
+
+      const renterEmail = confirmation.booking?.renter?.email;
+      const renterName = confirmation.booking?.renter?.full_name || "Traveler";
+      const resortName = confirmation.booking?.listing?.property?.resort_name;
+      const newDeadline = confirmation.owner_confirmation_deadline
+        ? new Date(confirmation.owner_confirmation_deadline).toLocaleString()
+        : "extended";
+
+      if (!renterEmail) throw new Error("Renter email not found");
+
+      const html = buildEmailHtml({
+        recipientName: renterName,
+        heading: "Owner Requested More Time",
+        body: `
+          <p>The property owner for <strong>${resortName}</strong> has requested a time extension to confirm your booking.</p>
+          ${infoBox(`The new confirmation deadline is <strong>${newDeadline}</strong>. We'll notify you as soon as the owner confirms.`, "warning")}
+          <p>No action is needed from you at this time. Your payment is safely held in escrow.</p>
+        `,
+        cta: { label: "View Booking", url: "https://rentavacation.lovable.app/booking-success" },
+      });
+
+      await resend.emails.send({
+        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        to: [renterEmail],
+        subject: `Booking Update – Owner requested more time for ${resortName}`,
+        html,
+      });
+
+      logStep("Owner extension notification sent to renter", { renterEmail });
+    }
+
+    if (type === "owner_confirmation_timeout" && bookingConfirmationId) {
+      const { data: confirmation, error } = await supabaseClient
+        .from("booking_confirmations")
+        .select(`*, booking:bookings(*, listing:listings(*, property:properties(*)), renter:profiles(*)), owner:profiles!booking_confirmations_owner_id_fkey(*)`)
+        .eq("id", bookingConfirmationId)
+        .single();
+
+      if (error || !confirmation) throw new Error("Booking confirmation not found");
+
+      const ownerEmail = confirmation.owner?.email;
+      const ownerName = confirmation.owner?.full_name || "Owner";
+      const renterEmail = confirmation.booking?.renter?.email;
+      const renterName = confirmation.booking?.renter?.full_name || "Traveler";
+      const resortName = confirmation.booking?.listing?.property?.resort_name;
+
+      // Notify owner
+      if (ownerEmail) {
+        const ownerHtml = buildEmailHtml({
+          recipientName: ownerName,
+          heading: "Booking Cancelled – Confirmation Timed Out",
+          body: `
+            <p>Your booking for <strong>${resortName}</strong> has been automatically cancelled because you did not confirm within the required time window.</p>
+            ${infoBox("The renter's payment has been refunded. This may affect your reliability rating.", "error")}
+          `,
+          cta: { label: "View Dashboard", url: "https://rentavacation.lovable.app/owner-dashboard" },
+        });
+
+        await resend.emails.send({
+          from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+          to: [ownerEmail],
+          subject: `Booking Cancelled – Confirmation timed out for ${resortName}`,
+          html: ownerHtml,
+        });
+
+        logStep("Timeout notification sent to owner", { ownerEmail });
+      }
+
+      // Notify renter
+      if (renterEmail) {
+        const renterHtml = buildEmailHtml({
+          recipientName: renterName,
+          heading: "Booking Cancelled – Full Refund Issued",
+          body: `
+            <p>Unfortunately, the property owner for <strong>${resortName}</strong> did not confirm your booking within the required time.</p>
+            <p>A full refund of <strong>$${confirmation.escrow_amount?.toLocaleString()}</strong> has been initiated to your original payment method.</p>
+            ${infoBox("Your refund should appear within 5-10 business days depending on your bank.", "success")}
+            <p>We encourage you to browse other available properties!</p>
+          `,
+          cta: { label: "Browse Properties", url: "https://rentavacation.lovable.app/rentals" },
+        });
+
+        await resend.emails.send({
+          from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+          to: [renterEmail],
+          subject: `Booking Cancelled – Full refund for ${resortName}`,
+          html: renterHtml,
+        });
+
+        logStep("Timeout notification sent to renter", { renterEmail });
+      }
     }
 
     if (type === "checkin_reminder" && checkinConfirmationId) {

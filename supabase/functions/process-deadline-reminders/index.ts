@@ -113,6 +113,60 @@ const handler = async (req: Request): Promise<Response> => {
       logStep("Reminder sent", { confirmationId: confirmation.id, ownerEmail, hoursRemaining });
     }
 
+    // Process owner confirmation timeouts
+    const { data: timedOutConfirmations, error: timeoutError } = await supabaseClient
+      .from("booking_confirmations")
+      .select("id, booking_id, owner_id, escrow_amount")
+      .eq("owner_confirmation_status", "pending_owner")
+      .lte("owner_confirmation_deadline", now.toISOString());
+
+    if (!timeoutError && timedOutConfirmations) {
+      logStep("Found timed-out owner confirmations", { count: timedOutConfirmations.length });
+
+      for (const conf of timedOutConfirmations) {
+        // Auto-set owner_timed_out and refund escrow
+        await supabaseClient
+          .from("booking_confirmations")
+          .update({
+            owner_confirmation_status: "owner_timed_out",
+            escrow_status: "refunded",
+            escrow_refunded_at: now.toISOString(),
+            updated_at: now.toISOString(),
+          })
+          .eq("id", conf.id);
+
+        // Cancel the booking
+        await supabaseClient
+          .from("bookings")
+          .update({
+            status: "cancelled",
+            updated_at: now.toISOString(),
+          })
+          .eq("id", conf.booking_id);
+
+        // Send timeout notifications to both parties
+        try {
+          const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-confirmation-reminder`;
+          await fetch(notificationUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+            },
+            body: JSON.stringify({
+              type: "owner_confirmation_timeout",
+              bookingConfirmationId: conf.id,
+            }),
+          });
+        } catch (notifyError) {
+          logStep("Warning: Failed to send timeout notification", { confirmationId: conf.id, error: String(notifyError) });
+        }
+
+        emailsSent++;
+        logStep("Owner confirmation timed out", { confirmationId: conf.id, bookingId: conf.booking_id });
+      }
+    }
+
     // Process check-in reminders for travelers
     const checkInStart = new Date(now.getTime() - 2 * 60 * 60 * 1000);
     const checkInEnd = new Date(now.getTime() + 2 * 60 * 60 * 1000);

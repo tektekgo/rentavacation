@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 17, 2026
+> **Last Updated:** February 20, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,16 +78,15 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Role terminology standardization shipped, ready for next feature work
-**Started:** February 17, 2026
+**Active Phase:** Phase 13 complete, ready for Phase 12 (Capacitor) or Phase 3 (Voice Everywhere)
+**Started:** February 20, 2026
 
 ### Working on TODAY:
-- [x] Role terminology standardization — "Traveler" → "Renter" across 27 files
-- [x] Centralized role constants (ROLE_LABELS, ROLE_COLORS, AccountType)
-- [x] Architecture link added for rav_owner in admin dashboard
+- [x] Phase 13: Core Business Flow Completion (5 tracks)
 - [ ] Phase 12: Capacitor setup
 
 ### Recently Completed:
+- [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
 - [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files: UI labels, flow manifests, documentation, user guides, admin components. Centralized ROLE_LABELS/ROLE_COLORS in database.ts. Architecture link for rav_owner. 96 tests passing (Feb 17)
 - [x] **UX Feedback Improvements** — ActionSuccessCard component, inline success states in 6 dialogs/pages, 2 email confirmations, BookingSuccess "What Happens Next" section, admin dashboard tab layout fix. 96 tests passing (Feb 16)
 - [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
@@ -174,6 +173,29 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Phase 13: Core Business Flow Completion</strong> — Completed Feb 20, 2026</summary>
+
+**What:** Complete the 5 remaining implementation gaps in core business flows.
+
+**5 Tracks:**
+- **Track C:** Approval email notifications — wired existing `send-approval-email` edge function to AdminListings approve/reject actions
+- **Track A:** Owner bidding UI — "Place Bid" button on PropertyDetail page, comprehensive tests for all 18 bidding hooks
+- **Track E:** Property image upload — Supabase Storage bucket with RLS, `usePropertyImages` hook, drag-and-drop upload component, integrated into ListProperty form
+- **Track D:** Payout tracking — `usePayouts` hooks, OwnerPayouts component with stats cards + table, Payouts tab in OwnerDashboard
+- **Track B:** Owner Confirmation Timer — configurable countdown timer (default 60 min), extension system (max 2 × 30 min), auto-timeout with refund, 3 new email types, admin settings UI, flow manifest updates
+
+**Database:** Migration `012_phase13_core_business.sql` — property-images storage bucket, owner confirmation columns on `booking_confirmations`, 3 system settings, `extend_owner_confirmation_deadline` RPC
+
+**New hooks:** `useOwnerConfirmation` (7 sub-hooks), `usePayouts` (3 sub-hooks), `usePropertyImages` (4 sub-hooks)
+**New components:** `OwnerConfirmationTimer`, `OwnerPayouts`, `PropertyImageUpload`
+**Edge functions updated:** `verify-booking-payment`, `send-booking-confirmation-reminder` (3 new types), `process-deadline-reminders` (timeout processing)
+**Flow manifests:** Both `owner-lifecycle.ts` and `traveler-lifecycle.ts` updated with owner confirmation steps
+
+**Files:** ~30 modified/created
+**Tests:** 142/142 passing, 0 type errors, 0 lint errors
+</details>
 
 <details>
 <summary><strong>Role Terminology Standardization</strong> — Completed Feb 17, 2026</summary>
@@ -441,6 +463,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 17, 2026
+**Last updated:** February 20, 2026
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

@@ -680,7 +680,7 @@ const Documentation = () => {
                       { step: 1, title: "Browse", desc: "Search listings by location, dates, amenities" },
                       { step: 2, title: "Select", desc: "View property details and availability" },
                       { step: 3, title: "Book", desc: "Proceed to Stripe Checkout" },
-                      { step: 4, title: "Confirm", desc: "Owner provides resort confirmation" },
+                      { step: 4, title: "Accept", desc: "Owner accepts within timer, then submits resort confirmation" },
                       { step: 5, title: "Stay", desc: "Check-in and enjoy vacation" },
                     ].map((item) => (
                       <div key={item.step} className="text-center">
@@ -1012,18 +1012,41 @@ const Documentation = () => {
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-4">Booking Confirmations</h1>
                   <p className="text-xl text-muted-foreground">
-                    Two-stage confirmation system ensuring booking validity and successful stays.
+                    Three-stage confirmation system ensuring booking validity and successful stays.
                   </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="bg-card rounded-xl p-6 border">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Owner Acceptance</h3>
+                        <p className="text-xs text-muted-foreground">Configurable timer (default 60 min)</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      After payment, the owner must confirm they can fulfill the booking within a configurable time window. They can request up to 2 time extensions (30 min each).
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 space-y-1">
+                      <p className="text-xs text-blue-800 dark:text-blue-200">
+                        <strong>Confirm:</strong> Proceeds to resort confirmation step
+                      </p>
+                      <p className="text-xs text-blue-800 dark:text-blue-200">
+                        <strong>Decline / Timeout:</strong> Auto-cancel, full refund to renter
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="bg-card rounded-xl p-6 border">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center">
                         <FileCheck className="h-5 w-5 text-amber-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Owner Confirmation</h3>
+                        <h3 className="font-semibold">Resort Confirmation</h3>
                         <p className="text-xs text-muted-foreground">48 hours after booking</p>
                       </div>
                     </div>
@@ -1200,7 +1223,12 @@ const Documentation = () => {
                       { type: "Booking Confirmation", recipient: "Renter", trigger: "After payment success" },
                       { type: "Confirmation Reminder", recipient: "Owner", trigger: "6-12h before deadline" },
                       { type: "Urgent Reminder", recipient: "Owner", trigger: "< 6h before deadline" },
+                      { type: "Owner Confirmation Request", recipient: "Owner", trigger: "After payment, timer starts" },
+                      { type: "Owner Extension Notification", recipient: "Renter", trigger: "Owner requests more time" },
+                      { type: "Owner Confirmation Timeout", recipient: "Both", trigger: "Owner fails to respond" },
                       { type: "Check-in Reminder", recipient: "Renter", trigger: "Around check-in time" },
+                      { type: "Listing Approved", recipient: "Owner", trigger: "Admin approves listing" },
+                      { type: "Listing Rejected", recipient: "Owner", trigger: "Admin rejects listing" },
                       { type: "Verification Approved", recipient: "Owner", trigger: "On document approval" },
                       { type: "Payout Sent", recipient: "Owner", trigger: "After payout processed" },
                     ].map((email, idx) => (
@@ -1269,7 +1297,7 @@ const Documentation = () => {
                       { name: "Financials", desc: "Revenue and commission reports", icon: CreditCard },
                       { name: "Escrow", desc: "Held funds management", icon: Shield },
                       { name: "Pending Approvals", desc: "User & role upgrade approval queue", icon: UserCheck },
-                      { name: "Settings", desc: "Platform settings, voice limits & role upgrades", icon: Settings },
+                      { name: "Settings", desc: "Platform settings, voice limits, role upgrades & owner confirmation timer", icon: Settings },
                     ].map((section) => {
                       const Icon = section.icon;
                       return (
@@ -1408,6 +1436,22 @@ const Documentation = () => {
                         <li>• When quota is exhausted, the voice button is disabled with a tooltip message</li>
                         <li>• Manual text search is always unlimited for all users</li>
                       </ul>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Owner Confirmation Timer</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Controls the time window and extension rules for owner booking acceptance after renter payment.
+                      </p>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• <strong>Confirmation Window</strong> — Minutes the owner has to accept (default: <strong>60</strong>)</li>
+                        <li>• <strong>Extension Duration</strong> — Minutes added per extension request (default: <strong>30</strong>)</li>
+                        <li>• <strong>Max Extensions</strong> — Maximum number of extensions allowed (default: <strong>2</strong>)</li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Settings stored in <code className="bg-muted px-1 py-0.5 rounded">system_settings</code> table.
+                        If the owner does not confirm within the window (including any extensions), the booking is automatically
+                        cancelled and the renter receives a full refund.
+                      </p>
                     </div>
                   </div>
                 </div>
