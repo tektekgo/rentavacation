@@ -1016,6 +1016,10 @@ export interface Database {
         Args: { _owner_id: string };
         Returns: number;
       };
+      extend_owner_confirmation_deadline: {
+        Args: { p_booking_confirmation_id: string; p_owner_id: string };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: {
       app_role: AppRole;

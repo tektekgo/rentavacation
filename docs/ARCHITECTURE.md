@@ -77,6 +77,22 @@ src/
 ├── assets/                    # Static images (imported as ES6 modules)
 ├── components/
 │   ├── ui/                    # shadcn/ui primitives (button, card, dialog, etc.)
+│   ├── executive/             # Executive dashboard components
+│   │   ├── TooltipIcon.tsx              # Metric tooltip (definition + whyItMatters)
+│   │   ├── SectionHeading.tsx           # Consistent section headers
+│   │   ├── SectionDivider.tsx           # Full-width dividers
+│   │   ├── HeadlineBar.tsx              # Sticky 5 KPI pills
+│   │   ├── BusinessPerformance.tsx      # Section 2: GMV trend, bid activity, revenue waterfall
+│   │   ├── MarketplaceHealth.tsx        # Section 3: liquidity, supply/demand, voice funnel
+│   │   ├── LiquidityGauge.tsx           # SVG gauge for liquidity score
+│   │   ├── SupplyDemandMap.tsx          # Destination cards
+│   │   ├── VoiceFunnel.tsx              # Voice vs traditional conversion
+│   │   ├── MarketIntelligence.tsx       # Section 4: BYOK market data
+│   │   ├── BYOKCard.tsx                 # Reusable BYOK wrapper
+│   │   ├── IndustryFeed.tsx             # Section 5: news + macro
+│   │   ├── UnitEconomics.tsx            # Section 6: investor metrics
+│   │   ├── IntegrationSettings.tsx      # API key management drawer
+│   │   └── utils.ts                     # formatCurrency, CHART_COLORS
 │   ├── admin/                 # Admin dashboard tab components
 │   │   ├── AdminOverview.tsx       # KPI cards, charts
 │   │   ├── AdminUsers.tsx          # User & role management
@@ -126,7 +142,12 @@ src/
 │   ├── useOwnerConfirmation.ts # Owner acceptance timer, extensions, confirm/decline
 │   ├── usePayouts.ts          # Owner & admin payout data hooks
 │   ├── usePropertyImages.ts   # Upload, list, delete, reorder property images
-│   └── use-mobile.tsx         # Responsive breakpoint hook
+│   ├── use-mobile.tsx         # Responsive breakpoint hook
+│   └── executive/             # Executive dashboard data hooks
+│       ├── useBusinessMetrics.ts      # Tier 1 metrics from Supabase
+│       ├── useMarketplaceHealth.ts    # Liquidity score + supply/demand
+│       ├── useIndustryFeed.ts         # Tier 2: news + macro indicators
+│       └── useMarketIntelligence.ts   # Tier 3: BYOK + settings
 ├── lib/
 │   ├── supabase.ts            # Supabase client initialization
 │   ├── email.ts               # Client-side email helpers (welcome, contact)
@@ -140,6 +161,7 @@ src/
 │   ├── Login.tsx / Signup.tsx  # Auth pages
 │   ├── OwnerDashboard.tsx     # Tabbed owner management
 │   ├── AdminDashboard.tsx     # Tabbed admin management
+│   ├── ExecutiveDashboard.tsx # Investor-grade strategy dashboard (dark theme, rav_owner only)
 │   ├── BiddingMarketplace.tsx # Browse bids & travel requests
 │   ├── MyBidsDashboard.tsx    # Traveler's bid management
 │   ├── BookingSuccess.tsx     # Post-payment confirmation
@@ -169,13 +191,17 @@ supabase/
     ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
     ├── send-cancellation-email/   # Traveler cancellation notifications
     ├── send-verification-notification/     # Admin notification on doc upload
-    └── process-deadline-reminders/         # CRON: scan & send overdue reminders + owner confirmation timeouts
+    ├── process-deadline-reminders/         # CRON: scan & send overdue reminders + owner confirmation timeouts
+    ├── fetch-industry-news/              # Executive: NewsAPI + Google News RSS (60-min cache)
+    ├── fetch-macro-indicators/           # Executive: FRED consumer confidence + travel data
+    ├── fetch-airdna-data/                # Executive: AirDNA market comps (BYOK)
+    └── fetch-str-data/                   # Executive: STR hospitality benchmarks (BYOK)
 
 docs/
 ├── SETUP.md                   # Local dev setup guide
 ├── DEPLOYMENT.md              # CI/CD, env vars, CRON setup
 ├── ARCHITECTURE.md            # This file
-└── supabase-migrations/       # SQL migration scripts (001-006, 012)
+└── supabase-migrations/       # SQL migration scripts (001-006, 012-013)
 ```
 
 ---
@@ -194,6 +220,7 @@ All routes are defined in `src/App.tsx`. Key mapping:
 | `/signup` | `Signup` | Public | Registration |
 | `/owner-dashboard` | `OwnerDashboard` | Owner | Tabbed: properties, listings, bookings, earnings, verification |
 | `/admin` | `AdminDashboard` | RAV Team | Tabbed: overview, users, listings, bookings, verifications, escrow, payouts, financials, issues |
+| `/executive-dashboard` | `ExecutiveDashboard` | RAV Owner | Investor-grade strategy dashboard (dark theme) |
 | `/bidding` | `BiddingMarketplace` | Auth | Browse biddable listings + travel requests |
 | `/my-bids` | `MyBidsDashboard` | Auth | Traveler's bid & request management |
 | `/checkin` | `TravelerCheckin` | Auth | Post-arrival confirmation |
@@ -322,6 +349,7 @@ Run in order via Supabase SQL Editor:
 | 005 | `cancellation_policies.sql` | cancellation_requests, policy enum, refund calculation function |
 | 006 | `owner_verification.sql` | owner_verifications, verification_documents, trust levels, platform_guarantee_fund |
 | 012 | `phase13_core_business.sql` | property-images storage bucket, owner confirmation columns on booking_confirmations, owner confirmation system_settings, `extend_owner_confirmation_deadline` RPC |
+| 013 | `executive_dashboard_settings.sql` | Executive dashboard system_settings keys (newsapi_key, airdna_api_key, str_api_key, refresh_interval) |
 
 ---
 
@@ -411,6 +439,10 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | `send-cancellation-email` | Internal | Notifies traveler of cancellation status (submitted, approved, denied, counter_offer) |
 | `send-verification-notification` | Client call | Alerts admin when owner uploads verification docs |
 | `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails, processes owner confirmation timeouts (auto-cancel + refund) |
+| `fetch-industry-news` | Client call | Fetches NewsAPI + Google News RSS for vacation rental industry (60-min cache, NEWSAPI_KEY secret) |
+| `fetch-macro-indicators` | Client call | Fetches FRED consumer confidence + travel data (public API, no key) |
+| `fetch-airdna-data` | Client call | Fetches AirDNA market comp data (BYOK — user-supplied API key) |
+| `fetch-str-data` | Client call | Fetches STR hospitality benchmarks (BYOK — user-supplied API key) |
 
 ### Required Secrets (set in Supabase Dashboard)
 
@@ -418,6 +450,7 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 |--------|---------|
 | `RESEND_API_KEY` | All email functions |
 | `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment |
+| `NEWSAPI_KEY` | fetch-industry-news |
 
 ---
 

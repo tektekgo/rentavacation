@@ -78,7 +78,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Priority 1 Track A + Priority 2 Track A complete
+**Active Phase:** Phase 14 Executive Dashboard — Complete
 **Started:** February 20, 2026
 
 ### Working on TODAY:
@@ -86,10 +86,12 @@ To keep PROJECT-HUB.md focused and scannable:
 - [x] Mobile UX Track B: Mobile screen optimization (30+ responsive fixes, 12 pages)
 - [x] Mobile UX Track A: Post-login welcome experience (header greeting, mobile auth state, flash fix)
 - [x] Voice Quality Track A: Fix known quality issues (5 fixes: dedup, abort, clickable cards, CORS, rate limit)
+- [x] Phase 14: Executive Dashboard (all 3 sessions — foundation, UI, polish)
 - [ ] Voice Experience Tracks B-D: Quality tuning, admin controls, observability
 
 ### Recently Completed:
-- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing (Feb 20)
+- [x] **Phase 14: Executive Dashboard** — Full investor-grade dashboard: 6 sections (HeadlineBar, BusinessPerformance, MarketplaceHealth, MarketIntelligence, IndustryFeed, UnitEconomics), 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index metrics, BYOK integrations (AirDNA, STR), dark-themed, 15+ new tests. Migration 013 (Feb 20)
+- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing. Edge function deployed to DEV + PROD (Feb 20)
 - [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, loading skeleton prevents auth flash, mobile menu buttons show skeleton during auth load (Feb 20)
 - [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
 - [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
@@ -162,7 +164,20 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 3. Phase 3: Voice Everywhere (Q2 2026)
+### ~~3. Phase 14: Executive Dashboard~~ ✅ COMPLETE
+**Status:** Complete (Feb 20)
+**Docs:** `docs/features/executive-dashboard/`
+**Decisions:** DEC-014, DEC-015, DEC-016, DEC-017
+
+**All Sessions Complete:**
+- [x] Migration 013, 4 Edge Functions, 4 data hooks, types
+- [x] ExecutiveDashboard page, HeadlineBar, BusinessPerformance, MarketplaceHealth
+- [x] MarketIntelligence (BYOK), IndustryFeed, UnitEconomics, IntegrationSettings
+- [x] 15+ new tests, flow manifest updated, responsive polish
+
+---
+
+### 4. Phase 3: Voice Everywhere (Q2 2026)
 **Status:** Planned — After Voice Quality hardening
 **Docs:** `docs/guides/user-journey-map.md`
 **Prerequisite:** Voice Experience Quality & Admin Controls (priority #2)
@@ -176,7 +191,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 4. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 5. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks
 **Decision:** DEC-011
@@ -201,7 +216,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 5. Phase 6: Advanced Features (Q3 2026)
+### 6. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
 
 **Features:**
@@ -221,6 +236,29 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Phase 14: Executive Dashboard</strong> — Completed Feb 20, 2026</summary>
+
+**What:** Investor-grade strategic dashboard for RAV Owner — dark-themed, boardroom-quality business intelligence with 6 sections.
+
+**6 Sections:**
+- **HeadlineBar:** Sticky bar with 5 KPI pills (GMV, Revenue, Active Listings, Liquidity Score, Voice Adoption)
+- **BusinessPerformance:** 4 Recharts charts — GMV trend (AreaChart), bid activity (LineChart), bid spread index (BarChart), revenue waterfall (StackedBarChart)
+- **MarketplaceHealth:** Proprietary metrics — Liquidity Score SVG gauge, supply/demand destination map, voice vs traditional funnel
+- **MarketIntelligence:** BYOK pattern — AirDNA market comparison, STR Global benchmarks, RAV pricing position
+- **IndustryFeed:** NewsAPI integration, regulatory radar timeline, macro indicators with sparklines
+- **UnitEconomics:** 7 metric cards (CAC, LTV, LTV:CAC, Payback, Avg Booking, Take Rate, MoM Growth) with methodology
+
+**Database:** Migration `013_executive_dashboard_settings.sql` — 4 system_settings rows for API key storage
+**Edge Functions:** `fetch-industry-news`, `fetch-macro-indicators`, `fetch-airdna-data`, `fetch-str-data` (all with caching + fallback)
+**New Hooks:** `useBusinessMetrics`, `useMarketplaceHealth`, `useIndustryFeed`, `useMarketIntelligence`
+**Components:** ~15 new files in `src/components/executive/`
+**Flow Manifest:** `admin-lifecycle.ts` updated with executive_dashboard step
+
+**Files:** ~25 created, 4 modified
+**Tests:** 15+ new tests (hooks + components)
+</details>
 
 <details>
 <summary><strong>Phase 13: Core Business Flow Completion</strong> — Completed Feb 20, 2026</summary>
@@ -389,6 +427,42 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
+### DEC-014: Separate Route for Executive Dashboard
+**Date:** February 20, 2026
+**Decision:** `/executive-dashboard` as standalone page, not a tab in admin dashboard
+**Status:** Final
+
+**Reasoning:** Different design language, different audience, different purpose. Admin = utilitarian ops tool. Executive = boardroom strategy view. Mixing them dilutes both.
+
+---
+
+### DEC-015: Demo Mode / Connected Pattern for BYOK
+**Date:** February 20, 2026
+**Decision:** Default to "Demo Mode" with sample data, toggle to "Connected" with user-supplied API key
+**Status:** Final
+
+**Reasoning:** Honest to VCs (not faking data), shows product capability, real feature for future enterprise customers, avoids paying $200-500/mo for APIs before product-market fit.
+
+---
+
+### DEC-016: NewsAPI for Industry Feed
+**Date:** February 20, 2026
+**Decision:** Use NewsAPI free tier (100 req/day) via Edge Function with 60-min cache
+**Status:** Final
+
+**Reasoning:** Free, reliable, sufficient volume for demo + early production use. Cache in Edge Function memory to stay within limits.
+
+---
+
+### DEC-017: Dark Theme Approach
+**Date:** February 20, 2026
+**Decision:** Build dark-first (not using Tailwind dark: variants), wrap page root in bg-slate-900
+**Status:** Final
+
+**Reasoning:** Cleaner implementation, avoids fighting with app's light theme, more reliable visual consistency for demo.
+
+---
+
 ### DEC-011: Mobile App Strategy
 **Date:** February 15, 2026
 **Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
@@ -426,6 +500,7 @@ To keep PROJECT-HUB.md focused and scannable:
 - **Claude Code Prompts:** `docs/testing/CLAUDE-CODE-PROMPTS.md`
 
 ### Feature Documentation
+- **Executive Dashboard:** `docs/features/executive-dashboard/`
 - **Voice Search:** `docs/features/voice-search/`
 - **Voice Auth & Approval:** `docs/features/voice-auth-approval/`
 - **Resort Master Data:** `docs/features/resort-master-data/`
@@ -478,6 +553,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 2)
+**Last updated:** February 20, 2026 (session 4)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
