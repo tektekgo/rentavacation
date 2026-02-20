@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 .claude/
 supabase/.temp/
+*.timestamp-*
 
 # Testing artifacts
 coverage/
