@@ -37,6 +37,9 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
+const isDevEnvironment = import.meta.env.VITE_SUPABASE_URL?.includes('oukbxqnlxnkainnligfz');
+
+
 /**
  * Handles auth events that require navigation (e.g., PASSWORD_RECOVERY).
  * Must be rendered inside BrowserRouter since AuthProvider is outside it.
@@ -89,6 +92,12 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        {isDevEnvironment && (
+          <div className="fixed top-0 left-0 right-0 z-[9999] bg-yellow-400 text-yellow-900 text-center text-xs font-medium py-1">
+            🚧 DEV ENVIRONMENT — dev.rent-a-vacation.com
+          </div>
+        )}
+        <div className={isDevEnvironment ? 'pt-7' : ''}>
         <Toaster />
         <Sonner />
         <OfflineBanner />
@@ -136,6 +145,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </div>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

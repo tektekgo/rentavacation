@@ -78,19 +78,17 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Phase 14 Executive Dashboard — Complete
+**Active Phase:** Voice Experience Tracks B-D
 **Started:** February 20, 2026
 
 ### Working on TODAY:
-- [x] Phase 13: Core Business Flow Completion (5 tracks) — deployed to DEV + PROD
-- [x] Mobile UX Track B: Mobile screen optimization (30+ responsive fixes, 12 pages)
-- [x] Mobile UX Track A: Post-login welcome experience (header greeting, mobile auth state, flash fix)
-- [x] Voice Quality Track A: Fix known quality issues (5 fixes: dedup, abort, clickable cards, CORS, rate limit)
-- [x] Phase 14: Executive Dashboard (all 3 sessions — foundation, UI, polish)
-- [ ] Voice Experience Tracks B-D: Quality tuning, admin controls, observability
+- [x] Phase 14: Executive Dashboard — deployed to PROD (PR #14, Feb 20)
+- [x] Dev environment banner — yellow top banner on DEV only (App.tsx)
+- [x] Voice Track B: Quality tuning — Nova-3, endpointing, anti-interruption, keyword boost
+- [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
-- [x] **Phase 14: Executive Dashboard** — Full investor-grade dashboard: 6 sections (HeadlineBar, BusinessPerformance, MarketplaceHealth, MarketIntelligence, IndustryFeed, UnitEconomics), 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index metrics, BYOK integrations (AirDNA, STR), dark-themed, 15+ new tests. Migration 013 (Feb 20)
+- [x] **Phase 14: Executive Dashboard** — Deployed to PROD (PR #14). Full investor-grade dashboard: 6 sections (HeadlineBar, BusinessPerformance, MarketplaceHealth, MarketIntelligence, IndustryFeed, UnitEconomics), 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index metrics, BYOK integrations (AirDNA, STR), dark-themed, 15+ new tests. Migration 013 + 4 edge functions deployed to DEV + PROD (Feb 20)
 - [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing. Edge function deployed to DEV + PROD (Feb 20)
 - [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, loading skeleton prevents auth flash, mobile menu buttons show skeleton during auth load (Feb 20)
 - [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
@@ -143,10 +141,11 @@ To keep PROJECT-HUB.md focused and scannable:
 - [x] AbortController on Edge Function fetch — abort on stop/reset/unmount/new-search
 - [x] Rate limiting on Edge Function — per-IP sliding window (30 req/min, HTTP 429)
 
-**Track B: Voice Quality Tuning (~1 week)**
-- [ ] Evaluate Deepgram endpointing sweet spot — currently 500ms, test 300ms vs 700ms
-- [ ] Add backchanneling config — prevent assistant jumping in during pauses
-- [ ] Evaluate transcription model upgrade — Deepgram Nova-2 vs Nova-3 for travel terms
+**Track B: Voice Quality Tuning** ✅ (Feb 20)
+- [x] Endpointing optimized — 500ms → 300ms + LiveKit smart endpointing + waitSeconds 0.6
+- [x] Anti-interruption — stopSpeakingPlan (numWords:2, backoff:1.5s) + Krisp smart denoising
+- [x] Transcription upgrade — Nova-2 → Nova-3 (54% better WER) + 16 keyword boosts
+- [x] Call duration cap — maxDurationSeconds: 120 (vs default 600)
 - [ ] Test voice experience on mobile (iOS Safari, Android Chrome) — WebRTC behavior
 
 **Track C: RAV Admin Voice Controls (~1-2 weeks)**

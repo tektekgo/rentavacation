@@ -48,9 +48,15 @@ const ASSISTANT_OVERRIDES: AssistantOverrides = {
     "Welcome to Rent-A-Vacation — voice-powered vacation search. Where are you looking to get away?",
   transcriber: {
     provider: "deepgram",
-    model: "nova-2",
+    model: "nova-3",
     language: "en",
-    endpointing: 500,
+    endpointing: 300,
+    keywords: [
+      "timeshare", "Rent-A-Vacation", "Hilton Grand Vacations",
+      "Marriott Vacations", "Wyndham", "Bluegreen", "Holiday Inn Club",
+      "Orlando", "Maui", "Cancun", "Myrtle Beach", "Las Vegas",
+      "studio", "one-bedroom", "two-bedroom", "lockoff",
+    ],
   },
   model: {
     provider: "openai",
@@ -61,6 +67,20 @@ const ASSISTANT_OVERRIDES: AssistantOverrides = {
         content: VOICE_SEARCH_SYSTEM_PROMPT,
       },
     ],
+  },
+  maxDurationSeconds: 120,
+  backgroundSpeechDenoisingPlan: {
+    smartDenoisingPlan: { enabled: true },
+  },
+  startSpeakingPlan: {
+    waitSeconds: 0.6,
+    smartEndpointingPlan: {
+      provider: "livekit",
+    },
+  },
+  stopSpeakingPlan: {
+    numWords: 2,
+    backoffSeconds: 1.5,
   },
 };
 

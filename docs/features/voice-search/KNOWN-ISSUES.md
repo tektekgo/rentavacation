@@ -1,6 +1,6 @@
 # Voice Search: Known Issues
 
-**Last Updated:** 2026-02-16
+**Last Updated:** 2026-02-20
 
 ---
 
@@ -161,7 +161,7 @@ It is applied via `ASSISTANT_OVERRIDES` passed to `vapi.start()`, overriding the
 
 | Issue | Severity | Description | Status |
 |-------|----------|-------------|--------|
-| Deepgram transcription quality | Low | Fragmented/hesitant speech garbled ("0 4 and, uh, 1 with") | Open |
+| Deepgram transcription quality | Low | Fragmented/hesitant speech garbled ("0 4 and, uh, 1 with") | ✅ Fixed (2026-02-20) — Nova-3 upgrade |
 | Duplicate function calls | Low | `search_properties` fires twice in quick succession | ✅ Fixed (2026-02-20) |
 | No AbortController on fetch | Low | Edge Function fetch continues after user stops voice search | ✅ Fixed (2026-02-20) |
 | Voice result cards not clickable | Low | Results use `<div>` not `<Link>` — can't click through to property | ✅ Fixed (2026-02-20) |
@@ -179,7 +179,29 @@ It is applied via `ASSISTANT_OVERRIDES` passed to `vapi.start()`, overriding the
 5. **Voice result cards** — ✅ Fixed (2026-02-20) — Changed `<div>` to `<Link to={/property/:id}>` with hover effects
 6. **CORS tightening** — ✅ Fixed (2026-02-20) — Dynamic origin check (exact domains + Vercel pattern + localhost)
 7. **Rate limiting** — ✅ Fixed (2026-02-20) — Per-IP sliding window (30 req/min) in edge function
-8. **Deepgram transcription** — Open — Address in Voice Quality Tuning (Track B)
+8. **Deepgram transcription** — ✅ Fixed (2026-02-20) — Upgraded to Nova-3 (54% better WER), keyword boosting for travel terms
+
+## Voice Track B: Quality Tuning (2026-02-20)
+
+All changes applied via `ASSISTANT_OVERRIDES` in `src/hooks/useVoiceSearch.ts`:
+
+**B1 — Endpointing optimized:**
+- Reduced from 500ms to 300ms (Nova-3's better accuracy allows faster response)
+- Added LiveKit smart endpointing (`startSpeakingPlan.smartEndpointingPlan`) for audio+text turn detection
+- Added `startSpeakingPlan.waitSeconds: 0.6` (vs default 0.4) for less interruption
+
+**B2 — Anti-interruption (replaces deprecated backchannelingEnabled):**
+- `stopSpeakingPlan.numWords: 2` — user must say 2+ words to interrupt assistant
+- `stopSpeakingPlan.backoffSeconds: 1.5` — longer pause before assistant resumes after interruption
+- `backgroundSpeechDenoisingPlan.smartDenoisingPlan.enabled: true` — Krisp AI denoising
+- Built-in acknowledgement phrases ("uh-huh", "okay", "right") won't trigger interruption
+
+**B3 — Transcription model upgraded:**
+- `nova-2` → `nova-3` (54.3% streaming WER reduction, multilingual codeswitching)
+- Added `keywords` array: 16 travel-specific terms (resort brands, destinations, unit types)
+
+**Bonus — Call duration cap:**
+- `maxDurationSeconds: 120` (2 min) vs default 600 (10 min) — prevents runaway VAPI costs
 
 ## Fix Implementation Notes
 
