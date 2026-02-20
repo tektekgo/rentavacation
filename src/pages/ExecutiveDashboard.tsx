@@ -37,7 +37,7 @@ const ExecutiveDashboard = () => {
       </div>
 
       {/* Main content — hidden below lg */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block pt-16 md:pt-20">
         <HeadlineBar />
 
         <main className="container mx-auto px-6 py-8 space-y-0">
@@ -45,8 +45,9 @@ const ExecutiveDashboard = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-bold text-white">Executive Dashboard</h1>
-              <p className="text-sm text-slate-400 mt-1">
-                Strategic business intelligence for Rent-A-Vacation
+              <p className="text-sm text-slate-400 mt-1 max-w-2xl">
+                Real-time marketplace performance, proprietary metrics like Liquidity Score and Bid Spread Index,
+                competitive benchmarking, and industry intelligence — all in one boardroom-ready view.
               </p>
             </div>
             <IntegrationSettings open={settingsOpen} onOpenChange={setSettingsOpen} />
