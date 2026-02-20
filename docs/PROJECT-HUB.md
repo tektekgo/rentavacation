@@ -89,7 +89,7 @@ To keep PROJECT-HUB.md focused and scannable:
 - [ ] Voice Experience Tracks B-D: Quality tuning, admin controls, observability
 
 ### Recently Completed:
-- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing (Feb 20)
+- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing. Edge function deployed to DEV + PROD (Feb 20)
 - [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, loading skeleton prevents auth flash, mobile menu buttons show skeleton during auth load (Feb 20)
 - [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
 - [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
@@ -478,6 +478,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 2)
+**Last updated:** February 20, 2026 (session 3)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
