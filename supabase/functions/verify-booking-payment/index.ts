@@ -130,7 +130,26 @@ serve(async (req) => {
         logStep("Warning: Failed to update listing status", { error: listingError.message });
       }
 
-      // Create booking_confirmations record with 48-hour deadline (escrow)
+      // Read owner confirmation window from system_settings
+      let ownerConfirmationWindowMinutes = 60; // default
+      try {
+        const { data: windowSetting } = await supabaseClient
+          .from("system_settings")
+          .select("setting_value")
+          .eq("setting_key", "owner_confirmation_window_minutes")
+          .single();
+        if (windowSetting?.setting_value?.value) {
+          ownerConfirmationWindowMinutes = windowSetting.setting_value.value;
+        }
+      } catch {
+        logStep("Using default owner confirmation window", { minutes: ownerConfirmationWindowMinutes });
+      }
+
+      // Calculate owner confirmation deadline
+      const ownerConfirmationDeadline = new Date();
+      ownerConfirmationDeadline.setMinutes(ownerConfirmationDeadline.getMinutes() + ownerConfirmationWindowMinutes);
+
+      // Create booking_confirmations record with 48-hour deadline (escrow) + owner confirmation
       const confirmationDeadline = getConfirmationDeadline();
       const { data: bookingConfirmation, error: confirmationError } = await supabaseClient
         .from("booking_confirmations")
@@ -141,6 +160,9 @@ serve(async (req) => {
           confirmation_deadline: confirmationDeadline,
           escrow_status: "pending_confirmation",
           escrow_amount: booking.total_amount,
+          owner_confirmation_status: "pending_owner",
+          owner_confirmation_deadline: ownerConfirmationDeadline.toISOString(),
+          extensions_used: 0,
         })
         .select()
         .single();
@@ -170,6 +192,25 @@ serve(async (req) => {
           logStep("New booking notification sent to owner");
         } catch (emailError) {
           logStep("Warning: Failed to send new booking notification", { error: String(emailError) });
+        }
+
+        // Send owner confirmation request notification
+        try {
+          const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-confirmation-reminder`;
+          await fetch(notificationUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+            },
+            body: JSON.stringify({
+              type: "owner_confirmation_request",
+              bookingConfirmationId: bookingConfirmation.id,
+            }),
+          });
+          logStep("Owner confirmation request notification sent");
+        } catch (emailError) {
+          logStep("Warning: Failed to send owner confirmation request", { error: String(emailError) });
         }
       }
 

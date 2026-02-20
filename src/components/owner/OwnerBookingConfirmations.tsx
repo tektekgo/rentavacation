@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { format, formatDistanceToNow, differenceInHours, differenceInMinutes, isPast } from "date-fns";
 import type { BookingConfirmation, Booking, Listing, Property, Profile, EscrowStatus } from "@/types/database";
+import { usePendingOwnerConfirmations } from "@/hooks/useOwnerConfirmation";
+import { OwnerConfirmationTimer } from "@/components/owner/OwnerConfirmationTimer";
 
 interface ConfirmationWithDetails extends BookingConfirmation {
   booking: Booking & {
@@ -77,6 +79,7 @@ const ESCROW_STATUS_CONFIG: Record<EscrowStatus, { label: string; color: string;
 const OwnerBookingConfirmations = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: pendingOwnerConfirmations = [] } = usePendingOwnerConfirmations();
   const [confirmations, setConfirmations] = useState<ConfirmationWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedConfirmation, setSelectedConfirmation] = useState<ConfirmationWithDetails | null>(null);
@@ -250,9 +253,29 @@ const OwnerBookingConfirmations = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Phase 1: Owner Acceptance */}
+      {pendingOwnerConfirmations.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Timer className="h-6 w-6 text-yellow-600" />
+              Step 1: Confirm You Can Fulfill
+            </h2>
+            <p className="text-muted-foreground">
+              Review and confirm these bookings before the timer expires
+            </p>
+          </div>
+          {pendingOwnerConfirmations.map((conf) => (
+            <OwnerConfirmationTimer key={conf.id} confirmation={conf} />
+          ))}
+        </div>
+      )}
+
+      {/* Phase 2: Resort Confirmation (existing) */}
       <div>
-        <h2 className="text-2xl font-bold">Booking Confirmations</h2>
+        <h2 className="text-2xl font-bold">
+          {pendingOwnerConfirmations.length > 0 ? 'Step 2: Resort Confirmation' : 'Booking Confirmations'}
+        </h2>
         <p className="text-muted-foreground">
           Submit resort confirmation numbers within 48 hours to release escrow funds
         </p>

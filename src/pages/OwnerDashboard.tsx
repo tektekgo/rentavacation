@@ -22,7 +22,8 @@ import {
   Shield,
   FileCheck,
   Crown,
-  Percent
+  Percent,
+  Wallet
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
@@ -34,6 +35,7 @@ import OwnerBookingConfirmations from "@/components/owner/OwnerBookingConfirmati
 import OwnerEarnings from "@/components/owner/OwnerEarnings";
 import { OwnerProposals } from "@/components/owner/OwnerProposals";
 import { OwnerVerification } from "@/components/owner/OwnerVerification";
+import { OwnerPayouts } from "@/components/owner/OwnerPayouts";
 import { MembershipPlans } from "@/components/MembershipPlans";
 import { useOwnerCommission } from "@/hooks/useOwnerCommission";
 
@@ -240,7 +242,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-grid">
+          <TabsList className="flex flex-wrap gap-1 h-auto w-full lg:w-auto lg:inline-grid lg:grid-cols-10">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -268,6 +270,10 @@ const OwnerDashboard = () => {
             <TabsTrigger value="earnings" className="gap-2">
               <DollarSign className="h-4 w-4" />
               <span className="hidden sm:inline">Earnings</span>
+            </TabsTrigger>
+            <TabsTrigger value="payouts" className="gap-2">
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">Payouts</span>
             </TabsTrigger>
             <TabsTrigger value="verification" className="gap-2">
               <Shield className="h-4 w-4" />
@@ -508,6 +514,11 @@ const OwnerDashboard = () => {
           {/* Earnings Tab */}
           <TabsContent value="earnings" className="mt-6">
             <OwnerEarnings />
+          </TabsContent>
+
+          {/* Payouts Tab */}
+          <TabsContent value="payouts" className="mt-6">
+            <OwnerPayouts />
           </TabsContent>
 
           {/* Verification Tab */}

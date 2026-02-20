@@ -48,13 +48,14 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { format, differenceInDays, addDays, isPast } from "date-fns";
-import type { 
-  BookingConfirmation, 
-  Booking, 
-  Listing, 
-  Property, 
+import type {
+  BookingConfirmation,
+  Booking,
+  Listing,
+  Property,
   Profile,
-  EscrowStatus 
+  EscrowStatus,
+  OwnerConfirmationStatus
 } from "@/types/database";
 
 interface EscrowWithDetails extends BookingConfirmation {
@@ -96,6 +97,13 @@ const ESCROW_STATUS_CONFIG: Record<EscrowStatus, { label: string; color: string;
     color: "bg-destructive", 
     icon: <AlertTriangle className="h-4 w-4" /> 
   },
+};
+
+const OWNER_CONFIRMATION_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending_owner: { label: "Pending", variant: "secondary" },
+  owner_confirmed: { label: "Confirmed", variant: "default" },
+  owner_timed_out: { label: "Timed Out", variant: "destructive" },
+  owner_declined: { label: "Declined", variant: "destructive" },
 };
 
 const AdminEscrow = () => {
@@ -439,7 +447,8 @@ const AdminEscrow = () => {
                   <TableHead>Renter</TableHead>
                   <TableHead>Confirmation #</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Owner Status</TableHead>
+                  <TableHead>Escrow Status</TableHead>
                   <TableHead>Deadline / Release</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -477,6 +486,15 @@ const AdminEscrow = () => {
                       </TableCell>
                       <TableCell>
                         <span className="font-semibold">${escrow.escrow_amount.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell>
+                        {escrow.owner_confirmation_status ? (
+                          <Badge variant={OWNER_CONFIRMATION_CONFIG[escrow.owner_confirmation_status]?.variant ?? "outline"}>
+                            {OWNER_CONFIRMATION_CONFIG[escrow.owner_confirmation_status]?.label ?? "—"}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`${ESCROW_STATUS_CONFIG[escrow.escrow_status].color} flex items-center gap-1 w-fit`}>

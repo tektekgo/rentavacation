@@ -17,7 +17,6 @@ import { UnitTypeSelector } from "@/components/resort/UnitTypeSelector";
 import { ResortPreview } from "@/components/resort/ResortPreview";
 import {
   Home,
-  Camera,
   Calendar,
   DollarSign,
   CheckCircle,
@@ -505,18 +504,18 @@ const ListProperty = () => {
               {formStep === 2 && (
                 <div className="space-y-6">
                   <h3 className="font-semibold text-lg mb-4">Photos</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Upload photos of your property. You can add images after creating
+                    your property from the Owner Dashboard.
+                  </p>
                   <div className="border-2 border-dashed border-border rounded-xl p-12 text-center">
                     <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-2">
-                      Drag & drop photos here, or click to browse
+                      Photos can be uploaded after your property is created
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Upload at least 5 photos. High quality images get more bookings!
+                      Go to Owner Dashboard &rarr; Properties &rarr; Edit to add images
                     </p>
-                    <Button variant="outline" className="mt-4">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Select Photos
-                    </Button>
                   </div>
                   <div className="flex gap-4">
                     <Button variant="outline" onClick={() => setFormStep(1)}>

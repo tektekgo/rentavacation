@@ -33,6 +33,9 @@ import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
+import { BidFormDialog } from "@/components/bidding/BidFormDialog";
+import { Gavel } from "lucide-react";
+import { isPast } from "date-fns";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -57,6 +60,7 @@ const PropertyDetail = () => {
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
   const [guests, setGuests] = useState(1);
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
 
   // Auth
   const { user } = useAuth();
@@ -108,6 +112,9 @@ const PropertyDetail = () => {
 
   const brandLabel = prop ? (BRAND_LABELS[prop.brand] || prop.brand) : "";
   const isOwnListing = user && listing && listing.owner_id === user.id;
+  const isBiddable = listing?.open_for_bidding &&
+    listing?.bidding_ends_at &&
+    !isPast(new Date(listing.bidding_ends_at));
   const favCount = id ? (favoritesCount.get(id) || 0) : 0;
   const freshnessLabel = listing ? getFreshnessLabel(listing.created_at) : null;
   const popularityLabel = getPopularityLabel(favCount);
@@ -467,6 +474,18 @@ const PropertyDetail = () => {
                         {user ? "Book Now" : "Sign In to Book"}
                       </Button>
 
+                      {isBiddable && user && (
+                        <Button
+                          variant="outline"
+                          className="w-full mb-4"
+                          size="lg"
+                          onClick={() => setBidDialogOpen(true)}
+                        >
+                          <Gavel className="w-4 h-4 mr-2" />
+                          Place a Bid
+                        </Button>
+                      )}
+
                       <p className="text-center text-sm text-muted-foreground mb-4">
                         You won't be charged yet
                       </p>
@@ -615,6 +634,23 @@ const PropertyDetail = () => {
       </main>
 
       <Footer />
+
+      {/* Bid Dialog */}
+      {listing && isBiddable && (
+        <BidFormDialog
+          listing={{
+            ...listing,
+            property: listing.property,
+            open_for_bidding: listing.open_for_bidding,
+            bidding_ends_at: listing.bidding_ends_at,
+            min_bid_amount: listing.min_bid_amount,
+            reserve_price: null,
+            allow_counter_offers: true,
+          }}
+          open={bidDialogOpen}
+          onOpenChange={setBidDialogOpen}
+        />
+      )}
     </div>
   );
 };
