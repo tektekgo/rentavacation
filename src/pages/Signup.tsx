@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2, Rocket } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ActionSuccessCard } from "@/components/ActionSuccessCard";
+import { supabase } from "@/lib/supabase";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,8 +20,28 @@ const Signup = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSignupComplete, setIsSignupComplete] = useState(false);
+  const [staffOnlyMode, setStaffOnlyMode] = useState(false);
 
   const { signUp, isConfigured } = useAuth();
+
+  // Check if platform is in staff-only mode
+  useEffect(() => {
+    const checkStaffOnly = async () => {
+      try {
+        const { data } = await supabase
+          .from("system_settings")
+          .select("setting_value")
+          .eq("setting_key", "platform_staff_only")
+          .single();
+        if (data?.setting_value && (data.setting_value as Record<string, unknown>).enabled) {
+          setStaffOnlyMode(true);
+        }
+      } catch {
+        // fail-open — if we can't check, allow signup
+      }
+    };
+    checkStaffOnly();
+  }, []);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -88,7 +109,18 @@ const Signup = () => {
             </div>
 
             <div className="bg-card rounded-2xl shadow-card-hover p-4 sm:p-6 md:p-8">
-              {isSignupComplete ? (
+              {staffOnlyMode ? (
+                <div className="text-center py-8">
+                  <Rocket className="w-12 h-12 mx-auto text-primary mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Coming Soon!</h2>
+                  <p className="text-muted-foreground mb-4">
+                    Rent-A-Vacation is launching soon. We'll notify you when we're live!
+                  </p>
+                  <Link to="/" className="text-primary font-medium hover:underline">
+                    Back to Home
+                  </Link>
+                </div>
+              ) : isSignupComplete ? (
                 <ActionSuccessCard
                   title="Account Created!"
                   description={
