@@ -29,6 +29,7 @@ import {
   Flame,
   Sparkles,
   Clock,
+  Mic,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
@@ -227,6 +228,20 @@ const Rentals = () => {
               </div>
             </div>
 
+            {/* Voice disabled explanation */}
+            {voiceEnabled && isAuthenticated && listings.length === 0 && voiceStatus === "idle" && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                <Mic className="w-3.5 h-3.5 inline mr-1" />
+                Voice search is unavailable — no properties are listed yet. Check back soon!
+              </p>
+            )}
+            {voiceEnabled && !isAuthenticated && voiceStatus === "idle" && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                <Mic className="w-3.5 h-3.5 inline mr-1" />
+                <Link to="/login" className="text-primary hover:underline">Sign in</Link> to use voice search.
+              </p>
+            )}
+
             {/* Voice Status Indicator */}
             {voiceEnabled && voiceStatus !== "idle" && (
               <VoiceStatusIndicator
@@ -239,7 +254,7 @@ const Rentals = () => {
             )}
 
             {/* Voice Quota Indicator */}
-            {voiceEnabled && isAuthenticated && (
+            {voiceEnabled && isAuthenticated && listings.length > 0 && (
               <div className="mt-3 flex justify-end">
                 <VoiceQuotaIndicator />
               </div>

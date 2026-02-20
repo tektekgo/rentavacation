@@ -10,12 +10,14 @@ interface AuthContextType {
   roles: AppRole[];
   isLoading: boolean;
   isConfigured: boolean;
+  isPasswordRecovery: boolean;
   // Auth methods
   signUp: (email: string, password: string, fullName?: string, accountType?: string) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  clearPasswordRecovery: () => void;
   // Role checks
   hasRole: (role: AppRole) => boolean;
   isRavTeam: () => boolean;
@@ -31,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const isConfigured = isSupabaseConfigured();
 
   // Fetch user profile
@@ -83,6 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        // Detect password recovery flow so we can redirect to /reset-password
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsPasswordRecovery(true);
+        }
+
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -170,6 +178,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const clearPasswordRecovery = () => setIsPasswordRecovery(false);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -198,11 +208,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         roles,
         isLoading,
         isConfigured,
+        isPasswordRecovery,
         signUp,
         signIn,
         signInWithGoogle,
         resetPasswordForEmail,
         signOut,
+        clearPasswordRecovery,
         hasRole,
         isRavTeam,
         isPropertyOwner,
