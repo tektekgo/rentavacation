@@ -23,11 +23,12 @@ import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { useMembershipTiers } from "@/hooks/useMembership";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { toast } from "sonner";
-import { Infinity as InfinityIcon, Timer } from "lucide-react";
+import { Infinity as InfinityIcon, Timer, ShieldAlert } from "lucide-react";
 import { useConfirmationTimerSettings } from "@/hooks/useOwnerConfirmation";
 
 export function SystemSettings() {
   const {
+    platformStaffOnly,
     requireUserApproval,
     autoApproveRoleUpgrades,
     voiceEnabled,
@@ -42,6 +43,7 @@ export function SystemSettings() {
 
   const { data: timerSettings } = useConfirmationTimerSettings();
 
+  const [updatingStaffOnly, setUpdatingStaffOnly] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updatingRole, setUpdatingRole] = useState(false);
   const [updatingVoice, setUpdatingVoice] = useState<string | null>(null);
@@ -113,6 +115,54 @@ export function SystemSettings() {
           Configure platform-wide settings
         </p>
       </div>
+
+      {/* Staff Only Mode */}
+      <Card className={platformStaffOnly ? "border-amber-500/50 bg-amber-50/50" : ""}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldAlert className={`h-5 w-5 ${platformStaffOnly ? "text-amber-600" : ""}`} />
+            Platform Access Mode
+          </CardTitle>
+          <CardDescription>
+            Control who can access the platform
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="staff-only">
+                Staff Only Mode (Pre-Launch Lock)
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                When enabled, only RAV team members can access the platform.
+                All other users will see a "Coming Soon" page after login.
+                Turn this off when you're ready to go live.
+              </p>
+            </div>
+            <Switch
+              id="staff-only"
+              checked={platformStaffOnly}
+              onCheckedChange={async (enabled) => {
+                setUpdatingStaffOnly(true);
+                try {
+                  await updateSetting("platform_staff_only", { enabled });
+                  toast.success(
+                    enabled
+                      ? "Platform locked — only RAV team can access"
+                      : "Platform unlocked — all approved users can access"
+                  );
+                } catch (error) {
+                  console.error("Failed to update setting:", error);
+                  toast.error("Failed to update setting");
+                } finally {
+                  setUpdatingStaffOnly(false);
+                }
+              }}
+              disabled={updatingStaffOnly}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* User Registration */}
       <Card>

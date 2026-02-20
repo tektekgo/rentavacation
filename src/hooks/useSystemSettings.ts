@@ -9,6 +9,7 @@ interface CommissionRateSettings {
 }
 
 interface SystemSettings {
+  platformStaffOnly: boolean;
   requireUserApproval: boolean;
   autoApproveRoleUpgrades: boolean;
   voiceEnabled: boolean;
@@ -22,6 +23,7 @@ interface SystemSettings {
 }
 
 const ALL_SETTING_KEYS = [
+  "platform_staff_only",
   "require_user_approval",
   "auto_approve_role_upgrades",
   "voice_enabled",
@@ -33,6 +35,7 @@ const ALL_SETTING_KEYS = [
 
 export function useSystemSettings(): SystemSettings {
   const { isRavTeam } = useAuth();
+  const [platformStaffOnly, setPlatformStaffOnly] = useState(true);
   const [requireUserApproval, setRequireUserApproval] = useState(true);
   const [autoApproveRoleUpgrades, setAutoApproveRoleUpgrades] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
@@ -58,6 +61,9 @@ export function useSystemSettings(): SystemSettings {
       for (const row of data || []) {
         const val = row.setting_value as Record<string, unknown>;
         switch (row.setting_key) {
+          case "platform_staff_only":
+            setPlatformStaffOnly(val.enabled as boolean);
+            break;
           case "require_user_approval":
             setRequireUserApproval(val.enabled as boolean);
             break;
@@ -131,6 +137,7 @@ export function useSystemSettings(): SystemSettings {
   };
 
   return {
+    platformStaffOnly,
     requireUserApproval,
     autoApproveRoleUpgrades,
     voiceEnabled,

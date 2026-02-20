@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,9 +15,30 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  const { signIn, isConfigured, user, profile, isRavTeam, isPasswordRecovery } = useAuth();
+  const [staffOnlyMode, setStaffOnlyMode] = useState(false);
+
+  const { signIn, signOut, isConfigured, user, profile, isRavTeam, isPasswordRecovery } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if platform is in staff-only mode
+  useEffect(() => {
+    const checkStaffOnly = async () => {
+      try {
+        const { data } = await supabase
+          .from("system_settings")
+          .select("setting_value")
+          .eq("setting_key", "platform_staff_only")
+          .single();
+        if (data?.setting_value && (data.setting_value as Record<string, unknown>).enabled) {
+          setStaffOnlyMode(true);
+        }
+      } catch {
+        // fail-open — if we can't check, allow login
+      }
+    };
+    checkStaffOnly();
+  }, []);
 
   // Redirect already-logged-in users based on approval status
   // Skip redirect during password recovery — user should stay on /reset-password
@@ -26,16 +48,21 @@ const Login = () => {
       navigate("/");
       return;
     }
+    // If staff-only mode, sign out non-RAV users
+    if (staffOnlyMode) {
+      signOut();
+      return;
+    }
     if (profile?.approval_status === "pending_approval") {
       navigate("/pending-approval");
     } else if (profile?.approval_status === "approved") {
       navigate("/");
     }
-  }, [user, profile, isRavTeam, isPasswordRecovery, navigate]);
+  }, [user, profile, isRavTeam, isPasswordRecovery, navigate, staffOnlyMode, signOut]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isConfigured) {
       toast({
         title: "Backend not configured",
@@ -44,23 +71,29 @@ const Login = () => {
       });
       return;
     }
-    
+
     setIsLoading(true);
     const { error } = await signIn(email, password);
     setIsLoading(false);
-    
+
     if (error) {
       toast({
         title: "Login failed",
         description: error.message,
         variant: "destructive",
       });
+    } else if (staffOnlyMode && !isRavTeam()) {
+      // Staff-only mode — sign them out with a friendly message
+      await signOut();
+      toast({
+        title: "Coming Soon!",
+        description: "Rent-A-Vacation is launching soon. We'll notify you when we're live!",
+      });
     } else {
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      // The useEffect above will handle redirect based on approval status
     }
   };
 
