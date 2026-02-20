@@ -31,6 +31,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
 import Architecture from "./pages/Architecture";
 import Contact from "./pages/Contact";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
@@ -118,6 +119,7 @@ const App = () => (
             <Route path="/list-property" element={<ProtectedRoute><ListProperty /></ProtectedRoute>} />
             <Route path="/owner-dashboard" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="/bidding" element={<ProtectedRoute><BiddingMarketplace /></ProtectedRoute>} />

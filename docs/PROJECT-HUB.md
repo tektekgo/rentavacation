@@ -78,7 +78,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Priority 1 Track A + Priority 2 Track A complete
+**Active Phase:** Phase 14 Executive Dashboard — Complete
 **Started:** February 20, 2026
 
 ### Working on TODAY:
@@ -86,9 +86,11 @@ To keep PROJECT-HUB.md focused and scannable:
 - [x] Mobile UX Track B: Mobile screen optimization (30+ responsive fixes, 12 pages)
 - [x] Mobile UX Track A: Post-login welcome experience (header greeting, mobile auth state, flash fix)
 - [x] Voice Quality Track A: Fix known quality issues (5 fixes: dedup, abort, clickable cards, CORS, rate limit)
+- [x] Phase 14: Executive Dashboard (all 3 sessions — foundation, UI, polish)
 - [ ] Voice Experience Tracks B-D: Quality tuning, admin controls, observability
 
 ### Recently Completed:
+- [x] **Phase 14: Executive Dashboard** — Full investor-grade dashboard: 6 sections (HeadlineBar, BusinessPerformance, MarketplaceHealth, MarketIntelligence, IndustryFeed, UnitEconomics), 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index metrics, BYOK integrations (AirDNA, STR), dark-themed, 15+ new tests. Migration 013 (Feb 20)
 - [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing. Edge function deployed to DEV + PROD (Feb 20)
 - [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, loading skeleton prevents auth flash, mobile menu buttons show skeleton during auth load (Feb 20)
 - [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
@@ -162,30 +164,16 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 3. Phase 14: Executive Dashboard
-**Status:** Planned — 3-session build
+### ~~3. Phase 14: Executive Dashboard~~ ✅ COMPLETE
+**Status:** Complete (Feb 20)
 **Docs:** `docs/features/executive-dashboard/`
 **Decisions:** DEC-014, DEC-015, DEC-016, DEC-017
-**Goal:** Investor-grade strategic dashboard for RAV Owner — dark-themed, boardroom-quality business intelligence
 
-**Session 1: Foundation & Data Layer**
-- [ ] Migration 013 (system_settings keys for API keys)
-- [ ] 4 Edge Functions: fetch-industry-news, fetch-macro-indicators, fetch-airdna-data, fetch-str-data
-- [ ] 4 data hooks (useBusinessMetrics, useMarketplaceHealth, useIndustryFeed, useMarketIntelligence)
-- [ ] Demo seed script (47 users, 22 bookings, $102K GMV)
-
-**Session 2: Dashboard UI — Sections 1-3**
-- [ ] ExecutiveDashboard.tsx page + routing (`/executive-dashboard`, rav_owner only)
-- [ ] HeadlineBar (sticky 5 KPI pills)
-- [ ] BusinessPerformance (GMV trend, bid activity, revenue waterfall)
-- [ ] MarketplaceHealth (liquidity gauge, supply/demand map, voice funnel)
-
-**Session 3: Market Intelligence + Polish**
-- [ ] MarketIntelligence (AirDNA, STR — BYOK pattern)
-- [ ] IndustryFeed (news, regulatory, macro indicators)
-- [ ] UnitEconomics (CAC, LTV, take rate, MoM growth)
-- [ ] IntegrationSettings drawer (API key management)
-- [ ] 15+ new tests, full verification
+**All Sessions Complete:**
+- [x] Migration 013, 4 Edge Functions, 4 data hooks, types
+- [x] ExecutiveDashboard page, HeadlineBar, BusinessPerformance, MarketplaceHealth
+- [x] MarketIntelligence (BYOK), IndustryFeed, UnitEconomics, IntegrationSettings
+- [x] 15+ new tests, flow manifest updated, responsive polish
 
 ---
 
@@ -248,6 +236,29 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Phase 14: Executive Dashboard</strong> — Completed Feb 20, 2026</summary>
+
+**What:** Investor-grade strategic dashboard for RAV Owner — dark-themed, boardroom-quality business intelligence with 6 sections.
+
+**6 Sections:**
+- **HeadlineBar:** Sticky bar with 5 KPI pills (GMV, Revenue, Active Listings, Liquidity Score, Voice Adoption)
+- **BusinessPerformance:** 4 Recharts charts — GMV trend (AreaChart), bid activity (LineChart), bid spread index (BarChart), revenue waterfall (StackedBarChart)
+- **MarketplaceHealth:** Proprietary metrics — Liquidity Score SVG gauge, supply/demand destination map, voice vs traditional funnel
+- **MarketIntelligence:** BYOK pattern — AirDNA market comparison, STR Global benchmarks, RAV pricing position
+- **IndustryFeed:** NewsAPI integration, regulatory radar timeline, macro indicators with sparklines
+- **UnitEconomics:** 7 metric cards (CAC, LTV, LTV:CAC, Payback, Avg Booking, Take Rate, MoM Growth) with methodology
+
+**Database:** Migration `013_executive_dashboard_settings.sql` — 4 system_settings rows for API key storage
+**Edge Functions:** `fetch-industry-news`, `fetch-macro-indicators`, `fetch-airdna-data`, `fetch-str-data` (all with caching + fallback)
+**New Hooks:** `useBusinessMetrics`, `useMarketplaceHealth`, `useIndustryFeed`, `useMarketIntelligence`
+**Components:** ~15 new files in `src/components/executive/`
+**Flow Manifest:** `admin-lifecycle.ts` updated with executive_dashboard step
+
+**Files:** ~25 created, 4 modified
+**Tests:** 15+ new tests (hooks + components)
+</details>
 
 <details>
 <summary><strong>Phase 13: Core Business Flow Completion</strong> — Completed Feb 20, 2026</summary>

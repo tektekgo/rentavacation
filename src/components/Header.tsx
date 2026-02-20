@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
@@ -129,7 +129,15 @@ const Header = () => {
                         </Link>
                       </DropdownMenuItem>
                     )}
-                    
+                    {isRavTeam() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/executive-dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <BarChart3 className="h-4 w-4" />
+                          Executive Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+
                     {isPropertyOwner() && (
                       <DropdownMenuItem asChild>
                         <Link to="/owner-dashboard" className="flex items-center gap-2 cursor-pointer">
@@ -275,13 +283,23 @@ const Header = () => {
                     My Bids & Requests
                   </Link>
                   {isRavTeam() && (
-                    <Link 
-                      to="/admin" 
+                    <Link
+                      to="/admin"
                       className="flex items-center gap-2 text-foreground py-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <ShieldCheck className="h-4 w-4" />
                       Admin Dashboard
+                    </Link>
+                  )}
+                  {isRavTeam() && (
+                    <Link
+                      to="/executive-dashboard"
+                      className="flex items-center gap-2 text-foreground py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      Executive Dashboard
                     </Link>
                   )}
                   {isPropertyOwner() && (
