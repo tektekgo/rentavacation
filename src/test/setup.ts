@@ -39,10 +39,8 @@ Object.defineProperty(window, "IntersectionObserver", {
 
 // Stub import.meta.env defaults for tests
 if (!import.meta.env.VITE_SUPABASE_URL) {
-  // @ts-expect-error setting env for tests
   import.meta.env.VITE_SUPABASE_URL = "https://test.supabase.co";
 }
 if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  // @ts-expect-error setting env for tests
   import.meta.env.VITE_SUPABASE_ANON_KEY = "test-anon-key";
 }

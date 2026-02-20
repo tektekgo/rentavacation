@@ -76,6 +76,10 @@ supabase functions deploy send-booking-confirmation-reminder
 supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
+supabase functions deploy fetch-industry-news
+supabase functions deploy fetch-macro-indicators
+supabase functions deploy fetch-airdna-data
+supabase functions deploy fetch-str-data
 
 # Deploy to PROD (switch project)
 supabase link --project-ref xzfllqndrlmhclqfybew
@@ -85,6 +89,10 @@ supabase functions deploy send-booking-confirmation-reminder
 supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
+supabase functions deploy fetch-industry-news
+supabase functions deploy fetch-macro-indicators
+supabase functions deploy fetch-airdna-data
+supabase functions deploy fetch-str-data
 ```
 
 ---
@@ -123,6 +131,7 @@ supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx --project-ref <PROJECT_REF>
 |--------|-------------|
 | `RESEND_API_KEY` | Email delivery via Resend |
 | `STRIPE_SECRET_KEY` | Stripe payment processing |
+| `NEWSAPI_KEY` | Industry news feed for Executive Dashboard |
 
 ---
 

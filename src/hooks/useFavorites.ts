@@ -40,7 +40,7 @@ export function useToggleFavorite() {
         const { error } = await supabase
           .from("favorites")
           .delete()
-          .eq("id", existing.id);
+          .eq("id", (existing as { id: string }).id);
         if (error) throw error;
         return { action: "removed" as const, propertyId };
       } else {

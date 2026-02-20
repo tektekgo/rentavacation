@@ -162,7 +162,34 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 3. Phase 3: Voice Everywhere (Q2 2026)
+### 3. Phase 14: Executive Dashboard
+**Status:** Planned — 3-session build
+**Docs:** `docs/features/executive-dashboard/`
+**Decisions:** DEC-014, DEC-015, DEC-016, DEC-017
+**Goal:** Investor-grade strategic dashboard for RAV Owner — dark-themed, boardroom-quality business intelligence
+
+**Session 1: Foundation & Data Layer**
+- [ ] Migration 013 (system_settings keys for API keys)
+- [ ] 4 Edge Functions: fetch-industry-news, fetch-macro-indicators, fetch-airdna-data, fetch-str-data
+- [ ] 4 data hooks (useBusinessMetrics, useMarketplaceHealth, useIndustryFeed, useMarketIntelligence)
+- [ ] Demo seed script (47 users, 22 bookings, $102K GMV)
+
+**Session 2: Dashboard UI — Sections 1-3**
+- [ ] ExecutiveDashboard.tsx page + routing (`/executive-dashboard`, rav_owner only)
+- [ ] HeadlineBar (sticky 5 KPI pills)
+- [ ] BusinessPerformance (GMV trend, bid activity, revenue waterfall)
+- [ ] MarketplaceHealth (liquidity gauge, supply/demand map, voice funnel)
+
+**Session 3: Market Intelligence + Polish**
+- [ ] MarketIntelligence (AirDNA, STR — BYOK pattern)
+- [ ] IndustryFeed (news, regulatory, macro indicators)
+- [ ] UnitEconomics (CAC, LTV, take rate, MoM growth)
+- [ ] IntegrationSettings drawer (API key management)
+- [ ] 15+ new tests, full verification
+
+---
+
+### 4. Phase 3: Voice Everywhere (Q2 2026)
 **Status:** Planned — After Voice Quality hardening
 **Docs:** `docs/guides/user-journey-map.md`
 **Prerequisite:** Voice Experience Quality & Admin Controls (priority #2)
@@ -176,7 +203,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 4. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 5. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks
 **Decision:** DEC-011
@@ -201,7 +228,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 5. Phase 6: Advanced Features (Q3 2026)
+### 6. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
 
 **Features:**
@@ -389,6 +416,42 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
+### DEC-014: Separate Route for Executive Dashboard
+**Date:** February 20, 2026
+**Decision:** `/executive-dashboard` as standalone page, not a tab in admin dashboard
+**Status:** Final
+
+**Reasoning:** Different design language, different audience, different purpose. Admin = utilitarian ops tool. Executive = boardroom strategy view. Mixing them dilutes both.
+
+---
+
+### DEC-015: Demo Mode / Connected Pattern for BYOK
+**Date:** February 20, 2026
+**Decision:** Default to "Demo Mode" with sample data, toggle to "Connected" with user-supplied API key
+**Status:** Final
+
+**Reasoning:** Honest to VCs (not faking data), shows product capability, real feature for future enterprise customers, avoids paying $200-500/mo for APIs before product-market fit.
+
+---
+
+### DEC-016: NewsAPI for Industry Feed
+**Date:** February 20, 2026
+**Decision:** Use NewsAPI free tier (100 req/day) via Edge Function with 60-min cache
+**Status:** Final
+
+**Reasoning:** Free, reliable, sufficient volume for demo + early production use. Cache in Edge Function memory to stay within limits.
+
+---
+
+### DEC-017: Dark Theme Approach
+**Date:** February 20, 2026
+**Decision:** Build dark-first (not using Tailwind dark: variants), wrap page root in bg-slate-900
+**Status:** Final
+
+**Reasoning:** Cleaner implementation, avoids fighting with app's light theme, more reliable visual consistency for demo.
+
+---
+
 ### DEC-011: Mobile App Strategy
 **Date:** February 15, 2026
 **Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
@@ -426,6 +489,7 @@ To keep PROJECT-HUB.md focused and scannable:
 - **Claude Code Prompts:** `docs/testing/CLAUDE-CODE-PROMPTS.md`
 
 ### Feature Documentation
+- **Executive Dashboard:** `docs/features/executive-dashboard/`
 - **Voice Search:** `docs/features/voice-search/`
 - **Voice Auth & Approval:** `docs/features/voice-auth-approval/`
 - **Resort Master Data:** `docs/features/resort-master-data/`
@@ -478,6 +542,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 3)
+**Last updated:** February 20, 2026 (session 4)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

@@ -92,7 +92,7 @@ const PropertyDetail = () => {
   // Derived data
   const prop = listing?.property;
   const resort = prop?.resort;
-  const unitType = prop?.unit_type as Record<string, string> | undefined;
+  const unitType = prop?.unit_type as unknown as Record<string, string> | undefined;
   const nights = listing ? calculateNights(listing.check_in_date, listing.check_out_date) : 0;
   const pricePerNight = nights > 0 && listing ? Math.round(listing.final_price / nights) : 0;
 
@@ -307,7 +307,7 @@ const PropertyDetail = () => {
                     <span className="flex items-center gap-1">
                       <Bed className="w-4 h-4" />
                       {unitType
-                        ? unitType.bedrooms === 0
+                        ? Number(unitType.bedrooms) === 0
                           ? "Studio"
                           : `${unitType.bedrooms} bedrooms`
                         : `${prop?.bedrooms} bedrooms`
@@ -363,7 +363,7 @@ const PropertyDetail = () => {
               {/* Unit Type Specs */}
               {unitType && (
                 <div className="mb-8">
-                  <UnitTypeSpecs unitType={unitType} />
+                  <UnitTypeSpecs unitType={unitType as unknown as import("@/types/database").ResortUnitType} />
                 </div>
               )}
 
@@ -446,7 +446,7 @@ const PropertyDetail = () => {
                           onChange={(e) => setGuests(Number(e.target.value))}
                         >
                           {Array.from(
-                            { length: unitType?.max_occupancy || prop?.sleeps || 6 },
+                            { length: Number(unitType?.max_occupancy || prop?.sleeps || 6) },
                             (_, i) => i + 1
                           ).map((n) => (
                             <option key={n} value={n}>
@@ -557,7 +557,7 @@ const PropertyDetail = () => {
                 const simPricePerNight = simNights > 0 ? Math.round(sim.final_price / simNights) : sim.final_price;
                 const simImage = sim.property.images?.[0] || sim.property.resort?.main_image_url || null;
                 const simName = sim.property.resort?.resort_name && sim.property.unit_type
-                  ? `${(sim.property.unit_type as Record<string, string>).unit_type_name} at ${sim.property.resort.resort_name}`
+                  ? `${(sim.property.unit_type as unknown as Record<string, string>).unit_type_name} at ${sim.property.resort.resort_name}`
                   : sim.property.resort?.resort_name || sim.property.resort_name;
                 const simLocation = sim.property.resort?.location
                   ? `${sim.property.resort.location.city}, ${sim.property.resort.location.state}`
@@ -646,6 +646,8 @@ const PropertyDetail = () => {
             min_bid_amount: listing.min_bid_amount,
             reserve_price: null,
             allow_counter_offers: true,
+            created_at: listing.created_at,
+            updated_at: new Date().toISOString(),
           }}
           open={bidDialogOpen}
           onOpenChange={setBidDialogOpen}
