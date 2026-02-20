@@ -161,18 +161,32 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? (
-              <X className="w-6 h-6 text-foreground" />
-            ) : (
-              <Menu className="w-6 h-6 text-foreground" />
+          {/* Mobile: User indicator + Menu Button */}
+          <div className="md:hidden flex items-center gap-2">
+            {user && !isLoading && (
+              <div className="flex items-center gap-2">
+                <NotificationBell />
+                <div
+                  className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold cursor-pointer"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  title={profile?.full_name || user.email || "Account"}
+                >
+                  {(profile?.full_name || user.email || "U").charAt(0).toUpperCase()}
+                </div>
+              </div>
             )}
-          </button>
+            <button
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6 text-foreground" />
+              ) : (
+                <Menu className="w-6 h-6 text-foreground" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -180,8 +194,22 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-card border-b border-border animate-slide-up">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
-            <Link 
-              to="/rentals" 
+            {/* Mobile: User greeting */}
+            {user && (
+              <div className="flex items-center gap-3 pb-3 border-b border-border">
+                <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold flex-shrink-0">
+                  {(profile?.full_name || user.email || "U").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate">{profile?.full_name || "Welcome!"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  {displayRole && <RoleBadge role={displayRole} variant="compact" />}
+                </div>
+              </div>
+            )}
+
+            <Link
+              to="/rentals"
               className="text-foreground py-2"
               onClick={() => setIsMenuOpen(false)}
             >
