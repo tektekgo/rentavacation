@@ -159,14 +159,14 @@ It is applied via `ASSISTANT_OVERRIDES` passed to `vapi.start()`, overriding the
 
 ## Other Known Issues (Non-blocking)
 
-| Issue | Severity | Description | Reference |
-|-------|----------|-------------|-----------|
-| Deepgram transcription quality | Low | Fragmented/hesitant speech garbled ("0 4 and, uh, 1 with") | VAPI handoff, Test 1 |
-| Duplicate function calls | Low | `search_properties` fires twice in quick succession | VAPI handoff, Test 2 |
-| No AbortController on fetch | Low | Edge Function fetch continues after user stops voice search | QA handoff, Issue #4 |
-| Voice result cards not clickable | Low | Results use `<div>` not `<Link>` — can't click through to property | QA handoff, Issue #5 |
-| CORS wildcard | Low | Edge Function allows `*` origin — tighten for production | QA handoff, Issue #7 |
-| No rate limiting | Low | Edge Function has no request rate limiting | QA handoff, Issue #8 |
+| Issue | Severity | Description | Status |
+|-------|----------|-------------|--------|
+| Deepgram transcription quality | Low | Fragmented/hesitant speech garbled ("0 4 and, uh, 1 with") | Open |
+| Duplicate function calls | Low | `search_properties` fires twice in quick succession | ✅ Fixed (2026-02-20) |
+| No AbortController on fetch | Low | Edge Function fetch continues after user stops voice search | ✅ Fixed (2026-02-20) |
+| Voice result cards not clickable | Low | Results use `<div>` not `<Link>` — can't click through to property | ✅ Fixed (2026-02-20) |
+| CORS wildcard | Low | Edge Function allows `*` origin — tighten for production | ✅ Fixed (2026-02-20) |
+| No rate limiting | Low | Edge Function has no request rate limiting | ✅ Fixed (2026-02-20) |
 
 ---
 
@@ -174,12 +174,46 @@ It is applied via `ASSISTANT_OVERRIDES` passed to `vapi.start()`, overriding the
 
 1. **Budget assumption** — ✅ Fixed (2026-02-16) — System prompt updated with explicit price rules
 2. **Interruption** — ✅ Fixed (2026-02-16) — Endpointing 500ms + system prompt listening instructions
-3. **Other issues** — Address in Phase 3 or as part of voice search v2
+3. **Duplicate function calls** — ✅ Fixed (2026-02-20) — 2-second dedup window in `useVoiceSearch.ts` message handler
+4. **AbortController** — ✅ Fixed (2026-02-20) — Abort in-flight fetch on stop/reset/unmount/new-search
+5. **Voice result cards** — ✅ Fixed (2026-02-20) — Changed `<div>` to `<Link to={/property/:id}>` with hover effects
+6. **CORS tightening** — ✅ Fixed (2026-02-20) — Dynamic origin check (exact domains + Vercel pattern + localhost)
+7. **Rate limiting** — ✅ Fixed (2026-02-20) — Per-IP sliding window (30 req/min) in edge function
+8. **Deepgram transcription** — Open — Address in Voice Quality Tuning (Track B)
 
 ## Fix Implementation Notes
+
+### Issues 1 & 2 (2026-02-16)
 
 Both fixes were implemented by passing `assistantOverrides` to `vapi.start()` in `src/hooks/useVoiceSearch.ts`:
 - **Advantage:** System prompt is now version-controlled in our codebase (not just on VAPI dashboard)
 - **Advantage:** No VAPI private API key needed for updates
 - **Advantage:** Changes deploy with normal frontend deploys
 - **Note:** The base assistant on VAPI still has the original prompt/config — our overrides take precedence at call start
+
+### Issues 3-8 (2026-02-20)
+
+**Duplicate calls** (`src/hooks/useVoiceSearch.ts`):
+- Added `lastSearchTimestampRef` — suppresses `search_properties` calls within 2 seconds of each other
+- Logs suppressed calls for debugging
+
+**AbortController** (`src/hooks/useVoiceSearch.ts`):
+- Added `abortControllerRef` — abort any in-flight fetch before starting a new search
+- Aborts on: stop, reset, unmount, and new search
+- `AbortError` is caught and ignored (not shown as error to user)
+
+**Voice result cards** (`src/pages/Rentals.tsx`):
+- Changed voice result `<div>` to `<Link to={/property/${result.listing_id}}>`
+- Added `group-hover:scale-105` on images and `group-hover:text-primary` on titles (matching regular listing cards)
+
+**CORS** (`supabase/functions/voice-search/index.ts`):
+- Replaced `"*"` wildcard with dynamic origin check via `getCorsHeaders(req)`
+- Allowed: exact production domains, Vercel preview pattern (`/^https:\/\/rentavacation[a-z0-9-]*\.vercel\.app$/`), localhost
+- Falls back to production domain for unknown origins
+
+**Rate limiting** (`supabase/functions/voice-search/index.ts`):
+- Per-IP sliding window: 30 requests per 60-second window
+- Uses `cf-connecting-ip` or `x-forwarded-for` headers for IP identification
+- Returns HTTP 429 with JSON error message when exceeded
+- Stale entries cleaned each request to prevent memory leaks
+- Note: Per-isolate only (Deno Deploy) — provides burst protection, not global rate limiting

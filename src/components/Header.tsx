@@ -19,6 +19,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, profile, roles, isPropertyOwner, isRavTeam, signOut, isLoading } = useAuth();
   const displayRole = getDisplayRole(roles);
+  const firstName = profile?.full_name?.split(" ")[0];
 
   const handleSignOut = async () => {
     await signOut();
@@ -96,8 +97,10 @@ const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span className="max-w-32 truncate">{profile?.full_name || user.email}</span>
+                      <div className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                        {(firstName || user.email || "U").charAt(0).toUpperCase()}
+                      </div>
+                      <span className="max-w-32 truncate">Hi, {firstName || user.email?.split("@")[0]}</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -163,16 +166,24 @@ const Header = () => {
 
           {/* Mobile: User indicator + Menu Button */}
           <div className="md:hidden flex items-center gap-2">
+            {isLoading && (
+              <div className="h-8 w-16 bg-muted animate-pulse rounded-full" />
+            )}
             {user && !isLoading && (
               <div className="flex items-center gap-2">
                 <NotificationBell />
-                <div
-                  className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold cursor-pointer"
+                <button
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 hover:bg-primary/15 transition-colors"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   title={profile?.full_name || user.email || "Account"}
                 >
-                  {(profile?.full_name || user.email || "U").charAt(0).toUpperCase()}
-                </div>
+                  <div className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                    {(firstName || user.email || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-foreground max-w-20 truncate">
+                    {firstName || "Me"}
+                  </span>
+                </button>
               </div>
             )}
             <button
@@ -288,10 +299,12 @@ const Header = () => {
             )}
             
             <div className="flex gap-3 pt-4 border-t border-border">
-              {user ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+              {isLoading ? (
+                <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
+              ) : user ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={() => {
                     handleSignOut();
                     setIsMenuOpen(false);
