@@ -1,3 +1,7 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Search, LayoutDashboard, Gavel, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FeaturedResorts from "@/components/FeaturedResorts";
@@ -8,12 +12,73 @@ import Testimonials from "@/components/Testimonials";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
+const WelcomeBanner = () => {
+  const { profile, isPropertyOwner, isRavTeam } = useAuth();
+  const firstName = profile?.full_name?.split(" ")[0] || "there";
+
+  return (
+    <div className="bg-primary/5 border-b border-primary/10">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">
+              Welcome back, {firstName}!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Where to next? Pick up where you left off.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/rentals">
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Search className="h-3.5 w-3.5" />
+                Browse
+              </Button>
+            </Link>
+            <Link to="/my-bids">
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Gavel className="h-3.5 w-3.5" />
+                My Bids
+              </Button>
+            </Link>
+            {isPropertyOwner() && (
+              <Link to="/owner-dashboard">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Dashboard
+                </Button>
+              </Link>
+            )}
+            {isRavTeam() && (
+              <Link to="/admin">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Admin
+                </Button>
+              </Link>
+            )}
+            <Link to="/rentals?tab=favorites">
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Heart className="h-3.5 w-3.5" />
+                Favorites
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Index = () => {
+  const { user, isLoading } = useAuth();
+
   return (
     <div className="min-h-screen">
       <Header />
       <main>
         <HeroSection />
+        {user && !isLoading && <WelcomeBanner />}
         <TrustBadges />
         <FeaturedResorts />
         <HowItWorks />

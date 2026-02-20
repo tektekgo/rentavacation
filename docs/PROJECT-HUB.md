@@ -78,12 +78,13 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Phase 13 complete, ready for Phase 12 (Capacitor) or Phase 3 (Voice Everywhere)
+**Active Phase:** Phase 13 complete. Next: Mobile UX polish + Voice Quality hardening
 **Started:** February 20, 2026
 
 ### Working on TODAY:
-- [x] Phase 13: Core Business Flow Completion (5 tracks)
-- [ ] Phase 12: Capacitor setup
+- [x] Phase 13: Core Business Flow Completion (5 tracks) — deployed to DEV + PROD
+- [ ] Mobile UX: Post-login welcome experience + mobile screen optimization
+- [ ] Voice Experience: Quality fixes & admin controls
 
 ### Recently Completed:
 - [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
@@ -107,23 +108,63 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## PRIORITY QUEUE (In Order)
 
-### 1. Phase 10: Link Audit Fixes & Support Infrastructure — IN PROGRESS
-**Status:** Tracks A-C complete, Track D deferred (Feb 15, 2026)
-**Audit:** 68 internal links verified working, 7 issues found and fixed
+### 1. Mobile UX & Post-Login Experience
+**Status:** Planned — User feedback driven
+**Est. Time:** 2-3 days
 
-**Completed:**
-- [x] **Track A:** FAQ "Contact Support" → `/contact`, footer email/phone clickable, removed social placeholders, fixed live chat claim
-- [x] **Track B:** Added Pricing & Success Stories sections to How It Works, hash scroll support, legacy route redirects via `<Navigate>`
-- [x] **Track C:** `/contact` page with form, `send-contact-form` edge function (Resend), deployed to DEV + PROD
+**Problem:** User feedback: after logging in on mobile (PWA/browser), the UI doesn't clearly show the user is authenticated. No "Welcome [Name]" or visual confirmation of login state. Mobile screen optimization also needs review.
 
-**Remaining:**
-- [ ] **Track D:** AI Support Agent — needs design decision (DEC-009)
+**Track A: Post-Login Welcome (~1 day)**
+- [ ] Show "Welcome, [Name]" greeting in header or dashboard after login
+- [ ] Visual login state indicator clearly visible on mobile (avatar, name, or badge)
+- [ ] Review auth state transition — ensure no flash of unauthenticated UI
+
+**Track B: Mobile Screen Optimization (~1-2 days)**
+- [ ] Audit all key pages on mobile viewport (375px, 390px, 428px)
+- [ ] Fix any overflow, truncation, or tap target issues
+- [ ] Verify navigation, dialogs, and forms work well on mobile
+- [ ] Test PWA standalone mode on iOS Safari + Android Chrome
+
+---
+
+### 2. Voice Experience: Quality & Admin Controls
+**Status:** Planned — Pre-Phase 3 prerequisite
+**Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
+**Decision:** DEC-012 (Stay on VAPI)
+**Goal:** Harden voice experience to premium standard + give RAV admin runtime control
+
+**Track A: Fix Known Quality Issues (~1-2 days)**
+- [ ] Duplicate function calls — `search_properties` fires twice in quick succession (race condition)
+- [ ] Voice result cards not clickable — results use `<div>` not `<Link>`, users can't navigate to property
+- [ ] CORS wildcard on Edge Function — tighten `*` origin to production domain only
+- [ ] Add AbortController to Edge Function fetch — prevent dangling requests after user stops voice session
+- [ ] Add rate limiting to Edge Function — protect against rapid-fire requests
+
+**Track B: Voice Quality Tuning (~1 week)**
+- [ ] Evaluate Deepgram endpointing sweet spot — currently 500ms, test 300ms vs 700ms
+- [ ] Add backchanneling config — prevent assistant jumping in during pauses
+- [ ] Evaluate transcription model upgrade — Deepgram Nova-2 vs Nova-3 for travel terms
+- [ ] Test voice experience on mobile (iOS Safari, Android Chrome) — WebRTC behavior
+
+**Track C: RAV Admin Voice Controls (~1-2 weeks)**
+- [ ] Voice search ON/OFF global toggle — disable instantly without code deploy
+- [ ] Daily quota adjustment — change limit from admin UI (currently DB-only)
+- [ ] Per-user quota override — grant specific users higher limits
+- [ ] Voice usage dashboard — searches/day chart, top queries, failure rate, cost estimate
+- [ ] LLM model selector — toggle between gpt-4o-mini / gpt-4o from admin
+- [ ] Approved user voice access toggle — enable/disable voice per user
+
+**Track D: Observability (~2-3 days)**
+- [ ] Log voice search queries + outcomes to Supabase (anonymized)
+- [ ] Alert threshold — notify admin if daily cost exceeds configurable amount
+- [ ] Failed search tracking — log queries that return 0 results (product intelligence)
 
 ---
 
 ### 3. Phase 3: Voice Everywhere (Q2 2026)
-**Status:** Planned
+**Status:** Planned — After Voice Quality hardening
 **Docs:** `docs/guides/user-journey-map.md`
+**Prerequisite:** Voice Experience Quality & Admin Controls (priority #2)
 
 **Features:**
 - Voice-assisted property listing
@@ -134,7 +175,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 2. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 4. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks
 **Decision:** DEC-011
@@ -159,7 +200,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 4. Phase 6: Advanced Features (Q3 2026)
+### 5. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
 
 **Features:**
@@ -167,6 +208,12 @@ To keep PROJECT-HUB.md focused and scannable:
 - Advanced filtering (price range, amenities, rating)
 - Owner analytics dashboard enhancements
 - Calendar integration (Google/Outlook sync)
+
+---
+
+### Deferred Items
+- **Phase 10 Track D:** AI Support Agent — needs design decision (DEC-009)
+- **Phase 10 Tracks A-C:** Complete (Feb 15) — dead links, contact page, support form
 
 ---
 
@@ -271,26 +318,8 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ### RS-001: LiveKit Voice Agents SDK Evaluation
 **Date Added:** February 15, 2026
-**Status:** Not Started
-**Priority:** High — could reshape voice architecture
-**Docs:** https://docs.livekit.io/agents/start/voice-ai-quickstart/
-
-**Objective:** Evaluate LiveKit Agents SDK as a platform for building a full voice agent experience on RAV — potentially replacing or complementing the current VAPI integration.
-
-**Why LiveKit:**
-- Open-source, self-hostable voice AI infrastructure
-- Built-in STT/LLM/TTS pipeline orchestration, WebRTC transport
-- Function calling / tool use for live data queries
-- Could unify search + support + booking into one voice agent
-
-**Research Tasks:**
-- [ ] Read LiveKit Agents quickstart & architecture docs
-- [ ] Compare LiveKit vs VAPI: cost model, latency, flexibility, vendor lock-in
-- [ ] Prototype: minimal voice agent that can answer "find me a resort in Orlando"
-- [ ] Evaluate hosting: LiveKit Cloud vs self-hosted
-- [ ] Determine migration path from VAPI → LiveKit (if viable)
-
-**Decision:** See DEC-010
+**Status:** Closed — Decision made (DEC-012: Stay on VAPI)
+**Resolution:** Cost savings from LiveKit don't justify 3-6 weeks of engineering at current scale (~$300-700/month voice spend). Revisit when monthly voice spend consistently exceeds $3,000/month.
 
 ---
 
@@ -322,6 +351,8 @@ To keep PROJECT-HUB.md focused and scannable:
 - DEC-006: Testing infrastructure approach — [details](DECISIONS.md#dec-006-testing-infrastructure-approach)
 - DEC-007: Build version system — [details](DECISIONS.md#dec-007-build-version-system)
 - DEC-008: Membership tier & commission architecture — [details](DECISIONS.md#dec-008-membership-tier--commission-architecture)
+- DEC-010: Voice platform VAPI vs LiveKit → resolved by DEC-012 — [details](DECISIONS.md#dec-010-voice-platform--vapi-vs-livekit)
+- DEC-012: Stay on VAPI (vs LiveKit migration) — [details](DECISIONS.md#dec-012-voice-infrastructure--stay-on-vapi)
 
 ---
 
@@ -354,23 +385,6 @@ To keep PROJECT-HUB.md focused and scannable:
 - F: Hybrid (contact form now + AI agent later) — likely best approach
 
 **Next Step:** Complete RS-001 research spike, then decide AI approach
-
----
-
-### DEC-010: Voice Platform — VAPI vs LiveKit Agents SDK
-**Date:** February 15, 2026
-**Decision:** TBD — Research spike RS-001 required first
-**Status:** Pending
-
-**Options:**
-- A: Stay with VAPI — proven, working, managed, but limited
-- B: Migrate fully to LiveKit — more control, lower cost at scale
-- C: Hybrid — keep VAPI for search, use LiveKit for new features
-- D: LiveKit for everything new — build future voice on LiveKit, sunset VAPI when ready
-
-**Key differences:** VAPI is managed/per-minute/WebSocket; LiveKit is self-hostable/WebRTC/full agent code control with any LLM (Claude, OpenAI, etc.)
-
-**Next Step:** Complete RS-001 research spike, then revisit
 
 ---
 

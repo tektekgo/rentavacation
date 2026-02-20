@@ -87,7 +87,7 @@ const Signup = () => {
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl shadow-card-hover p-8">
+            <div className="bg-card rounded-2xl shadow-card-hover p-4 sm:p-6 md:p-8">
               {isSignupComplete ? (
                 <ActionSuccessCard
                   title="Account Created!"
@@ -207,7 +207,7 @@ const Signup = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-2"
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4 text-muted-foreground" />

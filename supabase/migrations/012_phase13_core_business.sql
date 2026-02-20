@@ -13,37 +13,53 @@ VALUES ('property-images', 'property-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Owners can upload to their own folder
-CREATE POLICY "Owners can upload property images"
-  ON storage.objects FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    bucket_id = 'property-images'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Owners can upload property images' AND tablename = 'objects') THEN
+    CREATE POLICY "Owners can upload property images"
+      ON storage.objects FOR INSERT
+      TO authenticated
+      WITH CHECK (
+        bucket_id = 'property-images'
+        AND (storage.foldername(name))[1] = auth.uid()::text
+      );
+  END IF;
+END $$;
 
 -- Owners can update their own images
-CREATE POLICY "Owners can update own property images"
-  ON storage.objects FOR UPDATE
-  TO authenticated
-  USING (
-    bucket_id = 'property-images'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Owners can update own property images' AND tablename = 'objects') THEN
+    CREATE POLICY "Owners can update own property images"
+      ON storage.objects FOR UPDATE
+      TO authenticated
+      USING (
+        bucket_id = 'property-images'
+        AND (storage.foldername(name))[1] = auth.uid()::text
+      );
+  END IF;
+END $$;
 
 -- Owners can delete their own images
-CREATE POLICY "Owners can delete own property images"
-  ON storage.objects FOR DELETE
-  TO authenticated
-  USING (
-    bucket_id = 'property-images'
-    AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Owners can delete own property images' AND tablename = 'objects') THEN
+    CREATE POLICY "Owners can delete own property images"
+      ON storage.objects FOR DELETE
+      TO authenticated
+      USING (
+        bucket_id = 'property-images'
+        AND (storage.foldername(name))[1] = auth.uid()::text
+      );
+  END IF;
+END $$;
 
 -- Public read access for property images
-CREATE POLICY "Public can view property images"
-  ON storage.objects FOR SELECT
-  TO public
-  USING (bucket_id = 'property-images');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can view property images' AND tablename = 'objects') THEN
+    CREATE POLICY "Public can view property images"
+      ON storage.objects FOR SELECT
+      TO public
+      USING (bucket_id = 'property-images');
+  END IF;
+END $$;
 
 -- =============================================================
 -- 2. OWNER CONFIRMATION COLUMNS ON booking_confirmations

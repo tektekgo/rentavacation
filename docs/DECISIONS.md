@@ -1,7 +1,7 @@
 # Archived Decisions Log
 
 > Finalized decisions moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 15, 2026
+> **Last Archived:** February 20, 2026
 
 ---
 
@@ -132,3 +132,38 @@
 - Infrastructure-first approach: build data model before billing
 - Configurable commission allows A/B testing and per-owner deals
 - DB-controlled toggles eliminate deploy cycles for feature flags
+
+---
+
+## DEC-010: Voice Platform — VAPI vs LiveKit
+**Date:** February 15, 2026
+**Decision:** Stay on VAPI (see DEC-012)
+**Status:** Resolved → DEC-012
+
+**Original Options:**
+- A: Stay with VAPI — proven, working, managed, but limited
+- B: Migrate fully to LiveKit — more control, lower cost at scale
+- C: Hybrid — keep VAPI for search, use LiveKit for new features
+- D: LiveKit for everything new — build future voice on LiveKit, sunset VAPI when ready
+
+**Resolution:** DEC-012 decided to stay on VAPI. LiveKit migration not justified at current scale.
+
+---
+
+## DEC-012: Voice Infrastructure — Stay on VAPI
+**Date:** February 20, 2026
+**Decision:** Remain on VAPI for voice search. Do not migrate to LiveKit.
+**Status:** Approved
+
+**Options evaluated:**
+- VAPI (current) — managed, turnkey, ~$0.10/search
+- LiveKit open source — self-hosted pipeline, ~$0.01/search at scale
+
+**Rationale:**
+- Current beta cost is ~$300-700/month with auth gates + 10/day quota in place
+- LiveKit migration = 3-6 weeks engineering to solve a sub-$1K/month problem
+- Break-even requires 5,000+ searches/month — not at that scale yet
+- Acquisition thesis favors best-in-class managed services over self-hosted optimization
+- Revisit when monthly voice spend consistently exceeds $3,000/month
+
+**Owner:** Sujit

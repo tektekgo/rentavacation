@@ -175,7 +175,7 @@ const OwnerDashboard = () => {
               Your request to become a property owner is under review.
               We'll notify you once it's been approved.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="outline" onClick={() => navigate("/")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Home
@@ -192,7 +192,7 @@ const OwnerDashboard = () => {
               You need the property owner role to access this dashboard.
               Request an upgrade to start listing your vacation properties.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="outline" onClick={() => navigate("/")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Home
@@ -219,19 +219,19 @@ const OwnerDashboard = () => {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="flex-shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">Owner Dashboard</h1>
+                <h1 className="text-xl sm:text-2xl font-bold">Owner Dashboard</h1>
                 <p className="text-sm text-muted-foreground">
                   Manage your properties, listings, and bookings
                 </p>
               </div>
             </div>
-            <Button onClick={() => setActiveTab("properties")}>
+            <Button onClick={() => setActiveTab("properties")} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add Property
             </Button>

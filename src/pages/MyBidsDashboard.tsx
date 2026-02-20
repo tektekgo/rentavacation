@@ -117,9 +117,9 @@ const MyBidsDashboard = () => {
                   {myBids.map((bid) => (
                     <Card key={bid.id}>
                       <CardContent className="p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
                               <Badge className={STATUS_COLORS[bid.status]}>
                                 {bid.status.replace('_', ' ')}
                               </Badge>
@@ -133,18 +133,18 @@ const MyBidsDashboard = () => {
                               {bid.listing?.property?.resort_name}
                             </h3>
                             <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {bid.listing?.property?.location}
+                              <MapPin className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">{bid.listing?.property?.location}</span>
                             </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {format(new Date(bid.listing?.check_in_date || ''), 'MMM d')} - 
+                                {format(new Date(bid.listing?.check_in_date || ''), 'MMM d')} -
                                 {format(new Date(bid.listing?.check_out_date || ''), 'MMM d, yyyy')}
                               </span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right flex-shrink-0">
                             <p className="text-sm text-muted-foreground">Your bid</p>
                             <p className="text-2xl font-bold">${bid.bid_amount.toLocaleString()}</p>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -211,18 +211,18 @@ const MyBidsDashboard = () => {
                   {myRequests.map((request) => (
                     <Card key={request.id}>
                       <CardContent className="p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
                               <Badge className={STATUS_COLORS[request.status]}>
                                 {request.status}
                               </Badge>
                             </div>
                             <h3 className="font-semibold text-lg">{request.destination_location}</h3>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {format(new Date(request.check_in_date), 'MMM d')} - 
+                                {format(new Date(request.check_in_date), 'MMM d')} -
                                 {format(new Date(request.check_out_date), 'MMM d, yyyy')}
                               </span>
                               <span>{request.guest_count} guests</span>
@@ -238,14 +238,14 @@ const MyBidsDashboard = () => {
                               </p>
                             )}
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end">
+                          <div className="text-left sm:text-right flex-shrink-0">
+                            <p className="text-sm text-muted-foreground flex items-center gap-1 sm:justify-end">
                               <Clock className="h-3 w-3" />
                               Expires {formatDistanceToNow(new Date(request.proposals_deadline), { addSuffix: true })}
                             </p>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="mt-2"
                               onClick={() => {
                                 setSelectedRequest(request);
@@ -315,7 +315,7 @@ function ProposalsDialog({ request, open, onOpenChange }: ProposalsDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Proposals for {request.destination_location}</DialogTitle>
           <DialogDescription>

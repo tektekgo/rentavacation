@@ -122,14 +122,14 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="flex-shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">RAV Admin Dashboard</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold">RAV Admin Dashboard</h1>
                   <ShieldCheck className="h-5 w-5 text-primary" />
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -139,14 +139,14 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               {hasRole("rav_owner") && (
-                <Button variant="outline" onClick={() => navigate("/architecture")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/architecture")}>
                   <Network className="h-4 w-4 mr-2" />
-                  Architecture
+                  <span className="hidden sm:inline">Architecture</span>
                 </Button>
               )}
-              <Button variant="outline" onClick={() => navigate("/documentation")}>
+              <Button variant="outline" size="sm" onClick={() => navigate("/documentation")}>
                 <FileCheck className="h-4 w-4 mr-2" />
-                Documentation
+                <span className="hidden sm:inline">Documentation</span>
               </Button>
             </div>
           </div>
