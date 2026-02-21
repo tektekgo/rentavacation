@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.voice-search]
 verify_jwt = false
+
+[functions.seed-manager]
+verify_jwt = false
