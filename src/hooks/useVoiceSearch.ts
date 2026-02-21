@@ -69,19 +69,10 @@ const ASSISTANT_OVERRIDES: AssistantOverrides = {
     ],
   },
   maxDurationSeconds: 120,
-  backgroundSpeechDenoisingPlan: {
-    smartDenoisingPlan: { enabled: true },
-  },
-  startSpeakingPlan: {
-    waitSeconds: 0.6,
-    smartEndpointingPlan: {
-      provider: "livekit",
-    },
-  },
-  stopSpeakingPlan: {
-    numWords: 2,
-    backoffSeconds: 1.5,
-  },
+  // NOTE: Track B advanced plans (backgroundSpeechDenoisingPlan, startSpeakingPlan
+  // with smartEndpointingPlan, stopSpeakingPlan) removed — VAPI API rejects them
+  // as of Feb 2026 (400 start-method-error). Re-enable when VAPI supports them
+  // in assistant overrides. See docs/features/voice-search/KNOWN-ISSUES.md.
 };
 
 interface VapiMessage {
