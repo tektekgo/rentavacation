@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete)
+> **Last Updated:** February 21, 2026 (Session 11 — Marketing assets & brand concepts)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -82,10 +82,11 @@ To keep PROJECT-HUB.md focused and scannable:
 **Started:** February 21, 2026
 
 ### Working on TODAY:
-- [x] **Phase 18: Travel Request Enhancements** — 4 enhancements complete
+- [x] **Marketing & Brand Assets** — Playbook, pitch deck script, brand concepts (PR #18, Session 11)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Marketing & Brand Assets** (Feb 21, Session 11). Created 3 comprehensive go-to-market documents in `docs/brand-assets/`: MARKETING-PLAYBOOK.md (master strategy — positioning, audiences, 5 campaign pillars, GTM timeline, content strategy, PR angles), PITCH-DECK-SCRIPT.md (19-slide presentation with speaker notes, visual direction, live demo script), BRAND-CONCEPTS.md (14 named product features incl. RAVIO, Vacation Wishes, Name Your Price, SmartPrice, TrustShield, PaySafe, ResortIQ; tagline collection, social hooks, email subject lines, one-pagers, campaign calendar). All assets use honesty framework: BUILT / INDUSTRY DATA / PROJECTED labels on every claim. PR #18 merged to main.
 - [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
 - [x] **Phase 17: Owner Dashboard** (Feb 21, Session 9). 6 business intelligence sections in Overview tab: HeadlineStats (earned YTD, fees covered %, active bids), EarningsTimeline (AreaChart with monthly/quarterly + fee target line), MyListingsTable (status badges, FairValue badges, idle week alerts), BidActivityFeed (event stream), PricingIntelligence (per-listing FairValue + market range), MaintenanceFeeTracker (inline editor, coverage bar). 4 data hooks, migration 017, types. 30 new tests (264 total).
 - [x] **Phase 15: Fair Value Score** (Feb 21, Session 8). PostgreSQL RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge` components. Wired into Rentals listing cards, PropertyDetail sidebar, OwnerListings management. Owner vs traveler messaging. 14 new tests (222 total).
@@ -152,7 +153,81 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-### 7. Voice Experience Tracks C-D
+### 7. Phase 19: Flexible Date Booking + Per-Night Pricing
+**Status:** Planned — Next implementation priority
+**Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
+**Est. Time:** 10-13 hours
+
+**Option A: "Make an Offer" on a Listing (~4-6h)**
+- [ ] "Propose Different Dates" button on PropertyDetail alongside "Book Now"
+- [ ] Date range + price + message form (reuses bidding infrastructure)
+- [ ] Add `requested_check_in`, `requested_check_out` fields to `listing_bids`
+- [ ] Owner sees date proposals in bid manager, can accept or counter
+
+**Option B: "Inspired By" Travel Request (~6-8h)** — Follow-up
+- [ ] "Request Similar Dates" button on PropertyDetail
+- [ ] Pre-fills travel request with listing's location, brand, bedrooms
+- [ ] `source_listing_id` field on travel_requests for targeted owner notification
+- [ ] Checkbox: "Send to this owner first" vs "Open to all owners"
+
+**Per-Night Pricing Migration (~3-4h)** — Combined with Option A
+- [ ] Add `nightly_rate` column to listings (atomic unit)
+- [ ] Backfill from `owner_price / num_nights` for existing listings
+- [ ] Update all listing displays to show "$X/night" with "(N nights · $total total)"
+- [ ] Update bid forms, travel requests, Fair Value Score to use per-night rates
+
+---
+
+### 8. Phase 20: Accounting, Tax & Fee Framework
+**Status:** Planned — Required before public launch
+**Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
+**Decision:** DEC-022
+
+**Phase A: Fee Breakdown (~4-6h)**
+- [ ] Separate fee line items on bookings: `nightly_rate`, `base_amount`, `service_fee`, `cleaning_fee`, `tax_amount`, `total_charged`
+- [ ] Add `cleaning_fee`, `resort_fee` optional fields to listings
+- [ ] Price breakdown display on PropertyDetail and Checkout
+- [ ] Update payout calculation: owner gets base_amount + cleaning_fee
+
+**Phase B: Stripe Tax Integration (~6-8h)** — Pre-launch requirement
+- [ ] Integrate Stripe Tax for auto-calculated occupancy + sales tax
+- [ ] Tax line item at checkout based on property location
+- [ ] Store tax amounts on booking records
+
+**Phase C: Admin Tax Reporting (~4-6h)**
+- [ ] Tax collected report (by jurisdiction, by month)
+- [ ] Owner payout summary report
+- [ ] Platform revenue report (service fees only)
+
+**Phase D: QuickBooks Integration (~8-12h)** — Post-launch
+- [ ] Sync Stripe transactions → QuickBooks Online via API
+- [ ] Automated revenue recognition
+- [ ] Owner payout reconciliation
+
+**Phase E: 1099-K Compliance (~4-8h)** — Before Jan 2027
+- [ ] Track owner earnings (>$600/year threshold)
+- [ ] Generate 1099-K forms (Gusto or TaxJar)
+- [ ] Owner tax info collection (W-9 equivalent)
+
+**Phase F: Automated Tax Filing (~8-16h)** — When volume justifies
+- [ ] Avalara or TaxJar integration for auto-filing per jurisdiction
+- [ ] Quarterly remittance reports
+
+---
+
+### 9. Phase 21: Partial-Week Booking (Future — Nice to Have)
+**Status:** Backlog — Consider after Options A+B validate demand
+**Est. Time:** 20-30 hours
+
+- [ ] Owner marks listing as "flexible dates" (allow sub-ranges)
+- [ ] Per-night pricing enables subset selection on calendar
+- [ ] Listing splits: booked portion + remaining days become new listing
+- [ ] Escrow, confirmation, payout all work per-split
+- [ ] Handle edge cases: cleaning gaps, minimum stay, resort check-in days
+
+---
+
+### 10. Voice Experience Tracks C-D
 **Status:** Deferred until search flow hardening complete
 **Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
 
@@ -166,7 +241,7 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-### 8. Phase 3: Voice Everywhere (Q2 2026)
+### 11. Phase 3: Voice Everywhere (Q2 2026)
 **Status:** Planned — After Voice Tracks C-D
 **Prerequisite:** Voice Experience Quality complete
 - Voice-assisted property listing, booking, bidding
@@ -174,7 +249,7 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-### 9. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 12. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
 **Est. Time:** 2-3 weeks | **Decision:** DEC-011
 - Track A: Capacitor setup (~2 days)
@@ -184,7 +259,7 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-### 10. Phase 6: Advanced Features (Q3 2026)
+### 13. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
 - Saved searches & search alerts, advanced filtering, owner analytics, calendar integration
 
@@ -496,6 +571,36 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
+### DEC-022: Pricing, Tax & Accounting Framework
+**Date:** February 21, 2026
+**Decision:** Per-night pricing + separated fee line items + Stripe Tax before launch + QuickBooks post-launch
+**Status:** Approved
+**Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
+
+**Context:** Platform currently uses lump-sum pricing with fees bundled into `final_price`. As a marketplace facilitator in 43+ US states, RAV must collect and remit occupancy/sales taxes before going live with real transactions.
+
+**Key decisions:**
+- Per-night rate (`nightly_rate`) becomes the atomic pricing unit across the platform
+- Fee breakdown: separate `service_fee`, `cleaning_fee`, `tax_amount` line items on every booking
+- Stripe Tax for automated tax calculation at checkout (already on Stripe — easiest path)
+- QuickBooks Online as general ledger, synced via Stripe integration
+- 1099-K generation required for owners earning >$600/year (deadline: Jan 2027)
+- Resort fees are owner-disclosed, not RAV-collected (paid at resort check-in)
+- Stripe processing fees (~2.9%) absorbed by RAV, baked into 15% service fee margin
+
+---
+
+### DEC-023: Flexible Date Booking Strategy
+**Date:** February 21, 2026
+**Decision:** Three-phase approach — Option A (bid with dates) → Option B (inspired-by request) → Option C (partial-week splits)
+**Status:** Approved
+
+**Context:** Current model requires travelers to book the full date block set by the owner. This limits conversion when a traveler wants 6 of an 8-day listing.
+
+**Approach:** Start with lightweight "Propose Different Dates" button (reuses existing bidding infrastructure, adds date fields to bids). Follow up with "Inspired By" travel requests (pre-filled from a listing, targeted to that owner). Defer full partial-week splitting until demand validates the pattern.
+
+---
+
 ### DEC-011: Mobile App Strategy
 **Date:** February 15, 2026
 **Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
@@ -545,6 +650,12 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 - **Owner Dashboard (Phase 17):** `docs/features/owner-dashboard/`
 - **Travel Request Enhancements (Phase 18):** `docs/features/travel-request-enhancements/`
 
+### Brand & Marketing
+- **Marketing Playbook:** `docs/brand-assets/MARKETING-PLAYBOOK.md`
+- **Pitch Deck Script:** `docs/brand-assets/PITCH-DECK-SCRIPT.md`
+- **Brand Concepts:** `docs/brand-assets/BRAND-CONCEPTS.md`
+- **Brand Style Guide:** `docs/brand-assets/BRAND-STYLE-GUIDE.md`
+
 ### User Guides
 - **User Journey Map:** `docs/guides/user-journey-map.md`
 - **Voice Search Help:** `docs/guides/help/voice-search.md`
@@ -592,6 +703,6 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-**Last updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete, Priorities 1-6 done, 273 tests)
+**Last updated:** February 21, 2026 (Session 11 — Marketing assets: playbook, pitch deck, brand concepts, PR #18 merged)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
