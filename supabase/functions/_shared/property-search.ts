@@ -47,6 +47,39 @@ const logStep = (prefix: string, step: string, details?: Record<string, unknown>
   console.log(`[${prefix}] ${step}${detailsStr}`);
 };
 
+// State name → abbreviation mapping for flexible destination matching
+const STATE_ABBREVS: Record<string, string> = {
+  alabama: "al", alaska: "ak", arizona: "az", arkansas: "ar", california: "ca",
+  colorado: "co", connecticut: "ct", delaware: "de", florida: "fl", georgia: "ga",
+  hawaii: "hi", idaho: "id", illinois: "il", indiana: "in", iowa: "ia",
+  kansas: "ks", kentucky: "ky", louisiana: "la", maine: "me", maryland: "md",
+  massachusetts: "ma", michigan: "mi", minnesota: "mn", mississippi: "ms",
+  missouri: "mo", montana: "mt", nebraska: "ne", nevada: "nv",
+  "new hampshire": "nh", "new jersey": "nj", "new mexico": "nm", "new york": "ny",
+  "north carolina": "nc", "north dakota": "nd", ohio: "oh", oklahoma: "ok",
+  oregon: "or", pennsylvania: "pa", "rhode island": "ri", "south carolina": "sc",
+  "south dakota": "sd", tennessee: "tn", texas: "tx", utah: "ut", vermont: "vt",
+  virginia: "va", washington: "wa", "west virginia": "wv", wisconsin: "wi",
+  wyoming: "wy", "district of columbia": "dc",
+};
+
+// Reverse mapping: abbreviation → full state name
+const ABBREV_TO_STATE: Record<string, string> = Object.fromEntries(
+  Object.entries(STATE_ABBREVS).map(([name, abbr]) => [abbr, name])
+);
+
+/**
+ * Expand a destination search term to include state name/abbreviation variants.
+ * e.g., "hawaii" → ["hawaii", "hi"], "fl" → ["fl", "florida"]
+ */
+function expandDestination(dest: string): string[] {
+  const lower = dest.toLowerCase().trim();
+  const variants = [lower];
+  if (STATE_ABBREVS[lower]) variants.push(STATE_ABBREVS[lower]);
+  if (ABBREV_TO_STATE[lower]) variants.push(ABBREV_TO_STATE[lower]);
+  return variants;
+}
+
 export async function searchProperties(
   supabase: SupabaseClient,
   params: SearchParams,
@@ -151,8 +184,9 @@ export async function searchProperties(
   );
 
   // Destination filter: search in property location, resort_name, and resort location
+  // Expands state names/abbreviations (e.g., "Hawaii" also matches "HI")
   if (destination) {
-    const dest = destination.toLowerCase();
+    const variants = expandDestination(destination);
     filtered = filtered.filter((listing: Record<string, unknown>) => {
       const prop = listing.property as Record<string, unknown>;
       const location = ((prop.location as string) ?? "").toLowerCase();
@@ -162,16 +196,12 @@ export async function searchProperties(
       const resortCity = (resortLocation?.city ?? "").toLowerCase();
       const resortState = (resortLocation?.state ?? "").toLowerCase();
       const resortCountry = (resortLocation?.country ?? "").toLowerCase();
-      return (
-        location.includes(dest) ||
-        resortName.includes(dest) ||
-        resortCity.includes(dest) ||
-        resortState.includes(dest) ||
-        resortCountry.includes(dest)
-      );
+      const searchFields = [location, resortName, resortCity, resortState, resortCountry];
+      return variants.some((v) => searchFields.some((field) => field.includes(v)));
     });
     logStep(logPrefix, "Destination filter applied", {
       destination,
+      variants,
       afterCount: filtered.length,
     });
   }
