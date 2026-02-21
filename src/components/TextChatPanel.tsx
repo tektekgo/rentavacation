@@ -141,7 +141,7 @@ export function TextChatPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0">
+      <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0 [&>button.absolute]:hidden">
         {/* Header */}
         <SheetHeader className="px-4 py-3 border-b shrink-0">
           <div className="flex items-center justify-between">

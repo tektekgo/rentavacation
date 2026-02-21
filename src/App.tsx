@@ -93,7 +93,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         {isDevEnvironment && (
-          <div className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none bg-yellow-400 text-yellow-900 text-center text-xs font-medium py-1">
+          <div className="fixed top-0 left-0 right-0 z-[60] pointer-events-none bg-yellow-400 text-yellow-900 text-center text-xs font-medium py-1">
             🚧 DEV ENVIRONMENT — dev.rent-a-vacation.com
           </div>
         )}

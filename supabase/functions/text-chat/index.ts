@@ -142,9 +142,8 @@ interface TextChatRequest {
   context: string;
 }
 
-// OpenRouter model — free router auto-selects from available free models
-// Supports tool calling, image understanding, and structured outputs
-const OPENROUTER_MODEL = "openrouter/free";
+// OpenRouter model — Gemini Flash is fast, free, and supports tool calling
+const OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
