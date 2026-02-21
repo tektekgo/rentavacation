@@ -1,0 +1,119 @@
+# Seed Data Management System
+
+## Overview
+
+The seed system generates realistic test data for the DEV environment. It operates in 3 layers:
+
+| Layer | Contents | Behavior on Reseed |
+|-------|----------|--------------------|
+| **Layer 1: Foundation** | 8 core users (3 RAV + 5 owners) | **Preserved** (never deleted) |
+| **Layer 2: Inventory** | 10 properties, 30 listings | Deleted & recreated |
+| **Layer 3: Transactions** | 50 renters, 90 bookings, bids, requests | Deleted & recreated |
+
+## Architecture
+
+```
+Migration 015     →  profiles.is_seed_foundation column
+Edge Function     →  supabase/functions/seed-manager/index.ts
+Admin UI          →  Admin Dashboard > Dev Tools tab (DEV only)
+```
+
+## Test Accounts
+
+**Password for all accounts:** `SeedTest2026!`
+
+### RAV Team (Layer 1 — Foundation)
+| Email | Role | Purpose |
+|-------|------|---------|
+| dev-owner@rent-a-vacation.com | RAV Owner | Full admin access |
+| dev-admin@rent-a-vacation.com | RAV Admin | Admin operations |
+| dev-staff@rent-a-vacation.com | RAV Staff | Staff view testing |
+
+### Property Owners (Layer 1 — Foundation)
+| Email | Name | Brand |
+|-------|------|-------|
+| owner1@rent-a-vacation.com | Alex Rivera | Hilton Grand Vacations |
+| owner2@rent-a-vacation.com | Maria Chen | Marriott Vacation Club |
+| owner3@rent-a-vacation.com | James Thompson | Disney Vacation Club |
+| owner4@rent-a-vacation.com | Priya Patel | Wyndham Destinations |
+| owner5@rent-a-vacation.com | Robert Kim | Bluegreen Vacations |
+
+### Renters (Layer 3 — Recreated on reseed)
+- 50 renters: `renter001@rent-a-vacation.com` through `renter050@rent-a-vacation.com`
+- Signup dates are backdated to create a growth curve over 90 days
+
+### Email Routing
+All `@rent-a-vacation.com` emails route via Cloudflare catchall to `rentavacation0@gmail.com`.
+
+## Reseed Procedure
+
+### Via Admin UI
+1. Log in as any RAV team member on DEV
+2. Go to Admin Dashboard > Dev Tools tab
+3. Click "Refresh" in Status section to see current counts
+4. Click "Reset & Reseed DEV" and confirm
+5. Wait 30-60 seconds for completion
+6. Review the step-by-step log
+
+### Via curl
+```bash
+# Check status
+curl -X POST https://oukbxqnlxnkainnligfz.supabase.co/functions/v1/seed-manager \
+  -H "Authorization: Bearer <SERVICE_ROLE_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "status"}'
+
+# Full reseed
+curl -X POST https://oukbxqnlxnkainnligfz.supabase.co/functions/v1/seed-manager \
+  -H "Authorization: Bearer <SERVICE_ROLE_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "reseed"}'
+```
+
+## Generated Data Details
+
+### Properties (10)
+- 2 per owner, using real vacation club resort names
+- Brands: HGV, Marriott, Disney, Wyndham, Bluegreen
+- Locations: Las Vegas, Orlando, Hawaii, Myrtle Beach, Daytona Beach
+
+### Listings (30)
+- 15 fixed-price active (approved)
+- 10 bidding (open_for_bidding = true, 7-14 days remaining)
+- 5 draft
+- Check-in dates: 30-180 days from now
+- Pricing: owner_price $700-$3,000, 15% RAV markup
+
+### Bookings (105)
+- 90 completed (growth curve: 15 → 30 → 45 over 90 days)
+- 10 pending
+- 5 confirmed in escrow (pending owner confirmation)
+- Each completed booking has: booking_confirmation, platform_guarantee_fund contribution
+
+### Pipeline
+- 5 cancellation requests (mix of pending/approved/denied)
+- 20 listing bids (on bidding listings)
+- 10 travel requests (matching property locations)
+- 8 travel proposals (from owners)
+
+## Safety Guards
+
+1. **Production Guard:** Edge function checks `IS_DEV_ENVIRONMENT=true` secret. Returns 403 in PROD.
+2. **Admin UI Guard:** Dev Tools tab only renders when `VITE_SUPABASE_URL` contains the DEV project ref.
+3. **Foundation Protection:** Layer 1 users have `is_seed_foundation = true` and are excluded from deletion.
+4. **Idempotent:** Re-running reseed always works — it deletes non-foundation data first, then recreates.
+
+## Deployment
+
+```bash
+# Set the dev environment flag (one-time)
+npx supabase secrets set IS_DEV_ENVIRONMENT=true --project-ref oukbxqnlxnkainnligfz
+
+# Deploy the migration
+npx supabase db push --include-all
+
+# Deploy the edge function
+npx supabase functions deploy seed-manager --project-ref oukbxqnlxnkainnligfz
+```
+
+**Important:** Never set `IS_DEV_ENVIRONMENT=true` on PROD (`xzfllqndrlmhclqfybew`).

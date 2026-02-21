@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,8 @@ import {
   UserCheck,
   Settings,
   Crown,
-  Network
+  Network,
+  Wrench
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -42,6 +44,9 @@ import { PendingApprovals } from "@/components/admin/PendingApprovals";
 import { RoleUpgradeRequests } from "@/components/admin/RoleUpgradeRequests";
 import { SystemSettings } from "@/components/admin/SystemSettings";
 import { AdminMemberships } from "@/components/admin/AdminMemberships";
+import { DevTools } from "@/components/admin/DevTools";
+
+const IS_DEV = import.meta.env.VITE_SUPABASE_URL?.includes("oukbxqnlxnkainnligfz");
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -214,6 +219,12 @@ const AdminDashboard = () => {
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
+            {IS_DEV && (
+              <TabsTrigger value="dev-tools" className="gap-2">
+                <Wrench className="h-4 w-4" />
+                <span className="hidden sm:inline">Dev Tools</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="overview">
@@ -270,8 +281,15 @@ const AdminDashboard = () => {
           <TabsContent value="settings">
             <SystemSettings />
           </TabsContent>
+
+          {IS_DEV && (
+            <TabsContent value="dev-tools">
+              <DevTools />
+            </TabsContent>
+          )}
         </Tabs>
       </main>
+      <Footer />
     </div>
   );
 };
