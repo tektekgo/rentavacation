@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026 (Session 11 — Marketing assets & brand concepts)
+> **Last Updated:** February 21, 2026 (Session 12 — PostgREST FK fix, Mermaid rendering fix)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -86,6 +86,7 @@ To keep PROJECT-HUB.md focused and scannable:
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **PostgREST FK Fix + Mermaid Rendering** (Feb 21, Session 12). Migration 019: redirected 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` — fixes all PGRST200 "Could not find relationship" 400 errors across admin dashboard, bidding, travel requests, owner confirmations, escrow, edge functions. Also fixed `/architecture` Mermaid diagram rendering (vercel.json `/assets/*` rewrite before SPA catch-all). Created `docs/RAV-PRICING-TAXES-ACCOUNTING.md` partner 1-pager. Added Phases 19-21 to roadmap.
 - [x] **Marketing & Brand Assets** (Feb 21, Session 11). Created 3 comprehensive go-to-market documents in `docs/brand-assets/`: MARKETING-PLAYBOOK.md (master strategy — positioning, audiences, 5 campaign pillars, GTM timeline, content strategy, PR angles), PITCH-DECK-SCRIPT.md (19-slide presentation with speaker notes, visual direction, live demo script), BRAND-CONCEPTS.md (14 named product features incl. RAVIO, Vacation Wishes, Name Your Price, SmartPrice, TrustShield, PaySafe, ResortIQ; tagline collection, social hooks, email subject lines, one-pagers, campaign calendar). All assets use honesty framework: BUILT / INDUSTRY DATA / PROJECTED labels on every claim. PR #18 merged to main.
 - [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
 - [x] **Phase 17: Owner Dashboard** (Feb 21, Session 9). 6 business intelligence sections in Overview tab: HeadlineStats (earned YTD, fees covered %, active bids), EarningsTimeline (AreaChart with monthly/quarterly + fee target line), MyListingsTable (status badges, FairValue badges, idle week alerts), BidActivityFeed (event stream), PricingIntelligence (per-listing FairValue + market range), MaintenanceFeeTracker (inline editor, coverage bar). 4 data hooks, migration 017, types. 30 new tests (264 total).
@@ -102,7 +103,7 @@ To keep PROJECT-HUB.md focused and scannable:
 ### Known Issues:
 - **PropertyDetail/Checkout dates are read-only** — By design for timeshare listings (owner sets fixed dates), but users may expect date selection.
 - **VAPI overrides limited** — Transcriber (nova-3), keyword boosts, and speaking plans cause 400 errors via SDK overrides. Must configure in VAPI dashboard Advanced tab.
-- Admin dashboard 400 errors — `bookings_renter_id_fkey` FK may not exist on PROD
+- ~~Admin dashboard 400 errors~~ — **FIXED** (Session 12, migration 019). All 10 tables' user FK columns now reference `profiles(id)` directly.
 - Edge functions require `--no-verify-jwt` deployment flag
 
 ---
