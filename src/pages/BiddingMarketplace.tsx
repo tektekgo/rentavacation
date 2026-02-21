@@ -6,7 +6,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTextChat } from '@/hooks/useTextChat';
-import { TextChatButton } from '@/components/TextChatButton';
 import { TextChatPanel } from '@/components/TextChatPanel';
 import { useListingsOpenForBidding, useOpenTravelRequests } from '@/hooks/useBidding';
 import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
@@ -94,10 +93,15 @@ const BiddingMarketplace = () => {
             )}
             {user && (
               <div className="flex justify-center mt-4">
-                <TextChatButton
+                <Button
+                  variant="outline"
+                  size="lg"
                   onClick={() => setChatOpen(true)}
-                  isOpen={chatOpen}
-                />
+                  className="gap-2"
+                >
+                  <img src="/ravio-the-chat-genie-64px.svg" alt="" className="h-6 w-6" />
+                  Ask RAVIO
+                </Button>
               </div>
             )}
           </div>
