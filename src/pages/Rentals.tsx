@@ -226,7 +226,7 @@ const Rentals = () => {
                   onClick={() => setChatOpen(true)}
                   isOpen={chatOpen}
                   disabled={!isAuthenticated}
-                  disabledReason={!isAuthenticated ? "Sign in to use chat" : undefined}
+                  disabledReason={!isAuthenticated ? "Sign in to ask RAVIO" : undefined}
                 />
                 {voiceEnabled && (
                   <VoiceSearchButton

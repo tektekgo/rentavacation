@@ -205,7 +205,7 @@ const HowItWorksPage = () => {
             onClick={() => setChatOpen(true)}
             isOpen={chatOpen}
             disabled={!isAuthenticated}
-            disabledReason={!isAuthenticated ? "Sign in to use chat" : undefined}
+            disabledReason={!isAuthenticated ? "Sign in to ask RAVIO" : undefined}
           />
         </div>
       </section>

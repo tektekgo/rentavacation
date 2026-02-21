@@ -21,7 +21,7 @@ describe("TextChatPanel", () => {
 
   it("renders header with title and context badge", () => {
     renderWithProviders(<TextChatPanel {...defaultProps} />);
-    expect(screen.getByText("RAV Assistant")).toBeInTheDocument();
+    expect(screen.getByText("RAVIO")).toBeInTheDocument();
     expect(screen.getByText("Property Search")).toBeInTheDocument();
   });
 
@@ -49,7 +49,7 @@ describe("TextChatPanel", () => {
 
   it("sends message on Enter key", () => {
     renderWithProviders(<TextChatPanel {...defaultProps} />);
-    const input = screen.getByPlaceholderText("Type a message...");
+    const input = screen.getByPlaceholderText("Ask RAVIO...");
     fireEvent.change(input, { target: { value: "test message" } });
     fireEvent.keyDown(input, { key: "Enter" });
     expect(defaultProps.onSendMessage).toHaveBeenCalledWith("test message");
@@ -57,7 +57,7 @@ describe("TextChatPanel", () => {
 
   it("sends message on send button click", () => {
     renderWithProviders(<TextChatPanel {...defaultProps} />);
-    const input = screen.getByPlaceholderText("Type a message...");
+    const input = screen.getByPlaceholderText("Ask RAVIO...");
     fireEvent.change(input, { target: { value: "test message" } });
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
     expect(defaultProps.onSendMessage).toHaveBeenCalledWith("test message");
@@ -65,7 +65,7 @@ describe("TextChatPanel", () => {
 
   it("disables input during streaming", () => {
     renderWithProviders(<TextChatPanel {...defaultProps} status="streaming" />);
-    const input = screen.getByPlaceholderText("Type a message...");
+    const input = screen.getByPlaceholderText("Ask RAVIO...");
     expect(input).toBeDisabled();
   });
 

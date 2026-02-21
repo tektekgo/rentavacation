@@ -1,4 +1,3 @@
-import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -35,13 +34,13 @@ export function TextChatButton({
             disabled && "opacity-50 cursor-not-allowed",
             className,
           )}
-          aria-label={disabled && disabledReason ? disabledReason : "Chat Search"}
+          aria-label={disabled && disabledReason ? disabledReason : "Ask RAVIO"}
         >
-          <MessageCircle className="h-4 w-4" />
+          <img src="/ravio-the-chat-genie-64px.svg" alt="RAVIO" className="h-5 w-5" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{disabled && disabledReason ? disabledReason : "Chat Search"}</p>
+        <p>{disabled && disabledReason ? disabledReason : "Ask RAVIO"}</p>
       </TooltipContent>
     </Tooltip>
   );

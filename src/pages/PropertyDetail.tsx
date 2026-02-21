@@ -510,7 +510,7 @@ const PropertyDetail = () => {
                           size="sm"
                           onClick={() => setChatOpen(true)}
                         >
-                          Questions? Ask RAV Assistant
+                          Questions? Ask RAVIO
                         </Button>
                       )}
                     </>

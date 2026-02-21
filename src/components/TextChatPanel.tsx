@@ -146,7 +146,8 @@ export function TextChatPanel({
         <SheetHeader className="px-4 py-3 border-b shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <SheetTitle className="text-base">RAV Assistant</SheetTitle>
+              <img src="/ravio-the-chat-genie-64px.svg" alt="RAVIO" className="h-7 w-7" />
+              <SheetTitle className="text-base">RAVIO</SheetTitle>
               <Badge variant="secondary" className="text-xs">
                 {CONTEXT_LABELS[context]}
               </Badge>
@@ -182,8 +183,9 @@ export function TextChatPanel({
             {/* Empty state with suggested prompts */}
             {messages.length === 0 && (
               <div className="text-center py-8">
+                <img src="/ravio-the-chat-genie-128px.svg" alt="RAVIO" className="h-16 w-16 mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ask me anything about vacation rentals!
+                  Ask RAVIO anything about vacation rentals!
                 </p>
                 <div className="flex flex-col gap-2">
                   {SUGGESTED_PROMPTS[context].map((prompt) => (
@@ -252,7 +254,7 @@ export function TextChatPanel({
           <div className="flex gap-2">
             <Input
               ref={inputRef}
-              placeholder="Type a message..."
+              placeholder="Ask RAVIO..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
