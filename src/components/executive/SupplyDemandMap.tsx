@@ -1,4 +1,5 @@
 import type { SupplyDemandDestination } from '@/types/executive';
+import { TooltipIcon } from './TooltipIcon';
 
 interface SupplyDemandMapProps {
   destinations: SupplyDemandDestination[];
@@ -28,7 +29,13 @@ export function SupplyDemandMap({ destinations }: SupplyDemandMapProps) {
 
   return (
     <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
-      <h3 className="text-sm font-medium text-white mb-4">Supply / Demand by Destination</h3>
+      <h3 className="text-sm font-medium text-white mb-4 flex items-center">
+        Supply / Demand by Destination
+        <TooltipIcon
+          definition="Active listings (supply) vs. bookings + bids (demand) per destination. Ratio determines market tightness."
+          whyItMatters="Undersupplied destinations signal opportunity to recruit owners; oversupplied ones may need pricing incentives."
+        />
+      </h3>
 
       <div className="space-y-3">
         {destinations.map((dest) => {
