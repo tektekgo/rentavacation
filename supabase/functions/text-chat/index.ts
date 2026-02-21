@@ -141,8 +141,9 @@ interface TextChatRequest {
   context: string;
 }
 
-// OpenRouter model — cost-effective, good at tool calling
-const OPENROUTER_MODEL = "anthropic/claude-sonnet-4-20250514";
+// OpenRouter model — free router auto-selects from available free models
+// Supports tool calling, image understanding, and structured outputs
+const OPENROUTER_MODEL = "openrouter/free";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
