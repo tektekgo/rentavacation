@@ -69,6 +69,32 @@ const FALLBACK_NEWS: NewsItem[] = [
   },
 ];
 
+function categorizeArticle(
+  title: string,
+  description: string
+): "industry" | "regulatory" | "market" | "technology" {
+  const text = `${title} ${description}`.toLowerCase();
+  if (
+    /regulat|ordinance|legislat|law|tax|compliance|ban|restrict|license|zoning/.test(
+      text
+    )
+  )
+    return "regulatory";
+  if (
+    /revenue|occupancy|adr|revpar|demand|supply|growth|decline|forecast|trend|rate/.test(
+      text
+    )
+  )
+    return "market";
+  if (
+    /ai|tech|software|platform|app|automation|machine learning|voice|chatbot/.test(
+      text
+    )
+  )
+    return "technology";
+  return "industry";
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -93,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const url = `https://newsapi.org/v2/everything?q=vacation+rental+OR+short-term+rental+OR+airbnb&sortBy=publishedAt&pageSize=7&language=en&apiKey=${apiKey}`;
+    const url = `https://newsapi.org/v2/everything?q=(timeshare+OR+"vacation+ownership"+OR+"short-term+rental"+OR+"vacation+rental")+(industry+OR+market+OR+regulation+OR+revenue)&sortBy=publishedAt&pageSize=7&language=en&apiKey=${apiKey}`;
     const resp = await fetch(url);
     const json = await resp.json();
 
@@ -113,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
         source: a.source?.name || "Unknown",
         url: a.url,
         publishedAt: a.publishedAt,
-        category: "industry" as const,
+        category: categorizeArticle(a.title, a.description || ""),
         summary: a.description,
       })
     );
