@@ -279,16 +279,26 @@ async function deleteNonFoundation(log: string[]): Promise<void> {
     .eq("is_seed_foundation", true);
   const foundationIds = (foundationProfiles ?? []).map((p: { id: string }) => p.id);
 
-  log.push(`Foundation users to keep: ${foundationIds.length}`);
+  // Also protect any existing RAV team members (rav_owner, rav_admin, rav_staff)
+  const { data: ravTeamRoles } = await admin
+    .from("user_roles")
+    .select("user_id")
+    .in("role", ["rav_owner", "rav_admin", "rav_staff"]);
+  const ravTeamIds = (ravTeamRoles ?? []).map((r: { user_id: string }) => r.user_id);
 
-  // Get ALL non-foundation user IDs for targeted deletes
+  // Merge into a single protected set
+  const protectedIds = [...new Set([...foundationIds, ...ravTeamIds])];
+  log.push(`Protected users (foundation + RAV team): ${protectedIds.length}`);
+
+  // Get ALL non-protected user IDs for targeted deletes
   const { data: allProfiles } = await admin
     .from("profiles")
-    .select("id")
-    .eq("is_seed_foundation", false);
-  const nonFoundationIds = (allProfiles ?? []).map((p: { id: string }) => p.id);
+    .select("id");
+  const nonProtectedIds = (allProfiles ?? [])
+    .map((p: { id: string }) => p.id)
+    .filter((id: string) => !protectedIds.includes(id));
 
-  log.push(`Non-foundation users to remove: ${nonFoundationIds.length}`);
+  log.push(`Non-protected users to remove: ${nonProtectedIds.length}`);
 
   // 1. checkin_confirmations (all)
   const { error: e1 } = await admin.from("checkin_confirmations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -330,95 +340,95 @@ async function deleteNonFoundation(log: string[]): Promise<void> {
   const { error: e10 } = await admin.from("listings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   log.push(`Deleted listings: ${e10 ? `ERROR: ${e10.message}` : "OK"}`);
 
-  // 11. owner_verifications (non-foundation only)
-  if (foundationIds.length > 0) {
-    const { error: e11 } = await admin.from("owner_verifications").delete().not("owner_id", "in", `(${foundationIds.join(",")})`);
-    log.push(`Deleted non-foundation owner_verifications: ${e11 ? `ERROR: ${e11.message}` : "OK"}`);
+  // 11. owner_verifications (non-protected only)
+  if (protectedIds.length > 0) {
+    const { error: e11 } = await admin.from("owner_verifications").delete().not("owner_id", "in", `(${protectedIds.join(",")})`);
+    log.push(`Deleted non-protected owner_verifications: ${e11 ? `ERROR: ${e11.message}` : "OK"}`);
   }
 
-  // 12. owner_agreements (non-foundation only)
-  if (foundationIds.length > 0) {
-    const { error: e12 } = await admin.from("owner_agreements").delete().not("owner_id", "in", `(${foundationIds.join(",")})`);
-    log.push(`Deleted non-foundation owner_agreements: ${e12 ? `ERROR: ${e12.message}` : "OK"}`);
+  // 12. owner_agreements (non-protected only)
+  if (protectedIds.length > 0) {
+    const { error: e12 } = await admin.from("owner_agreements").delete().not("owner_id", "in", `(${protectedIds.join(",")})`);
+    log.push(`Deleted non-protected owner_agreements: ${e12 ? `ERROR: ${e12.message}` : "OK"}`);
   }
 
   // 13. properties (all)
   const { error: e13 } = await admin.from("properties").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   log.push(`Deleted properties: ${e13 ? `ERROR: ${e13.message}` : "OK"}`);
 
-  // 14. voice_search_usage (non-foundation) — NO CASCADE on auth.users FK
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 14. voice_search_usage (non-protected) — NO CASCADE on auth.users FK
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("voice_search_usage").delete().in("user_id", batch);
     }
   }
-  log.push("Deleted non-foundation voice_search_usage: OK");
+  log.push("Deleted non-protected voice_search_usage: OK");
 
-  // 15. favorites (non-foundation)
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 15. favorites (non-protected)
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("favorites").delete().in("user_id", batch);
     }
   }
-  log.push("Deleted non-foundation favorites: OK");
+  log.push("Deleted non-protected favorites: OK");
 
-  // 16. user_memberships (non-foundation)
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 16. user_memberships (non-protected)
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("user_memberships").delete().in("user_id", batch);
     }
   }
-  log.push("Deleted non-foundation user_memberships: OK");
+  log.push("Deleted non-protected user_memberships: OK");
 
-  // 17. user_roles (non-foundation)
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 17. user_roles (non-protected)
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("user_roles").delete().in("user_id", batch);
     }
   }
-  log.push("Deleted non-foundation user_roles: OK");
+  log.push("Deleted non-protected user_roles: OK");
 
-  // 18. role_upgrade_requests (non-foundation)
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 18. role_upgrade_requests (non-protected)
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("role_upgrade_requests").delete().in("user_id", batch);
     }
   }
-  log.push("Deleted non-foundation role_upgrade_requests: OK");
+  log.push("Deleted non-protected role_upgrade_requests: OK");
 
-  // 19. system_settings — NULL out updated_by for non-foundation users
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 19. system_settings — NULL out updated_by for non-protected users
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("system_settings").update({ updated_by: null }).in("updated_by", batch);
     }
   }
-  log.push("Nulled non-foundation system_settings.updated_by: OK");
+  log.push("Nulled non-protected system_settings.updated_by: OK");
 
-  // 20. profiles (non-foundation)
-  if (nonFoundationIds.length > 0) {
-    for (let i = 0; i < nonFoundationIds.length; i += 50) {
-      const batch = nonFoundationIds.slice(i, i + 50);
+  // 20. profiles (non-protected)
+  if (nonProtectedIds.length > 0) {
+    for (let i = 0; i < nonProtectedIds.length; i += 50) {
+      const batch = nonProtectedIds.slice(i, i + 50);
       await admin.from("profiles").delete().in("id", batch);
     }
   }
-  log.push("Deleted non-foundation profiles: OK");
+  log.push("Deleted non-protected profiles: OK");
 
-  // 21. auth.users — delete non-foundation via admin API
-  if (nonFoundationIds.length > 0) {
+  // 21. auth.users — delete non-protected via admin API
+  if (nonProtectedIds.length > 0) {
     let deleted = 0;
-    for (const uid of nonFoundationIds) {
+    for (const uid of nonProtectedIds) {
       const { error } = await admin.auth.admin.deleteUser(uid);
       if (!error) deleted++;
     }
-    log.push(`Deleted ${deleted}/${nonFoundationIds.length} auth.users`);
+    log.push(`Deleted ${deleted}/${nonProtectedIds.length} auth.users`);
   } else {
-    log.push("No non-foundation auth.users to delete");
+    log.push("No non-protected auth.users to delete");
   }
 }
 
@@ -1073,7 +1083,8 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { action } = await req.json();
+    const body = await req.json();
+    const { action } = body;
     const log: string[] = [];
 
     if (action === "status") {
@@ -1092,8 +1103,8 @@ serve(async (req: Request): Promise<Response> => {
       log.push("--- Layer 1: Foundation users ---");
       const emailToId = await ensureFoundation(log);
 
-      // Step 2: Delete non-foundation data
-      log.push("--- Deleting non-foundation data ---");
+      // Step 2: Delete non-protected data
+      log.push("--- Deleting non-protected data ---");
       await deleteNonFoundation(log);
 
       // Step 3: Create inventory
@@ -1116,8 +1127,71 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
+    if (action === "restore-user") {
+      const { email, full_name, role, password } = body;
+      if (!email || !role) {
+        return new Response(
+          JSON.stringify({ error: "restore-user requires email and role" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const admin = createAdminClient();
+
+      // Check if auth user exists
+      const { data: existingProfile } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+      let userId: string;
+      if (existingProfile) {
+        userId = existingProfile.id;
+        log.push(`Profile exists: ${email} (${userId})`);
+      } else {
+        // Recreate auth user
+        const { data: newUser, error: createErr } = await admin.auth.admin.createUser({
+          email,
+          password: password ?? "SeedTest2026!",
+          email_confirm: true,
+          user_metadata: { full_name: full_name ?? email, account_type: "traveler" },
+        });
+        if (createErr) throw new Error(`Failed to create user: ${createErr.message}`);
+        userId = newUser.user.id;
+        await new Promise(r => setTimeout(r, 300));
+        log.push(`Recreated auth user: ${email} → ${userId}`);
+      }
+
+      // Ensure profile is approved
+      await admin.from("profiles").update({
+        approval_status: "approved",
+        full_name: full_name ?? undefined,
+      }).eq("id", userId);
+
+      // Ensure role exists
+      const { data: existingRole } = await admin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("role", role)
+        .maybeSingle();
+
+      if (!existingRole) {
+        await admin.from("user_roles").insert({ user_id: userId, role });
+        log.push(`Added role: ${role}`);
+      } else {
+        log.push(`Role already exists: ${role}`);
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, userId, log }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: `Unknown action: ${action}. Use "status" or "reseed".` }),
+      JSON.stringify({ error: `Unknown action: ${action}. Use "status", "reseed", or "restore-user".` }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
