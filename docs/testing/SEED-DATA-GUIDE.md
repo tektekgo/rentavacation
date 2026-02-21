@@ -38,6 +38,24 @@ Admin UI          →  Admin Dashboard > Dev Tools tab (DEV only)
 | owner4@rent-a-vacation.com | Priya Patel | Wyndham Destinations |
 | owner5@rent-a-vacation.com | Robert Kim | Bluegreen Vacations |
 
+### Owner Maintenance Fees (Layer 1 — Foundation)
+
+Each foundation owner has an `annual_maintenance_fees` value set for testing the Owner Dashboard (Phase 17):
+
+| Owner | Annual Fees | Purpose |
+|-------|------------|---------|
+| Alex Rivera | $2,400 | HGV — mid-range fees |
+| Maria Chen | $3,100 | Marriott — higher fees (Hawaii property) |
+| James Thompson | $1,800 | Disney — lower fees |
+| Priya Patel | $2,700 | Wyndham — above average |
+| Robert Kim | $2,200 | Bluegreen — moderate |
+
+These values are set by the `ensureFoundation()` function in seed-manager and are used by:
+- `OwnerHeadlineStats` — fees coverage percentage KPI
+- `EarningsTimeline` — monthly fee target ReferenceLine
+- `MaintenanceFeeTracker` — coverage progress bar
+- `get_owner_dashboard_stats()` RPC — `fees_covered_percent` calculation
+
 ### Renters (Layer 3 — Recreated on reseed)
 - 50 renters: `renter001@rent-a-vacation.com` through `renter050@rent-a-vacation.com`
 - Signup dates are backdated to create a growth curve over 90 days

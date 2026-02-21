@@ -109,9 +109,18 @@ src/
 │   │   ├── BidsManagerDialog.tsx   # Owner manages incoming bids
 │   │   ├── OpenForBiddingDialog.tsx # Owner opens listing for bids
 │   │   ├── TravelRequestCard.tsx   # Display travel request
-│   │   ├── TravelRequestForm.tsx   # Create travel request
+│   │   ├── TravelRequestForm.tsx   # Create travel request (supports defaultValues prefill)
 │   │   ├── ProposalFormDialog.tsx  # Owner proposes to travel request
+│   │   ├── DemandSignal.tsx       # Shows matching travel request count on listing form
+│   │   ├── PostRequestCTA.tsx     # Empty search results → "Post a Travel Request" CTA
 │   │   └── NotificationBell.tsx   # Real-time notification icon
+│   ├── owner-dashboard/       # Owner dashboard analytics components
+│   │   ├── OwnerHeadlineStats.tsx    # 4 KPI cards (earned, listings, bids, fees coverage)
+│   │   ├── EarningsTimeline.tsx      # Recharts AreaChart with monthly/quarterly toggle
+│   │   ├── MyListingsTable.tsx       # Listing rows with status, fair value, idle alerts
+│   │   ├── BidActivityFeed.tsx       # Event stream with color-coded bid events
+│   │   ├── PricingIntelligence.tsx   # Per-listing fair value + market range
+│   │   └── MaintenanceFeeTracker.tsx # Fee input prompt or coverage progress bar
 │   ├── owner/                 # Owner dashboard components
 │   │   ├── OwnerProperties.tsx     # CRUD properties
 │   │   ├── OwnerListings.tsx       # Manage listings
@@ -144,6 +153,11 @@ src/
 │   ├── usePayouts.ts          # Owner & admin payout data hooks
 │   ├── usePropertyImages.ts   # Upload, list, delete, reorder property images
 │   ├── use-mobile.tsx         # Responsive breakpoint hook
+│   ├── owner/                 # Owner dashboard data hooks
+│   │   ├── useOwnerDashboardStats.ts  # RPC: get_owner_dashboard_stats + useUpdateMaintenanceFees
+│   │   ├── useOwnerEarnings.ts        # RPC: get_owner_monthly_earnings + fillMissingMonths
+│   │   ├── useOwnerListingsData.ts    # Join query → OwnerListingRow[]
+│   │   └── useOwnerBidActivity.ts     # Join query → BidEvent[]
 │   └── executive/             # Executive dashboard data hooks
 │       ├── useBusinessMetrics.ts      # Tier 1 metrics from Supabase
 │       ├── useMarketplaceHealth.ts    # Liquidity score + supply/demand
@@ -177,6 +191,7 @@ src/
 │   ├── database.ts            # Complete DB schema types (~768 lines)
 │   ├── bidding.ts             # Bidding system types
 │   ├── chat.ts                # Text chat types (ChatMessage, ChatStatus, ChatContext)
+│   ├── ownerDashboard.ts      # Owner dashboard types (OwnerDashboardStats, MonthlyEarning, OwnerListingRow, BidEvent)
 │   └── voice.ts               # Voice search types
 ├── index.css                  # Design system tokens (HSL)
 ├── App.tsx                    # Router + providers
@@ -198,6 +213,7 @@ supabase/
     ├── process-deadline-reminders/         # CRON: scan & send overdue reminders + owner confirmation timeouts
     ├── voice-search/                     # VAPI webhook: property search via voice
     ├── text-chat/                        # OpenRouter LLM: text chat with tool calling + SSE streaming
+    ├── match-travel-requests/            # Auto-match approved listings to open travel requests
     ├── seed-manager/                     # DEV only: 3-layer seed data system (status/reseed/restore)
     ├── fetch-industry-news/              # Executive: NewsAPI + Google News RSS (60-min cache)
     ├── fetch-macro-indicators/           # Executive: FRED consumer confidence + travel data
@@ -208,7 +224,7 @@ docs/
 ├── SETUP.md                   # Local dev setup guide
 ├── DEPLOYMENT.md              # CI/CD, env vars, CRON setup
 ├── ARCHITECTURE.md            # This file
-└── supabase-migrations/       # SQL migration scripts (001-006, 012-013)
+└── supabase-migrations/       # SQL migration scripts (001-006, 012-018)
 ```
 
 ---
@@ -281,6 +297,9 @@ User Action → Supabase Auth → onAuthStateChange listener
 - `has_role(_user_id, _role)` → boolean
 - `get_user_roles(_user_id)` → AppRole[]
 - `is_rav_team(_user_id)` → boolean
+- `calculate_fair_value_score(p_listing_id)` → JSONB (tier, range_low/high, avg_accepted_bid, comparable_count)
+- `get_owner_dashboard_stats(p_owner_id)` → JSONB (total_earned_ytd, active_listings, active_bids, maintenance fees, coverage %)
+- `get_owner_monthly_earnings(p_owner_id)` → TABLE(month, earnings, booking_count)
 
 ---
 
@@ -357,6 +376,11 @@ Run in order via Supabase SQL Editor:
 | 006 | `owner_verification.sql` | owner_verifications, verification_documents, trust levels, platform_guarantee_fund |
 | 012 | `phase13_core_business.sql` | property-images storage bucket, owner confirmation columns on booking_confirmations, owner confirmation system_settings, `extend_owner_confirmation_deadline` RPC |
 | 013 | `executive_dashboard_settings.sql` | Executive dashboard system_settings keys (newsapi_key, airdna_api_key, str_api_key, refresh_interval) |
+| 014 | `platform_staff_only.sql` | `platform_staff_only` system setting + `can_access_platform()` RPC for pre-launch lock |
+| 015 | `seed_foundation_flag.sql` | `profiles.is_seed_foundation` boolean column + partial index for seed data management |
+| 016 | `fair_value_score.sql` | `calculate_fair_value_score(listing_id)` RPC — comparable bid analysis with P25/P75 tiers |
+| 017 | `owner_dashboard.sql` | `profiles.annual_maintenance_fees` column, `get_owner_dashboard_stats(owner_id)` + `get_owner_monthly_earnings(owner_id)` RPCs |
+| 018 | `travel_request_enhancements.sql` | `notification_type` enum: `travel_request_expiring_soon`, `travel_request_matched` |
 
 ---
 
@@ -445,7 +469,8 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |
 | `send-cancellation-email` | Internal | Notifies traveler of cancellation status (submitted, approved, denied, counter_offer) |
 | `send-verification-notification` | Client call | Alerts admin when owner uploads verification docs |
-| `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails, processes owner confirmation timeouts (auto-cancel + refund) |
+| `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails, processes owner confirmation timeouts (auto-cancel + refund), sends travel request expiry warnings (48h before deadline) |
+| `match-travel-requests` | Internal (admin listing approval) | Matches newly approved listings against open travel requests by destination, dates, bedrooms, budget, brand. Creates in-app notifications + sends email. Budget-aware (undisclosed budgets don't reveal pricing). |
 | `voice-search` | VAPI webhook | Property search via voice — shared `_shared/property-search.ts` module, state name/abbreviation expansion |
 | `text-chat` | Client call | OpenRouter LLM chat with SSE streaming, tool calling (`search_properties`), 4 context modes (rentals/property-detail/bidding/general). Model: `google/gemini-3-flash-preview`. Auth: manual JWT verification (`--no-verify-jwt`) |
 | `seed-manager` | Client call | DEV only: 3-layer seed data system — status, reseed, restore-user actions. Production guard via `IS_DEV_ENVIRONMENT` secret |
