@@ -38,6 +38,16 @@ import { OwnerVerification } from "@/components/owner/OwnerVerification";
 import { OwnerPayouts } from "@/components/owner/OwnerPayouts";
 import { MembershipPlans } from "@/components/MembershipPlans";
 import { useOwnerCommission } from "@/hooks/useOwnerCommission";
+import { useOwnerDashboardStats } from "@/hooks/owner/useOwnerDashboardStats";
+import { useOwnerEarnings } from "@/hooks/owner/useOwnerEarnings";
+import { useOwnerListingsData } from "@/hooks/owner/useOwnerListingsData";
+import { useOwnerBidActivity } from "@/hooks/owner/useOwnerBidActivity";
+import { OwnerHeadlineStats } from "@/components/owner-dashboard/OwnerHeadlineStats";
+import { EarningsTimeline } from "@/components/owner-dashboard/EarningsTimeline";
+import { MyListingsTable } from "@/components/owner-dashboard/MyListingsTable";
+import { BidActivityFeed } from "@/components/owner-dashboard/BidActivityFeed";
+import { PricingIntelligence } from "@/components/owner-dashboard/PricingIntelligence";
+import { MaintenanceFeeTracker } from "@/components/owner-dashboard/MaintenanceFeeTracker";
 
 interface DashboardStats {
   totalProperties: number;
@@ -64,6 +74,12 @@ const OwnerDashboard = () => {
 
   const pendingRequest = useLatestRequestForRole('property_owner');
   const { effectiveRate, tierName, loading: commissionLoading } = useOwnerCommission();
+
+  // Phase 17: Owner Dashboard data hooks
+  const { data: dashStats, isLoading: dashStatsLoading } = useOwnerDashboardStats();
+  const { data: earningsData, isLoading: earningsLoading } = useOwnerEarnings();
+  const { data: ownerListingsData, isLoading: listingsDataLoading } = useOwnerListingsData();
+  const { data: bidActivity, isLoading: bidActivityLoading } = useOwnerBidActivity();
 
   const activeTab = searchParams.get("tab") || "overview";
 
@@ -286,163 +302,35 @@ const OwnerDashboard = () => {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-              {/* Properties Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <div className="text-2xl font-bold">{stats.totalProperties}</div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Vacation club properties
-                  </p>
-                </CardContent>
-              </Card>
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Section 1: Headline Stats */}
+            <OwnerHeadlineStats stats={dashStats} isLoading={dashStatsLoading} />
 
-              {/* Active Listings Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Listings</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <div className="text-2xl font-bold">{stats.activeListings}</div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Available for booking
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Section 2: Earnings Timeline */}
+            <EarningsTimeline
+              data={earningsData}
+              isLoading={earningsLoading}
+              annualMaintenanceFees={dashStats?.annual_maintenance_fees ?? null}
+            />
 
-              {/* Pending Bookings Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <div className="text-2xl font-bold">{stats.pendingBookings}</div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Awaiting confirmation
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Total Earnings Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-24" />
-                  ) : (
-                    <div className="text-2xl font-bold">
-                      ${stats.totalEarnings.toLocaleString()}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    From {stats.completedBookings} completed bookings
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Commission Rate Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Commission Rate</CardTitle>
-                  <Percent className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {commissionLoading ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <div className="text-2xl font-bold">{effectiveRate}%</div>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {tierName} tier
-                    {tierName === "Free" && (
-                      <span
-                        className="text-primary cursor-pointer ml-1"
-                        onClick={() => setActiveTab("membership")}
-                      >
-                        Upgrade to save
-                      </span>
-                    )}
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Section 3 + 5: Listings + Pricing in 2-column grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <MyListingsTable listings={ownerListingsData} isLoading={listingsDataLoading} />
+              <PricingIntelligence listings={ownerListingsData} isLoading={listingsDataLoading} />
             </div>
 
-            {/* Quick Actions */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card 
-                  className="cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => setActiveTab("properties")}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Plus className="h-5 w-5 text-primary" />
-                      Add New Property
-                    </CardTitle>
-                    <CardDescription>
-                      Register a vacation club property you own
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-
-                <Card 
-                  className="cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => setActiveTab("listings")}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      Create Listing
-                    </CardTitle>
-                    <CardDescription>
-                      List available dates for your properties
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-
-                <Card 
-                  className="cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => setActiveTab("earnings")}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                      View Earnings
-                    </CardTitle>
-                    <CardDescription>
-                      Track your payouts and performance
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </div>
+            {/* Section 4 + 6: Bid Activity + Fee Tracker in 2-column grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <BidActivityFeed events={bidActivity} isLoading={bidActivityLoading} />
+              <MaintenanceFeeTracker
+                annualFees={dashStats?.annual_maintenance_fees ?? null}
+                totalEarnedYtd={dashStats?.total_earned_ytd ?? 0}
+              />
             </div>
 
-            {/* Getting Started Guide */}
+            {/* Getting Started Guide — shown when no properties */}
             {stats.totalProperties === 0 && !isLoading && (
-              <Card className="mt-8 border-dashed">
+              <Card className="border-dashed">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -455,23 +343,23 @@ const OwnerDashboard = () => {
                 <CardContent>
                   <ol className="list-decimal list-inside space-y-3 text-muted-foreground">
                     <li>
-                      <span className="font-medium text-foreground">Add your property</span> — 
+                      <span className="font-medium text-foreground">Add your property</span> —
                       Enter details about your vacation club membership
                     </li>
                     <li>
-                      <span className="font-medium text-foreground">Create a listing</span> — 
+                      <span className="font-medium text-foreground">Create a listing</span> —
                       Select available dates and set your asking price
                     </li>
                     <li>
-                      <span className="font-medium text-foreground">Get approved</span> — 
+                      <span className="font-medium text-foreground">Get approved</span> —
                       Our team will review and publish your listing
                     </li>
                     <li>
-                      <span className="font-medium text-foreground">Receive bookings</span> — 
+                      <span className="font-medium text-foreground">Receive bookings</span> —
                       Renters book and pay through our platform
                     </li>
                     <li>
-                      <span className="font-medium text-foreground">Get paid</span> — 
+                      <span className="font-medium text-foreground">Get paid</span> —
                       Receive your payout after the stay is complete
                     </li>
                   </ol>
