@@ -7,7 +7,6 @@ import type {
 } from "@/types/voice";
 import { supabase } from "@/lib/supabase";
 import { useVoiceQuota } from "./useVoiceQuota";
-
 import type { AssistantOverrides } from "@vapi-ai/web/dist/api";
 
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY as string;
@@ -43,21 +42,11 @@ Other guidelines:
 - Be warm, helpful, and concise
 - Don't mention technical details like function names or API calls`;
 
+// VAPI override diagnostic: testing which fields VAPI accepts.
+// If this minimal override works, we'll add fields back incrementally.
 const ASSISTANT_OVERRIDES: AssistantOverrides = {
   firstMessage:
     "Welcome to Rent-A-Vacation — voice-powered vacation search. Where are you looking to get away?",
-  transcriber: {
-    provider: "deepgram",
-    model: "nova-3",
-    language: "en",
-    endpointing: 300,
-    keywords: [
-      "timeshare", "Rent-A-Vacation", "Hilton Grand Vacations",
-      "Marriott Vacations", "Wyndham", "Bluegreen", "Holiday Inn Club",
-      "Orlando", "Maui", "Cancun", "Myrtle Beach", "Las Vegas",
-      "studio", "one-bedroom", "two-bedroom", "lockoff",
-    ],
-  },
   model: {
     provider: "openai",
     model: "gpt-4o-mini",
@@ -69,19 +58,6 @@ const ASSISTANT_OVERRIDES: AssistantOverrides = {
     ],
   },
   maxDurationSeconds: 120,
-  backgroundSpeechDenoisingPlan: {
-    smartDenoisingPlan: { enabled: true },
-  },
-  startSpeakingPlan: {
-    waitSeconds: 0.6,
-    smartEndpointingPlan: {
-      provider: "livekit",
-    },
-  },
-  stopSpeakingPlan: {
-    numWords: 2,
-    backoffSeconds: 1.5,
-  },
 };
 
 interface VapiMessage {
@@ -124,8 +100,10 @@ export function useVoiceSearch() {
 
     vapi.on("call-end", () => {
       setIsCallActive(false);
-      // Keep "success" status so results stay visible after call ends
-      setStatus((prev) => (prev === "success" ? prev : "idle"));
+      // Keep "success" and "processing" status so results stay visible after call ends
+      setStatus((prev) =>
+        prev === "success" || prev === "processing" ? prev : "idle"
+      );
     });
 
     vapi.on("message", async (message: VapiMessage) => {

@@ -86,8 +86,9 @@ export const ownerLifecycle: FlowDefinition = {
       route: '/rentals',
       label: 'Listing Live',
       component: 'Rentals',
-      description: 'Listing visible to renters on the marketplace',
-      tables: ['listings'],
+      description: 'Listing visible to renters on the marketplace. Auto-matches open travel requests.',
+      tables: ['listings', 'notifications'],
+      edgeFunctions: ['match-travel-requests'],
       branches: [
         { condition: 'Direct booking', targetStepId: 'booking_confirmed' },
         { condition: 'Open for bidding', targetStepId: 'manage_bids' },

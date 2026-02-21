@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { buildEmailHtml, infoBox } from "../_shared/email-template.ts";
+import { buildEmailHtml, detailRow, infoBox } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -215,10 +215,102 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    logStep("Processing complete", { totalEmailsSent: emailsSent, urgentReminders, standardReminders });
+    // === TRAVEL REQUEST EXPIRY WARNINGS ===
+    // Find requests expiring in the next 47-49 hours (window avoids duplicate sends)
+    let expiryWarningsSent = 0;
+    const expiryWindowStart = new Date(now.getTime() + 47 * 3600000);
+    const expiryWindowEnd = new Date(now.getTime() + 49 * 3600000);
+
+    const { data: expiringRequests, error: expiryError } = await supabaseClient
+      .from("travel_requests")
+      .select(`
+        *,
+        traveler:profiles!travel_requests_traveler_id_fkey(email, full_name),
+        travel_proposals(count)
+      `)
+      .eq("status", "open")
+      .gte("proposals_deadline", expiryWindowStart.toISOString())
+      .lte("proposals_deadline", expiryWindowEnd.toISOString());
+
+    if (!expiryError && expiringRequests) {
+      logStep("Found expiring travel requests", { count: expiringRequests.length });
+
+      for (const request of expiringRequests) {
+        // Dedup: check if expiry warning already sent for this request
+        const { data: existingWarning } = await supabaseClient
+          .from("notifications")
+          .select("id")
+          .eq("user_id", request.traveler_id)
+          .eq("type", "travel_request_expiring_soon")
+          .maybeSingle();
+
+        if (existingWarning) {
+          logStep("Expiry warning already sent", { request_id: request.id });
+          continue;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const traveler = request.traveler as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const proposalCount = (request.travel_proposals as any)?.[0]?.count ?? 0;
+
+        // Create in-app notification
+        await supabaseClient.from("notifications").insert({
+          user_id: request.traveler_id,
+          type: "travel_request_expiring_soon",
+          title: "Your travel request expires in 48 hours",
+          message: proposalCount > 0
+            ? `You have ${proposalCount} proposal(s) waiting. Review them before your request closes.`
+            : `Your request for ${request.destination_location} closes soon. Extend it or it will expire.`,
+        });
+
+        // Send email
+        if (traveler?.email) {
+          try {
+            const subject = proposalCount > 0
+              ? `${proposalCount} proposal(s) waiting — your request expires in 48h`
+              : `Your travel request for ${request.destination_location} expires in 48h`;
+
+            const html = buildEmailHtml({
+              recipientName: traveler.full_name,
+              heading: "Your Travel Request Is Expiring",
+              body: `
+                ${detailRow("Destination", request.destination_location)}
+                ${detailRow("Dates", `${request.check_in_date} – ${request.check_out_date}`)}
+                ${detailRow("Proposals received", String(proposalCount))}
+                ${detailRow("Expires", new Date(request.proposals_deadline).toLocaleDateString())}
+                ${proposalCount > 0
+                  ? infoBox("You have proposals waiting. Review them before your request closes.", "warning")
+                  : infoBox("No proposals yet. You can extend your deadline to give owners more time.", "info")
+                }
+              `,
+              cta: {
+                label: proposalCount > 0 ? "Review Proposals →" : "View My Request →",
+                url: "https://rent-a-vacation.com/my-bids",
+              },
+            });
+
+            await resend.emails.send({
+              from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+              to: [traveler.email],
+              subject,
+              html,
+            });
+          } catch (emailErr) {
+            logStep("Expiry warning email failed", { request_id: request.id, error: String(emailErr) });
+          }
+        }
+
+        expiryWarningsSent++;
+        emailsSent++;
+        logStep("Expiry warning sent", { request_id: request.id, traveler_id: request.traveler_id });
+      }
+    }
+
+    logStep("Processing complete", { totalEmailsSent: emailsSent, urgentReminders, standardReminders, expiryWarningsSent });
 
     return new Response(
-      JSON.stringify({ success: true, emailsSent, urgentReminders, standardReminders }),
+      JSON.stringify({ success: true, emailsSent, urgentReminders, standardReminders, expiryWarningsSent }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {

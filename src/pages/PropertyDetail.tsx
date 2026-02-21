@@ -5,6 +5,9 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ResortInfoCard } from "@/components/resort/ResortInfoCard";
 import { UnitTypeSpecs } from "@/components/resort/UnitTypeSpecs";
+import { useTextChat } from "@/hooks/useTextChat";
+import { TextChatButton } from "@/components/TextChatButton";
+import { TextChatPanel } from "@/components/TextChatPanel";
 import {
   Star,
   MapPin,
@@ -36,6 +39,7 @@ import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAg
 import { BidFormDialog } from "@/components/bidding/BidFormDialog";
 import { Gavel } from "lucide-react";
 import { isPast } from "date-fns";
+import { FairValueCard } from "@/components/fair-value/FairValueCard";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -61,10 +65,20 @@ const PropertyDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [guests, setGuests] = useState(1);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Auth
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Text chat
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "property-detail" });
 
   // Favorites
   const { data: favoriteIds = [] } = useFavoriteIds();
@@ -423,6 +437,8 @@ const PropertyDetail = () => {
                     </p>
                   )}
 
+                  <FairValueCard listingId={listing.id} viewerRole={isOwnListing ? 'owner' : 'traveler'} />
+
                   <div className="space-y-4 mb-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">Check-in</label>
@@ -489,6 +505,17 @@ const PropertyDetail = () => {
                       <p className="text-center text-sm text-muted-foreground mb-4">
                         You won't be charged yet
                       </p>
+
+                      {user && (
+                        <Button
+                          variant="ghost"
+                          className="w-full mb-2"
+                          size="sm"
+                          onClick={() => setChatOpen(true)}
+                        >
+                          Questions? Ask RAVIO
+                        </Button>
+                      )}
                     </>
                   )}
 
@@ -653,6 +680,18 @@ const PropertyDetail = () => {
           onOpenChange={setBidDialogOpen}
         />
       )}
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="property-detail"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

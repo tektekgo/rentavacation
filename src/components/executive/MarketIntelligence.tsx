@@ -4,6 +4,7 @@ import {
 import { useAirDNAData, useSTRData, useIntegrationSettings } from '@/hooks/executive';
 import { SectionHeading } from './SectionHeading';
 import { BYOKCard } from './BYOKCard';
+import { TooltipIcon } from './TooltipIcon';
 import { CHART_COLORS, DARK_CHART_THEME, formatCurrency, formatPercent } from './utils';
 
 interface MarketIntelligenceProps {
@@ -62,6 +63,7 @@ export function MarketIntelligence({ onOpenSettings }: MarketIntelligenceProps) 
           provider="AirDNA"
           isDemo={airdna?.isDemo ?? true}
           onConnect={onOpenSettings}
+          titleExtra={<TooltipIcon definition="Compares RAV listing prices against AirDNA market averages by destination. Shows how competitively RAV properties are priced." whyItMatters="Validates RAV's value proposition — renters get below-market rates while owners still earn more than traditional timeshare exchanges." />}
         >
           {airdnaDestinations.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -92,6 +94,7 @@ export function MarketIntelligence({ onOpenSettings }: MarketIntelligenceProps) 
           provider="STR Global"
           isDemo={str?.isDemo ?? true}
           onConnect={onOpenSettings}
+          titleExtra={<TooltipIcon definition="Industry-standard hospitality metrics from STR Global — occupancy rates, ADR (Average Daily Rate), and RevPAR (Revenue Per Available Room) compared to market averages." whyItMatters="Benchmarks RAV performance against the broader vacation rental industry to identify competitive advantages and areas for improvement." />}
         >
           {strMetrics.length > 0 ? (
             <div className="space-y-3">
@@ -131,7 +134,10 @@ export function MarketIntelligence({ onOpenSettings }: MarketIntelligenceProps) 
 
         {/* Pricing Position (own data) */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
-          <h3 className="text-sm font-medium text-white mb-4">RAV Pricing Position</h3>
+          <h3 className="text-sm font-medium text-white mb-4 flex items-center">
+            RAV Pricing Position
+            <TooltipIcon definition="Shows how RAV listing prices compare to market rates by destination. Negative percentages indicate RAV is priced below market — a key selling point for renters." whyItMatters="Demonstrates the dual value proposition: renters save money vs. market rates, owners earn more than through traditional timeshare exchange programs." />
+          </h3>
           <div className="space-y-4">
             {airdnaDestinations.slice(0, 4).map((dest) => {
               const discount = dest.marketAvgPrice > 0

@@ -44,6 +44,8 @@ import { OpenForBiddingDialog } from "@/components/bidding/OpenForBiddingDialog"
 import { BidsManagerDialog } from "@/components/bidding/BidsManagerDialog";
 import { ActionSuccessCard } from "@/components/ActionSuccessCard";
 import { sendListingSubmittedEmail } from "@/lib/email";
+import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
+import { DemandSignal } from "@/components/bidding/DemandSignal";
 
 type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 type ListingUpdate = Database['public']['Tables']['listings']['Update'];
@@ -409,6 +411,18 @@ const OwnerListings = () => {
                 </div>
               </div>
 
+              {/* Demand signal — shows matching travel requests */}
+              {formData.property_id && formData.check_in_date && (() => {
+                const selectedProp = properties.find(p => p.id === formData.property_id);
+                return selectedProp ? (
+                  <DemandSignal
+                    destination={selectedProp.location || selectedProp.resort_name || ""}
+                    checkInDate={formData.check_in_date}
+                    bedrooms={selectedProp.bedrooms || 1}
+                  />
+                ) : null;
+              })()}
+
               <div className="space-y-2">
                 <Label htmlFor="owner_price">Your Asking Price ($)</Label>
                 <Input
@@ -547,6 +561,7 @@ const OwnerListings = () => {
                         (Your price: ${listing.owner_price.toLocaleString()})
                       </p>
                     )}
+                    <ListingFairValueBadge listingId={listing.id} />
                     {/* Bidding End Time */}
                     {listing.open_for_bidding && listing.bidding_ends_at && !isPast(new Date(listing.bidding_ends_at)) && (
                       <p className="text-xs text-muted-foreground mt-1">

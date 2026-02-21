@@ -40,8 +40,9 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/rentals',
       label: 'Search Listings',
       component: 'Rentals',
-      description: 'Browse, filter, and search active listings',
+      description: 'Browse, filter, and search active listings via text chat or voice search',
       tables: ['listings', 'properties'],
+      edgeFunctions: ['voice-search', 'text-chat'],
       branches: [
         { condition: 'Found listing', targetStepId: 'view_property', label: 'View listing' },
         { condition: 'Post travel request', targetStepId: 'post_travel_request', label: 'Request vacation' },

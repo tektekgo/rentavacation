@@ -2,6 +2,7 @@ import { ExternalLink, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lu
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useIndustryNews, useMacroIndicators } from '@/hooks/executive';
 import { SectionHeading } from './SectionHeading';
+import { TooltipIcon } from './TooltipIcon';
 import type { NewsItem, MacroIndicator } from '@/types/executive';
 
 function NewsCard({ item }: { item: NewsItem }) {
@@ -54,6 +55,10 @@ function RegulatoryTimeline({ items }: { items: NewsItem[] }) {
         <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-400" />
           Regulatory Radar
+          <TooltipIcon
+            definition="Tracks regulatory news affecting short-term rentals — local ordinances, tax changes, licensing requirements, and federal guidelines."
+            whyItMatters="Regulatory changes directly impact where owners can list, what fees apply, and platform compliance requirements."
+          />
         </h3>
         <p className="text-xs text-slate-500 py-4 text-center">No regulatory alerts at this time.</p>
       </div>
@@ -65,6 +70,10 @@ function RegulatoryTimeline({ items }: { items: NewsItem[] }) {
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <AlertTriangle className="h-4 w-4 text-amber-400" />
         Regulatory Radar
+        <TooltipIcon
+          definition="Tracks regulatory news affecting short-term rentals — local ordinances, tax changes, licensing requirements, and federal guidelines."
+          whyItMatters="Regulatory changes directly impact where owners can list, what fees apply, and platform compliance requirements."
+        />
       </h3>
       <div className="space-y-3">
         {regulatory.slice(0, 4).map((item) => (
@@ -158,7 +167,13 @@ export function IndustryFeed() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {/* Industry News */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
-          <h3 className="text-sm font-medium text-white mb-3">Industry News</h3>
+          <h3 className="text-sm font-medium text-white mb-3">
+            Industry News
+            <TooltipIcon
+              definition="Real-time news feed covering vacation rentals, short-term rentals, and timeshare industry developments. Sourced from NewsAPI."
+              whyItMatters="Stay ahead of market shifts, competitor moves, and emerging trends that affect your rental marketplace."
+            />
+          </h3>
           <div className="space-y-0">
             {newsItems.length > 0 ? (
               newsItems.slice(0, 7).map((item) => <NewsCard key={item.id} item={item} />)
@@ -173,7 +188,13 @@ export function IndustryFeed() {
 
         {/* Macro Indicators */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
-          <h3 className="text-sm font-medium text-white mb-3">Macro Indicators</h3>
+          <h3 className="text-sm font-medium text-white mb-3">
+            Macro Indicators
+            <TooltipIcon
+              definition="Key economic metrics affecting the vacation rental market — occupancy rates, RevPAR, average daily rates, and travel spending trends. Currently using simulated data."
+              whyItMatters="Macro trends signal demand shifts before they show up in your booking pipeline."
+            />
+          </h3>
           <div className="space-y-2">
             {macroItems.length > 0 ? (
               macroItems.map((ind) => <MacroCard key={ind.id} indicator={ind} />)

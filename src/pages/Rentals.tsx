@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -36,12 +41,17 @@ import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
 import { VoiceQuotaIndicator } from "@/components/VoiceQuotaIndicator";
+import { useTextChat } from "@/hooks/useTextChat";
+import { TextChatButton } from "@/components/TextChatButton";
+import { TextChatPanel } from "@/components/TextChatPanel";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
+import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
+import { PostRequestCTA } from "@/components/bidding/PostRequestCTA";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -102,6 +112,14 @@ const Rentals = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("location") || searchParams.get("brand") || "");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Filter state
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minGuests, setMinGuests] = useState("");
+  const [minBedrooms, setMinBedrooms] = useState("");
+  const [brandFilter, setBrandFilter] = useState("");
+
   // Auth state for voice search gating
   const { user } = useAuth();
   const isAuthenticated = !!user;
@@ -118,6 +136,16 @@ const Rentals = () => {
   // Real listings from database
   const { data: listings = [], isLoading, error: listingsError } = useActiveListings();
   const { favoritesCount } = useListingSocialProof();
+
+  // Text chat integration
+  const [chatOpen, setChatOpen] = useState(false);
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "rentals" });
 
   // Voice search integration
   const {
@@ -149,20 +177,52 @@ const Rentals = () => {
     toggleFavoriteMutation.mutate(id);
   };
 
-  // Filter listings by search query
-  const filteredListings = searchQuery.trim()
-    ? listings.filter((listing) => {
-        const q = searchQuery.toLowerCase();
-        const name = getListingDisplayName(listing).toLowerCase();
-        const location = getListingLocation(listing).toLowerCase();
-        const brand = getListingBrandLabel(listing).toLowerCase();
-        return (
-          location.includes(q) ||
-          name.includes(q) ||
-          brand.includes(q)
-        );
-      })
-    : listings;
+  // Active filter count for badge
+  const activeFilterCount = [
+    dateRange?.from,
+    minPrice,
+    maxPrice,
+    minGuests,
+    minBedrooms,
+    brandFilter && brandFilter !== "all" ? brandFilter : "",
+  ].filter(Boolean).length;
+
+  // Filter listings by all criteria
+  const filteredListings = listings.filter((listing) => {
+    // Text search (existing)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const name = getListingDisplayName(listing).toLowerCase();
+      const location = getListingLocation(listing).toLowerCase();
+      const brand = getListingBrandLabel(listing).toLowerCase();
+      if (!location.includes(q) && !name.includes(q) && !brand.includes(q)) return false;
+    }
+
+    // Date range overlap
+    if (dateRange?.from) {
+      const listingStart = new Date(listing.check_in_date);
+      const listingEnd = new Date(listing.check_out_date);
+      const filterEnd = dateRange.to || dateRange.from;
+      if (listingStart > filterEnd || listingEnd < dateRange.from) return false;
+    }
+
+    // Price range
+    if (minPrice && listing.final_price < Number(minPrice)) return false;
+    if (maxPrice && listing.final_price > Number(maxPrice)) return false;
+
+    // Guests
+    if (minGuests && listing.property.sleeps < Number(minGuests)) return false;
+
+    // Bedrooms
+    if (minBedrooms && listing.property.bedrooms < Number(minBedrooms)) return false;
+
+    // Brand (from filter panel dropdown)
+    if (brandFilter && brandFilter !== "all") {
+      if (listing.property.brand !== brandFilter) return false;
+    }
+
+    return true;
+  });
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredListings.length / ITEMS_PER_PAGE));
@@ -172,10 +232,23 @@ const Rentals = () => {
     safePage * ITEMS_PER_PAGE
   );
 
-  // Reset page when search changes
+  // Reset page when any filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, dateRange, minPrice, maxPrice, minGuests, minBedrooms, brandFilter]);
+
+  // Clear all filters helper
+  const clearAllFilters = () => {
+    setDateRange(undefined);
+    setMinPrice("");
+    setMaxPrice("");
+    setMinGuests("");
+    setMinBedrooms("");
+    setBrandFilter("");
+    setSearchQuery("");
+    setShowFilters(false);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,15 +273,41 @@ const Rentals = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="Check-in - Check-out" className="pl-10" />
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal pl-10 relative h-10">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    {dateRange?.from ? (
+                      <span>
+                        {format(dateRange.from, "MMM d")}
+                        {dateRange.to ? ` - ${format(dateRange.to, "MMM d")}` : ""}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Check-in - Check-out</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={window.innerWidth < 640 ? 1 : 2}
+                    disabled={{ before: new Date() }}
+                  />
+                </PopoverContent>
+              </Popover>
               <div className="flex gap-2">
-                <Button className="flex-1">
+                <Button className="flex-1" onClick={() => setCurrentPage(1)}>
                   <Search className="w-4 h-4 mr-2" />
                   Search
                 </Button>
+                <TextChatButton
+                  onClick={() => setChatOpen(true)}
+                  isOpen={chatOpen}
+                  disabled={!isAuthenticated}
+                  disabledReason={!isAuthenticated ? "Sign in to ask RAVIO" : undefined}
+                />
                 {voiceEnabled && (
                   <VoiceSearchButton
                     status={voiceStatus}
@@ -275,6 +374,11 @@ const Rentals = () => {
               >
                 <SlidersHorizontal className="w-4 h-4 mr-2" />
                 Filters
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1.5 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </Badge>
+                )}
               </Button>
               <Button variant="outline" onClick={() => setShowFilters(true)}>
                 Price
@@ -323,26 +427,40 @@ const Rentals = () => {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Price Range</label>
                   <div className="flex gap-2">
-                    <Input placeholder="Min" type="number" />
-                    <Input placeholder="Max" type="number" />
+                    <Input placeholder="Min" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+                    <Input placeholder="Max" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Guests</label>
-                  <Input placeholder="Number of guests" type="number" />
+                  <Input placeholder="Min guests" type="number" value={minGuests} onChange={(e) => setMinGuests(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Bedrooms</label>
-                  <Input placeholder="Min bedrooms" type="number" />
+                  <Input placeholder="Min bedrooms" type="number" value={minBedrooms} onChange={(e) => setMinBedrooms(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Resort Brand</label>
-                  <Input placeholder="e.g., Marriott, Hilton" />
+                  <Select value={brandFilter} onValueChange={setBrandFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Brands" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Brands</SelectItem>
+                      {Object.entries(BRAND_LABELS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
-                <Button>Apply Filters</Button>
-                <Button variant="outline">Clear All</Button>
+                <Button onClick={() => { setShowFilters(false); setCurrentPage(1); }}>
+                  Apply Filters
+                </Button>
+                <Button variant="outline" onClick={clearAllFilters}>
+                  Clear All
+                </Button>
               </div>
             </div>
           )}
@@ -498,6 +616,11 @@ const Rentals = () => {
                   </Button>
                 </Link>
               </div>
+              <PostRequestCTA
+                searchDestination={searchQuery}
+                searchCheckIn={dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined}
+                searchCheckOut={dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined}
+              />
             </div>
           )}
 
@@ -509,11 +632,16 @@ const Rentals = () => {
                 No properties found
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                We couldn't find any properties matching "{searchQuery}". Try a different location or browse all available rentals.
+                No properties match your current filters. Try adjusting your search criteria or browse all available rentals.
               </p>
-              <Button variant="outline" onClick={() => setSearchQuery("")}>
+              <Button variant="outline" onClick={clearAllFilters}>
                 View All Properties
               </Button>
+              <PostRequestCTA
+                searchDestination={searchQuery}
+                searchCheckIn={dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined}
+                searchCheckOut={dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined}
+              />
             </div>
           ) : !isLoading && !listingsError && filteredListings.length > 0 && (
           <>
@@ -652,6 +780,7 @@ const Rentals = () => {
                             ${pricePerNight}/night
                           </span>
                         )}
+                        <ListingFairValueBadge listingId={listing.id} />
                       </div>
                       <div className="text-xs text-muted-foreground">
                         <Users className="w-3 h-3 inline mr-1" />
@@ -700,6 +829,18 @@ const Rentals = () => {
       </section>
 
       <Footer />
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="rentals"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

@@ -1,7 +1,198 @@
 # Completed Phases Archive
 
 > Detailed records of completed project phases, moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 15, 2026
+> **Last Archived:** February 21, 2026
+
+---
+
+## Phase 18: Travel Request Enhancements
+
+**Completed:** February 21, 2026
+**Status:** Code merged to dev, migrations deployed to DEV
+**Migration:** `018_travel_request_enhancements.sql`
+
+**What Was Done:**
+
+Four automation features connecting travel requests with listings across the platform.
+
+### 1. Auto-Match on Listing Approval
+- **Edge function:** `supabase/functions/match-travel-requests/index.ts` — POST `{ listing_id }` matches open travel requests by destination (city ILIKE), dates (±30 days + flexibility), bedrooms, budget, brand preferences
+- **Budget-aware notifications:** Undisclosed budgets don't reveal listing pricing
+- **Deduplication:** Checks `notifications` table before creating duplicates
+- **Trigger:** Fire-and-forget call from `AdminListings.tsx` after listing approval
+
+### 2. Demand Signal on Listing Form
+- **Component:** `src/components/bidding/DemandSignal.tsx` — Shows matching travel request count while creating a listing
+- 500ms debounce, queries `travel_requests` table by destination, check-in date, bedrooms
+- Displays amber card: "{count} traveler(s) looking for this" + max disclosed budget
+- Wired into `OwnerListings.tsx` listing creation dialog
+
+### 3. Post-Request CTA on Empty Results
+- **Component:** `src/components/bidding/PostRequestCTA.tsx` — "Can't find what you need?" CTA
+- Builds URL: `/bidding?tab=requests&prefill=true&destination=...&checkin=...&checkout=...`
+- Wired into both empty states in `Rentals.tsx`
+
+### 4. Travel Request Expiry Warnings
+- Added 48h expiry warning scan to `process-deadline-reminders/index.ts`
+- Finds travel requests with `proposals_deadline` in 47-49h window
+- Creates in-app notification + sends email with proposal count
+- Dedup via `notifications` table (type='travel_request_expiring_soon')
+
+### Cross-Page Prefill
+- `BiddingMarketplace.tsx` reads URL params (`tab`, `prefill`, `destination`, `checkin`, `checkout`)
+- `TravelRequestForm.tsx` accepts `defaultValues` prop for pre-filling from URL params
+
+### Tests
+- 9 new tests: DemandSignal (3), PostRequestCTA (6)
+- 273 total tests passing, 0 type errors, build clean
+
+**New Files:**
+- `docs/supabase-migrations/018_travel_request_enhancements.sql`
+- `supabase/functions/match-travel-requests/index.ts`
+- `src/components/bidding/DemandSignal.tsx`, `PostRequestCTA.tsx`
+- Test files for both components
+
+**Modified Files:**
+- `src/pages/Rentals.tsx` — PostRequestCTA in empty states
+- `src/pages/BiddingMarketplace.tsx` — URL param reading + default tab
+- `src/components/bidding/TravelRequestForm.tsx` — defaultValues prop
+- `src/components/admin/AdminListings.tsx` — fire-and-forget match trigger
+- `src/components/owner/OwnerListings.tsx` — DemandSignal in listing form
+- `supabase/functions/process-deadline-reminders/index.ts` — expiry warning scan
+- `src/flows/owner-lifecycle.ts` — updated listing_active step
+
+---
+
+## Phase 17: Owner Dashboard Enhancement
+
+**Completed:** February 21, 2026
+**Status:** Code merged to dev, migrations deployed to DEV
+**Migration:** `017_owner_dashboard.sql`
+
+**What Was Done:**
+
+Replaced the placeholder Overview tab in Owner Dashboard with 6 data-driven sections powered by 2 new Supabase RPC functions and 4 new data hooks.
+
+### Database
+- `profiles.annual_maintenance_fees` + `maintenance_fee_updated_at` columns
+- `get_owner_dashboard_stats(p_owner_id)` — RPC returning total_earned_ytd, active_listings, active_bids, annual_maintenance_fees, fees_covered_percent
+- `get_owner_monthly_earnings(p_owner_id)` — RPC returning 12-month earnings timeline
+
+### Data Hooks (4)
+- `src/hooks/owner/useOwnerDashboardStats.ts` — RPC call + `useUpdateMaintenanceFees` mutation
+- `src/hooks/owner/useOwnerEarnings.ts` — RPC call + `fillMissingMonths` pure function
+- `src/hooks/owner/useOwnerListingsData.ts` — Join query: listings + properties + listing_bids → `OwnerListingRow[]`
+- `src/hooks/owner/useOwnerBidActivity.ts` — Join query with `mapBidStatus` helper → `BidEvent[]`
+
+### Components (6)
+- `OwnerHeadlineStats.tsx` — 4 KPI cards with color-coded fees coverage
+- `EarningsTimeline.tsx` — Recharts AreaChart with monthly/quarterly toggle, ReferenceLine for fee target
+- `MyListingsTable.tsx` — Listing rows with status badges, FairValueBadge, idle week alert
+- `BidActivityFeed.tsx` — Event stream with EVENT_CONFIG mapping (color, icon per bid status)
+- `PricingIntelligence.tsx` — Per-listing FairValue + market range display
+- `MaintenanceFeeTracker.tsx` — Dual-state: prompt (null fees) vs tracker (coverage progress bar)
+
+### Tests
+- 30 new tests: fillMissingMonths (5), OwnerHeadlineStats (6), MyListingsTable (6), BidActivityFeed (5), MaintenanceFeeTracker (8)
+- 264 total tests passing, 0 type errors, build clean
+
+**New Files:**
+- `src/types/ownerDashboard.ts`
+- 4 hooks in `src/hooks/owner/`
+- 6 components in `src/components/owner-dashboard/`
+- `docs/supabase-migrations/017_owner_dashboard.sql`
+- 5 test files
+
+**Modified Files:**
+- `src/pages/OwnerDashboard.tsx` — replaced Overview tab content with 6 new sections
+
+---
+
+## Phase 16: Maintenance Fee Calculator
+
+**Completed:** February 21, 2026
+**Status:** Code merged to dev (no migration needed — uses Phase 17 maintenance fee column)
+
+**What Was Done:**
+
+The maintenance fee tracking is embedded within the Phase 17 Owner Dashboard components:
+- `MaintenanceFeeTracker.tsx` — prompts owners to enter their annual maintenance fee if not set, then displays a coverage progress bar showing YTD earnings vs annual fees
+- `OwnerHeadlineStats.tsx` — shows fees coverage percentage with color-coded indicator
+- `EarningsTimeline.tsx` — ReferenceLine on chart showing monthly maintenance fee target
+
+No separate migration needed — the `annual_maintenance_fees` column was added in migration 017.
+
+---
+
+## Phase 15: Fair Value Score
+
+**Completed:** February 21, 2026
+**Status:** Code merged to dev, migration deployed to DEV
+**Migration:** `016_fair_value_score.sql`
+
+**What Was Done:**
+
+Built a market value indicator for listings based on comparable accepted bids.
+
+### Database
+- `calculate_fair_value_score(p_listing_id)` — RPC function that:
+  - Finds comparable accepted bids (same city, same bedrooms, ±45 days)
+  - Falls back to wider search (any city, same bedrooms, ±90 days) if < 3 comparables
+  - Calculates P25/P75 percentiles and returns a tier: `below_market`, `fair_value`, `above_market`, or `insufficient_data`
+
+### Frontend
+- `ListingFairValueBadge.tsx` — Color-coded badge (green=fair, amber=above, blue=below)
+- Used in `MyListingsTable.tsx` and `PricingIntelligence.tsx` in the Owner Dashboard
+
+**New Files:**
+- `docs/supabase-migrations/016_fair_value_score.sql`
+- `src/components/owner-dashboard/ListingFairValueBadge.tsx` (or similar)
+
+---
+
+## Text Chat Agent (RAVIO)
+
+**Completed:** February 21, 2026
+**Status:** Deployed to DEV (tested working)
+**Docs:** `docs/features/text-chat/`
+**Decision:** DEC-020
+
+**What Was Done:**
+
+Built a conversational text chat assistant (RAVIO) powered by OpenRouter, with property search tool calling, SSE streaming, and context-aware system prompts. Runs alongside the existing VAPI voice search as a separate, independent system.
+
+### Backend
+- **Shared search module:** `supabase/functions/_shared/property-search.ts` — Extracted from voice-search, used by both voice-search and text-chat. Includes state name ↔ abbreviation expansion (e.g., "Hawaii" ↔ "HI") for flexible destination matching.
+- **Edge function:** `supabase/functions/text-chat/index.ts` — OpenRouter API with `google/gemini-3-flash-preview` model. SSE streaming, tool calling (`search_properties`), 4 context-based system prompts (rentals, property-detail, bidding, general). CORS allowlist, per-IP rate limiting (60 req/min), manual JWT verification via `auth.getUser(jwt)`.
+- **voice-search refactored** to import shared `searchProperties()` module — zero behavior change.
+
+### Frontend
+- **Types:** `src/types/chat.ts` — `ChatMessage`, `ChatStatus`, `ChatContext`
+- **Hook:** `src/hooks/useTextChat.ts` — Streaming SSE parser, AbortController, context-aware, session-only state
+- **Components:** `TextChatButton.tsx` (MessageCircle icon), `TextChatPanel.tsx` (Sheet-based UI with message bubbles, search result cards, suggested prompts, typing indicator)
+- **Page integration:** Rentals (rentals), PropertyDetail (property-detail), BiddingMarketplace (bidding), HowItWorks (general)
+
+### Debugging & Fixes (Session 7)
+- **VAPI 400 error:** Track B overrides (transcriber, speaking plans) rejected by VAPI SDK. Solution: minimal overrides only (firstMessage, model, maxDurationSeconds). Configure transcriber/speaking plans in VAPI dashboard.
+- **Text chat 401:** Supabase built-in JWT verification + edge function `getUser()` without JWT param. Solution: `--no-verify-jwt` + pass JWT directly to `auth.getUser(jwt)`.
+- **Text chat 502:** Model `google/gemini-2.0-flash-exp:free` removed from OpenRouter. Solution: switch to `google/gemini-3-flash-preview`.
+- **Destination matching:** "Hawaii" didn't match "Kapolei, HI". Solution: state name/abbreviation expansion in shared search module.
+- **DEV banner z-index:** z-[9999] interfered with popovers. Solution: lowered to z-[60].
+- **Double X button:** SheetContent built-in close + custom close. Solution: `[&>button.absolute]:hidden`.
+
+### Tests
+- 26 new tests (208 total), 0 type errors, 0 lint errors, build passing
+
+**New Files (14):**
+- `supabase/functions/_shared/property-search.ts`, `supabase/functions/text-chat/index.ts`
+- `src/types/chat.ts`, `src/hooks/useTextChat.ts`
+- `src/components/TextChatButton.tsx`, `src/components/TextChatPanel.tsx`
+- 8 test files, 5 documentation files
+
+**Modified Files (6):**
+- `supabase/functions/voice-search/index.ts` (shared module import)
+- `src/pages/Rentals.tsx`, `PropertyDetail.tsx`, `BiddingMarketplace.tsx`, `HowItWorksPage.tsx` (chat integration)
+- `src/flows/traveler-lifecycle.ts` (flow manifest)
 
 ---
 

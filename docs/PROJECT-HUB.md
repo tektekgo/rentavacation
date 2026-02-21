@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 20, 2026
+> **Last Updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,170 +78,153 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Voice Experience Tracks C-D + Platform Hardening
-**Started:** February 20, 2026
+**Active Phase:** Voice Tracks C-D + remaining backlog
+**Started:** February 21, 2026
 
 ### Working on TODAY:
-- [x] Phase 14: Executive Dashboard — deployed to PROD (PR #14, Feb 20)
-- [x] Dev environment banner — yellow top banner on DEV only (App.tsx)
-- [x] Voice Track B: Quality tuning — Nova-3, endpointing, anti-interruption, keyword boost (PR #15)
-- [x] Executive dashboard header fix + description improvement (PR #15)
-- [x] NEWSAPI_KEY configured on DEV + PROD for live industry news (PR #15)
-- [x] Staff Only Mode — pre-launch platform lock for PROD safety (PR #16)
+- [x] **Phase 18: Travel Request Enhancements** — 4 enhancements complete
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
-- [x] **Staff Only Mode** — Pre-launch platform lock (PR #16). Toggle in Admin > System Settings locks PROD to RAV team only. Non-RAV users see "Coming Soon" on login/signup. Enforced at 3 layers: database RLS (`can_access_platform()`), Login.tsx sign-out, Signup.tsx form block. Migration 014 deployed to DEV + PROD (Feb 20)
-- [x] **Executive Dashboard Fixes** — Fixed header hidden behind fixed nav (added pt-16 md:pt-20), improved page description, configured NEWSAPI_KEY secret on DEV + PROD for live industry news (PR #15, Feb 20)
-- [x] **Voice Track B: Quality Tuning** — Nova-3 transcription (54% WER improvement), 300ms endpointing + LiveKit smart endpointing, anti-interruption (stopSpeakingPlan, backgroundSpeechDenoisingPlan), 16 keyword boosts, 120s max duration (PR #15, Feb 20)
-- [x] **DEV Environment Banner** — Yellow fixed banner at top of app when running against DEV Supabase, with content offset (Feb 20)
-- [x] **Phase 14: Executive Dashboard** — Deployed to PROD (PR #14). Full investor-grade dashboard: 6 sections, 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index, BYOK integrations, dark-themed, 15+ new tests. Migration 013 + 4 edge functions deployed to DEV + PROD (Feb 20)
-- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable, CORS tightened, per-IP rate limiting. Edge function deployed to DEV + PROD (Feb 20)
-- [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, auth flash fix (Feb 20)
-- [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
-- [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
-- [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files: UI labels, flow manifests, documentation, user guides, admin components. Centralized ROLE_LABELS/ROLE_COLORS in database.ts. Architecture link for rav_owner. 96 tests passing (Feb 17)
-- [x] **UX Feedback Improvements** — ActionSuccessCard component, inline success states in 6 dialogs/pages, 2 email confirmations, BookingSuccess "What Happens Next" section, admin dashboard tab layout fix. 96 tests passing (Feb 16)
-- [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
-- [x] **CI fully green** — all 4 jobs passing (lint, tests, E2E, Lighthouse), Qase receiving results (Feb 16)
-- [x] **58 ESLint errors fixed** — `any` types replaced across 17 files, unblocked CI pipeline (Feb 16)
-- [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags, 11 new tests (Feb 16)
-- [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection, CLAUDE.md documented (Feb 15)
-- [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page + edge function deployed (Feb 15)
-- [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
+- [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
+- [x] **Phase 17: Owner Dashboard** (Feb 21, Session 9). 6 business intelligence sections in Overview tab: HeadlineStats (earned YTD, fees covered %, active bids), EarningsTimeline (AreaChart with monthly/quarterly + fee target line), MyListingsTable (status badges, FairValue badges, idle week alerts), BidActivityFeed (event stream), PricingIntelligence (per-listing FairValue + market range), MaintenanceFeeTracker (inline editor, coverage bar). 4 data hooks, migration 017, types. 30 new tests (264 total).
+- [x] **Phase 15: Fair Value Score** (Feb 21, Session 8). PostgreSQL RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge` components. Wired into Rentals listing cards, PropertyDetail sidebar, OwnerListings management. Owner vs traveler messaging. 14 new tests (222 total).
+- [x] **Phase 16: Maintenance Fee Calculator** (Feb 21, Session 8). Public `/calculator` route (no auth). Pure calculation logic in `calculatorLogic.ts`, `OwnershipForm`, `BreakevenResults`, `BreakevenBar`, `CalculatorCTA` components. 9 vacation club brands, 4 unit types, live break-even analysis, color-coded progress bars, CTA to owner signup. Footer link added. 12 new tests (234 total).
+- [x] **Functional Search Bar** (Feb 21, Session 8). Calendar date picker (Popover + Calendar), date range filter, all filter panel inputs wired (price/guests/bedrooms/brand), Search button, Apply/Clear handlers, active filter count badge, URL not persisted yet.
+- [x] **Exec Dashboard Polish** (Feb 21, Session 8). STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards), Bid Activity tooltip fix (was showing $ on count values), Bid Spread Index tooltip fix (was showing $ on percentages).
+- [x] **Text Chat Agent — Deployed & Working** (Feb 21). 26 tests (208 total). DEC-020.
+- [x] **Seed Data System** — 3-layer seed system, Migration 015 (PR #17, Feb 21)
 
 ### Blocked/Waiting:
-- Phase 10 Track D (AI Support Agent) — awaiting design decision (DEC-009)
+- Phase 10 Track D (AI Support Agent) — superseded by Text Chat Agent (DEC-009 → DEC-020)
 
 ### Known Issues:
-- Admin dashboard console errors (400 Bad Request) — `bookings` table FK constraints (`bookings_renter_id_fkey`) may not exist on PROD. Affects Bookings, Financials, and Escrow tabs. Needs DB migration.
+- **PropertyDetail/Checkout dates are read-only** — By design for timeshare listings (owner sets fixed dates), but users may expect date selection.
+- **VAPI overrides limited** — Transcriber (nova-3), keyword boosts, and speaking plans cause 400 errors via SDK overrides. Must configure in VAPI dashboard Advanced tab.
+- Admin dashboard 400 errors — `bookings_renter_id_fkey` FK may not exist on PROD
+- Edge functions require `--no-verify-jwt` deployment flag
 
 ---
 
 ## PRIORITY QUEUE (In Order)
 
-### ~~1. Mobile UX & Post-Login Experience~~ ✅ COMPLETE
-**Status:** Complete (Feb 20)
+### 1. ~~Functional Search & Booking Flow Hardening~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
 
-**Track A: Post-Login Welcome** ✅
-- [x] "Hi, {Name}" greeting in header (desktop dropdown + mobile pill)
-- [x] Visual login state indicator on mobile (avatar + name pill with bg-primary/10)
-- [x] Auth state transition fixed (loading skeleton prevents flash of login/signup buttons)
-
-**Track B: Mobile Screen Optimization** ✅
-- [x] 30+ responsive fixes across 12 pages (375px-428px audited)
-- [x] WCAG tap targets, dialog widths, responsive grids
-- [x] All pages verified for mobile viewport
+**Track A:** All 6 items complete — calendar picker, date filter, search button, filter panel, Apply/Clear, active filter badge.
+**Track B:** All 3 items complete — voice, text chat, and direct search all navigate/filter correctly.
+**Remaining:** URL search params persistence (deferred — nice to have, not blocking).
 
 ---
 
-### 2. Voice Experience: Quality & Admin Controls
-**Status:** Planned — Pre-Phase 3 prerequisite
+### 2. ~~Executive Dashboard Polish~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
+
+All 3 items complete: STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards). Also fixed Bid Activity and Bid Spread Index tooltip formatting (was showing $ on counts/percentages).
+
+---
+
+### 3. ~~Phase 15: Fair Value Score~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
+
+All items complete: Migration 016, RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge`, wired into Rentals + PropertyDetail + OwnerListings. 14 tests.
+
+---
+
+### 4. ~~Phase 16: Maintenance Fee Calculator~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
+
+All items complete: Public `/calculator` route, `calculatorLogic.ts` (pure functions), `MaintenanceFeeCalculator` page + 4 components, 9 brands, SEO meta tags, Footer link, CTA to owner signup. 12 tests.
+
+---
+
+### 5. ~~Phase 17: Owner Dashboard~~ ✅ COMPLETE
+**Status:** Done (Session 9, Feb 21)
+
+All items complete in 1 session: Migration 017, types, 4 data hooks (useOwnerDashboardStats, useOwnerEarnings, useOwnerListingsData, useOwnerBidActivity), 6 components (OwnerHeadlineStats, EarningsTimeline, MyListingsTable, BidActivityFeed, PricingIntelligence, MaintenanceFeeTracker). 30 new tests (264 total).
+
+---
+
+### 6. ~~Phase 18: Travel Request Enhancements~~ ✅ COMPLETE
+**Status:** Done (Session 9, Feb 21)
+
+All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-forget trigger on admin listing approval, (2) DemandSignal component wired into OwnerListings form with 500ms debounce, (3) PostRequestCTA on empty Rentals results with prefill params → BiddingMarketplace, (4) expiry warning scan in process-deadline-reminders edge function. TravelRequestForm now accepts defaultValues prop. Migration 018. 9 new tests (273 total).
+
+---
+
+### 7. Voice Experience Tracks C-D
+**Status:** Deferred until search flow hardening complete
 **Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
-**Decision:** DEC-012 (Stay on VAPI)
-**Goal:** Harden voice experience to premium standard + give RAV admin runtime control
 
-**Track A: Fix Known Quality Issues** ✅ (Feb 20)
-- [x] Duplicate function calls — 2-second dedup window in useVoiceSearch message handler
-- [x] Voice result cards not clickable — changed `<div>` to `<Link>` with hover effects
-- [x] CORS wildcard on Edge Function — dynamic origin check (production + Vercel + localhost)
-- [x] AbortController on Edge Function fetch — abort on stop/reset/unmount/new-search
-- [x] Rate limiting on Edge Function — per-IP sliding window (30 req/min, HTTP 429)
+**Track C: RAV Admin Voice Controls**
+- [ ] Voice search ON/OFF global toggle, daily quota adjustment, per-user override
+- [ ] Voice usage dashboard, LLM model selector, per-user voice access toggle
 
-**Track B: Voice Quality Tuning** ✅ (Feb 20)
-- [x] Endpointing optimized — 500ms → 300ms + LiveKit smart endpointing + waitSeconds 0.6
-- [x] Anti-interruption — stopSpeakingPlan (numWords:2, backoff:1.5s) + Krisp smart denoising
-- [x] Transcription upgrade — Nova-2 → Nova-3 (54% better WER) + 16 keyword boosts
-- [x] Call duration cap — maxDurationSeconds: 120 (vs default 600)
-- [ ] Test voice experience on mobile (iOS Safari, Android Chrome) — WebRTC behavior
-
-**Track C: RAV Admin Voice Controls (~1-2 weeks)**
-- [ ] Voice search ON/OFF global toggle — disable instantly without code deploy
-- [ ] Daily quota adjustment — change limit from admin UI (currently DB-only)
-- [ ] Per-user quota override — grant specific users higher limits
-- [ ] Voice usage dashboard — searches/day chart, top queries, failure rate, cost estimate
-- [ ] LLM model selector — toggle between gpt-4o-mini / gpt-4o from admin
-- [ ] Approved user voice access toggle — enable/disable voice per user
-
-**Track D: Observability (~2-3 days)**
-- [ ] Log voice search queries + outcomes to Supabase (anonymized)
-- [ ] Alert threshold — notify admin if daily cost exceeds configurable amount
-- [ ] Failed search tracking — log queries that return 0 results (product intelligence)
+**Track D: Observability**
+- [ ] Log voice search queries + outcomes (anonymized)
+- [ ] Alert threshold, failed search tracking
 
 ---
 
-### ~~3. Phase 14: Executive Dashboard~~ ✅ COMPLETE
-**Status:** Complete (Feb 20)
-**Docs:** `docs/features/executive-dashboard/`
-**Decisions:** DEC-014, DEC-015, DEC-016, DEC-017
-
-**All Sessions Complete:**
-- [x] Migration 013, 4 Edge Functions, 4 data hooks, types
-- [x] ExecutiveDashboard page, HeadlineBar, BusinessPerformance, MarketplaceHealth
-- [x] MarketIntelligence (BYOK), IndustryFeed, UnitEconomics, IntegrationSettings
-- [x] 15+ new tests, flow manifest updated, responsive polish
+### 8. Phase 3: Voice Everywhere (Q2 2026)
+**Status:** Planned — After Voice Tracks C-D
+**Prerequisite:** Voice Experience Quality complete
+- Voice-assisted property listing, booking, bidding
+- **Est. Time:** 3-4 weeks
 
 ---
 
-### 4. Phase 3: Voice Everywhere (Q2 2026)
-**Status:** Planned — After Voice Quality hardening
-**Docs:** `docs/guides/user-journey-map.md`
-**Prerequisite:** Voice Experience Quality & Admin Controls (priority #2)
-
-**Features:**
-- Voice-assisted property listing
-- Voice-assisted booking
-- Voice-assisted bidding
-
-**Est. Time:** 3-4 weeks
-
----
-
-### 5. Phase 12: Native App Shells (Capacitor) — Android + iOS
+### 9. Phase 12: Native App Shells (Capacitor) — Android + iOS
 **Status:** Planned — After PWA validates demand
-**Est. Time:** 2-3 weeks
-**Decision:** DEC-011
-**Prerequisite:** Phase 11 (PWA) complete
-
-**Objective:** Wrap the existing React app in native shells using Capacitor for publishing to **Google Play Store** and **Apple App Store**. One codebase → two app stores.
-
-**Track A: Project Setup (~2 days)**
-- [ ] Install Capacitor, initialize Android + iOS projects
-- [ ] Configure `capacitor.config.ts`, set up build environments
-
-**Track B: Native Features (~1 week)**
-- [ ] Push notifications, camera access, haptic feedback
-- [ ] Status bar theming, deep linking, biometric auth (optional)
-
-**Track C: App Store Publishing (~1 week)**
-- [ ] Apple Developer Account ($99/year), Google Play Console ($25 one-time)
-- [ ] App Store assets, signed builds, TestFlight beta, review process
-
-**Track D: CI/CD for Mobile (~2-3 days)**
-- [ ] GitHub Actions workflow for automated builds + app store submission
+**Est. Time:** 2-3 weeks | **Decision:** DEC-011
+- Track A: Capacitor setup (~2 days)
+- Track B: Native features — push notifications, camera, biometric (~1 week)
+- Track C: App Store publishing (~1 week)
+- Track D: CI/CD for mobile (~2-3 days)
 
 ---
 
-### 6. Phase 6: Advanced Features (Q3 2026)
+### 10. Phase 6: Advanced Features (Q3 2026)
 **Status:** Backlog
-
-**Features:**
-- Saved searches & search alerts
-- Advanced filtering (price range, amenities, rating)
-- Owner analytics dashboard enhancements
-- Calendar integration (Google/Outlook sync)
+- Saved searches & search alerts, advanced filtering, owner analytics, calendar integration
 
 ---
 
-### Deferred Items
-- **Phase 10 Track D:** AI Support Agent — needs design decision (DEC-009)
-- **Phase 10 Tracks A-C:** Complete (Feb 15) — dead links, contact page, support form
+### Completed Priorities (Archived)
+- ~~Functional Search & Booking Flow~~ ✅ (Feb 21, Session 8)
+- ~~Executive Dashboard Polish~~ ✅ (Feb 21, Session 8)
+- ~~Phase 15: Fair Value Score~~ ✅ (Feb 21, Session 8)
+- ~~Phase 16: Maintenance Fee Calculator~~ ✅ (Feb 21, Session 8)
+- ~~Mobile UX & Post-Login Experience~~ ✅ (Feb 20)
+- ~~Phase 14: Executive Dashboard~~ ✅ (Feb 20)
+- ~~Text Chat Agent~~ ✅ (Feb 21)
+- ~~Phase 10 Track D: AI Support Agent~~ → Superseded by Text Chat Agent (DEC-020)
 
 ---
 
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Seed Data Management System</strong> — Completed Feb 21, 2026</summary>
+
+**What:** Complete 3-layer seed data system for DEV environment testing and executive demos.
+
+**3 Layers:**
+- **Layer 1 (Foundation):** 8 permanent users — 3 RAV team (dev-owner, dev-admin, dev-staff) + 5 property owners (Alex Rivera/HGV, Maria Chen/Marriott, James Thompson/Disney, Priya Patel/Wyndham, Robert Kim/Bluegreen). Marked `is_seed_foundation = true`, never wiped.
+- **Layer 2 (Inventory):** 10 properties (2 per owner, real resort names), 30 listings (15 active, 10 bidding, 5 draft)
+- **Layer 3 (Transactions):** 50 renters with growth curve (8→16→26 over 90 days), 90 completed bookings, 10 pending, 5 in escrow, 5 cancellations, 20 bids, 10 travel requests, 8 proposals
+
+**Database:** Migration `015_seed_foundation_flag.sql` — `is_seed_foundation` boolean column on profiles with partial index
+**Edge Function:** `seed-manager` with 3 actions: `status` (table counts), `reseed` (full 3-layer creation), `restore-user` (recreate deleted accounts)
+**Admin UI:** `DevTools.tsx` — 4 sections (status grid, reseed with log, test accounts table, Stripe test cards). Conditional tab in AdminDashboard (DEV only)
+**Safety:** Production guard (`IS_DEV_ENVIRONMENT` secret), protected set (foundation + RAV team members), FK-ordered 21-table deletion
+**Documentation:** `docs/testing/SEED-DATA-GUIDE.md`
+
+**Files:** 6 created/modified
+**Password:** All seed accounts use `SeedTest2026!`
+</details>
 
 <details>
 <summary><strong>Phase 14: Executive Dashboard</strong> — Completed Feb 20, 2026</summary>
@@ -469,6 +452,17 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
+### DEC-020: Text Chat Agent — Two-Tier Conversational Model
+**Date:** February 21, 2026
+**Decision:** Add OpenRouter-powered text chat alongside existing VAPI voice, as completely separate systems
+**Status:** Final
+
+**Context:** Voice search (VAPI) is expensive, tier-gated, and not always practical. Users need a conversational alternative that's universally available.
+
+**Reasoning:** (1) OpenRouter is 10-100x cheaper than VAPI per interaction — no quota needed. (2) Text chat works in all environments (noisy, mobile, accessibility). (3) Shared `_shared/property-search.ts` module avoids code duplication while keeping systems independent. (4) VAPI remains untouched — zero regression risk. (5) Context-based system prompts (rentals/property-detail/bidding/general) provide relevant help across pages. (6) SSE streaming gives natural token-by-token display. (7) Session-only persistence avoids migration — can add localStorage/DB persistence later.
+
+---
+
 ### DEC-018: Pre-Launch Platform Lock Strategy
 **Date:** February 20, 2026
 **Decision:** System-settings-based "Staff Only Mode" toggle (not per-user blocking)
@@ -477,6 +471,28 @@ To keep PROJECT-HUB.md focused and scannable:
 **Context:** Need to prevent external users from creating test data on PROD before launch, while still deploying all code to PROD.
 
 **Reasoning:** A global toggle in `system_settings` is simpler than per-user blocking. Leverages existing `can_access_platform()` RLS function. Toggle is in Admin > System Settings — flip it off when ready to go live. Default: enabled (locked). Enforced at 3 layers: database RLS, Login.tsx, Signup.tsx.
+
+---
+
+### DEC-019: Seed Data Management Approach
+**Date:** February 21, 2026
+**Decision:** 3-layer edge-function-based seed system with foundation user protection
+**Status:** Final
+
+**Context:** DEV environment needs realistic test data for functional testing and executive demos. PROD is locked via Staff Only Mode.
+
+**Reasoning:** Edge function approach (vs raw SQL) allows: (1) idempotent auth.admin.createUser for proper trigger-based user setup, (2) production guard via env variable, (3) admin UI integration for one-click reset, (4) protected set pattern to never wipe RAV team or foundation accounts. Foundation users survive reseeds; everything else is disposable.
+
+---
+
+### DEC-021: Search Bar & Filter Strategy
+**Date:** February 21, 2026
+**Decision:** Make Rentals page search bar, calendar picker, and filter panel fully functional with state management and query integration
+**Status:** Approved
+
+**Context:** Comprehensive audit revealed the Rentals page search bar is mostly placeholder UI. Calendar picker is a static `<Input>`, Search button has no handler, and filter panel inputs (price/guests/bedrooms/brand) have no state bindings. Only the location text input works.
+
+**Approach:** Wire all controls to React state, integrate with listing query filters. Calendar uses existing shadcn/ui `Calendar` component + `Popover`. Dates filter listings at application level (matching `_shared/property-search.ts` approach). PropertyDetail/Checkout dates remain read-only (timeshare model = owner sets fixed availability windows).
 
 ---
 
@@ -513,15 +529,21 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ### Testing Documentation
 - **Test Strategy:** `docs/testing/TEST-STRATEGY.md`
+- **Seed Data Guide:** `docs/testing/SEED-DATA-GUIDE.md`
 - **Setup Checklist:** `docs/testing/TEST-SETUP-CHECKLIST.md`
 - **Claude Code Prompts:** `docs/testing/CLAUDE-CODE-PROMPTS.md`
 
 ### Feature Documentation
+- **Text Chat Agent:** `docs/features/text-chat/`
 - **Executive Dashboard:** `docs/features/executive-dashboard/`
 - **Voice Search:** `docs/features/voice-search/`
 - **Voice Auth & Approval:** `docs/features/voice-auth-approval/`
 - **Resort Master Data:** `docs/features/resort-master-data/`
 - **Testing Infrastructure:** `docs/features/testing-infrastructure/`
+- **Fair Value Score (Phase 15):** `docs/features/fair-value-score/`
+- **Maintenance Fee Calculator (Phase 16):** `docs/features/maintenance-fee-calculator/`
+- **Owner Dashboard (Phase 17):** `docs/features/owner-dashboard/`
+- **Travel Request Enhancements (Phase 18):** `docs/features/travel-request-enhancements/`
 
 ### User Guides
 - **User Journey Map:** `docs/guides/user-journey-map.md`
@@ -570,6 +592,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 5)
+**Last updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete, Priorities 1-6 done, 273 tests)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

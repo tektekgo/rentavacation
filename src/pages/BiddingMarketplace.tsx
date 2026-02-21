@@ -1,10 +1,12 @@
 // Vacation Marketplace - Browse listings open for bidding and post travel requests
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTextChat } from '@/hooks/useTextChat';
+import { TextChatPanel } from '@/components/TextChatPanel';
 import { useListingsOpenForBidding, useOpenTravelRequests } from '@/hooks/useBidding';
 import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
 import { TravelRequestCard } from '@/components/bidding/TravelRequestCard';
@@ -33,11 +35,28 @@ import type { ListingWithBidding } from '@/types/bidding';
 const BiddingMarketplace = () => {
   const { user, isRenter } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const { data: biddableListings, isLoading: listingsLoading } = useListingsOpenForBidding();
   const { data: travelRequests, isLoading: requestsLoading } = useOpenTravelRequests();
 
+  // Pre-fill support from PostRequestCTA on /rentals
+  const prefill = searchParams.get('prefill') === 'true';
+  const prefillDestination = searchParams.get('destination') ?? '';
+  const prefillCheckin = searchParams.get('checkin') ?? '';
+  const prefillCheckout = searchParams.get('checkout') ?? '';
+  const defaultTab = searchParams.get('tab') || 'listings';
+
   const [selectedListing, setSelectedListing] = useState<ListingWithBidding | null>(null);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "bidding" });
 
   const handleBidClick = (listing: ListingWithBidding) => {
     if (!user) {
@@ -71,12 +90,27 @@ const BiddingMarketplace = () => {
               or post your travel plans and let verified owners compete for your booking.
             </p>
             {user && isRenter() && (
-              <TravelRequestForm />
+              <TravelRequestForm defaultValues={prefill ? { destination: prefillDestination, checkIn: prefillCheckin, checkOut: prefillCheckout } : undefined} />
             )}
             {!user && (
-              <Button asChild size="lg">
-                <Link to="/login">Sign in to start bidding</Link>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild size="lg">
+                  <Link to="/login">Sign in to start bidding</Link>
+                </Button>
+              </div>
+            )}
+            {user && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setChatOpen(true)}
+                  className="gap-2"
+                >
+                  <img src="/ravio-the-chat-genie-64px.svg" alt="" className="h-6 w-6" />
+                  Ask RAVIO
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -85,7 +119,7 @@ const BiddingMarketplace = () => {
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <Tabs defaultValue="listings" className="space-y-8">
+          <Tabs defaultValue={defaultTab} className="space-y-8">
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
               <TabsTrigger value="listings" className="gap-2">
                 <Gavel className="h-4 w-4" />
@@ -194,7 +228,7 @@ const BiddingMarketplace = () => {
                       Be the first to post your travel needs and get offers from owners!
                     </p>
                     {user ? (
-                      <TravelRequestForm />
+                      <TravelRequestForm defaultValues={prefill ? { destination: prefillDestination, checkIn: prefillCheckin, checkOut: prefillCheckout } : undefined} />
                     ) : (
                       <Button asChild>
                         <Link to="/login">Sign in to post a request</Link>
@@ -292,6 +326,18 @@ const BiddingMarketplace = () => {
           onOpenChange={setBidDialogOpen}
         />
       )}
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="bidding"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

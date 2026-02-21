@@ -32,6 +32,7 @@ import Checkout from "./pages/Checkout";
 import Architecture from "./pages/Architecture";
 import Contact from "./pages/Contact";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import MaintenanceFeeCalculator from "./pages/MaintenanceFeeCalculator";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
@@ -93,7 +94,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         {isDevEnvironment && (
-          <div className="fixed top-0 left-0 right-0 z-[9999] bg-yellow-400 text-yellow-900 text-center text-xs font-medium py-1">
+          <div className="fixed top-0 left-0 right-0 z-[60] pointer-events-none bg-yellow-400 text-yellow-900 text-center text-xs font-medium py-1">
             🚧 DEV ENVIRONMENT — dev.rent-a-vacation.com
           </div>
         )}
@@ -122,6 +123,7 @@ const App = () => (
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/calculator" element={<MaintenanceFeeCalculator />} />
 
             {/* Protected routes — require approved account */}
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />

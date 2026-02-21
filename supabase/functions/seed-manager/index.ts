@@ -31,6 +31,7 @@ interface FoundationUser {
   full_name: string;
   account_type: "traveler" | "owner";
   extra_role?: string; // additional role to assign after trigger
+  annual_maintenance_fees?: number; // for owner dashboard Phase 17
 }
 
 const FOUNDATION_USERS: FoundationUser[] = [
@@ -39,11 +40,11 @@ const FOUNDATION_USERS: FoundationUser[] = [
   { email: "dev-admin@rent-a-vacation.com", full_name: "RAV Dev Admin", account_type: "traveler", extra_role: "rav_admin" },
   { email: "dev-staff@rent-a-vacation.com", full_name: "RAV Dev Staff", account_type: "traveler", extra_role: "rav_staff" },
   // Property owners (sign up as owner → trigger gives 'property_owner' + creates verification)
-  { email: "owner1@rent-a-vacation.com", full_name: "Alex Rivera", account_type: "owner" },
-  { email: "owner2@rent-a-vacation.com", full_name: "Maria Chen", account_type: "owner" },
-  { email: "owner3@rent-a-vacation.com", full_name: "James Thompson", account_type: "owner" },
-  { email: "owner4@rent-a-vacation.com", full_name: "Priya Patel", account_type: "owner" },
-  { email: "owner5@rent-a-vacation.com", full_name: "Robert Kim", account_type: "owner" },
+  { email: "owner1@rent-a-vacation.com", full_name: "Alex Rivera", account_type: "owner", annual_maintenance_fees: 2400 },
+  { email: "owner2@rent-a-vacation.com", full_name: "Maria Chen", account_type: "owner", annual_maintenance_fees: 3100 },
+  { email: "owner3@rent-a-vacation.com", full_name: "James Thompson", account_type: "owner", annual_maintenance_fees: 1800 },
+  { email: "owner4@rent-a-vacation.com", full_name: "Priya Patel", account_type: "owner", annual_maintenance_fees: 2700 },
+  { email: "owner5@rent-a-vacation.com", full_name: "Robert Kim", account_type: "owner", annual_maintenance_fees: 2200 },
 ];
 
 // ============================================================
@@ -451,6 +452,16 @@ async function ensureFoundation(log: string[]): Promise<Map<string, string>> {
 
     if (existingProfile) {
       emailToId.set(fu.email, existingProfile.id);
+      // Ensure maintenance fees are set for owners
+      if (fu.annual_maintenance_fees) {
+        await admin
+          .from("profiles")
+          .update({
+            annual_maintenance_fees: fu.annual_maintenance_fees,
+            maintenance_fee_updated_at: new Date().toISOString(),
+          })
+          .eq("id", existingProfile.id);
+      }
       log.push(`Foundation user exists: ${fu.email} (${existingProfile.id})`);
       continue;
     }
@@ -501,12 +512,16 @@ async function ensureFoundation(log: string[]): Promise<Map<string, string>> {
     // Wait briefly for trigger to fire
     await new Promise(r => setTimeout(r, 300));
 
-    // Update profile: approved + foundation flag
+    // Update profile: approved + foundation flag + maintenance fees
     await admin
       .from("profiles")
       .update({
         approval_status: "approved",
         is_seed_foundation: true,
+        ...(fu.annual_maintenance_fees ? {
+          annual_maintenance_fees: fu.annual_maintenance_fees,
+          maintenance_fee_updated_at: new Date().toISOString(),
+        } : {}),
       })
       .eq("id", userId);
 
