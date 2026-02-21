@@ -181,12 +181,12 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify user token
+    // Verify user token — pass JWT directly (edge functions have no session storage)
+    const jwt = authHeader.replace("Bearer ", "");
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    const { data: { user }, error: authError } = await userClient.auth.getUser(jwt);
     if (authError || !user) {
       logStep("Auth failed", { error: authError?.message });
       return new Response(
