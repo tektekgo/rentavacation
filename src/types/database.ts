@@ -176,6 +176,7 @@ export interface Database {
           approved_by: string | null;
           approved_at: string | null;
           rejection_reason: string | null;
+          is_seed_foundation: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -189,6 +190,7 @@ export interface Database {
           approved_by?: string | null;
           approved_at?: string | null;
           rejection_reason?: string | null;
+          is_seed_foundation?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -202,6 +204,7 @@ export interface Database {
           approved_by?: string | null;
           approved_at?: string | null;
           rejection_reason?: string | null;
+          is_seed_foundation?: boolean;
           updated_at?: string;
         };
         Relationships: [];

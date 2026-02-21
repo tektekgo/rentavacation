@@ -7,7 +7,7 @@ async function fetchIndustryNews(): Promise<NewsItem[]> {
 
   try {
     const { data, error } = await supabase.functions.invoke('fetch-industry-news', {
-      method: 'POST',
+      body: { category: 'all' },
     });
 
     if (error) throw error;
@@ -23,7 +23,7 @@ async function fetchMacroIndicators(): Promise<MacroIndicator[]> {
 
   try {
     const { data, error } = await supabase.functions.invoke('fetch-macro-indicators', {
-      method: 'GET',
+      body: {},
     });
 
     if (error) throw error;

@@ -62,3 +62,18 @@ verify_jwt = false
 
 [functions.voice-search]
 verify_jwt = false
+
+[functions.seed-manager]
+verify_jwt = false
+
+[functions.fetch-industry-news]
+verify_jwt = false
+
+[functions.fetch-macro-indicators]
+verify_jwt = false
+
+[functions.fetch-airdna-data]
+verify_jwt = false
+
+[functions.fetch-str-data]
+verify_jwt = false

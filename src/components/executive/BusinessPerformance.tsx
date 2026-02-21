@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { useBusinessMetrics } from '@/hooks/executive';
 import { SectionHeading } from './SectionHeading';
+import { TooltipIcon } from './TooltipIcon';
 import { CHART_COLORS, DARK_CHART_THEME, formatCurrency } from './utils';
 
 function ChartSkeleton() {
@@ -56,7 +57,13 @@ export function BusinessPerformance() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* GMV Trend — 2 col span */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 xl:col-span-2">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">GMV Trend</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4 flex items-center">
+            GMV Trend
+            <TooltipIcon
+              definition="Gross Merchandise Value — total booking revenue flowing through the platform before fees."
+              whyItMatters="Tracks top-line growth and seasonal demand patterns over 6 months."
+            />
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={monthlyData}>
               <defs>
@@ -82,7 +89,13 @@ export function BusinessPerformance() {
 
         {/* Bid Activity — 1 col */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">Bid Activity</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4 flex items-center">
+            Bid Activity
+            <TooltipIcon
+              definition="Monthly count of bids placed by travelers vs. bids accepted by owners."
+              whyItMatters="A rising accepted-to-placed ratio indicates healthy marketplace matching."
+            />
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={bidActivity}>
               <CartesianGrid strokeDasharray="3 3" stroke={DARK_CHART_THEME.grid} />
@@ -99,7 +112,13 @@ export function BusinessPerformance() {
         {/* Bid Spread Index — 1 col */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5">
           <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-sm font-medium text-slate-300">Bid Spread Index</h3>
+            <h3 className="text-sm font-medium text-slate-300 flex items-center">
+              Bid Spread Index
+              <TooltipIcon
+                definition="Percentage gap between bid amounts and final booking prices, shown as average and median."
+                whyItMatters="A narrowing spread means buyers and sellers are converging on price — sign of an efficient marketplace."
+              />
+            </h3>
             <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-400 rounded border border-amber-500/30">
               RAV Proprietary
             </span>
@@ -118,7 +137,13 @@ export function BusinessPerformance() {
 
         {/* Revenue Waterfall — 2 col span */}
         <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-5 xl:col-span-2">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">Revenue Waterfall</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4 flex items-center">
+            Revenue Waterfall
+            <TooltipIcon
+              definition="Stacked breakdown of total revenue into owner payouts and RAV platform commission each month."
+              whyItMatters="Shows how GMV splits between owners and the platform, and whether take-rate is stable."
+            />
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={revenueWaterfall}>
               <CartesianGrid strokeDasharray="3 3" stroke={DARK_CHART_THEME.grid} />
