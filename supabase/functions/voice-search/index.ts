@@ -9,6 +9,7 @@ function isAllowedOrigin(origin: string): boolean {
     "https://rentavacation.lovable.app",
     "https://rent-a-vacation.com",
     "https://www.rent-a-vacation.com",
+    "https://dev.rent-a-vacation.com",
   ];
   if (allowedExact.includes(origin)) return true;
   // Vercel preview deploys
