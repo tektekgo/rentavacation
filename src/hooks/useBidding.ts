@@ -63,7 +63,7 @@ export function useBidsForListing(listingId: string | undefined) {
         .from('listing_bids')
         .select(`
           *,
-          bidder:profiles(*)
+          bidder:profiles!listing_bids_bidder_id_fkey(*)
         `)
         .eq('listing_id', listingId)
         .order('bid_amount', { ascending: false });
@@ -229,7 +229,7 @@ export function useOpenTravelRequests() {
         .from('travel_requests')
         .select(`
           *,
-          traveler:profiles(*)
+          traveler:profiles!travel_requests_traveler_id_fkey(*)
         `)
         .eq('status', 'open')
         .gt('proposals_deadline', new Date().toISOString())
@@ -342,7 +342,7 @@ export function useProposalsForRequest(requestId: string | undefined) {
         .select(`
           *,
           property:properties(*),
-          owner:profiles(*)
+          owner:profiles!travel_proposals_owner_id_fkey(*)
         `)
         .eq('request_id', requestId)
         .order('proposed_price', { ascending: true });
