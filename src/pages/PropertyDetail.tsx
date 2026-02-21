@@ -39,6 +39,7 @@ import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAg
 import { BidFormDialog } from "@/components/bidding/BidFormDialog";
 import { Gavel } from "lucide-react";
 import { isPast } from "date-fns";
+import { FairValueCard } from "@/components/fair-value/FairValueCard";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -435,6 +436,8 @@ const PropertyDetail = () => {
                       ${pricePerNight}/night × {nights} nights
                     </p>
                   )}
+
+                  <FairValueCard listingId={listing.id} viewerRole={isOwnListing ? 'owner' : 'traveler'} />
 
                   <div className="space-y-4 mb-6">
                     <div>

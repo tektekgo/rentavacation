@@ -17,14 +17,15 @@ function ChartSkeleton() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DarkTooltip({ active, payload, label }: any) {
+function DarkTooltip({ active, payload, label, valueFormatter }: any) {
   if (!active || !payload?.length) return null;
+  const fmt = valueFormatter || formatCurrency;
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 shadow-xl">
       <p className="text-xs text-slate-400 mb-1">{label}</p>
       {payload.map((entry: { name: string; value: number; color: string }, i: number) => (
         <p key={i} className="text-xs" style={{ color: entry.color }}>
-          {entry.name}: {formatCurrency(entry.value)}
+          {entry.name}: {fmt(entry.value)}
         </p>
       ))}
     </div>
@@ -101,7 +102,7 @@ export function BusinessPerformance() {
               <CartesianGrid strokeDasharray="3 3" stroke={DARK_CHART_THEME.grid} />
               <XAxis dataKey="month" tick={{ fill: DARK_CHART_THEME.axis, fontSize: 11 }} />
               <YAxis tick={{ fill: DARK_CHART_THEME.axis, fontSize: 11 }} />
-              <Tooltip content={<DarkTooltip />} />
+              <Tooltip content={<DarkTooltip valueFormatter={(v: number) => v.toLocaleString()} />} />
               <Legend wrapperStyle={{ fontSize: 11, color: DARK_CHART_THEME.axis }} />
               <Line type="monotone" dataKey="bidsPlaced" name="Placed" stroke={CHART_COLORS.violet} strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="bidsAccepted" name="Accepted" stroke={CHART_COLORS.emerald} strokeWidth={2} dot={false} />
@@ -128,7 +129,7 @@ export function BusinessPerformance() {
               <CartesianGrid strokeDasharray="3 3" stroke={DARK_CHART_THEME.grid} />
               <XAxis dataKey="month" tick={{ fill: DARK_CHART_THEME.axis, fontSize: 11 }} />
               <YAxis tick={{ fill: DARK_CHART_THEME.axis, fontSize: 11 }} unit="%" />
-              <Tooltip content={<DarkTooltip />} />
+              <Tooltip content={<DarkTooltip valueFormatter={(v: number) => `${v}%`} />} />
               <Bar dataKey="avgSpread" name="Avg Spread" fill={CHART_COLORS.amber} radius={[4, 4, 0, 0]} />
               <Bar dataKey="medianSpread" name="Median" fill={CHART_COLORS.slate} radius={[4, 4, 0, 0]} />
             </BarChart>

@@ -50,6 +50,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
+import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -768,6 +769,7 @@ const Rentals = () => {
                             ${pricePerNight}/night
                           </span>
                         )}
+                        <ListingFairValueBadge listingId={listing.id} />
                       </div>
                       <div className="text-xs text-muted-foreground">
                         <Users className="w-3 h-3 inline mr-1" />

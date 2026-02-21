@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026 (Session 7 — Text Chat fixes + comprehensive review)
+> **Last Updated:** February 21, 2026 (Session 8 — Phase 15 + 16 + Exec Dashboard fixes)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,20 +78,20 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Search & Booking Flow Hardening + Executive Dashboard Polish
+**Active Phase:** Phase 17 (Owner Dashboard) + Voice Tracks C-D
 **Started:** February 21, 2026
 
 ### Working on TODAY:
-- [ ] **Functional Search Bar** — Make Rentals page calendar picker, Search button, and filter panel (price/guests/bedrooms/brand) actually work with state bindings and query integration
-- [ ] **Exec Dashboard Polish** — Restrict Industry News to STR/rental industry; add TooltipIcon (source, definition, why it matters) to Industry News, Regulatory Radar, Macro Indicators sections
+- [ ] **Phase 17: Owner Dashboard** — Requires Phase 15 (Fair Value Score) ✅ — ready to build
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
-- [x] **Text Chat Agent — Deployed & Working** (Feb 21). Full implementation + debugging: shared `_shared/property-search.ts` module, `text-chat` edge function (OpenRouter + SSE + tool calling), `useTextChat` hook, `TextChatButton`, `TextChatPanel`. Integrated into 4 pages. Fixed auth (pass JWT directly to `getUser(jwt)` + `--no-verify-jwt`), model switch (deprecated `gemini-2.0-flash-exp:free` → `google/gemini-3-flash-preview`), double-X fix, DEV banner z-index. 26 tests (208 total). DEC-020.
-- [x] **Voice Search Fix** — Removed VAPI Track B overrides that caused 400 start-method-error. Minimal overrides work: `firstMessage`, `model` (system prompt), `maxDurationSeconds`. Track B tuning (nova-3, endpointing, speaking plans) must be configured in VAPI dashboard directly.
-- [x] **Destination Search Fix** — Added state name ↔ abbreviation expansion (e.g., "Hawaii" → also matches "HI") in `_shared/property-search.ts`. Deployed to DEV + PROD.
-- [x] **Seed Data System** — 3-layer seed system, Migration 015, `seed-manager` edge function, Admin Dev Tools tab (PR #17, Feb 21)
-- [x] **Executive Dashboard Fixes** — News feed bug, chart tooltips, JWT verification (PR #17, Feb 21)
+- [x] **Phase 15: Fair Value Score** (Feb 21, Session 8). PostgreSQL RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge` components. Wired into Rentals listing cards, PropertyDetail sidebar, OwnerListings management. Owner vs traveler messaging. 14 new tests (222 total).
+- [x] **Phase 16: Maintenance Fee Calculator** (Feb 21, Session 8). Public `/calculator` route (no auth). Pure calculation logic in `calculatorLogic.ts`, `OwnershipForm`, `BreakevenResults`, `BreakevenBar`, `CalculatorCTA` components. 9 vacation club brands, 4 unit types, live break-even analysis, color-coded progress bars, CTA to owner signup. Footer link added. 12 new tests (234 total).
+- [x] **Functional Search Bar** (Feb 21, Session 8). Calendar date picker (Popover + Calendar), date range filter, all filter panel inputs wired (price/guests/bedrooms/brand), Search button, Apply/Clear handlers, active filter count badge, URL not persisted yet.
+- [x] **Exec Dashboard Polish** (Feb 21, Session 8). STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards), Bid Activity tooltip fix (was showing $ on count values), Bid Spread Index tooltip fix (was showing $ on percentages).
+- [x] **Text Chat Agent — Deployed & Working** (Feb 21). 26 tests (208 total). DEC-020.
+- [x] **Seed Data System** — 3-layer seed system, Migration 015 (PR #17, Feb 21)
 
 ### Blocked/Waiting:
 - Phase 10 Track D (AI Support Agent) — superseded by Text Chat Agent (DEC-009 → DEC-020)
@@ -107,66 +107,38 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## PRIORITY QUEUE (In Order)
 
-### 1. Functional Search & Booking Flow Hardening (NEXT UP)
-**Status:** Ready to build
-**Goal:** Make the Rentals search bar, filters, and booking journey fully functional end-to-end
+### 1. ~~Functional Search & Booking Flow Hardening~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
 
-**Track A: Rentals Search Bar (~1 session)**
-- [ ] Calendar date picker (replace static Input with Popover + Calendar component from shadcn/ui)
-- [ ] Wire date state to listing query filter (check_in_date/check_out_date)
-- [ ] Search button onClick — apply all filters (location + dates + filters)
-- [ ] Filter panel: wire price range, guests, bedrooms, brand inputs to state
-- [ ] Apply Filters / Clear All buttons — functional handlers
-- [ ] Persist filters in URL search params (shareable filtered views)
-
-**Track B: Search Integration Across Channels**
-- [ ] Voice search results → clicking a card navigates to PropertyDetail with correct dates
-- [ ] Text chat search results → same navigation behavior
-- [ ] Direct search → filter grid results by date range, price, bedrooms
-
-**Note:** PropertyDetail and Checkout dates are intentionally read-only (timeshare model = owner sets fixed dates). No change needed there.
+**Track A:** All 6 items complete — calendar picker, date filter, search button, filter panel, Apply/Clear, active filter badge.
+**Track B:** All 3 items complete — voice, text chat, and direct search all navigate/filter correctly.
+**Remaining:** URL search params persistence (deferred — nice to have, not blocking).
 
 ---
 
-### 2. Executive Dashboard Polish
-**Status:** Ready to build (~1 session)
-**Goal:** Improve data quality and add explanatory context
+### 2. ~~Executive Dashboard Polish~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
 
-- [ ] **Industry News** — Restrict NewsAPI query to STR/rental industry keywords (remove generic "airbnb" term, add "short-term rental regulation", "vacation ownership", "timeshare industry", "hospitality STR")
-- [ ] **Info Tooltips** — Add TooltipIcon to Industry News, Regulatory Radar, and Macro Indicators sections (matching BusinessPerformance pattern: definition + source + why it matters)
-- [ ] **MarketIntelligence tooltips** — Add missing TooltipIcon to AirDNA and STR sections
+All 3 items complete: STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards). Also fixed Bid Activity and Bid Spread Index tooltip formatting (was showing $ on counts/percentages).
 
 ---
 
-### 3. Phase 15: Fair Value Score (~1 session, ~2h)
-**Status:** Ready to build
-**Docs:** `docs/features/fair-value-score/`
-**Dependencies:** None
+### 3. ~~Phase 15: Fair Value Score~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
 
-- [ ] PostgreSQL function `calculate_fair_value_score(listing_id)` returning JSONB
-- [ ] `useFairValueScore` hook
-- [ ] `FairValueBadge` + `FairValueCard` components
-- [ ] Wire into listing cards and detail pages
-- [ ] 8+ tests
+All items complete: Migration 016, RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge`, wired into Rentals + PropertyDetail + OwnerListings. 14 tests.
 
 ---
 
-### 4. Phase 16: Maintenance Fee Calculator (~1 session, ~2h)
-**Status:** Ready to build — Independent, can run parallel with Phase 15
-**Docs:** `docs/features/maintenance-fee-calculator/`
-**Dependencies:** None
+### 4. ~~Phase 16: Maintenance Fee Calculator~~ ✅ COMPLETE
+**Status:** Done (Session 8, Feb 21)
 
-- [ ] Public route `/calculator` (no auth required)
-- [ ] Calculation logic in `src/lib/calculatorLogic.ts` (pure functions)
-- [ ] `MaintenanceFeeCalculator` page + form + results components
-- [ ] Income lookup table for 9 vacation club brands
-- [ ] SEO-optimized lead generation tool
-- [ ] 8+ tests
+All items complete: Public `/calculator` route, `calculatorLogic.ts` (pure functions), `MaintenanceFeeCalculator` page + 4 components, 9 brands, SEO meta tags, Footer link, CTA to owner signup. 12 tests.
 
 ---
 
-### 5. Phase 17: Owner Dashboard (~2 sessions, ~6h)
-**Status:** Ready to build — **Requires Phase 15 (Fair Value Score)**
+### 5. Phase 17: Owner Dashboard (~2 sessions, ~6h) ← NEXT UP
+**Status:** Ready to build — Phase 15 (Fair Value Score) ✅ complete
 **Docs:** `docs/features/owner-dashboard/`
 
 - [ ] Session 1: Migration, types, 4 data hooks, HeadlineStats, EarningsTimeline
@@ -224,6 +196,10 @@ To keep PROJECT-HUB.md focused and scannable:
 ---
 
 ### Completed Priorities (Archived)
+- ~~Functional Search & Booking Flow~~ ✅ (Feb 21, Session 8)
+- ~~Executive Dashboard Polish~~ ✅ (Feb 21, Session 8)
+- ~~Phase 15: Fair Value Score~~ ✅ (Feb 21, Session 8)
+- ~~Phase 16: Maintenance Fee Calculator~~ ✅ (Feb 21, Session 8)
 - ~~Mobile UX & Post-Login Experience~~ ✅ (Feb 20)
 - ~~Phase 14: Executive Dashboard~~ ✅ (Feb 20)
 - ~~Text Chat Agent~~ ✅ (Feb 21)
@@ -621,6 +597,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 21, 2026 (session 7 — comprehensive review + new phases 15-18)
+**Last updated:** February 21, 2026 (Session 8 — Phase 15 + 16 complete, Priorities 1-4 done, 234 tests)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

@@ -44,6 +44,7 @@ import { OpenForBiddingDialog } from "@/components/bidding/OpenForBiddingDialog"
 import { BidsManagerDialog } from "@/components/bidding/BidsManagerDialog";
 import { ActionSuccessCard } from "@/components/ActionSuccessCard";
 import { sendListingSubmittedEmail } from "@/lib/email";
+import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
 
 type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 type ListingUpdate = Database['public']['Tables']['listings']['Update'];
@@ -547,6 +548,7 @@ const OwnerListings = () => {
                         (Your price: ${listing.owner_price.toLocaleString()})
                       </p>
                     )}
+                    <ListingFairValueBadge listingId={listing.id} />
                     {/* Bidding End Time */}
                     {listing.open_for_bidding && listing.bidding_ends_at && !isPast(new Date(listing.bidding_ends_at)) && (
                       <p className="text-xs text-muted-foreground mt-1">

@@ -32,6 +32,7 @@ import Checkout from "./pages/Checkout";
 import Architecture from "./pages/Architecture";
 import Contact from "./pages/Contact";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import MaintenanceFeeCalculator from "./pages/MaintenanceFeeCalculator";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
@@ -122,6 +123,7 @@ const App = () => (
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/calculator" element={<MaintenanceFeeCalculator />} />
 
             {/* Protected routes — require approved account */}
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
