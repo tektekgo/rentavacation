@@ -98,47 +98,49 @@ export function DevTools() {
   const [reseedLoading, setReseedLoading] = useState(false);
   const [reseedLog, setReseedLog] = useState<string[]>([]);
 
+  const invokeSeedManager = useCallback(async (action: string) => {
+    // Get the current session token to pass explicitly
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {};
+    if (session?.access_token) {
+      headers["Authorization"] = `Bearer ${session.access_token}`;
+    }
+
+    const { data, error } = await supabase.functions.invoke("seed-manager", {
+      body: { action },
+      headers,
+    });
+
+    if (error) {
+      const context = (error as Record<string, unknown>).context;
+      if (context && typeof context === "object" && "json" in context) {
+        const body = await (context as Response).json().catch(() => null);
+        throw new Error(body?.error ?? error.message);
+      }
+      throw error;
+    }
+    return data;
+  }, []);
+
   const fetchStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("seed-manager", {
-        body: { action: "status" },
-      });
-      if (error) {
-        // Try to extract the actual error message from the response
-        const context = (error as Record<string, unknown>).context;
-        if (context && typeof context === "object" && "json" in context) {
-          const body = await (context as Response).json().catch(() => null);
-          throw new Error(body?.error ?? error.message);
-        }
-        throw error;
-      }
+      const data = await invokeSeedManager("status");
       setStatus({ counts: data.counts });
     } catch (err) {
       toast.error(`Failed to fetch status: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setStatusLoading(false);
     }
-  }, []);
+  }, [invokeSeedManager]);
 
   const handleReseed = useCallback(async () => {
     setReseedLoading(true);
     setReseedLog(["Starting reseed..."]);
     try {
-      const { data, error } = await supabase.functions.invoke("seed-manager", {
-        body: { action: "reseed" },
-      });
-      if (error) {
-        const context = (error as Record<string, unknown>).context;
-        if (context && typeof context === "object" && "json" in context) {
-          const body = await (context as Response).json().catch(() => null);
-          throw new Error(body?.error ?? error.message);
-        }
-        throw error;
-      }
+      const data = await invokeSeedManager("reseed");
       setReseedLog(data.log ?? ["Reseed complete"]);
       toast.success(`Reseed complete in ${data.elapsed_seconds}s`);
-      // Auto-refresh status
       setStatus({ counts: data.counts });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
@@ -147,7 +149,7 @@ export function DevTools() {
     } finally {
       setReseedLoading(false);
     }
-  }, []);
+  }, [invokeSeedManager]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
