@@ -142,8 +142,8 @@ interface TextChatRequest {
   context: string;
 }
 
-// OpenRouter model — Gemini Flash is fast, free, and supports tool calling
-const OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free";
+// OpenRouter model — Gemini 3 Flash: fast, cheap ($0.50/M tokens), supports tool calling
+const OPENROUTER_MODEL = "google/gemini-3-flash-preview";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -249,8 +249,9 @@ serve(async (req) => {
     if (!openRouterResponse.ok) {
       const errBody = await openRouterResponse.text();
       logStep("OpenRouter error", { status: openRouterResponse.status, body: errBody });
+      const detail = openRouterResponse.status === 401 ? " (check OPENROUTER_API_KEY)" : "";
       return new Response(
-        JSON.stringify({ error: "Chat service temporarily unavailable" }),
+        JSON.stringify({ error: `Chat service temporarily unavailable${detail}`, debug: errBody }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 502 },
       );
     }
