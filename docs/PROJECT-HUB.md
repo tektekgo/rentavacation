@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026
+> **Last Updated:** February 21, 2026 (Text Chat Agent session)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,16 +78,18 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Voice Experience Tracks C-D + Platform Hardening
+**Active Phase:** Text Chat Agent + Voice Experience Tracks C-D
 **Started:** February 20, 2026
 
 ### Working on TODAY:
 - [x] Seed Data Management System — 3-layer seed system for DEV testing (PR #17, Feb 21)
 - [x] Executive Dashboard bug fixes — Industry News feed, chart tooltips, JWT verification (PR #17, Feb 21)
 - [x] Admin Dashboard footer + Dev Tools tab (PR #17, Feb 21)
+- [x] Text Chat Agent — Full implementation: shared search module, text-chat edge function (OpenRouter + SSE), useTextChat hook, TextChatButton, TextChatPanel. Integrated into 4 pages (Rentals, PropertyDetail, BiddingMarketplace, HowItWorks). 26 new tests (208 total). Flow manifest updated. (Feb 21)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Text Chat Agent** — Conversational text assistant via OpenRouter (DEC-020). Shared `_shared/property-search.ts` module (used by voice-search + text-chat). Edge function with SSE streaming, context-based system prompts, tool calling for property search. React hook with AbortController + streaming parser. Sheet-based UI with suggested prompts, inline search result cards, typing indicator. 4 pages: Rentals, PropertyDetail, BiddingMarketplace, HowItWorks. 26 new tests (208 total). 0 type errors, 0 lint errors. Docs: `docs/features/text-chat/`. (Feb 21)
 - [x] **Seed Data Management System** — Complete 3-layer seed system for DEV environment (PR #17). Migration 015 (`is_seed_foundation` column), `seed-manager` edge function (status/reseed/restore-user actions), Admin Dev Tools tab (DEV only). Creates 8 foundation users (3 RAV + 5 owners), 10 properties, 30 listings, 50 renters (growth curve), 90+ bookings, pipeline data. FK-safe 21-table deletion. Protected set: foundation users + RAV team members never wiped. Documentation: `docs/testing/SEED-DATA-GUIDE.md`. Deployed to DEV (Feb 21)
 - [x] **Executive Dashboard Fixes** — Fixed Industry News feed bug (`method` param → `body` param in `functions.invoke`), deployed all 4 executive edge functions with `--no-verify-jwt`, added chart tooltip explanations (TooltipIcon) to 5 charts: GMV Trend, Bid Activity, Bid Spread Index, Revenue Waterfall, Supply/Demand (PR #17, Feb 21)
 - [x] **Admin Dashboard Footer** — Added Footer component to AdminDashboard.tsx (PR #17, Feb 21)
@@ -178,7 +180,22 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-### 4. Phase 3: Voice Everywhere (Q2 2026)
+### ~~4. Text Chat Agent~~ ✅ COMPLETE
+**Status:** Complete (Feb 21)
+**Docs:** `docs/features/text-chat/`
+**Decision:** DEC-020
+
+**All Sessions Complete:**
+- [x] Shared property search module (`_shared/property-search.ts`), voice-search refactored
+- [x] `text-chat` edge function (OpenRouter, SSE streaming, tool calling, 4 context modes)
+- [x] Frontend: types, `useTextChat` hook, `TextChatButton`, `TextChatPanel`
+- [x] Page integration: Rentals, PropertyDetail, BiddingMarketplace, HowItWorks
+- [x] 26 tests, flow manifest updated, documentation
+- [ ] Deploy: `OPENROUTER_API_KEY` secret + `text-chat` + `voice-search` edge functions
+
+---
+
+### 5. Phase 3: Voice Everywhere (Q2 2026)
 **Status:** Planned — After Voice Quality hardening
 **Docs:** `docs/guides/user-journey-map.md`
 **Prerequisite:** Voice Experience Quality & Admin Controls (priority #2)
@@ -481,6 +498,17 @@ To keep PROJECT-HUB.md focused and scannable:
 **Status:** Final
 
 **Reasoning:** Cleaner implementation, avoids fighting with app's light theme, more reliable visual consistency for demo.
+
+---
+
+### DEC-020: Text Chat Agent — Two-Tier Conversational Model
+**Date:** February 21, 2026
+**Decision:** Add OpenRouter-powered text chat alongside existing VAPI voice, as completely separate systems
+**Status:** Final
+
+**Context:** Voice search (VAPI) is expensive, tier-gated, and not always practical. Users need a conversational alternative that's universally available.
+
+**Reasoning:** (1) OpenRouter is 10-100x cheaper than VAPI per interaction — no quota needed. (2) Text chat works in all environments (noisy, mobile, accessibility). (3) Shared `_shared/property-search.ts` module avoids code duplication while keeping systems independent. (4) VAPI remains untouched — zero regression risk. (5) Context-based system prompts (rentals/property-detail/bidding/general) provide relevant help across pages. (6) SSE streaming gives natural token-by-token display. (7) Session-only persistence avoids migration — can add localStorage/DB persistence later.
 
 ---
 

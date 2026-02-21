@@ -5,6 +5,9 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ResortInfoCard } from "@/components/resort/ResortInfoCard";
 import { UnitTypeSpecs } from "@/components/resort/UnitTypeSpecs";
+import { useTextChat } from "@/hooks/useTextChat";
+import { TextChatButton } from "@/components/TextChatButton";
+import { TextChatPanel } from "@/components/TextChatPanel";
 import {
   Star,
   MapPin,
@@ -61,10 +64,20 @@ const PropertyDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [guests, setGuests] = useState(1);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Auth
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Text chat
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "property-detail" });
 
   // Favorites
   const { data: favoriteIds = [] } = useFavoriteIds();
@@ -489,6 +502,17 @@ const PropertyDetail = () => {
                       <p className="text-center text-sm text-muted-foreground mb-4">
                         You won't be charged yet
                       </p>
+
+                      {user && (
+                        <Button
+                          variant="ghost"
+                          className="w-full mb-2"
+                          size="sm"
+                          onClick={() => setChatOpen(true)}
+                        >
+                          Questions? Ask RAV Assistant
+                        </Button>
+                      )}
                     </>
                   )}
 
@@ -653,6 +677,18 @@ const PropertyDetail = () => {
           onOpenChange={setBidDialogOpen}
         />
       )}
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="property-detail"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTextChat } from '@/hooks/useTextChat';
+import { TextChatButton } from '@/components/TextChatButton';
+import { TextChatPanel } from '@/components/TextChatPanel';
 import { useListingsOpenForBidding, useOpenTravelRequests } from '@/hooks/useBidding';
 import { TravelRequestForm } from '@/components/bidding/TravelRequestForm';
 import { TravelRequestCard } from '@/components/bidding/TravelRequestCard';
@@ -38,6 +41,15 @@ const BiddingMarketplace = () => {
 
   const [selectedListing, setSelectedListing] = useState<ListingWithBidding | null>(null);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "bidding" });
 
   const handleBidClick = (listing: ListingWithBidding) => {
     if (!user) {
@@ -74,9 +86,19 @@ const BiddingMarketplace = () => {
               <TravelRequestForm />
             )}
             {!user && (
-              <Button asChild size="lg">
-                <Link to="/login">Sign in to start bidding</Link>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild size="lg">
+                  <Link to="/login">Sign in to start bidding</Link>
+                </Button>
+              </div>
+            )}
+            {user && (
+              <div className="flex justify-center mt-4">
+                <TextChatButton
+                  onClick={() => setChatOpen(true)}
+                  isOpen={chatOpen}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -292,6 +314,18 @@ const BiddingMarketplace = () => {
           onOpenChange={setBidDialogOpen}
         />
       )}
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="bidding"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

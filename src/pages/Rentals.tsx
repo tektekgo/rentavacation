@@ -36,6 +36,9 @@ import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { VoiceSearchButton } from "@/components/VoiceSearchButton";
 import { VoiceStatusIndicator } from "@/components/VoiceStatusIndicator";
 import { VoiceQuotaIndicator } from "@/components/VoiceQuotaIndicator";
+import { useTextChat } from "@/hooks/useTextChat";
+import { TextChatButton } from "@/components/TextChatButton";
+import { TextChatPanel } from "@/components/TextChatPanel";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavoriteIds, useToggleFavorite } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
@@ -118,6 +121,16 @@ const Rentals = () => {
   // Real listings from database
   const { data: listings = [], isLoading, error: listingsError } = useActiveListings();
   const { favoritesCount } = useListingSocialProof();
+
+  // Text chat integration
+  const [chatOpen, setChatOpen] = useState(false);
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "rentals" });
 
   // Voice search integration
   const {
@@ -209,6 +222,12 @@ const Rentals = () => {
                   <Search className="w-4 h-4 mr-2" />
                   Search
                 </Button>
+                <TextChatButton
+                  onClick={() => setChatOpen(true)}
+                  isOpen={chatOpen}
+                  disabled={!isAuthenticated}
+                  disabledReason={!isAuthenticated ? "Sign in to use chat" : undefined}
+                />
                 {voiceEnabled && (
                   <VoiceSearchButton
                     status={voiceStatus}
@@ -700,6 +719,18 @@ const Rentals = () => {
       </section>
 
       <Footer />
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="rentals"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };

@@ -1,7 +1,11 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
+import { useTextChat } from "@/hooks/useTextChat";
+import { TextChatButton } from "@/components/TextChatButton";
+import { TextChatPanel } from "@/components/TextChatPanel";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -157,6 +161,16 @@ const faqs = [
 
 const HowItWorksPage = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  const [chatOpen, setChatOpen] = useState(false);
+  const {
+    messages: chatMessages,
+    status: chatStatus,
+    error: chatError,
+    sendMessage: sendChatMessage,
+    clearHistory: clearChatHistory,
+  } = useTextChat({ context: "general" });
 
   // Scroll to hash section on page load or hash change
   useEffect(() => {
@@ -183,10 +197,16 @@ const HowItWorksPage = () => {
           <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
             How Rent-A-Vacation Works
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             Whether you're looking to book an amazing vacation or earn from your
             timeshare, we make it simple, secure, and rewarding.
           </p>
+          <TextChatButton
+            onClick={() => setChatOpen(true)}
+            isOpen={chatOpen}
+            disabled={!isAuthenticated}
+            disabledReason={!isAuthenticated ? "Sign in to use chat" : undefined}
+          />
         </div>
       </section>
 
@@ -461,6 +481,18 @@ const HowItWorksPage = () => {
       </section>
 
       <Footer />
+
+      {/* Text Chat Panel */}
+      <TextChatPanel
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chatMessages}
+        status={chatStatus}
+        error={chatError}
+        context="general"
+        onSendMessage={sendChatMessage}
+        onClearHistory={clearChatHistory}
+      />
     </div>
   );
 };
