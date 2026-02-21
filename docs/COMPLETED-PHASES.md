@@ -1,7 +1,53 @@
 # Completed Phases Archive
 
 > Detailed records of completed project phases, moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 15, 2026
+> **Last Archived:** February 21, 2026
+
+---
+
+## Text Chat Agent (RAVIO)
+
+**Completed:** February 21, 2026
+**Status:** Deployed to DEV (tested working)
+**Docs:** `docs/features/text-chat/`
+**Decision:** DEC-020
+
+**What Was Done:**
+
+Built a conversational text chat assistant (RAVIO) powered by OpenRouter, with property search tool calling, SSE streaming, and context-aware system prompts. Runs alongside the existing VAPI voice search as a separate, independent system.
+
+### Backend
+- **Shared search module:** `supabase/functions/_shared/property-search.ts` — Extracted from voice-search, used by both voice-search and text-chat. Includes state name ↔ abbreviation expansion (e.g., "Hawaii" ↔ "HI") for flexible destination matching.
+- **Edge function:** `supabase/functions/text-chat/index.ts` — OpenRouter API with `google/gemini-3-flash-preview` model. SSE streaming, tool calling (`search_properties`), 4 context-based system prompts (rentals, property-detail, bidding, general). CORS allowlist, per-IP rate limiting (60 req/min), manual JWT verification via `auth.getUser(jwt)`.
+- **voice-search refactored** to import shared `searchProperties()` module — zero behavior change.
+
+### Frontend
+- **Types:** `src/types/chat.ts` — `ChatMessage`, `ChatStatus`, `ChatContext`
+- **Hook:** `src/hooks/useTextChat.ts` — Streaming SSE parser, AbortController, context-aware, session-only state
+- **Components:** `TextChatButton.tsx` (MessageCircle icon), `TextChatPanel.tsx` (Sheet-based UI with message bubbles, search result cards, suggested prompts, typing indicator)
+- **Page integration:** Rentals (rentals), PropertyDetail (property-detail), BiddingMarketplace (bidding), HowItWorks (general)
+
+### Debugging & Fixes (Session 7)
+- **VAPI 400 error:** Track B overrides (transcriber, speaking plans) rejected by VAPI SDK. Solution: minimal overrides only (firstMessage, model, maxDurationSeconds). Configure transcriber/speaking plans in VAPI dashboard.
+- **Text chat 401:** Supabase built-in JWT verification + edge function `getUser()` without JWT param. Solution: `--no-verify-jwt` + pass JWT directly to `auth.getUser(jwt)`.
+- **Text chat 502:** Model `google/gemini-2.0-flash-exp:free` removed from OpenRouter. Solution: switch to `google/gemini-3-flash-preview`.
+- **Destination matching:** "Hawaii" didn't match "Kapolei, HI". Solution: state name/abbreviation expansion in shared search module.
+- **DEV banner z-index:** z-[9999] interfered with popovers. Solution: lowered to z-[60].
+- **Double X button:** SheetContent built-in close + custom close. Solution: `[&>button.absolute]:hidden`.
+
+### Tests
+- 26 new tests (208 total), 0 type errors, 0 lint errors, build passing
+
+**New Files (14):**
+- `supabase/functions/_shared/property-search.ts`, `supabase/functions/text-chat/index.ts`
+- `src/types/chat.ts`, `src/hooks/useTextChat.ts`
+- `src/components/TextChatButton.tsx`, `src/components/TextChatPanel.tsx`
+- 8 test files, 5 documentation files
+
+**Modified Files (6):**
+- `supabase/functions/voice-search/index.ts` (shared module import)
+- `src/pages/Rentals.tsx`, `PropertyDetail.tsx`, `BiddingMarketplace.tsx`, `HowItWorksPage.tsx` (chat integration)
+- `src/flows/traveler-lifecycle.ts` (flow manifest)
 
 ---
 

@@ -138,6 +138,7 @@ src/
 │   └── AuthContext.tsx        # Auth state, session, roles, sign-in/out
 ├── hooks/
 │   ├── useAuth.ts             # Re-exports from AuthContext
+│   ├── useTextChat.ts         # Text chat hook (SSE streaming, AbortController, context-aware)
 │   ├── useBidding.ts          # All bidding queries & mutations (~600 lines)
 │   ├── useOwnerConfirmation.ts # Owner acceptance timer, extensions, confirm/decline
 │   ├── usePayouts.ts          # Owner & admin payout data hooks
@@ -174,7 +175,9 @@ src/
 │   └── NotFound.tsx           # 404 page
 ├── types/
 │   ├── database.ts            # Complete DB schema types (~768 lines)
-│   └── bidding.ts             # Bidding system types
+│   ├── bidding.ts             # Bidding system types
+│   ├── chat.ts                # Text chat types (ChatMessage, ChatStatus, ChatContext)
+│   └── voice.ts               # Voice search types
 ├── index.css                  # Design system tokens (HSL)
 ├── App.tsx                    # Router + providers
 └── main.tsx                   # Entry point
@@ -183,7 +186,8 @@ supabase/
 ├── config.toml                # Edge function registration
 └── functions/
     ├── _shared/
-    │   └── email-template.ts  # Unified email layout (buildEmailHtml, detailRow, infoBox)
+    │   ├── email-template.ts  # Unified email layout (buildEmailHtml, detailRow, infoBox)
+    │   └── property-search.ts # Shared search query builder (used by voice-search + text-chat)
     ├── create-booking-checkout/   # Stripe checkout session creation
     ├── verify-booking-payment/    # Stripe webhook → update booking + send confirmation email
     ├── send-email/                # Generic email dispatch via Resend
@@ -192,6 +196,9 @@ supabase/
     ├── send-cancellation-email/   # Traveler cancellation notifications
     ├── send-verification-notification/     # Admin notification on doc upload
     ├── process-deadline-reminders/         # CRON: scan & send overdue reminders + owner confirmation timeouts
+    ├── voice-search/                     # VAPI webhook: property search via voice
+    ├── text-chat/                        # OpenRouter LLM: text chat with tool calling + SSE streaming
+    ├── seed-manager/                     # DEV only: 3-layer seed data system (status/reseed/restore)
     ├── fetch-industry-news/              # Executive: NewsAPI + Google News RSS (60-min cache)
     ├── fetch-macro-indicators/           # Executive: FRED consumer confidence + travel data
     ├── fetch-airdna-data/                # Executive: AirDNA market comps (BYOK)
@@ -213,7 +220,7 @@ All routes are defined in `src/App.tsx`. Key mapping:
 | Route | Page Component | Access | Description |
 |-------|---------------|--------|-------------|
 | `/` | `Index` | Public | Landing page |
-| `/rentals` | `Rentals` | Public | Browse active listings |
+| `/rentals` | `Rentals` | Auth | Browse active listings + voice/text search |
 | `/property/:id` | `PropertyDetail` | Public | Listing detail + book |
 | `/list-property` | `ListProperty` | Owner | Create a new listing |
 | `/login` | `Login` | Public | Email/password + Google |
@@ -439,6 +446,9 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | `send-cancellation-email` | Internal | Notifies traveler of cancellation status (submitted, approved, denied, counter_offer) |
 | `send-verification-notification` | Client call | Alerts admin when owner uploads verification docs |
 | `process-deadline-reminders` | **CRON (pg_cron, every 30 min)** | Scans for upcoming deadlines, sends reminder emails, processes owner confirmation timeouts (auto-cancel + refund) |
+| `voice-search` | VAPI webhook | Property search via voice — shared `_shared/property-search.ts` module, state name/abbreviation expansion |
+| `text-chat` | Client call | OpenRouter LLM chat with SSE streaming, tool calling (`search_properties`), 4 context modes (rentals/property-detail/bidding/general). Model: `google/gemini-3-flash-preview`. Auth: manual JWT verification (`--no-verify-jwt`) |
+| `seed-manager` | Client call | DEV only: 3-layer seed data system — status, reseed, restore-user actions. Production guard via `IS_DEV_ENVIRONMENT` secret |
 | `fetch-industry-news` | Client call | Fetches NewsAPI + Google News RSS for vacation rental industry (60-min cache, NEWSAPI_KEY secret) |
 | `fetch-macro-indicators` | Client call | Fetches FRED consumer confidence + travel data (public API, no key) |
 | `fetch-airdna-data` | Client call | Fetches AirDNA market comp data (BYOK — user-supplied API key) |
@@ -451,6 +461,8 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | `RESEND_API_KEY` | All email functions |
 | `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment |
 | `NEWSAPI_KEY` | fetch-industry-news |
+| `OPENROUTER_API_KEY` | text-chat |
+| `IS_DEV_ENVIRONMENT` | seed-manager (production guard) |
 
 ---
 
