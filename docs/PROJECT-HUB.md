@@ -78,19 +78,26 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Voice Experience Tracks B-D
+**Active Phase:** Voice Experience Tracks C-D + Platform Hardening
 **Started:** February 20, 2026
 
 ### Working on TODAY:
 - [x] Phase 14: Executive Dashboard — deployed to PROD (PR #14, Feb 20)
 - [x] Dev environment banner — yellow top banner on DEV only (App.tsx)
-- [x] Voice Track B: Quality tuning — Nova-3, endpointing, anti-interruption, keyword boost
+- [x] Voice Track B: Quality tuning — Nova-3, endpointing, anti-interruption, keyword boost (PR #15)
+- [x] Executive dashboard header fix + description improvement (PR #15)
+- [x] NEWSAPI_KEY configured on DEV + PROD for live industry news (PR #15)
+- [x] Staff Only Mode — pre-launch platform lock for PROD safety (PR #16)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
-- [x] **Phase 14: Executive Dashboard** — Deployed to PROD (PR #14). Full investor-grade dashboard: 6 sections (HeadlineBar, BusinessPerformance, MarketplaceHealth, MarketIntelligence, IndustryFeed, UnitEconomics), 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index metrics, BYOK integrations (AirDNA, STR), dark-themed, 15+ new tests. Migration 013 + 4 edge functions deployed to DEV + PROD (Feb 20)
-- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable (`<Link>`), CORS tightened (dynamic origin), per-IP rate limiting (30 req/min). 142 tests passing. Edge function deployed to DEV + PROD (Feb 20)
-- [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, loading skeleton prevents auth flash, mobile menu buttons show skeleton during auth load (Feb 20)
+- [x] **Staff Only Mode** — Pre-launch platform lock (PR #16). Toggle in Admin > System Settings locks PROD to RAV team only. Non-RAV users see "Coming Soon" on login/signup. Enforced at 3 layers: database RLS (`can_access_platform()`), Login.tsx sign-out, Signup.tsx form block. Migration 014 deployed to DEV + PROD (Feb 20)
+- [x] **Executive Dashboard Fixes** — Fixed header hidden behind fixed nav (added pt-16 md:pt-20), improved page description, configured NEWSAPI_KEY secret on DEV + PROD for live industry news (PR #15, Feb 20)
+- [x] **Voice Track B: Quality Tuning** — Nova-3 transcription (54% WER improvement), 300ms endpointing + LiveKit smart endpointing, anti-interruption (stopSpeakingPlan, backgroundSpeechDenoisingPlan), 16 keyword boosts, 120s max duration (PR #15, Feb 20)
+- [x] **DEV Environment Banner** — Yellow fixed banner at top of app when running against DEV Supabase, with content offset (Feb 20)
+- [x] **Phase 14: Executive Dashboard** — Deployed to PROD (PR #14). Full investor-grade dashboard: 6 sections, 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index, BYOK integrations, dark-themed, 15+ new tests. Migration 013 + 4 edge functions deployed to DEV + PROD (Feb 20)
+- [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable, CORS tightened, per-IP rate limiting. Edge function deployed to DEV + PROD (Feb 20)
+- [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, auth flash fix (Feb 20)
 - [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
 - [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
 - [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files: UI labels, flow manifests, documentation, user guides, admin components. Centralized ROLE_LABELS/ROLE_COLORS in database.ts. Architecture link for rav_owner. 96 tests passing (Feb 17)
@@ -462,6 +469,17 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
+### DEC-018: Pre-Launch Platform Lock Strategy
+**Date:** February 20, 2026
+**Decision:** System-settings-based "Staff Only Mode" toggle (not per-user blocking)
+**Status:** Final
+
+**Context:** Need to prevent external users from creating test data on PROD before launch, while still deploying all code to PROD.
+
+**Reasoning:** A global toggle in `system_settings` is simpler than per-user blocking. Leverages existing `can_access_platform()` RLS function. Toggle is in Admin > System Settings — flip it off when ready to go live. Default: enabled (locked). Enforced at 3 layers: database RLS, Login.tsx, Signup.tsx.
+
+---
+
 ### DEC-011: Mobile App Strategy
 **Date:** February 15, 2026
 **Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
@@ -552,6 +570,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 4)
+**Last updated:** February 20, 2026 (session 5)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
