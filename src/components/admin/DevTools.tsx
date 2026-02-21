@@ -104,7 +104,15 @@ export function DevTools() {
       const { data, error } = await supabase.functions.invoke("seed-manager", {
         body: { action: "status" },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to extract the actual error message from the response
+        const context = (error as Record<string, unknown>).context;
+        if (context && typeof context === "object" && "json" in context) {
+          const body = await (context as Response).json().catch(() => null);
+          throw new Error(body?.error ?? error.message);
+        }
+        throw error;
+      }
       setStatus({ counts: data.counts });
     } catch (err) {
       toast.error(`Failed to fetch status: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -120,7 +128,14 @@ export function DevTools() {
       const { data, error } = await supabase.functions.invoke("seed-manager", {
         body: { action: "reseed" },
       });
-      if (error) throw error;
+      if (error) {
+        const context = (error as Record<string, unknown>).context;
+        if (context && typeof context === "object" && "json" in context) {
+          const body = await (context as Response).json().catch(() => null);
+          throw new Error(body?.error ?? error.message);
+        }
+        throw error;
+      }
       setReseedLog(data.log ?? ["Reseed complete"]);
       toast.success(`Reseed complete in ${data.elapsed_seconds}s`);
       // Auto-refresh status

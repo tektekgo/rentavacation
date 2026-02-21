@@ -234,10 +234,14 @@ async function getStatus(log: string[]): Promise<Record<string, number>> {
 
   const counts: Record<string, number> = {};
   for (const table of tables) {
-    const { count, error } = await admin
-      .from(table)
-      .select("id", { count: "exact", head: true });
-    counts[table] = error ? -1 : (count ?? 0);
+    try {
+      const { count, error } = await admin
+        .from(table)
+        .select("id", { count: "exact", head: true });
+      counts[table] = error ? -1 : (count ?? 0);
+    } catch {
+      counts[table] = -1;
+    }
   }
 
   // Foundation user count
@@ -1117,8 +1121,9 @@ serve(async (req: Request): Promise<Response> => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: message, stack: err instanceof Error ? err.stack : undefined }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
