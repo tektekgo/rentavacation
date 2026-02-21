@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 20, 2026
+> **Last Updated:** February 21, 2026
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -82,39 +82,34 @@ To keep PROJECT-HUB.md focused and scannable:
 **Started:** February 20, 2026
 
 ### Working on TODAY:
-- [x] Phase 14: Executive Dashboard — deployed to PROD (PR #14, Feb 20)
-- [x] Dev environment banner — yellow top banner on DEV only (App.tsx)
-- [x] Voice Track B: Quality tuning — Nova-3, endpointing, anti-interruption, keyword boost (PR #15)
-- [x] Executive dashboard header fix + description improvement (PR #15)
-- [x] NEWSAPI_KEY configured on DEV + PROD for live industry news (PR #15)
-- [x] Staff Only Mode — pre-launch platform lock for PROD safety (PR #16)
+- [x] Seed Data Management System — 3-layer seed system for DEV testing (PR #17, Feb 21)
+- [x] Executive Dashboard bug fixes — Industry News feed, chart tooltips, JWT verification (PR #17, Feb 21)
+- [x] Admin Dashboard footer + Dev Tools tab (PR #17, Feb 21)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Seed Data Management System** — Complete 3-layer seed system for DEV environment (PR #17). Migration 015 (`is_seed_foundation` column), `seed-manager` edge function (status/reseed/restore-user actions), Admin Dev Tools tab (DEV only). Creates 8 foundation users (3 RAV + 5 owners), 10 properties, 30 listings, 50 renters (growth curve), 90+ bookings, pipeline data. FK-safe 21-table deletion. Protected set: foundation users + RAV team members never wiped. Documentation: `docs/testing/SEED-DATA-GUIDE.md`. Deployed to DEV (Feb 21)
+- [x] **Executive Dashboard Fixes** — Fixed Industry News feed bug (`method` param → `body` param in `functions.invoke`), deployed all 4 executive edge functions with `--no-verify-jwt`, added chart tooltip explanations (TooltipIcon) to 5 charts: GMV Trend, Bid Activity, Bid Spread Index, Revenue Waterfall, Supply/Demand (PR #17, Feb 21)
+- [x] **Admin Dashboard Footer** — Added Footer component to AdminDashboard.tsx (PR #17, Feb 21)
 - [x] **Staff Only Mode** — Pre-launch platform lock (PR #16). Toggle in Admin > System Settings locks PROD to RAV team only. Non-RAV users see "Coming Soon" on login/signup. Enforced at 3 layers: database RLS (`can_access_platform()`), Login.tsx sign-out, Signup.tsx form block. Migration 014 deployed to DEV + PROD (Feb 20)
-- [x] **Executive Dashboard Fixes** — Fixed header hidden behind fixed nav (added pt-16 md:pt-20), improved page description, configured NEWSAPI_KEY secret on DEV + PROD for live industry news (PR #15, Feb 20)
 - [x] **Voice Track B: Quality Tuning** — Nova-3 transcription (54% WER improvement), 300ms endpointing + LiveKit smart endpointing, anti-interruption (stopSpeakingPlan, backgroundSpeechDenoisingPlan), 16 keyword boosts, 120s max duration (PR #15, Feb 20)
-- [x] **DEV Environment Banner** — Yellow fixed banner at top of app when running against DEV Supabase, with content offset (Feb 20)
 - [x] **Phase 14: Executive Dashboard** — Deployed to PROD (PR #14). Full investor-grade dashboard: 6 sections, 4 edge functions, 4 data hooks, proprietary Liquidity Score & Bid Spread Index, BYOK integrations, dark-themed, 15+ new tests. Migration 013 + 4 edge functions deployed to DEV + PROD (Feb 20)
 - [x] **Voice Quality Track A** — 5 fixes: duplicate call dedup (2s window), AbortController on fetch, voice result cards clickable, CORS tightened, per-IP rate limiting. Edge function deployed to DEV + PROD (Feb 20)
-- [x] **Mobile UX Track A: Post-Login Welcome** — "Hi, {name}" greeting in header (desktop + mobile), avatar+name pill on mobile, auth flash fix (Feb 20)
-- [x] **Mobile UX Track B: Mobile Screen Optimization** — 30+ responsive fixes across 12 pages, WCAG tap targets, dialog widths, responsive grids (Feb 20)
-- [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails wired to admin UI, bidding UI + Place Bid button, property image upload system, owner payout tracking, owner confirmation timer with configurable deadlines/extensions. Migration 012. 142 tests passing (Feb 20)
-- [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files: UI labels, flow manifests, documentation, user guides, admin components. Centralized ROLE_LABELS/ROLE_COLORS in database.ts. Architecture link for rav_owner. 96 tests passing (Feb 17)
-- [x] **UX Feedback Improvements** — ActionSuccessCard component, inline success states in 6 dialogs/pages, 2 email confirmations, BookingSuccess "What Happens Next" section, admin dashboard tab layout fix. 96 tests passing (Feb 16)
-- [x] **Brand logo update** — new stylized "R" design, old assets archived (Feb 16)
-- [x] **CI fully green** — all 4 jobs passing (lint, tests, E2E, Lighthouse), Qase receiving results (Feb 16)
-- [x] **58 ESLint errors fixed** — `any` types replaced across 17 files, unblocked CI pipeline (Feb 16)
-- [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags, 11 new tests (Feb 16)
-- [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection, CLAUDE.md documented (Feb 15)
-- [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page + edge function deployed (Feb 15)
-- [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files, migration deployed (Feb 14)
+- [x] **Mobile UX** — Post-login welcome ("Hi, {name}" greeting, avatar+name pill, auth flash fix) + 30+ responsive fixes across 12 pages (Feb 20)
+- [x] **Phase 13: Core Business Flow Completion** — 5 tracks: approval emails, bidding UI, property images, payouts, owner confirmation timer. Migration 012. 142 tests passing (Feb 20)
+- [x] **Role Terminology Standardization** — "Traveler" → "Renter" across 27 files (Feb 17)
+- [x] **UX Feedback Improvements** — ActionSuccessCard, inline success states, BookingSuccess timeline (Feb 16)
+- [x] **Phase 11: PWA** — service worker, install banner, offline detection, iOS meta tags (Feb 16)
+- [x] **DevOps: Branch strategy** — `dev` → `main` workflow, branch protection (Feb 15)
+- [x] **Phase 10 Tracks A-C** — dead link fixes, footer consolidation, Contact page (Feb 15)
+- [x] **Phase 9: Voice Toggles, Membership Tiers & Commission** — 5 tracks, 22 files (Feb 14)
 
 ### Blocked/Waiting:
 - Phase 10 Track D (AI Support Agent) — awaiting design decision (DEC-009)
 
 ### Known Issues:
 - Admin dashboard console errors (400 Bad Request) — `bookings` table FK constraints (`bookings_renter_id_fkey`) may not exist on PROD. Affects Bookings, Financials, and Escrow tabs. Needs DB migration.
+- Supabase hosted edge functions require `--no-verify-jwt` deployment flag — `config.toml` `verify_jwt = false` only applies locally
 
 ---
 
@@ -242,6 +237,26 @@ To keep PROJECT-HUB.md focused and scannable:
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Seed Data Management System</strong> — Completed Feb 21, 2026</summary>
+
+**What:** Complete 3-layer seed data system for DEV environment testing and executive demos.
+
+**3 Layers:**
+- **Layer 1 (Foundation):** 8 permanent users — 3 RAV team (dev-owner, dev-admin, dev-staff) + 5 property owners (Alex Rivera/HGV, Maria Chen/Marriott, James Thompson/Disney, Priya Patel/Wyndham, Robert Kim/Bluegreen). Marked `is_seed_foundation = true`, never wiped.
+- **Layer 2 (Inventory):** 10 properties (2 per owner, real resort names), 30 listings (15 active, 10 bidding, 5 draft)
+- **Layer 3 (Transactions):** 50 renters with growth curve (8→16→26 over 90 days), 90 completed bookings, 10 pending, 5 in escrow, 5 cancellations, 20 bids, 10 travel requests, 8 proposals
+
+**Database:** Migration `015_seed_foundation_flag.sql` — `is_seed_foundation` boolean column on profiles with partial index
+**Edge Function:** `seed-manager` with 3 actions: `status` (table counts), `reseed` (full 3-layer creation), `restore-user` (recreate deleted accounts)
+**Admin UI:** `DevTools.tsx` — 4 sections (status grid, reseed with log, test accounts table, Stripe test cards). Conditional tab in AdminDashboard (DEV only)
+**Safety:** Production guard (`IS_DEV_ENVIRONMENT` secret), protected set (foundation + RAV team members), FK-ordered 21-table deletion
+**Documentation:** `docs/testing/SEED-DATA-GUIDE.md`
+
+**Files:** 6 created/modified
+**Password:** All seed accounts use `SeedTest2026!`
+</details>
 
 <details>
 <summary><strong>Phase 14: Executive Dashboard</strong> — Completed Feb 20, 2026</summary>
@@ -480,6 +495,17 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
+### DEC-019: Seed Data Management Approach
+**Date:** February 21, 2026
+**Decision:** 3-layer edge-function-based seed system with foundation user protection
+**Status:** Final
+
+**Context:** DEV environment needs realistic test data for functional testing and executive demos. PROD is locked via Staff Only Mode.
+
+**Reasoning:** Edge function approach (vs raw SQL) allows: (1) idempotent auth.admin.createUser for proper trigger-based user setup, (2) production guard via env variable, (3) admin UI integration for one-click reset, (4) protected set pattern to never wipe RAV team or foundation accounts. Foundation users survive reseeds; everything else is disposable.
+
+---
+
 ### DEC-011: Mobile App Strategy
 **Date:** February 15, 2026
 **Decision:** PWA first (Phase 11), then Capacitor native shells (Phase 12)
@@ -513,6 +539,7 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ### Testing Documentation
 - **Test Strategy:** `docs/testing/TEST-STRATEGY.md`
+- **Seed Data Guide:** `docs/testing/SEED-DATA-GUIDE.md`
 - **Setup Checklist:** `docs/testing/TEST-SETUP-CHECKLIST.md`
 - **Claude Code Prompts:** `docs/testing/CLAUDE-CODE-PROMPTS.md`
 
@@ -570,6 +597,6 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ---
 
-**Last updated:** February 20, 2026 (session 5)
+**Last updated:** February 21, 2026 (session 6)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
