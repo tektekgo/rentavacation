@@ -51,6 +51,7 @@ import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
 import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
+import { PostRequestCTA } from "@/components/bidding/PostRequestCTA";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -615,6 +616,11 @@ const Rentals = () => {
                   </Button>
                 </Link>
               </div>
+              <PostRequestCTA
+                searchDestination={searchQuery}
+                searchCheckIn={dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined}
+                searchCheckOut={dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined}
+              />
             </div>
           )}
 
@@ -631,6 +637,11 @@ const Rentals = () => {
               <Button variant="outline" onClick={clearAllFilters}>
                 View All Properties
               </Button>
+              <PostRequestCTA
+                searchDestination={searchQuery}
+                searchCheckIn={dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined}
+                searchCheckOut={dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : undefined}
+              />
             </div>
           ) : !isLoading && !listingsError && filteredListings.length > 0 && (
           <>

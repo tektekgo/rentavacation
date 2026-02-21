@@ -41,20 +41,27 @@ const VACATION_BRANDS: { value: VacationClubBrand; label: string }[] = [
   { value: 'other', label: 'Other' },
 ];
 
-interface TravelRequestFormProps {
-  onSuccess?: () => void;
+interface TravelRequestFormDefaults {
+  destination?: string;
+  checkIn?: string;
+  checkOut?: string;
 }
 
-export function TravelRequestForm({ onSuccess }: TravelRequestFormProps) {
+interface TravelRequestFormProps {
+  onSuccess?: () => void;
+  defaultValues?: TravelRequestFormDefaults;
+}
+
+export function TravelRequestForm({ onSuccess, defaultValues }: TravelRequestFormProps) {
   const { user } = useAuth();
   const createRequest = useCreateTravelRequest();
   const [open, setOpen] = useState(false);
 
   // Form state
-  const [destinationLocation, setDestinationLocation] = useState('');
+  const [destinationLocation, setDestinationLocation] = useState(defaultValues?.destination || '');
   const [destinationFlexibility, setDestinationFlexibility] = useState('');
-  const [checkInDate, setCheckInDate] = useState('');
-  const [checkOutDate, setCheckOutDate] = useState('');
+  const [checkInDate, setCheckInDate] = useState(defaultValues?.checkIn || '');
+  const [checkOutDate, setCheckOutDate] = useState(defaultValues?.checkOut || '');
   const [datesFlexible, setDatesFlexible] = useState(false);
   const [flexibilityDays, setFlexibilityDays] = useState(3);
   const [guestCount, setGuestCount] = useState(2);

@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026 (Session 8 — Phase 15 + 16 + Exec Dashboard fixes)
+> **Last Updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,14 +78,16 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Phase 17 (Owner Dashboard) + Voice Tracks C-D
+**Active Phase:** Voice Tracks C-D + remaining backlog
 **Started:** February 21, 2026
 
 ### Working on TODAY:
-- [ ] **Phase 17: Owner Dashboard** — Requires Phase 15 (Fair Value Score) ✅ — ready to build
+- [x] **Phase 18: Travel Request Enhancements** — 4 enhancements complete
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
+- [x] **Phase 17: Owner Dashboard** (Feb 21, Session 9). 6 business intelligence sections in Overview tab: HeadlineStats (earned YTD, fees covered %, active bids), EarningsTimeline (AreaChart with monthly/quarterly + fee target line), MyListingsTable (status badges, FairValue badges, idle week alerts), BidActivityFeed (event stream), PricingIntelligence (per-listing FairValue + market range), MaintenanceFeeTracker (inline editor, coverage bar). 4 data hooks, migration 017, types. 30 new tests (264 total).
 - [x] **Phase 15: Fair Value Score** (Feb 21, Session 8). PostgreSQL RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge` components. Wired into Rentals listing cards, PropertyDetail sidebar, OwnerListings management. Owner vs traveler messaging. 14 new tests (222 total).
 - [x] **Phase 16: Maintenance Fee Calculator** (Feb 21, Session 8). Public `/calculator` route (no auth). Pure calculation logic in `calculatorLogic.ts`, `OwnershipForm`, `BreakevenResults`, `BreakevenBar`, `CalculatorCTA` components. 9 vacation club brands, 4 unit types, live break-even analysis, color-coded progress bars, CTA to owner signup. Footer link added. 12 new tests (234 total).
 - [x] **Functional Search Bar** (Feb 21, Session 8). Calendar date picker (Popover + Calendar), date range filter, all filter panel inputs wired (price/guests/bedrooms/brand), Search button, Apply/Clear handlers, active filter count badge, URL not persisted yet.
@@ -97,7 +99,6 @@ To keep PROJECT-HUB.md focused and scannable:
 - Phase 10 Track D (AI Support Agent) — superseded by Text Chat Agent (DEC-009 → DEC-020)
 
 ### Known Issues:
-- **Rentals search bar is mostly placeholder UI** — Calendar picker, Search button, and filter panel (price/guests/bedrooms/brand Apply/Clear) have no state bindings or handlers. Only the location text input works.
 - **PropertyDetail/Checkout dates are read-only** — By design for timeshare listings (owner sets fixed dates), but users may expect date selection.
 - **VAPI overrides limited** — Transcriber (nova-3), keyword boosts, and speaking plans cause 400 errors via SDK overrides. Must configure in VAPI dashboard Advanced tab.
 - Admin dashboard 400 errors — `bookings_renter_id_fkey` FK may not exist on PROD
@@ -137,23 +138,17 @@ All items complete: Public `/calculator` route, `calculatorLogic.ts` (pure funct
 
 ---
 
-### 5. Phase 17: Owner Dashboard (~2 sessions, ~6h) ← NEXT UP
-**Status:** Ready to build — Phase 15 (Fair Value Score) ✅ complete
-**Docs:** `docs/features/owner-dashboard/`
+### 5. ~~Phase 17: Owner Dashboard~~ ✅ COMPLETE
+**Status:** Done (Session 9, Feb 21)
 
-- [ ] Session 1: Migration, types, 4 data hooks, HeadlineStats, EarningsTimeline
-- [ ] Session 2: MyListingsTable (with FairValueBadge), BidActivityFeed, PricingIntelligence, MaintenanceFeeTracker
+All items complete in 1 session: Migration 017, types, 4 data hooks (useOwnerDashboardStats, useOwnerEarnings, useOwnerListingsData, useOwnerBidActivity), 6 components (OwnerHeadlineStats, EarningsTimeline, MyListingsTable, BidActivityFeed, PricingIntelligence, MaintenanceFeeTracker). 30 new tests (264 total).
 
 ---
 
-### 6. Phase 18: Travel Request Enhancements (~1 session, ~3h)
-**Status:** Ready to build — Independent
-**Docs:** `docs/features/travel-request-enhancements/`
+### 6. ~~Phase 18: Travel Request Enhancements~~ ✅ COMPLETE
+**Status:** Done (Session 9, Feb 21)
 
-- [ ] Automated match notifications when listings activate
-- [ ] Demand signal on listing creation form
-- [ ] "Post a Request" CTA on empty search results
-- [ ] Request expiry warning emails (48h before deadline)
+All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-forget trigger on admin listing approval, (2) DemandSignal component wired into OwnerListings form with 500ms debounce, (3) PostRequestCTA on empty Rentals results with prefill params → BiddingMarketplace, (4) expiry warning scan in process-deadline-reminders edge function. TravelRequestForm now accepts defaultValues prop. Migration 018. 9 new tests (273 total).
 
 ---
 
@@ -597,6 +592,6 @@ All items complete: Public `/calculator` route, `calculatorLogic.ts` (pure funct
 
 ---
 
-**Last updated:** February 21, 2026 (Session 8 — Phase 15 + 16 complete, Priorities 1-4 done, 234 tests)
+**Last updated:** February 21, 2026 (Session 9 — Phase 17 + 18 complete, Priorities 1-6 done, 273 tests)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

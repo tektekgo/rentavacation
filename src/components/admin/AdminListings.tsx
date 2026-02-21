@@ -116,6 +116,11 @@ const AdminListings = () => {
         sendApprovalEmail(listing.owner.id, "approved");
       }
 
+      // Trigger travel request matching (fire-and-forget)
+      supabase.functions.invoke("match-travel-requests", {
+        body: { listing_id: listingId },
+      }).catch((err) => console.error("Match trigger failed:", err));
+
       toast({
         title: "Listing Approved",
         description: "The listing is now active and visible to renters.",
