@@ -8,7 +8,6 @@ import type {
 import { supabase } from "@/lib/supabase";
 import { useVoiceQuota } from "./useVoiceQuota";
 
-import type { AssistantOverrides } from "@vapi-ai/web/dist/api";
 
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY as string;
 const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID as string;
@@ -43,37 +42,18 @@ Other guidelines:
 - Be warm, helpful, and concise
 - Don't mention technical details like function names or API calls`;
 
-const ASSISTANT_OVERRIDES: AssistantOverrides = {
-  firstMessage:
-    "Welcome to Rent-A-Vacation — voice-powered vacation search. Where are you looking to get away?",
-  transcriber: {
-    provider: "deepgram",
-    model: "nova-3",
-    language: "en",
-    endpointing: 300,
-    keywords: [
-      "timeshare", "Rent-A-Vacation", "Hilton Grand Vacations",
-      "Marriott Vacations", "Wyndham", "Bluegreen", "Holiday Inn Club",
-      "Orlando", "Maui", "Cancun", "Myrtle Beach", "Las Vegas",
-      "studio", "one-bedroom", "two-bedroom", "lockoff",
-    ],
-  },
-  model: {
-    provider: "openai",
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: VOICE_SEARCH_SYSTEM_PROMPT,
-      },
-    ],
-  },
-  maxDurationSeconds: 120,
-  // NOTE: Track B advanced plans (backgroundSpeechDenoisingPlan, startSpeakingPlan
-  // with smartEndpointingPlan, stopSpeakingPlan) removed — VAPI API rejects them
-  // as of Feb 2026 (400 start-method-error). Re-enable when VAPI supports them
-  // in assistant overrides. See docs/features/voice-search/KNOWN-ISSUES.md.
-};
+// NOTE: All assistant overrides removed — VAPI API rejects them with 400
+// start-method-error as of Feb 2026. The base assistant config from the VAPI
+// dashboard is used instead. System prompt, transcriber, and model are all
+// configured in the VAPI dashboard. See docs/features/voice-search/KNOWN-ISSUES.md.
+//
+// To restore overrides, uncomment and test individually:
+// const ASSISTANT_OVERRIDES: AssistantOverrides = {
+//   firstMessage: "Welcome to Rent-A-Vacation — voice-powered vacation search...",
+//   transcriber: { provider: "deepgram", model: "nova-3", language: "en", endpointing: 300, keywords: [...] },
+//   model: { provider: "openai", model: "gpt-4o-mini", messages: [{ role: "system", content: VOICE_SEARCH_SYSTEM_PROMPT }] },
+//   maxDurationSeconds: 120,
+// };
 
 interface VapiMessage {
   type: string;
@@ -251,7 +231,7 @@ export function useVoiceSearch() {
     setStatus("listening");
 
     try {
-      await vapi.start(VAPI_ASSISTANT_ID, ASSISTANT_OVERRIDES);
+      await vapi.start(VAPI_ASSISTANT_ID);
     } catch (err) {
       console.error("[Voice Search] Failed to start:", err);
       setError(
