@@ -11,15 +11,22 @@
 
 ## 1. Executive Summary
 
-Rent-A-Vacation (RAV) is a peer-to-peer vacation rental marketplace purpose-built for vacation club and timeshare owners. The platform enables owners to list unused timeshare weeks and travelers to discover, negotiate, and book vacation rentals — with AI-powered search, transparent per-night pricing, and trust-first design.
+### The Problem
+
+The vacation ownership (timeshare) industry is valued at $10.5 billion, yet owners of unused weeks have no efficient, trusted marketplace to monetize them. Existing options are fragmented — classified ads, Facebook groups, or legacy resale sites — with no pricing transparency, no buyer protection, and no tools for owners to manage their inventory. Meanwhile, travelers looking for vacation club properties have no way to discover available weeks, negotiate pricing, or book with confidence.
+
+### The Solution
+
+Rent-A-Vacation (RAV) is a peer-to-peer vacation rental marketplace purpose-built for vacation club and timeshare owners. The platform creates a two-sided marketplace where owners list unused timeshare weeks and travelers discover, negotiate, and book vacation rentals — with transparent per-night pricing, a bidding engine that lets travelers propose their own terms, and trust infrastructure that protects both sides of every transaction.
 
 The platform is feature-complete for MVP across 19 completed development phases, with 306 automated tests passing, zero type errors, and zero lint errors. All 21 database migrations and 17 edge functions are deployed to both development and production environments.
 
 **Key differentiators:**
-- **AI-First Search:** Voice concierge (Ask RAVIO) and text chat (Chat with RAVIO) — the first AI-powered search in the vacation rental space
-- **Traveler-Friendly Pricing:** "Name Your Price" bidding system, date proposals, and per-night rate transparency
-- **Owner-Centric Tools:** "Owner's Edge" dashboard with earnings analytics, pricing intelligence, and maintenance fee tracking
-- **Trust Infrastructure:** TrustShield owner verification, PaySafe escrow, and admin-controlled approval workflows
+- **Two-Sided Marketplace with Real-Time Negotiation:** Travelers can book at listed prices, bid their own price ("Name Your Price"), propose different dates, or post wish lists ("Vacation Wishes") that owners compete to fulfill. Owners see live demand signals — matching travel request count and max budget — while creating listings. Auto-matching connects newly approved listings with open traveler requests.
+- **Traveler-Friendly Pricing:** Per-night rate transparency (not lump-sum), flexible date proposals that auto-compute from nightly rate, and AI-powered fair value analysis so travelers know if a price is competitive.
+- **Owner-Centric Tools:** Full business intelligence suite ("Owner's Edge") with earnings tracking against maintenance fee targets, pricing recommendations based on comparable accepted bids, bid activity feed, and idle week alerts — giving owners the data they need to maximize returns on their unused weeks.
+- **Trust & Payment Protection:** Escrow system holds funds until the traveler physically checks in and confirms the stay. Owner verification with progressive trust levels (New → Verified → Trusted → Premium). Admin-controlled approval workflows for both users and listings. 4 cancellation policy tiers.
+- **AI-Enhanced Search (Voice + Text):** Voice concierge and text chat assistant provide natural language property search as an additional discovery channel — complementing the traditional search, filter, and browse experience.
 
 ---
 
@@ -39,28 +46,18 @@ The platform is feature-complete for MVP across 19 completed development phases,
 | **Cancellation Policies** | 4 tiers: Flexible (100% ≥1 day), Moderate (100% ≥5 days), Strict (50% ≥7 days), Super Strict (no refunds) | BUILT |
 | **Check-in Confirmation** | Traveler confirms arrival or reports issues; issue resolution workflow for admin | BUILT |
 
-### 2.2 AI-Powered Search
+### 2.2 Bidding & Negotiation
 
-| Feature | Marketing Name | Description | Status |
-|---------|---------------|-------------|--------|
-| **Voice Search** | Ask RAVIO | VAPI + Deepgram Nova-3 transcription, natural language queries, 300ms endpointing, smart denoising | BUILT |
-| **Text Chat** | Chat with RAVIO | OpenRouter LLM (Gemini 3 Flash), SSE streaming, tool calling for property search, context-aware prompts across 4 page types | BUILT |
-| **Resort Knowledge** | ResortIQ | 117 partner resorts, 351 unit types, auto-populate listing specs from professional database | BUILT |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Place a Bid (Name Your Price)** | Travelers bid on any listing where the owner has opted in. Owners review, accept, reject, or counter-offer | BUILT |
+| **Date Proposals** | Travelers propose different dates; bid amount auto-computes from nightly rate × proposed nights. Owners see proposed dates highlighted in bid manager | BUILT |
+| **Travel Requests (Vacation Wishes)** | Reverse auction — travelers post dream trips (destination, dates, budget, bedrooms), owners compete with proposals | BUILT |
+| **Inspired Requests** | "Request Similar Dates" from any listing detail page — pre-fills destination, dates, bedrooms from listing. Optional "Send to this owner first" targeting | BUILT |
+| **Auto-Matching** | Newly approved listings are automatically matched against open travel requests by destination, dates (±30 days), budget, bedrooms, and brand | BUILT |
+| **Demand Signals** | Owners see matching travel request count + max disclosed budget while creating listings, helping them price competitively | BUILT |
 
-**Voice quota system:** Tier-based daily limits with admin overrides and per-user controls.
-
-### 2.3 Bidding & Negotiation
-
-| Feature | Marketing Name | Description | Status |
-|---------|---------------|-------------|--------|
-| **Place a Bid** | Name Your Price | Travelers bid on any listing where the owner has opted in | BUILT |
-| **Date Proposals** | — | Travelers propose different dates; bid amount auto-computes from nightly rate × proposed nights | BUILT |
-| **Travel Requests** | Vacation Wishes | Reverse auction — travelers post dream trips, owners compete with proposals | BUILT |
-| **Inspired Requests** | — | "Request Similar Dates" from any listing detail page, pre-fills destination/dates/bedrooms, optional "Send to this owner first" | BUILT |
-| **Auto-Matching** | — | Newly approved listings are automatically matched against open travel requests by destination, dates, budget, and brand | BUILT |
-| **Demand Signals** | — | Owners see matching travel request count + max budget while creating listings | BUILT |
-
-### 2.4 Pricing & Revenue
+### 2.3 Pricing & Revenue
 
 | Aspect | Detail |
 |--------|--------|
@@ -71,14 +68,22 @@ The platform is feature-complete for MVP across 19 completed development phases,
 | **Stripe Processing** | ~2.9% absorbed by RAV within service fee margin |
 | **Payout Timing** | Owner receives payout after checkout date + 5 days |
 
-### 2.5 Business Intelligence
+### 2.4 Business Intelligence
 
-| Dashboard | Marketing Name | Audience | Description |
-|-----------|---------------|----------|-------------|
-| **Executive Dashboard** | RAV Command | RAV Owner | Investor-grade, dark-themed. 6 sections: Headline KPIs, Business Performance (4 charts), Marketplace Health (Liquidity Score gauge, supply/demand map, voice funnel), Market Intelligence (AirDNA + STR benchmarks via BYOK), Industry Feed (NewsAPI + macro indicators), Unit Economics (CAC, LTV, take rate, MoM growth) |
-| **Owner Dashboard** | Owner's Edge | Property Owners | 6 BI sections: Headline Stats (earned YTD, fees covered %, active bids), Earnings Timeline (AreaChart with fee target line), My Listings Table (status badges, Fair Value badges, idle week alerts), Bid Activity Feed, Pricing Intelligence (per-listing Fair Value + market range), Maintenance Fee Tracker (coverage progress bar) |
-| **Fair Value Score** | RAV SmartPrice | All users | PostgreSQL P25-P75 percentile analysis of comparable accepted bids. Tiers: below market (amber), fair value (emerald), above market (red). Role-specific messaging (owner vs traveler) |
-| **Maintenance Fee Calculator** | Fee Freedom Calculator | Public (no auth) | Break-even analysis across 9 vacation club brands, 4 unit types, live progress bars, CTA to owner signup |
+| Dashboard | Audience | Description |
+|-----------|----------|-------------|
+| **Owner Dashboard (Owner's Edge)** | Property Owners | 6 BI sections: Headline Stats (earned YTD, fees covered %, active bids), Earnings Timeline (monthly/quarterly chart with maintenance fee target reference line), My Listings Table (status badges, idle week alerts), Bid Activity Feed (color-coded event stream), Pricing Intelligence (per-listing fair value based on comparable accepted bids + market range), Maintenance Fee Tracker (inline editor + coverage progress bar) |
+| **Fair Value Score (RAV SmartPrice)** | All users | PostgreSQL analysis of comparable accepted bids using P25-P75 percentile range. Shows whether a listing is priced below market (opportunity), at fair value, or above market. Different messaging for owners ("you could earn more") vs travelers ("this is a good deal") |
+| **Maintenance Fee Calculator** | Public (no auth) | Break-even analysis tool covering 9 vacation club brands and 4 unit types — shows owners exactly how many weeks they need to rent to cover their annual maintenance fees. Live progress bars, CTA to owner signup |
+| **Executive Dashboard (RAV Command)** | RAV Leadership | Investor-grade strategic dashboard. 6 sections: KPI headline bar, Business Performance (4 charts), Marketplace Health (proprietary Liquidity Score and Bid Spread Index), Market Intelligence (AirDNA + STR benchmarks via Bring-Your-Own-Key), Industry Feed (live news + macro indicators), Unit Economics (CAC, LTV, take rate, MoM growth) |
+
+### 2.5 AI-Enhanced Search
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Voice Search (Ask RAVIO)** | Voice concierge powered by VAPI + Deepgram Nova-3 transcription. Natural language queries ("show me beachfront condos in Hawaii for next month"), 300ms endpointing, smart denoising. Tier-based daily limits with admin overrides | BUILT |
+| **Text Chat (Chat with RAVIO)** | LLM-powered text assistant (OpenRouter / Gemini 3 Flash) with SSE streaming and tool calling for property search. Context-aware across 4 page types (rentals, property detail, bidding, general) | BUILT |
+| **Resort Knowledge Base (ResortIQ)** | Database of 117 partner resorts and 351 unit types from 9 vacation club brands. Auto-populates listing specs (bedrooms, bathrooms, max guests, square footage) when owners create listings | BUILT |
 
 ### 2.6 Admin & Operations
 
@@ -87,7 +92,7 @@ The platform is feature-complete for MVP across 19 completed development phases,
 | **Admin Dashboard** | 12 tabs: Overview, Users, Listings (approval workflow), Bookings, Properties, Verifications, Escrow, Payouts, Financials, Issues, Voice, Memberships |
 | **Voice Admin Controls** | Global config display, tier quota manager, per-user overrides (disable/custom quota), usage dashboard with charts + top users, observability (search log viewer + alert thresholds) |
 | **Staff Only Mode** | Pre-launch platform lock — 3-layer enforcement (database RLS, Login page, Signup page). Toggle in Admin > System Settings |
-| **Owner Verification (TrustShield)** | Document upload (deed, certificate, ID), trust levels (new → verified → trusted → premium), admin review workflow |
+| **Owner Verification (TrustShield)** | Document upload (deed, certificate, government ID), progressive trust levels (New → Verified → Trusted → Premium), admin review workflow |
 | **Seed Data System** | DEV-only 3-layer system: 8 foundation users (never wiped), 10 properties + 30 listings, 50 renters + 110 bookings + 20 bids. Production-guarded |
 
 ### 2.7 Communication
@@ -503,6 +508,43 @@ Enables travelers to book a subset of an owner's listed dates (e.g., 6 of 8 days
 | Automated Test Count | 306 | BUILT |
 
 > **Honesty Framework:** BUILT = deployed and demonstrable in the codebase. INDUSTRY DATA = published research from third-party sources. PROJECTED = forward-looking estimates based on industry benchmarks and internal modeling. Never present projections as actuals.
+
+---
+
+## Glossary
+
+All branded terms below are **RAV-coined names** — proprietary marketing terms created by Rent-A-Vacation to describe platform features. They are not industry-standard terms.
+
+| Term | Type | Definition |
+|------|------|------------|
+| **RAV** | Brand abbreviation | Short for Rent-A-Vacation. Used in informal contexts, internal docs, and UI where space is limited |
+| **RAVIO** | RAV-coined | **R**ent-**A**-**V**acation **I**ntelligent **O**perator. The AI assistant brand identity used for both voice search ("Ask RAVIO") and text chat ("Chat with RAVIO") |
+| **Ask RAVIO** | RAV-coined | The voice search feature — travelers speak natural language queries to find properties. Powered by VAPI + Deepgram Nova-3 |
+| **Chat with RAVIO** | RAV-coined | The text chat feature — travelers type questions to find properties. Powered by OpenRouter LLM |
+| **Name Your Price** | RAV-coined | The bidding feature — travelers submit their own price offer on any listing where the owner has opted in to receiving bids |
+| **Vacation Wishes** | RAV-coined | The travel request feature — a reverse auction where travelers post their dream trip (destination, dates, budget) and owners compete with proposals |
+| **RAV SmartPrice** | RAV-coined | The fair value scoring system — uses P25-P75 percentile analysis of comparable accepted bids to tell users whether a listing is priced below market, at fair value, or above market |
+| **Fee Freedom Calculator** | RAV-coined | The public break-even calculator — shows timeshare owners how many weeks they need to rent to cover their annual maintenance fees, across 9 vacation club brands |
+| **TrustShield** | RAV-coined | The owner verification program — multi-step identity and property ownership verification with progressive trust levels (New → Verified → Trusted → Premium). Includes document upload and admin review |
+| **PaySafe** | RAV-coined | The escrow payment system — holds traveler funds from booking until check-in is confirmed. Owners receive payout after checkout + 5 days. If issues arise, funds are held for resolution |
+| **ResortIQ** | RAV-coined | The resort knowledge base — a curated database of 117 resorts and 351 unit types from 9 vacation club brands. Auto-populates listing specs when owners create listings |
+| **RAV Command** | RAV-coined | The executive dashboard — investor-grade business intelligence with proprietary metrics, market data integrations, and live industry feed. For RAV leadership only |
+| **Owner's Edge** | RAV-coined | The owner dashboard suite — 6 business intelligence sections giving property owners earnings tracking, pricing recommendations, bid activity, and maintenance fee coverage progress |
+| **Liquidity Score** | RAV-coined | A proprietary marketplace health metric displayed on the executive dashboard — measures how efficiently supply (listings) is being matched with demand (bookings + bids) |
+| **Bid Spread Index** | RAV-coined | A proprietary price discovery metric displayed on the executive dashboard — measures how closely bid amounts track listed prices, indicating pricing efficiency |
+| **Demand Signals** | RAV-coined | Real-time indicators shown to owners while creating listings — displays matching travel request count and maximum disclosed budget to help owners price competitively |
+
+### Industry Terms Used
+
+| Term | Definition |
+|------|------------|
+| **Timeshare / Vacation Ownership** | A property ownership model where multiple buyers share rights to use a vacation property, typically in one-week intervals |
+| **Maintenance Fees** | Annual fees charged by vacation clubs to owners for property upkeep, regardless of whether the owner uses their allotted time |
+| **Escrow** | A financial arrangement where a third party holds funds on behalf of two transacting parties until conditions are met |
+| **Per-Night Rate** | Industry-standard pricing model charging per night of stay (as opposed to lump-sum per-week pricing) |
+| **P2P Marketplace** | Peer-to-peer marketplace — a platform connecting individual sellers directly with individual buyers |
+| **BYOK** | Bring Your Own Key — a pattern where users supply their own API keys for third-party data integrations |
+| **RLS** | Row Level Security — a PostgreSQL feature that restricts database access based on user identity at the row level |
 
 ---
 
