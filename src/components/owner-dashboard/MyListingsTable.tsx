@@ -87,7 +87,8 @@ export function MyListingsTable({ listings, isLoading }: MyListingsTableProps) {
 
                 <div className="flex items-center gap-4 text-sm">
                   <div className="text-right">
-                    <div className="font-semibold">${listing.final_price.toLocaleString()}</div>
+                    <div className="font-semibold">${listing.nightly_rate}/night</div>
+                    <div className="text-xs text-muted-foreground">${listing.final_price.toLocaleString()} total</div>
                     <div className="text-xs text-muted-foreground">
                       {listing.bid_count > 0
                         ? `${listing.bid_count} bid${listing.bid_count > 1 ? 's' : ''} · High: $${listing.highest_bid?.toLocaleString()}`

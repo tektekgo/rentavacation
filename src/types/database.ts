@@ -334,6 +334,7 @@ export interface Database {
           owner_price: number;
           rav_markup: number;
           final_price: number;
+          nightly_rate: number;
           notes: string | null;
           cancellation_policy: CancellationPolicy;
           approved_by: string | null;
@@ -351,6 +352,7 @@ export interface Database {
           owner_price: number;
           rav_markup?: number;
           final_price: number;
+          nightly_rate: number;
           notes?: string | null;
           cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;
@@ -368,6 +370,7 @@ export interface Database {
           owner_price?: number;
           rav_markup?: number;
           final_price?: number;
+          nightly_rate?: number;
           notes?: string | null;
           cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;

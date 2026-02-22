@@ -53,11 +53,13 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/property/:id',
       label: 'View Property',
       component: 'PropertyDetail',
-      description: 'View listing details, photos, amenities, pricing. Owner decides at listing time whether bidding is open.',
+      description: 'View listing details, photos, amenities, per-night pricing. Owner decides at listing time whether bidding is open.',
       tables: ['listings', 'properties'],
       branches: [
         { condition: 'Listing allows direct booking', targetStepId: 'checkout', label: 'Book directly' },
         { condition: 'Listing is open to bidding', targetStepId: 'place_bid', label: 'Place bid' },
+        { condition: 'Propose different dates', targetStepId: 'place_bid', label: 'Date proposal', edgeStyle: 'dashed' },
+        { condition: 'Request similar dates', targetStepId: 'post_travel_request', label: 'Inspired request', edgeStyle: 'dashed' },
       ],
     },
     {

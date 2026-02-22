@@ -21,6 +21,7 @@ export interface OwnerListingRow {
   status: string;
   final_price: number;
   owner_price: number;
+  nightly_rate: number;
   open_for_bidding: boolean;
   bid_count: number;
   highest_bid: number | null;

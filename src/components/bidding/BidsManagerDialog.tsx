@@ -257,6 +257,21 @@ function BidCard({
                 {bid.counter_offer_message && ` - "${bid.counter_offer_message}"`}
               </div>
             )}
+
+            {bid.requested_check_in && bid.requested_check_out && (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                <span className="font-medium">Different dates proposed: </span>
+                {new Date(bid.requested_check_in).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {' – '}
+                {new Date(bid.requested_check_out).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {(() => {
+                  const days = Math.ceil(
+                    (new Date(bid.requested_check_out).getTime() - new Date(bid.requested_check_in).getTime()) / (1000 * 60 * 60 * 24)
+                  );
+                  return days > 0 ? ` (${days} night${days > 1 ? 's' : ''})` : '';
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Bid Amount & Actions */}

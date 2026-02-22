@@ -52,6 +52,7 @@ import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAg
 import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
 import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
 import { PostRequestCTA } from "@/components/bidding/PostRequestCTA";
+import { calculateNights } from "@/lib/pricing";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -97,12 +98,6 @@ function getListingImage(listing: ActiveListing): string | null {
 
 function getListingBrandLabel(listing: ActiveListing): string {
   return BRAND_LABELS[listing.property.brand] || listing.property.brand;
-}
-
-function calculateNights(checkIn: string, checkOut: string): number {
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 const Rentals = () => {
@@ -655,7 +650,7 @@ const Rentals = () => {
           >
             {paginatedListings.map((listing) => {
               const nights = calculateNights(listing.check_in_date, listing.check_out_date);
-              const pricePerNight = nights > 0 ? Math.round(listing.final_price / nights) : listing.final_price;
+              const pricePerNight = listing.nightly_rate || (nights > 0 ? Math.round(listing.final_price / nights) : 0);
               const image = getListingImage(listing);
               const displayName = getListingDisplayName(listing);
               const location = getListingLocation(listing);

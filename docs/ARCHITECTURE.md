@@ -381,6 +381,7 @@ Run in order via Supabase SQL Editor:
 | 016 | `fair_value_score.sql` | `calculate_fair_value_score(listing_id)` RPC — comparable bid analysis with P25/P75 tiers |
 | 017 | `owner_dashboard.sql` | `profiles.annual_maintenance_fees` column, `get_owner_dashboard_stats(owner_id)` + `get_owner_monthly_earnings(owner_id)` RPCs |
 | 018 | `travel_request_enhancements.sql` | `notification_type` enum: `travel_request_expiring_soon`, `travel_request_matched` |
+| 019 | `profiles_fk_constraints.sql` | Redirects 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` for PostgREST embedding |
 
 ---
 
@@ -682,6 +683,7 @@ Lovable Editor → GitHub main → Vercel auto-deploy → Production
 - **Security definer functions** — used for role checks to prevent RLS recursion
 - **Triggers** — auto-create profile on signup, auto-assign `renter` role
 - **Enums** — defined in DB, mirrored in `src/types/database.ts`
+- **FK constraints for PostgREST** — user-related FK columns MUST reference `profiles(id)`, NOT `auth.users(id)`. PostgREST only traverses FKs within the `public` schema (migration 019)
 
 ### Naming
 

@@ -5,6 +5,39 @@
 
 ---
 
+## Session 12: PostgREST FK Fix + Mermaid Rendering + Accounting Doc
+
+**Completed:** February 21, 2026
+**Status:** Migration 019 deployed to both DEV + PROD, verified via REST API
+**Migration:** `019_profiles_fk_constraints.sql`
+
+### Root Cause
+
+All user-related FK columns (e.g., `owner_id`, `renter_id`, `bidder_id`) across 10 tables referenced `auth.users(id)` in the `auth` schema. PostgREST can only traverse FK relationships within the exposed `public` schema, so every `.select('*, user:profiles!fk_hint(*)')` query failed with PGRST200 "Could not find a relationship between X and profiles".
+
+### Fix
+
+Migration 019 drops the `auth.users` FKs and recreates them with the same constraint names pointing to `profiles(id)`. Since `profiles.id` references `auth.users(id)`, referential integrity is maintained transitively.
+
+**10 tables fixed:** `properties`, `listings`, `bookings`, `listing_bids`, `travel_requests`, `travel_proposals`, `booking_confirmations`, `checkin_confirmations`, `role_upgrade_requests`, `owner_verifications`.
+
+### Other Fixes
+- **Mermaid diagram rendering** — `vercel.json` `/assets/*` rewrite added before SPA catch-all so Mermaid's dynamic ESM chunks are served as JS instead of HTML
+- **FK hints in useBidding.ts** — Added explicit FK hints to 3 PostgREST queries (now backed by real constraints)
+
+### New Documentation
+- `docs/RAV-PRICING-TAXES-ACCOUNTING.md` — Partner-facing 1-pager: fee structure, per-night pricing model, marketplace facilitator tax obligations (43 states + DC), integration options (Stripe Tax, Avalara, QuickBooks), 7-phase implementation roadmap
+
+### Roadmap Additions (PROJECT-HUB)
+- Phase 19: Flexible Date Booking + Per-Night Pricing
+- Phase 20: Accounting, Tax & Fee Framework
+- Phase 21: Partial-Week Booking
+
+### Key Convention Established
+> **For all future tables with user columns:** Always use `REFERENCES profiles(id)` — NEVER `REFERENCES auth.users(id)`. PostgREST requires FKs within the `public` schema.
+
+---
+
 ## Phase 18: Travel Request Enhancements
 
 **Completed:** February 21, 2026

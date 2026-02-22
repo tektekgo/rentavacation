@@ -37,9 +37,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
 import { BidFormDialog } from "@/components/bidding/BidFormDialog";
+import { InspiredTravelRequestDialog } from "@/components/bidding/InspiredTravelRequestDialog";
 import { Gavel } from "lucide-react";
 import { isPast } from "date-fns";
 import { FairValueCard } from "@/components/fair-value/FairValueCard";
+import { calculateNights } from "@/lib/pricing";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -53,18 +55,14 @@ const BRAND_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-function calculateNights(checkIn: string, checkOut: string): number {
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-}
-
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
   const [guests, setGuests] = useState(1);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [dateProposalOpen, setDateProposalOpen] = useState(false);
+  const [inspiredRequestOpen, setInspiredRequestOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   // Auth
@@ -108,7 +106,7 @@ const PropertyDetail = () => {
   const resort = prop?.resort;
   const unitType = prop?.unit_type as unknown as Record<string, string> | undefined;
   const nights = listing ? calculateNights(listing.check_in_date, listing.check_out_date) : 0;
-  const pricePerNight = nights > 0 && listing ? Math.round(listing.final_price / nights) : 0;
+  const pricePerNight = listing?.nightly_rate || (nights > 0 && listing ? Math.round(listing.final_price / nights) : 0);
 
   // Build image array from property/resort data
   const images: string[] = [];
@@ -502,9 +500,33 @@ const PropertyDetail = () => {
                         </Button>
                       )}
 
+                      {user && !isOwnListing && (
+                        <Button
+                          variant="outline"
+                          className="w-full mb-4"
+                          size="lg"
+                          onClick={() => setDateProposalOpen(true)}
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Propose Different Dates
+                        </Button>
+                      )}
+
                       <p className="text-center text-sm text-muted-foreground mb-4">
                         You won't be charged yet
                       </p>
+
+                      {user && !isOwnListing && (
+                        <Button
+                          variant="ghost"
+                          className="w-full mb-2"
+                          size="sm"
+                          onClick={() => setInspiredRequestOpen(true)}
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Request Similar Dates
+                        </Button>
+                      )}
 
                       {user && (
                         <Button
@@ -678,6 +700,35 @@ const PropertyDetail = () => {
           }}
           open={bidDialogOpen}
           onOpenChange={setBidDialogOpen}
+        />
+      )}
+
+      {/* Date Proposal Dialog */}
+      {listing && (
+        <BidFormDialog
+          listing={{
+            ...listing,
+            property: listing.property,
+            open_for_bidding: listing.open_for_bidding,
+            bidding_ends_at: listing.bidding_ends_at,
+            min_bid_amount: listing.min_bid_amount,
+            reserve_price: null,
+            allow_counter_offers: true,
+            created_at: listing.created_at,
+            updated_at: new Date().toISOString(),
+          }}
+          open={dateProposalOpen}
+          onOpenChange={setDateProposalOpen}
+          mode="date-proposal"
+        />
+      )}
+
+      {/* Inspired Travel Request Dialog */}
+      {listing && prop && (
+        <InspiredTravelRequestDialog
+          listing={listing}
+          open={inspiredRequestOpen}
+          onOpenChange={setInspiredRequestOpen}
         />
       )}
 

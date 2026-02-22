@@ -20,6 +20,7 @@ const mockListings: OwnerListingRow[] = [
     status: 'active',
     final_price: 1200,
     owner_price: 1000,
+    nightly_rate: 143,
     open_for_bidding: true,
     bid_count: 3,
     highest_bid: 900,
@@ -34,6 +35,7 @@ const mockListings: OwnerListingRow[] = [
     status: 'draft',
     final_price: 2500,
     owner_price: 2200,
+    nightly_rate: 314,
     open_for_bidding: false,
     bid_count: 0,
     highest_bid: null,
@@ -68,8 +70,10 @@ describe('MyListingsTable', () => {
 
   it('renders listing prices', () => {
     renderTable(mockListings);
-    expect(screen.getByText('$1,200')).toBeDefined();
-    expect(screen.getByText('$2,500')).toBeDefined();
+    expect(screen.getByText('$143/night')).toBeDefined();
+    expect(screen.getByText('$314/night')).toBeDefined();
+    expect(screen.getByText('$1,200 total')).toBeDefined();
+    expect(screen.getByText('$2,500 total')).toBeDefined();
   });
 
   it('renders bid info for listings with bids', () => {
