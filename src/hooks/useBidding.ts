@@ -117,6 +117,8 @@ export function useCreateBid() {
           bid_amount: input.bid_amount,
           message: input.message || null,
           guest_count: input.guest_count,
+          requested_check_in: input.requested_check_in || null,
+          requested_check_out: input.requested_check_out || null,
         } as never)
         .select()
         .single();

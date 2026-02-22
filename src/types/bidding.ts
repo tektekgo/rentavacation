@@ -50,6 +50,8 @@ export interface ListingBid {
   guest_count: number;
   counter_offer_amount: number | null;
   counter_offer_message: string | null;
+  requested_check_in: string | null;
+  requested_check_out: string | null;
   responded_at: string | null;
   created_at: string;
   updated_at: string;
@@ -107,6 +109,8 @@ export interface TravelRequest {
   preferred_brands: VacationClubBrand[] | null;
   amenities_required: string[] | null;
   // Timing
+  source_listing_id: string | null;
+  target_owner_only: boolean;
   proposals_deadline: string;
   created_at: string;
   updated_at: string;
@@ -190,6 +194,8 @@ export interface CreateBidInput {
   bid_amount: number;
   message?: string;
   guest_count: number;
+  requested_check_in?: string;
+  requested_check_out?: string;
 }
 
 export interface CreateTravelRequestInput {
@@ -208,6 +214,8 @@ export interface CreateTravelRequestInput {
   preferred_brands?: VacationClubBrand[];
   amenities_required?: string[];
   proposals_deadline: string;
+  source_listing_id?: string;
+  target_owner_only?: boolean;
 }
 
 export interface CreateProposalInput {

@@ -41,7 +41,7 @@ function PricingRow({ listing }: { listing: OwnerListingRow }) {
           <FairValueBadge tier={data.tier} />
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {new Date(listing.check_in_date).toLocaleDateString()} · Your price: ${listing.final_price.toLocaleString()}
+          {new Date(listing.check_in_date).toLocaleDateString()} · ${listing.nightly_rate}/night (${listing.final_price.toLocaleString()} total)
           {data.range_low != null && data.range_high != null && (
             <> · Market: ${data.range_low.toLocaleString()}–${data.range_high.toLocaleString()}</>
           )}

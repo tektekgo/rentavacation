@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveListings, type ActiveListing } from "@/hooks/useListings";
 import { useListingSocialProof, getFreshnessLabel, getPopularityLabel, getDaysAgo } from "@/hooks/useListingSocialProof";
+import { calculateNights } from "@/lib/pricing";
 
 const BRAND_LABELS: Record<string, string> = {
   hilton_grand_vacations: "Hilton Grand Vacations",
@@ -41,12 +42,6 @@ function getImage(listing: ActiveListing): string | null {
   if (listing.property.images?.length > 0) return listing.property.images[0];
   if (listing.property.resort?.main_image_url) return listing.property.resort.main_image_url;
   return null;
-}
-
-function calculateNights(checkIn: string, checkOut: string): number {
-  return Math.ceil(
-    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-  );
 }
 
 const FeaturedResorts = () => {
@@ -138,7 +133,7 @@ const FeaturedResorts = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featured.map((listing, index) => {
             const nights = calculateNights(listing.check_in_date, listing.check_out_date);
-            const pricePerNight = nights > 0 ? Math.round(listing.final_price / nights) : listing.final_price;
+            const pricePerNight = listing.nightly_rate || (nights > 0 ? Math.round(listing.final_price / nights) : 0);
             const image = getImage(listing);
             const displayName = getDisplayName(listing);
             const location = getLocation(listing);

@@ -115,8 +115,11 @@ export const sendWelcomeEmail = async (to: string, userName: string): Promise<Em
 export const sendListingSubmittedEmail = async (
   to: string,
   ownerName: string,
-  details: { resortName: string; location: string; checkIn: string; checkOut: string; price: number }
+  details: { resortName: string; location: string; checkIn: string; checkOut: string; price: number; nightlyRate?: number; nights?: number }
 ): Promise<EmailResponse> => {
+  const priceDisplay = details.nightlyRate && details.nights
+    ? `$${details.nightlyRate}/night (${details.nights} nights, $${details.price.toLocaleString()} total)`
+    : `$${details.price.toLocaleString()}`;
   return sendEmail({
     to,
     subject: 'Listing Submitted for Review - Rent-A-Vacation',
@@ -130,7 +133,7 @@ export const sendListingSubmittedEmail = async (
           <p style="margin: 0 0 6px 0;"><strong>Resort:</strong> ${details.resortName}</p>
           <p style="margin: 0 0 6px 0;"><strong>Location:</strong> ${details.location}</p>
           <p style="margin: 0 0 6px 0;"><strong>Dates:</strong> ${details.checkIn} — ${details.checkOut}</p>
-          <p style="margin: 0;"><strong>Your Price:</strong> $${details.price.toLocaleString()}</p>
+          <p style="margin: 0;"><strong>Your Price:</strong> ${priceDisplay}</p>
         </div>
         <div style="background: #ebf8ff; padding: 16px 20px; border-radius: 6px; border-left: 4px solid ${BRAND_COLOR}; margin: 16px 0;">
           <p style="margin: 0 0 8px 0; font-weight: 600;">What happens next?</p>

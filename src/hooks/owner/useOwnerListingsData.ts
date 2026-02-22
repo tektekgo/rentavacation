@@ -13,7 +13,7 @@ export function useOwnerListingsData() {
       const { data: listings, error } = await supabase
         .from('listings')
         .select(`
-          id, check_in_date, check_out_date, status, final_price, owner_price,
+          id, check_in_date, check_out_date, status, final_price, owner_price, nightly_rate,
           open_for_bidding,
           property:properties!inner(resort_name, location)
         `)
@@ -62,6 +62,7 @@ export function useOwnerListingsData() {
           status: l.status,
           final_price: l.final_price,
           owner_price: l.owner_price,
+          nightly_rate: l.nightly_rate || 0,
           open_for_bidding: l.open_for_bidding || false,
           bid_count: bc.count,
           highest_bid: bc.highest,

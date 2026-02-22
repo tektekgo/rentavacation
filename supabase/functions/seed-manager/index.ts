@@ -633,7 +633,8 @@ async function createInventory(
 
     const checkInDays = randomInt(30, 180);
     const stayLength = randomInt(3, 10);
-    const ownerPrice = randomInt(700, 3000);
+    const nightlyRate = randomInt(100, 400);
+    const ownerPrice = nightlyRate * stayLength;
     const ravMarkup = Math.round(ownerPrice * 0.15);
     const finalPrice = ownerPrice + ravMarkup;
 
@@ -674,6 +675,7 @@ async function createInventory(
         owner_price: ownerPrice,
         rav_markup: ravMarkup,
         final_price: finalPrice,
+        nightly_rate: nightlyRate,
         cancellation_policy: randomChoice(cancellationPolicies),
         approved_by: approvedBy,
         approved_at: approvedAt,

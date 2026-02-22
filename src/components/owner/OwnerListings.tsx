@@ -46,6 +46,7 @@ import { ActionSuccessCard } from "@/components/ActionSuccessCard";
 import { sendListingSubmittedEmail } from "@/lib/email";
 import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
 import { DemandSignal } from "@/components/bidding/DemandSignal";
+import { calculateNights, computeListingPricing } from "@/lib/pricing";
 
 type ListingInsert = Database['public']['Tables']['listings']['Insert'];
 type ListingUpdate = Database['public']['Tables']['listings']['Update'];
@@ -82,7 +83,7 @@ interface ListingFormData {
   property_id: string;
   check_in_date: string;
   check_out_date: string;
-  owner_price: number;
+  nightly_rate: number;
   notes: string;
   cancellation_policy: CancellationPolicy;
 }
@@ -91,7 +92,7 @@ const initialFormData: ListingFormData = {
   property_id: "",
   check_in_date: "",
   check_out_date: "",
-  owner_price: 0,
+  nightly_rate: 0,
   notes: "",
   cancellation_policy: "moderate",
 };
@@ -176,13 +177,17 @@ const OwnerListings = () => {
           return;
         }
 
+        const nights = calculateNights(formData.check_in_date, formData.check_out_date);
+        const pricing = computeListingPricing(formData.nightly_rate, nights);
+
         const updateData: ListingUpdate = {
           property_id: formData.property_id,
           check_in_date: formData.check_in_date,
           check_out_date: formData.check_out_date,
-          owner_price: formData.owner_price,
-          rav_markup: 0,
-          final_price: formData.owner_price,
+          nightly_rate: formData.nightly_rate,
+          owner_price: pricing.ownerPrice,
+          rav_markup: pricing.ravMarkup,
+          final_price: pricing.finalPrice,
           notes: formData.notes || null,
           cancellation_policy: formData.cancellation_policy,
           status: "pending_approval",
@@ -196,14 +201,18 @@ const OwnerListings = () => {
         if (error) throw error;
       } else {
         // Create new
+        const newNights = calculateNights(formData.check_in_date, formData.check_out_date);
+        const newPricing = computeListingPricing(formData.nightly_rate, newNights);
+
         const insertData: ListingInsert = {
           property_id: formData.property_id,
           owner_id: user.id,
           check_in_date: formData.check_in_date,
           check_out_date: formData.check_out_date,
-          owner_price: formData.owner_price,
-          rav_markup: 0,
-          final_price: formData.owner_price,
+          nightly_rate: formData.nightly_rate,
+          owner_price: newPricing.ownerPrice,
+          rav_markup: newPricing.ravMarkup,
+          final_price: newPricing.finalPrice,
           notes: formData.notes || null,
           cancellation_policy: formData.cancellation_policy,
           status: "pending_approval",
@@ -219,6 +228,8 @@ const OwnerListings = () => {
       // Fire confirmation email (fire-and-forget)
       const selectedProperty = properties.find(p => p.id === formData.property_id);
       if (user.email && selectedProperty) {
+        const emailNights = calculateNights(formData.check_in_date, formData.check_out_date);
+        const emailPricing = computeListingPricing(formData.nightly_rate, emailNights);
         sendListingSubmittedEmail(
           user.email,
           user.user_metadata?.full_name || "",
@@ -227,7 +238,9 @@ const OwnerListings = () => {
             location: selectedProperty.location,
             checkIn: formData.check_in_date,
             checkOut: formData.check_out_date,
-            price: formData.owner_price,
+            price: emailPricing.ownerPrice,
+            nightlyRate: formData.nightly_rate,
+            nights: emailNights,
           }
         ).catch(console.error);
       }
@@ -250,11 +263,14 @@ const OwnerListings = () => {
     }
 
     setEditingListing(listing);
+    const editNights = calculateNights(listing.check_in_date, listing.check_out_date);
+    const editNightlyRate = (listing as { nightly_rate?: number }).nightly_rate
+      || (editNights > 0 ? Math.round(listing.owner_price / editNights) : 0);
     setFormData({
       property_id: listing.property_id,
       check_in_date: listing.check_in_date,
       check_out_date: listing.check_out_date,
-      owner_price: listing.owner_price,
+      nightly_rate: editNightlyRate,
       notes: listing.notes || "",
       cancellation_policy: listing.cancellation_policy || "moderate",
     });
@@ -424,21 +440,41 @@ const OwnerListings = () => {
               })()}
 
               <div className="space-y-2">
-                <Label htmlFor="owner_price">Your Asking Price ($)</Label>
+                <Label htmlFor="nightly_rate">Nightly Rate ($)</Label>
                 <Input
-                  id="owner_price"
+                  id="nightly_rate"
                   type="number"
                   min={0}
-                  step={0.01}
-                  value={formData.owner_price || ""}
+                  step={1}
+                  value={formData.nightly_rate || ""}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, owner_price: parseFloat(e.target.value) || 0 }))
+                    setFormData((prev) => ({ ...prev, nightly_rate: parseFloat(e.target.value) || 0 }))
                   }
-                  placeholder="Enter your desired price"
+                  placeholder="Enter your nightly rate"
                   required
                 />
+                {formData.nightly_rate > 0 && formData.check_in_date && formData.check_out_date && (() => {
+                  const formNights = calculateNights(formData.check_in_date, formData.check_out_date);
+                  const formPricing = computeListingPricing(formData.nightly_rate, formNights);
+                  return formNights > 0 ? (
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{formNights} nights x ${formData.nightly_rate}/night</span>
+                        <span className="font-medium">${formPricing.ownerPrice.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">RAV service fee (15%)</span>
+                        <span>${formPricing.ravMarkup.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold border-t pt-1">
+                        <span>Traveler pays</span>
+                        <span>${formPricing.finalPrice.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
                 <p className="text-xs text-muted-foreground">
-                  This is the amount you'll receive. RAV will add a markup for the final renter price.
+                  Set your per-night rate. Your earnings and the traveler's total price are computed automatically.
                 </p>
               </div>
 

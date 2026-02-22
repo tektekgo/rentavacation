@@ -1,6 +1,7 @@
 // Bid Form Component - For travelers to bid on listings open for bidding
+// Supports two modes: 'bid' (standard) and 'date-proposal' (propose different dates)
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateBid } from '@/hooks/useBidding';
 import { Button } from '@/components/ui/button';
@@ -15,36 +16,57 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Gavel, DollarSign, Users, Clock, LogIn } from 'lucide-react';
+import { Gavel, DollarSign, Users, Clock, LogIn, Calendar } from 'lucide-react';
 import { ActionSuccessCard } from '@/components/ActionSuccessCard';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import type { ListingWithBidding } from '@/types/bidding';
+import { calculateNights, computeListingPricing } from '@/lib/pricing';
+
+type BidMode = 'bid' | 'date-proposal';
 
 interface BidFormDialogProps {
   listing: ListingWithBidding;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: BidMode;
 }
 
-export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProps) {
-  const { user, isConfigured } = useAuth();
+export function BidFormDialog({ listing, open, onOpenChange, mode = 'bid' }: BidFormDialogProps) {
+  const { user } = useAuth();
   const createBid = useCreateBid();
-  
+
   const [bidAmount, setBidAmount] = useState<number>(listing.min_bid_amount || listing.owner_price);
   const [guestCount, setGuestCount] = useState<number>(1);
   const [message, setMessage] = useState('');
   const [bidSuccess, setBidSuccess] = useState(false);
   const [submittedBidAmount, setSubmittedBidAmount] = useState(0);
 
+  // Date proposal fields
+  const [proposedCheckIn, setProposedCheckIn] = useState('');
+  const [proposedCheckOut, setProposedCheckOut] = useState('');
+
+  const nightlyRate = (listing as { nightly_rate?: number }).nightly_rate || 0;
+  const proposedNights = proposedCheckIn && proposedCheckOut
+    ? calculateNights(proposedCheckIn, proposedCheckOut)
+    : 0;
+
+  // Auto-compute bid amount from nightly rate when in date-proposal mode
+  useEffect(() => {
+    if (mode === 'date-proposal' && nightlyRate > 0 && proposedNights > 0) {
+      const pricing = computeListingPricing(nightlyRate, proposedNights);
+      setBidAmount(pricing.finalPrice);
+    }
+  }, [mode, nightlyRate, proposedNights]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       return;
     }
 
-    if (listing.min_bid_amount && bidAmount < listing.min_bid_amount) {
+    if (mode === 'bid' && listing.min_bid_amount && bidAmount < listing.min_bid_amount) {
       return;
     }
 
@@ -54,6 +76,9 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
         bid_amount: bidAmount,
         guest_count: guestCount,
         message: message || undefined,
+        ...(mode === 'date-proposal' && proposedCheckIn && proposedCheckOut
+          ? { requested_check_in: proposedCheckIn, requested_check_out: proposedCheckOut }
+          : {}),
       });
 
       setSubmittedBidAmount(bidAmount);
@@ -63,7 +88,7 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
     }
   };
 
-  const timeRemaining = listing.bidding_ends_at 
+  const timeRemaining = listing.bidding_ends_at
     ? formatDistanceToNow(new Date(listing.bidding_ends_at), { addSuffix: true })
     : null;
 
@@ -101,18 +126,29 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
       setBidAmount(listing.min_bid_amount || listing.owner_price);
       setGuestCount(1);
       setMessage('');
+      setProposedCheckIn('');
+      setProposedCheckOut('');
     }
   };
+
+  const isDateProposal = mode === 'date-proposal';
+  const dialogTitle = isDateProposal ? 'Propose Different Dates' : 'Place Your Bid';
+  const dialogIcon = isDateProposal ? Calendar : Gavel;
+  const DialogIcon = dialogIcon;
+  const successTitle = isDateProposal ? 'Date Proposal Submitted!' : 'Bid Submitted!';
+  const successDescription = isDateProposal
+    ? 'The property owner will review your proposed dates and respond. You\'ll be notified when they accept, reject, or counter your offer.'
+    : 'The property owner will review your bid and respond. You\'ll be notified when they accept, reject, or counter your offer.';
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         {bidSuccess ? (
           <ActionSuccessCard
-            icon={Gavel}
+            icon={dialogIcon}
             iconClassName="text-primary"
-            title="Bid Submitted!"
-            description="The property owner will review your bid and respond. You'll be notified when they accept, reject, or counter your offer."
+            title={successTitle}
+            description={successDescription}
             referenceLabel="Bid Amount"
             referenceValue={`$${submittedBidAmount.toLocaleString()}`}
             actions={[{ label: "Done", onClick: () => handleOpenChange(false) }]}
@@ -121,8 +157,8 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
         <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Gavel className="h-5 w-5 text-primary" />
-            Place Your Bid
+            <DialogIcon className="h-5 w-5 text-primary" />
+            {dialogTitle}
           </DialogTitle>
           <DialogDescription>
             {listing.property?.resort_name} - {listing.property?.location}
@@ -144,6 +180,12 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
               <span className="text-muted-foreground">Listed Price</span>
               <span className="font-medium">${listing.final_price.toLocaleString()}</span>
             </div>
+            {nightlyRate > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Nightly Rate</span>
+                <span className="font-medium">${nightlyRate}/night</span>
+              </div>
+            )}
             {listing.min_bid_amount && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Minimum Bid</span>
@@ -167,8 +209,46 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Date proposal fields */}
+          {isDateProposal && (
+            <div className="space-y-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-800">Propose your preferred dates</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="proposedCheckIn" className="text-xs">Check-in</Label>
+                  <Input
+                    id="proposedCheckIn"
+                    type="date"
+                    value={proposedCheckIn}
+                    onChange={(e) => setProposedCheckIn(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="proposedCheckOut" className="text-xs">Check-out</Label>
+                  <Input
+                    id="proposedCheckOut"
+                    type="date"
+                    value={proposedCheckOut}
+                    onChange={(e) => setProposedCheckOut(e.target.value)}
+                    min={proposedCheckIn || new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                </div>
+              </div>
+              {proposedNights > 0 && nightlyRate > 0 && (
+                <p className="text-xs text-blue-700">
+                  {proposedNights} night{proposedNights > 1 ? 's' : ''} x ${nightlyRate}/night = ${(nightlyRate * proposedNights).toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label htmlFor="bidAmount">Your Bid Amount ($)</Label>
+            <Label htmlFor="bidAmount">
+              {isDateProposal ? 'Total Bid Amount ($)' : 'Your Bid Amount ($)'}
+            </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -182,9 +262,14 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
                 required
               />
             </div>
-            {listing.min_bid_amount && bidAmount < listing.min_bid_amount && (
+            {!isDateProposal && listing.min_bid_amount && bidAmount < listing.min_bid_amount && (
               <p className="text-xs text-destructive">
                 Minimum bid is ${listing.min_bid_amount.toLocaleString()}
+              </p>
+            )}
+            {isDateProposal && nightlyRate > 0 && proposedNights > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Auto-computed from nightly rate. You can adjust this amount.
               </p>
             )}
           </div>
@@ -215,7 +300,9 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Add a message to the property owner..."
+              placeholder={isDateProposal
+                ? "Explain why these dates work better for you..."
+                : "Add a message to the property owner..."}
               rows={3}
             />
           </div>
@@ -226,9 +313,13 @@ export function BidFormDialog({ listing, open, onOpenChange }: BidFormDialogProp
             </Button>
             <Button
               type="submit"
-              disabled={createBid.isPending || (listing.min_bid_amount ? bidAmount < listing.min_bid_amount : false)}
+              disabled={
+                createBid.isPending
+                || (!isDateProposal && listing.min_bid_amount ? bidAmount < listing.min_bid_amount : false)
+                || (isDateProposal && (!proposedCheckIn || !proposedCheckOut || proposedNights <= 0))
+              }
             >
-              {createBid.isPending ? 'Submitting...' : 'Submit Bid'}
+              {createBid.isPending ? 'Submitting...' : isDateProposal ? 'Submit Proposal' : 'Submit Bid'}
             </Button>
           </DialogFooter>
         </form>

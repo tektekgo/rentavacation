@@ -64,7 +64,7 @@ export const ownerLifecycle: FlowDefinition = {
       component: 'OwnerListings',
       tab: 'listings',
       roles: ['property_owner'],
-      description: 'Set available dates, pricing, cancellation policy',
+      description: 'Set available dates, nightly rate pricing, cancellation policy',
       tables: ['listings'],
     },
     {
@@ -97,10 +97,10 @@ export const ownerLifecycle: FlowDefinition = {
     {
       id: 'manage_bids',
       route: '/owner-dashboard',
-      label: 'Manage Bids',
+      label: 'Manage Bids & Date Proposals',
       component: 'OwnerDashboard',
       tab: 'proposals',
-      description: 'Owner reviews and responds to renter bids',
+      description: 'Owner reviews and responds to renter bids and date proposals',
       tables: ['listing_bids'],
       branches: [
         { condition: 'Bid accepted', targetStepId: 'booking_confirmed' },

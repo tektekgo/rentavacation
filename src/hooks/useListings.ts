@@ -20,6 +20,7 @@ export interface ActiveListing {
   final_price: number;
   owner_price: number;
   rav_markup: number;
+  nightly_rate: number;
   notes: string | null;
   cancellation_policy: string;
   open_for_bidding: boolean;

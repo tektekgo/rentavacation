@@ -21,6 +21,7 @@ export function mockListing(overrides: Partial<ActiveListing> = {}): ActiveListi
     final_price: 1200,
     owner_price: 1000,
     rav_markup: 200,
+    nightly_rate: 143,
     notes: null,
     cancellation_policy: "moderate",
     open_for_bidding: false,

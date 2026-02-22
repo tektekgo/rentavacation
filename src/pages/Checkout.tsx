@@ -23,12 +23,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { Resort, ResortUnitType } from "@/types/database";
-
-function calculateNights(checkIn: string, checkOut: string): number {
-  return Math.ceil(
-    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-  );
-}
+import { calculateNights } from "@/lib/pricing";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -49,7 +44,7 @@ const Checkout = () => {
   const resort = prop?.resort as Resort | null;
   const unitType = prop?.unit_type as ResortUnitType | null;
   const nights = listing ? calculateNights(listing.check_in_date, listing.check_out_date) : 0;
-  const pricePerNight = nights > 0 && listing ? Math.round(listing.final_price / nights) : 0;
+  const pricePerNight = listing?.nightly_rate || (nights > 0 && listing ? Math.round(listing.final_price / nights) : 0);
 
   const displayName = resort?.resort_name && unitType
     ? `${unitType.unit_type_name} at ${resort.resort_name}`
