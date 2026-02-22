@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 22, 2026 (Session 15 — Content Accuracy Audit + Documentation Fixes)
+> **Last Updated:** February 22, 2026 (Session 16 — Voice Tracks C-D: Admin Controls + Observability)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -84,9 +84,10 @@ To keep PROJECT-HUB.md focused and scannable:
 ### Working on TODAY:
 - [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** — Migration 020, pricing utility, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, owner form nightly rate, 289 tests (PR #20, Session 14)
 - [x] **Content Accuracy Audit** — Fixed fabricated tier names, wrong edge function count, 10%→15% commission rate across 7 code files + 3 tests, brand list (Westgate→WorldMark), voice quota (10/day→tier-based), added 9 missing Documentation sections, CLAUDE.md Content Accuracy policy, regenerated export docs (Session 15)
-- [ ] Voice Experience Tracks C-D: Admin controls, observability
+- [x] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Voice Tracks C-D: Admin Controls + Observability** (Feb 22, Session 16). Migration 021: `voice_search_logs` table (per-search observability), `voice_user_overrides` table (per-user voice disable/custom quota), 2 alert threshold system_settings, updated `get_user_voice_quota()` with override support, 3 new RPCs (log_voice_search, get_voice_usage_stats, get_voice_top_users). 5 new types. 2 admin hooks (useVoiceAdminData, useVoiceAdminMutations). Modified useVoiceSearch.ts for automatic search logging. 6 new components (VoiceControls + VoiceConfigInfo, VoiceTierQuotaManager, VoiceUserOverrideManager, VoiceUsageDashboard, VoiceObservability). Admin Dashboard "Voice" tab. Flow manifest updated. 17 new tests (306 total).
 - [x] **Content Accuracy Audit** (Feb 22, Session 15). Fixed 10%→15% commission rate in 7 code files + 3 test files. Fixed brand list (Westgate→WorldMark, 8→9 brands). Fixed voice quota (flat 10/day→tier-based). Added 9 missing sections to Documentation.tsx admin manual. Added Content Accuracy (MANDATORY) policy to CLAUDE.md. Regenerated export documents with correct data.
 - [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** (Feb 22, Session 14). Migration 020: `nightly_rate` on listings (backfilled), `requested_check_in/out` on listing_bids, `source_listing_id/target_owner_only` on travel_requests. Shared `pricing.ts` utility replaces 4 duplicated calculateNights functions. Owner form switched to nightly rate input with live price summary. BidFormDialog dual-mode (bid vs date-proposal). InspiredTravelRequestDialog for "Request Similar Dates" from PropertyDetail. All displays use DB `nightly_rate`. 16 new tests (289 total). PR #20 merged.
 - [x] **PostgREST FK Fix + Mermaid Rendering** (Feb 21, Session 12). Migration 019: redirected 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` — fixes all PGRST200 "Could not find relationship" 400 errors across admin dashboard, bidding, travel requests, owner confirmations, escrow, edge functions. Also fixed `/architecture` Mermaid diagram rendering (vercel.json `/assets/*` rewrite before SPA catch-all). Created `docs/RAV-PRICING-TAXES-ACCOUNTING.md` partner 1-pager. Added Phases 19-21 to roadmap.
@@ -213,17 +214,10 @@ All items complete: Migration 020 (nightly_rate + requested dates + source_listi
 
 ---
 
-### 10. Voice Experience Tracks C-D
-**Status:** Deferred until search flow hardening complete
-**Docs:** `docs/features/voice-search/KNOWN-ISSUES.md`
+### 10. ~~Voice Experience Tracks C-D~~ ✅ COMPLETE
+**Status:** Done (Session 16, Feb 22)
 
-**Track C: RAV Admin Voice Controls**
-- [ ] Voice search ON/OFF global toggle, daily quota adjustment, per-user override
-- [ ] Voice usage dashboard, LLM model selector, per-user voice access toggle
-
-**Track D: Observability**
-- [ ] Log voice search queries + outcomes (anonymized)
-- [ ] Alert threshold, failed search tracking
+Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, updated `get_user_voice_quota()` with override support, 2 alert threshold settings. Admin Dashboard "Voice" tab with 5 sections: config info, tier quota manager, per-user overrides, usage dashboard (charts + top users), observability (log viewer + alert thresholds). Voice search auto-logging integrated. 17 new tests (306 total).
 
 ---
 

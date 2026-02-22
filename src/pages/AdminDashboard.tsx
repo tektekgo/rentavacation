@@ -28,7 +28,8 @@ import {
   Settings,
   Crown,
   Network,
-  Wrench
+  Wrench,
+  Mic
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -45,6 +46,7 @@ import { RoleUpgradeRequests } from "@/components/admin/RoleUpgradeRequests";
 import { SystemSettings } from "@/components/admin/SystemSettings";
 import { AdminMemberships } from "@/components/admin/AdminMemberships";
 import { DevTools } from "@/components/admin/DevTools";
+import { VoiceControls } from "@/components/admin/VoiceControls";
 
 const IS_DEV = import.meta.env.VITE_SUPABASE_URL?.includes("oukbxqnlxnkainnligfz");
 
@@ -219,6 +221,10 @@ const AdminDashboard = () => {
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
+            <TabsTrigger value="voice" className="gap-2">
+              <Mic className="h-4 w-4" />
+              <span className="hidden sm:inline">Voice</span>
+            </TabsTrigger>
             {IS_DEV && (
               <TabsTrigger value="dev-tools" className="gap-2">
                 <Wrench className="h-4 w-4" />
@@ -280,6 +286,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="settings">
             <SystemSettings />
+          </TabsContent>
+
+          <TabsContent value="voice">
+            <VoiceControls />
           </TabsContent>
 
           {IS_DEV && (
