@@ -240,3 +240,48 @@ A task is only done when ALL of the following are true:
 | `npm run test:e2e` | Run Playwright E2E tests |
 | `npm run build` | Production build |
 | `npm run lint` | ESLint check |
+
+---
+
+## Content Accuracy (MANDATORY)
+
+### Core Rule
+
+**Never fabricate names, statistics, counts, or other factual claims.** Always verify against source code or database before including in documentation, export reports, or UI text.
+
+### Source of Truth Locations
+
+| Data Point | Source of Truth | Notes |
+|-----------|----------------|-------|
+| Membership tiers | Migration `011_membership_tiers.sql` | Free/Plus/Premium (traveler), Free/Pro/Business (owner) |
+| Vacation club brands | `src/lib/calculatorLogic.ts` → `VACATION_CLUB_BRANDS` | 9 brands (includes "Other / Independent Resort") |
+| Edge functions | `supabase/functions/*/` directory listing | Count actual directories, not estimates |
+| Commission rate | Migration `011` + `system_settings` table | Default 15%, admin-configurable. Pro −2%, Business −5% |
+| Test count | `npm test` output | Always run before citing a count |
+| Migration count | `supabase/migrations/` directory listing | Count actual `.sql` files |
+
+### Cross-Reference Checklist
+
+Before committing any document, report, or export that contains factual claims:
+
+1. **Tier names** — Verify against migration 011 (never invent tier names)
+2. **Counts** (edge functions, tests, migrations) — Run the actual count command
+3. **Rates/percentages** — Check `system_settings` defaults and code constants
+4. **Brand lists** — Match `VACATION_CLUB_BRANDS` in `calculatorLogic.ts`
+5. **Feature status** — Check `docs/PROJECT-HUB.md` and git log
+
+### Honesty Framework Labels
+
+When creating marketing, pitch, or investor-facing content, label every claim:
+
+- **BUILT** — Feature exists in the codebase and is deployed
+- **INDUSTRY DATA** — Sourced from published research (cite source)
+- **PROJECTED** — Forward-looking estimate (clearly mark as projection)
+
+### Anti-Patterns
+
+- ❌ Do NOT invent tier names (e.g., "Explorer", "Diamond") — use actual names from migration 011
+- ❌ Do NOT round or estimate counts — run the actual query/listing
+- ❌ Do NOT hardcode commission rates without noting they are admin-configurable
+- ❌ Do NOT copy brand lists from memory — always reference `VACATION_CLUB_BRANDS`
+- ❌ Do NOT claim features exist without verifying the code is deployed

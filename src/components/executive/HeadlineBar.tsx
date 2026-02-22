@@ -65,7 +65,7 @@ export function HeadlineBar() {
       value: formatCurrency(business?.platformRevenue || 0),
       color: 'text-blue-400',
       tooltip: {
-        definition: 'Platform Revenue — RAV\'s 10% commission on all confirmed bookings.',
+        definition: 'Platform Revenue — RAV\'s commission (default 15%, configurable) on all confirmed bookings.',
         whyItMatters: 'Direct measure of RAV\'s top-line earnings.',
       },
     },

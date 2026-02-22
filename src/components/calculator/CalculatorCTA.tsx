@@ -22,7 +22,7 @@ export function CalculatorCTA() {
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/80 pt-2">
         <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5" /> No listing fees</span>
-        <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5" /> 10% fee only on bookings</span>
+        <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5" /> Low platform fee on bookings</span>
         <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5" /> You control pricing</span>
       </div>
     </div>

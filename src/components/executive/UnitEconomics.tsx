@@ -43,7 +43,7 @@ export function UnitEconomics() {
   const ltv = revenuePerUser * 24; // 24-month projected LTV
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   const paybackMonths = revenuePerUser > 0 ? cac / revenuePerUser : 0;
-  const takeRate = totalGmv > 0 ? (platformRevenue / totalGmv) * 100 : 10;
+  const takeRate = totalGmv > 0 ? (platformRevenue / totalGmv) * 100 : 15;
 
   // MoM growth from monthly data
   const monthlyData = business?.monthlyData || [];
@@ -106,7 +106,7 @@ export function UnitEconomics() {
       value: formatPercent(takeRate),
       tooltip: {
         definition: 'Take Rate — platform commission as a percentage of GMV.',
-        whyItMatters: 'Measures monetization efficiency. RAV targets 10% take rate.',
+        whyItMatters: 'Measures monetization efficiency. RAV default 15% take rate (admin-configurable).',
       },
       color: 'text-blue-400',
     },
@@ -145,7 +145,7 @@ export function UnitEconomics() {
           <p><strong className="text-slate-300">LTV:</strong> (Platform Revenue / Total Users) x 24 months projected</p>
           <p><strong className="text-slate-300">LTV:CAC:</strong> LTV / CAC. Green at 3x+, amber at 1-3x, red below 1x</p>
           <p><strong className="text-slate-300">Payback:</strong> CAC / (Monthly Revenue Per User). Target &lt;12 months</p>
-          <p><strong className="text-slate-300">Take Rate:</strong> Platform Revenue / GMV. RAV model: 10% commission</p>
+          <p><strong className="text-slate-300">Take Rate:</strong> Platform Revenue / GMV. RAV model: 15% commission (admin-configurable)</p>
           <p><strong className="text-slate-300">MoM Growth:</strong> (Current Month GMV - Previous Month GMV) / Previous Month GMV</p>
         </div>
       )}

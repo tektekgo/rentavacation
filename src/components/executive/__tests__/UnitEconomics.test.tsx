@@ -30,14 +30,14 @@ describe('UnitEconomics', () => {
     mockedUseBiz.mockReturnValue({
       data: {
         totalGmv: 100000,
-        platformRevenue: 10000,
+        platformRevenue: 15000,
         activeListings: 20,
         totalOwners: 10,
         totalRenters: 30,
         monthlySignups: 5,
         monthlyData: [
-          { month: 'Jan 26', gmv: 40000, revenue: 4000, bookings: 8 },
-          { month: 'Feb 26', gmv: 60000, revenue: 6000, bookings: 12 },
+          { month: 'Jan 26', gmv: 40000, revenue: 6000, bookings: 8 },
+          { month: 'Feb 26', gmv: 60000, revenue: 9000, bookings: 12 },
         ],
         bidActivity: [],
         bidSpread: [],
@@ -73,11 +73,11 @@ describe('UnitEconomics', () => {
     expect(screen.getByText(/Estimated at \$45/)).toBeDefined();
   });
 
-  it('calculates take rate as 10%', () => {
+  it('calculates take rate as 15%', () => {
     render(<UnitEconomics />, { wrapper: Wrapper });
 
-    // Take rate should be 10% (10000/100000)
-    expect(screen.getByText('10.0%')).toBeDefined();
+    // Take rate should be 15% (15000/100000)
+    expect(screen.getByText('15.0%')).toBeDefined();
   });
 
   it('shows positive MoM growth with plus sign', () => {

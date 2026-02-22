@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  ChevronRight, 
-  Home, 
-  Users, 
-  Building2, 
-  Gavel, 
-  CreditCard, 
-  Shield, 
-  FileCheck, 
-  Mail, 
+import {
+  ChevronRight,
+  Home,
+  Users,
+  Building2,
+  Gavel,
+  CreditCard,
+  Shield,
+  FileCheck,
+  Mail,
   Settings,
   Download,
   Menu,
@@ -26,7 +26,15 @@ import {
   Calendar,
   Briefcase,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Crown,
+  MessageSquare,
+  TrendingUp,
+  Calculator,
+  LayoutDashboard,
+  Compass,
+  BarChart3,
+  Database
 } from "lucide-react";
 
 const Documentation = () => {
@@ -59,6 +67,15 @@ const Documentation = () => {
     { id: "notifications", label: "Email Notifications", icon: Mail },
     { id: "admin", label: "Admin Dashboard", icon: Settings },
     { id: "rav-owner-guide", label: "RAV Owner How-To Guide", icon: Briefcase },
+    { id: "membership-tiers", label: "Membership Tiers", icon: Crown },
+    { id: "ai-assistants", label: "AI Assistants (RAVIO)", icon: MessageSquare },
+    { id: "fair-value", label: "Fair Value Score", icon: TrendingUp },
+    { id: "fee-calculator", label: "Maintenance Fee Calculator", icon: Calculator },
+    { id: "owner-dashboard", label: "Owner Dashboard", icon: LayoutDashboard },
+    { id: "travel-enhancements", label: "Travel Request Automation", icon: Compass },
+    { id: "executive-dashboard", label: "Executive Dashboard", icon: BarChart3 },
+    { id: "seed-data", label: "Seed Data System", icon: Database },
+    { id: "per-night-pricing", label: "Per-Night Pricing", icon: DollarSign },
   ];
 
   const currentDate = new Date().toLocaleDateString('en-US', { 
@@ -479,9 +496,9 @@ const Documentation = () => {
 
                 <div className="bg-card rounded-xl p-6 border">
                   <h3 className="font-semibold text-lg mb-4">Supported Vacation Club Brands</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {["Hilton Grand Vacations", "Marriott Vacation Club", "Disney Vacation Club", "Wyndham", 
-                      "Hyatt Residence Club", "Bluegreen Vacations", "Holiday Inn Club", "Westgate Resorts"].map((brand) => (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {["Hilton Grand Vacations", "Marriott Vacation Club", "Disney Vacation Club", "Wyndham Destinations",
+                      "Hyatt Residence Club", "Bluegreen Vacations", "Holiday Inn Club Vacations", "WorldMark by Wyndham", "Other / Independent Resort"].map((brand) => (
                       <div key={brand} className="bg-muted/50 rounded-lg p-3 text-center text-sm">
                         {brand}
                       </div>
@@ -1421,11 +1438,28 @@ const Documentation = () => {
                       </div>
                       <div className="bg-muted/50 rounded-lg p-4">
                         <h4 className="font-medium mb-2">Voice Search Daily Limit</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Currently set to <strong>10 searches per user per day</strong>. RAV team members (rav_owner, rav_admin, rav_staff)
-                          have unlimited voice searches (999 sentinel value). The limit resets at midnight UTC.
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Voice search quotas are <strong>tier-based</strong> (configured in migration 011). The limit resets at midnight UTC.
                           Usage records older than 90 days are automatically cleaned up.
                         </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                          <div className="bg-background rounded p-2 text-center">
+                            <p className="font-medium text-foreground">Free</p>
+                            <p className="text-muted-foreground">5/day</p>
+                          </div>
+                          <div className="bg-background rounded p-2 text-center">
+                            <p className="font-medium text-foreground">Plus / Pro</p>
+                            <p className="text-muted-foreground">25/day</p>
+                          </div>
+                          <div className="bg-background rounded p-2 text-center">
+                            <p className="font-medium text-foreground">Premium / Business</p>
+                            <p className="text-muted-foreground">Unlimited</p>
+                          </div>
+                          <div className="bg-background rounded p-2 text-center">
+                            <p className="font-medium text-foreground">RAV Team</p>
+                            <p className="text-muted-foreground">Unlimited</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">
@@ -1754,6 +1788,411 @@ const Documentation = () => {
                       </ol>
                     </div>
                   </div>
+                </div>
+              </section>
+            )}
+
+            {/* Membership Tiers */}
+            {(isPrinting || activeSection === "membership-tiers") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Membership Tiers</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Six membership tiers with role-specific benefits, quotas, and commission discounts.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Renter Tiers</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 px-3">Tier</th>
+                          <th className="text-left py-2 px-3">Price</th>
+                          <th className="text-left py-2 px-3">Voice Searches</th>
+                          <th className="text-left py-2 px-3">Benefits</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-2 px-3 font-medium">Free</td>
+                          <td className="py-2 px-3">$0</td>
+                          <td className="py-2 px-3">5/day</td>
+                          <td className="py-2 px-3 text-muted-foreground">Basic search, browse listings</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-2 px-3 font-medium">Plus</td>
+                          <td className="py-2 px-3">$9.99/mo</td>
+                          <td className="py-2 px-3">25/day</td>
+                          <td className="py-2 px-3 text-muted-foreground">Priority support, saved searches</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 font-medium">Premium</td>
+                          <td className="py-2 px-3">$24.99/mo</td>
+                          <td className="py-2 px-3">Unlimited</td>
+                          <td className="py-2 px-3 text-muted-foreground">Early access to new listings, concierge</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Owner Tiers</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 px-3">Tier</th>
+                          <th className="text-left py-2 px-3">Price</th>
+                          <th className="text-left py-2 px-3">Commission</th>
+                          <th className="text-left py-2 px-3">Benefits</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-2 px-3 font-medium">Free</td>
+                          <td className="py-2 px-3">$0</td>
+                          <td className="py-2 px-3">15% (default)</td>
+                          <td className="py-2 px-3 text-muted-foreground">List properties, basic dashboard</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-2 px-3 font-medium">Pro</td>
+                          <td className="py-2 px-3">$19.99/mo</td>
+                          <td className="py-2 px-3">13% (-2%)</td>
+                          <td className="py-2 px-3 text-muted-foreground">Analytics, priority listing placement</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-3 font-medium">Business</td>
+                          <td className="py-2 px-3">$49.99/mo</td>
+                          <td className="py-2 px-3">10% (-5%)</td>
+                          <td className="py-2 px-3 text-muted-foreground">Multi-property, API access, dedicated support</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    The base commission rate (currently 15%) is configurable by RAV Owner or RAV Admin in Admin &gt; System Settings.
+                    Tier data is defined in migration <code className="text-xs bg-muted px-1 rounded">011_membership_tiers.sql</code>.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* AI Assistants (RAVIO) */}
+            {(isPrinting || activeSection === "ai-assistants") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">AI Assistants (RAVIO)</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Voice and text AI assistants that help users search, explore, and navigate the platform.
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-3">Voice Search (VAPI)</h3>
+                    <ul className="text-sm text-muted-foreground space-y-2">
+                      <li>• Powered by VAPI SDK with Deepgram transcription</li>
+                      <li>• Natural language: "Find a 2BR in Orlando under $2000"</li>
+                      <li>• Tier-based daily quotas (Free: 5, Plus/Pro: 25, Premium/Business: unlimited)</li>
+                      <li>• RAV team members always have unlimited access</li>
+                      <li>• Requires microphone permission</li>
+                    </ul>
+                  </div>
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-3">Text Chat (OpenRouter)</h3>
+                    <ul className="text-sm text-muted-foreground space-y-2">
+                      <li>• Powered by OpenRouter (10-100x cheaper than voice)</li>
+                      <li>• No quota required — available to all authenticated users</li>
+                      <li>• Context-aware prompts (rentals, property detail, bidding, general)</li>
+                      <li>• SSE streaming for natural token-by-token display</li>
+                      <li>• Session-only persistence (no DB storage)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Both assistants share a common property search module (<code className="text-xs bg-muted px-1 rounded">_shared/property-search.ts</code>)
+                    for consistent search results. Voice and text operate as independent systems — no shared state.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Fair Value Score */}
+            {(isPrinting || activeSection === "fair-value") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Fair Value Score</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Data-driven pricing transparency that helps renters identify good deals and owners price competitively.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">How It Works</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    The <code className="text-xs bg-muted px-1 rounded">calculate_fair_value_score()</code> PostgreSQL RPC compares
+                    a listing's nightly rate against similar listings (same brand, unit type, location) using P25-P75 percentile range.
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { tier: "Great Deal", range: "Below P25", color: "bg-emerald-100 text-emerald-800" },
+                      { tier: "Fair Price", range: "P25 - P50", color: "bg-blue-100 text-blue-800" },
+                      { tier: "Above Average", range: "P50 - P75", color: "bg-amber-100 text-amber-800" },
+                      { tier: "Premium", range: "Above P75", color: "bg-red-100 text-red-800" },
+                    ].map((item) => (
+                      <div key={item.tier} className={`rounded-lg p-3 text-center text-xs ${item.color}`}>
+                        <p className="font-medium">{item.tier}</p>
+                        <p className="mt-1 opacity-75">{item.range}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h4 className="font-medium mb-2 text-sm">Role-Specific Messaging</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• <strong>Renters</strong> see deal quality badges on listing cards and property detail</li>
+                    <li>• <strong>Owners</strong> see pricing intelligence with market range and suggestions</li>
+                  </ul>
+                </div>
+              </section>
+            )}
+
+            {/* Maintenance Fee Calculator */}
+            {(isPrinting || activeSection === "fee-calculator") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Maintenance Fee Calculator</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Public tool at <code className="text-xs bg-muted px-1 rounded">/calculator</code> that helps timeshare owners
+                    estimate how many rental weeks cover their annual maintenance fees.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Features</h3>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• 9 supported vacation club brands (Hilton, Marriott, Disney, Wyndham, Hyatt, Bluegreen, Holiday Inn, WorldMark, Other)</li>
+                    <li>• 4 unit types: Studio, 1BR, 2BR, 3BR+</li>
+                    <li>• Live break-even analysis with color-coded progress bars</li>
+                    <li>• 1/2/3 week rental scenarios with net income projections</li>
+                    <li>• Uses current platform fee (default 15%, admin-configurable)</li>
+                    <li>• No authentication required — public lead generation tool</li>
+                    <li>• CTA links to owner signup for conversion</li>
+                  </ul>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Pure calculation logic in <code className="text-xs bg-muted px-1 rounded">src/lib/calculatorLogic.ts</code>.
+                    Income estimates are based on comparable RAV listings and published market research (labeled INDUSTRY DATA).
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Owner Dashboard */}
+            {(isPrinting || activeSection === "owner-dashboard") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Owner Dashboard</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Business intelligence for property owners in the Overview tab of the Owner Dashboard.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">6 Dashboard Sections</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      { name: "Headline Stats", desc: "Earned YTD, fees covered %, active bids count" },
+                      { name: "Earnings Timeline", desc: "AreaChart with monthly/quarterly view + fee target line" },
+                      { name: "My Listings Table", desc: "Status badges, Fair Value badges, idle week alerts" },
+                      { name: "Bid Activity Feed", desc: "Real-time event stream of bid actions" },
+                      { name: "Pricing Intelligence", desc: "Per-listing Fair Value score + market range" },
+                      { name: "Maintenance Fee Tracker", desc: "Inline editor, coverage bar, YTD progress" },
+                    ].map((section) => (
+                      <div key={section.name} className="bg-muted/50 rounded-lg p-3">
+                        <p className="font-medium text-sm">{section.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{section.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Powered by 4 data hooks: <code className="text-xs bg-muted px-1 rounded">useOwnerDashboardStats</code>,{" "}
+                    <code className="text-xs bg-muted px-1 rounded">useOwnerEarnings</code>,{" "}
+                    <code className="text-xs bg-muted px-1 rounded">useOwnerListingsData</code>,{" "}
+                    <code className="text-xs bg-muted px-1 rounded">useOwnerBidActivity</code>.
+                    Migration: <code className="text-xs bg-muted px-1 rounded">017</code>.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Travel Request Automation */}
+            {(isPrinting || activeSection === "travel-enhancements") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Travel Request Automation</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Automated matching, demand signals, and engagement features for the travel request system.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">4 Enhancements</h3>
+                  <div className="space-y-3">
+                    {[
+                      { name: "Auto-Match Engine", desc: "match-travel-requests edge function fires on listing approval, notifying requesters of matching inventory" },
+                      { name: "Demand Signals", desc: "DemandSignal component on owner listing form shows how many travelers are looking for similar dates/locations" },
+                      { name: "Post-Request CTA", desc: "When Rentals search returns no results, prompts travelers to submit a travel request with pre-filled filters" },
+                      { name: "Expiry Warnings", desc: "process-deadline-reminders edge function scans for travel requests nearing expiration and sends email alerts" },
+                    ].map((item) => (
+                      <div key={item.name} className="bg-muted/50 rounded-lg p-3">
+                        <p className="font-medium text-sm">{item.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Executive Dashboard */}
+            {(isPrinting || activeSection === "executive-dashboard") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Executive Dashboard</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Investor-grade strategic dashboard at <code className="text-xs bg-muted px-1 rounded">/executive-dashboard</code> — dark-themed, boardroom-quality business intelligence.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">6 Sections</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      { name: "Headline Bar", desc: "Sticky KPI pills: GMV, Revenue, Active Listings, Liquidity Score, Voice Adoption" },
+                      { name: "Business Performance", desc: "4 Recharts charts: GMV trend, bid activity, bid spread index, revenue waterfall" },
+                      { name: "Marketplace Health", desc: "Proprietary Liquidity Score gauge, supply/demand map, voice vs traditional funnel" },
+                      { name: "Market Intelligence", desc: "BYOK pattern: AirDNA comparison, STR Global benchmarks, RAV pricing position" },
+                      { name: "Industry Feed", desc: "NewsAPI integration, regulatory radar, macro indicators with sparklines" },
+                      { name: "Unit Economics", desc: "7 metric cards (CAC, LTV, LTV:CAC, Payback, Avg Booking, Take Rate, MoM Growth)" },
+                    ].map((section) => (
+                      <div key={section.name} className="bg-muted/50 rounded-lg p-3">
+                        <p className="font-medium text-sm">{section.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{section.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    RAV Owner only. Dark theme (standalone, not Tailwind dark: variants). BYOK pattern shows demo data by default,
+                    toggles to connected mode with user-supplied API keys stored in <code className="text-xs bg-muted px-1 rounded">system_settings</code>.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Seed Data System */}
+            {(isPrinting || activeSection === "seed-data") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Seed Data System</h1>
+                  <p className="text-xl text-muted-foreground">
+                    DEV-only 3-layer seed data system for functional testing and executive demos.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">3 Layers</h3>
+                  <div className="space-y-3">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Layer 1: Foundation Users</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        8 permanent users (3 RAV team + 5 property owners). Marked <code className="text-xs bg-muted px-1 rounded">is_seed_foundation = true</code>, never wiped on reseed.
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Layer 2: Inventory</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        10 properties (2 per owner, real resort names), 30 listings (15 active, 10 bidding, 5 draft).
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Layer 3: Transactions</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        50 renters, 90 completed bookings, 10 pending, 5 in escrow, 20 bids, 10 travel requests.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-800">
+                    <strong>Production guard:</strong> The seed-manager edge function checks <code className="text-xs bg-muted px-1 rounded">IS_DEV_ENVIRONMENT</code> secret.
+                    It will refuse to run on PROD. Admin UI in DevTools tab (DEV only).
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Per-Night Pricing */}
+            {(isPrinting || activeSection === "per-night-pricing") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Per-Night Pricing</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Nightly rate as the atomic pricing unit, with date proposals and inspired travel requests.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">Key Features</h3>
+                  <div className="space-y-3">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Nightly Rate</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Owners set a <code className="text-xs bg-muted px-1 rounded">nightly_rate</code> on listings. Total price = nights x rate.
+                        RAV applies the platform fee (default 15%) on top for the traveler-facing price.
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Date Proposals</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Renters can "Propose Different Dates" via BidFormDialog date-proposal mode. The bid amount auto-computes
+                        from nightly_rate x proposed nights. Owners see proposed dates in bid manager.
+                      </p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <h4 className="font-medium text-sm">Inspired Travel Requests</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        "Request Similar Dates" from PropertyDetail pre-fills a TravelRequestForm with the listing's details.
+                        Optional "Send to this owner first" toggle targets the request.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Shared pricing utility in <code className="text-xs bg-muted px-1 rounded">src/lib/pricing.ts</code> —
+                    <code className="text-xs bg-muted px-1 rounded">calculateNights()</code> + <code className="text-xs bg-muted px-1 rounded">computeListingPricing()</code>
+                    (15% RAV markup). Migration: <code className="text-xs bg-muted px-1 rounded">020_flexible_dates_nightly_pricing.sql</code>.
+                  </p>
                 </div>
               </section>
             )}

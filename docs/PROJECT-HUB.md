@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 22, 2026 (Session 14 — Phase 19: Flexible Date Booking + Per-Night Pricing)
+> **Last Updated:** February 22, 2026 (Session 15 — Content Accuracy Audit + Documentation Fixes)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -83,9 +83,11 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ### Working on TODAY:
 - [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** — Migration 020, pricing utility, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, owner form nightly rate, 289 tests (PR #20, Session 14)
+- [x] **Content Accuracy Audit** — Fixed fabricated tier names, wrong edge function count, 10%→15% commission rate across 7 code files + 3 tests, brand list (Westgate→WorldMark), voice quota (10/day→tier-based), added 9 missing Documentation sections, CLAUDE.md Content Accuracy policy, regenerated export docs (Session 15)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Content Accuracy Audit** (Feb 22, Session 15). Fixed 10%→15% commission rate in 7 code files + 3 test files. Fixed brand list (Westgate→WorldMark, 8→9 brands). Fixed voice quota (flat 10/day→tier-based). Added 9 missing sections to Documentation.tsx admin manual. Added Content Accuracy (MANDATORY) policy to CLAUDE.md. Regenerated export documents with correct data.
 - [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** (Feb 22, Session 14). Migration 020: `nightly_rate` on listings (backfilled), `requested_check_in/out` on listing_bids, `source_listing_id/target_owner_only` on travel_requests. Shared `pricing.ts` utility replaces 4 duplicated calculateNights functions. Owner form switched to nightly rate input with live price summary. BidFormDialog dual-mode (bid vs date-proposal). InspiredTravelRequestDialog for "Request Similar Dates" from PropertyDetail. All displays use DB `nightly_rate`. 16 new tests (289 total). PR #20 merged.
 - [x] **PostgREST FK Fix + Mermaid Rendering** (Feb 21, Session 12). Migration 019: redirected 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` — fixes all PGRST200 "Could not find relationship" 400 errors across admin dashboard, bidding, travel requests, owner confirmations, escrow, edge functions. Also fixed `/architecture` Mermaid diagram rendering (vercel.json `/assets/*` rewrite before SPA catch-all). Created `docs/RAV-PRICING-TAXES-ACCOUNTING.md` partner 1-pager. Added Phases 19-21 to roadmap.
 - [x] **Marketing & Brand Assets** (Feb 21, Session 11). Created 3 comprehensive go-to-market documents in `docs/brand-assets/`: MARKETING-PLAYBOOK.md (master strategy — positioning, audiences, 5 campaign pillars, GTM timeline, content strategy, PR angles), PITCH-DECK-SCRIPT.md (19-slide presentation with speaker notes, visual direction, live demo script), BRAND-CONCEPTS.md (14 named product features incl. RAVIO, Vacation Wishes, Name Your Price, SmartPrice, TrustShield, PaySafe, ResortIQ; tagline collection, social hooks, email subject lines, one-pagers, campaign calendar). All assets use honesty framework: BUILT / INDUSTRY DATA / PROJECTED labels on every claim. PR #18 merged to main.
@@ -704,6 +706,6 @@ All items complete: Migration 020 (nightly_rate + requested dates + source_listi
 
 ---
 
-**Last updated:** February 22, 2026 (Session 14 — Phase 19: Flexible Date Booking + Per-Night Pricing, PR #20 merged)
+**Last updated:** February 22, 2026 (Session 15 — Content Accuracy Audit + Documentation Fixes)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

@@ -31,7 +31,7 @@ const INCOME_ESTIMATES: Record<string, Record<string, number>> = {
   other:                  { studio: 900,  '1br': 1400, '2br': 2100, '3br': 3100 },
 };
 
-const RAV_FEE_RATE = 0.10; // 10% platform fee
+const RAV_FEE_RATE = 0.15; // 15% platform fee (configurable in Admin Settings)
 
 export interface CalculatorInputs {
   brand: string;

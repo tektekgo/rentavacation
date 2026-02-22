@@ -29,7 +29,7 @@ export function BreakevenResults({ result }: BreakevenResultsProps) {
           </span>
         </div>
         <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">RAV platform fee (10%)</span>
+          <span className="text-muted-foreground">RAV platform fee (currently 15%)</span>
           <span className="text-muted-foreground">-${result.ravFeePerWeek.toLocaleString()}</span>
         </div>
         <div className="border-t pt-2 flex items-baseline justify-between">

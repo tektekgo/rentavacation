@@ -25,19 +25,19 @@ describe('calculateBreakeven', () => {
     expect(calculateBreakeven({ ...validInputs, annualMaintenanceFees: -100 })).toBeNull();
   });
 
-  it('netPerWeek = grossWeekly - 10% RAV fee', () => {
+  it('netPerWeek = grossWeekly - 15% RAV fee', () => {
     const result = calculateBreakeven(validInputs);
     expect(result).not.toBeNull();
     // HGV 1BR = $1,850 gross
     expect(result!.estimatedWeeklyIncome).toBe(1850);
-    expect(result!.ravFeePerWeek).toBe(185);
-    expect(result!.netPerWeek).toBe(1665);
+    expect(result!.ravFeePerWeek).toBe(277.5);
+    expect(result!.netPerWeek).toBe(1572.5);
   });
 
   it('breakEvenWeeks is correct: fees / netPerWeek', () => {
     const result = calculateBreakeven(validInputs);
-    // 2800 / 1665 ≈ 1.6817
-    expect(result!.breakEvenWeeks).toBeCloseTo(2800 / 1665, 4);
+    // 2800 / 1572.5 ≈ 1.7812
+    expect(result!.breakEvenWeeks).toBeCloseTo(2800 / 1572.5, 4);
   });
 
   it('scenario 2 weeks: coverage is 2x single week coverage', () => {
