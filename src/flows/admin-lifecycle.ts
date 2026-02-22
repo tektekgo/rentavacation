@@ -124,6 +124,16 @@ export const adminLifecycle: FlowDefinition = {
       tables: ['bookings', 'listings'],
     },
     {
+      id: 'voice_controls',
+      route: '/admin',
+      label: 'Voice Controls',
+      component: 'VoiceControls',
+      tab: 'voice',
+      roles: ['rav_owner', 'rav_admin'],
+      description: 'Voice search admin controls: tier quotas, per-user overrides, usage dashboard, observability logs, and alert thresholds',
+      tables: ['voice_search_logs', 'voice_user_overrides', 'voice_search_usage', 'membership_tiers', 'system_settings'],
+    },
+    {
       id: 'executive_dashboard',
       route: '/executive-dashboard',
       label: 'Executive Dashboard',

@@ -136,6 +136,8 @@ export function useVoiceSearch() {
         abortControllerRef.current?.abort();
         abortControllerRef.current = new AbortController();
 
+        const searchStartTime = Date.now();
+
         try {
           const response = await fetch(
             `${SUPABASE_URL}/functions/v1/voice-search`,
@@ -151,6 +153,7 @@ export function useVoiceSearch() {
           );
 
           const data: VoiceSearchResponse = await response.json();
+          const latencyMs = Date.now() - searchStartTime;
 
           if (data.success) {
             setResults(data.results);
@@ -163,9 +166,43 @@ export function useVoiceSearch() {
               await (supabase.rpc as any)("increment_voice_search_count", { _user_id: user.id });
               refreshQuota();
             }
+
+            // Log search for observability (fire-and-forget)
+            const logStatus = data.results.length > 0 ? "success" : "no_results";
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase.rpc as any)("log_voice_search", {
+              _search_params: {
+                destination: params.destination,
+                check_in_date: params.check_in_date,
+                check_out_date: params.check_out_date,
+                min_price: params.min_price,
+                max_price: params.max_price,
+                bedrooms: params.bedrooms,
+              },
+              _results_count: data.results.length,
+              _latency_ms: latencyMs,
+              _status: logStatus,
+              _error_message: null,
+              _source: "voice",
+            }).catch(() => {/* observability log — non-critical */});
           } else {
             setError(data.error ?? "Search failed");
             setStatus("error");
+
+            // Log error for observability (fire-and-forget)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase.rpc as any)("log_voice_search", {
+              _search_params: {
+                destination: params.destination,
+                check_in_date: params.check_in_date,
+                check_out_date: params.check_out_date,
+              },
+              _results_count: 0,
+              _latency_ms: latencyMs,
+              _status: "error",
+              _error_message: data.error ?? "Search failed",
+              _source: "voice",
+            }).catch(() => {/* observability log — non-critical */});
           }
         } catch (err) {
           // Don't treat abort as an error
@@ -176,6 +213,18 @@ export function useVoiceSearch() {
           console.error("[Voice Search] Edge Function call failed:", err);
           setError("Failed to search. Please try again.");
           setStatus("error");
+
+          // Log timeout/network error for observability (fire-and-forget)
+          const latencyMs = Date.now() - searchStartTime;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase.rpc as any)("log_voice_search", {
+            _search_params: { destination: params.destination },
+            _results_count: 0,
+            _latency_ms: latencyMs,
+            _status: "timeout",
+            _error_message: err instanceof Error ? err.message : "Network error",
+            _source: "voice",
+          }).catch(() => {/* observability log — non-critical */});
         }
       }
     });
@@ -226,7 +275,10 @@ export function useVoiceSearch() {
 
     // Check quota before starting
     if (!canSearch) {
-      setError("Daily voice search limit reached. Try again tomorrow.");
+      const msg = remaining === 0 && !isUnlimited
+        ? "Voice search has been disabled for your account. Contact support for help."
+        : "Daily voice search limit reached. Try again tomorrow.";
+      setError(msg);
       setStatus("error");
       return;
     }
@@ -246,7 +298,7 @@ export function useVoiceSearch() {
       );
       setStatus("error");
     }
-  }, [canSearch]);
+  }, [canSearch, remaining, isUnlimited]);
 
   const stopVoiceSearch = useCallback(() => {
     abortControllerRef.current?.abort();
