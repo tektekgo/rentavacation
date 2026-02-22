@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 21, 2026 (Session 12 — PostgREST FK fix, Mermaid rendering fix)
+> **Last Updated:** February 22, 2026 (Session 14 — Phase 19: Flexible Date Booking + Per-Night Pricing)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -79,13 +79,14 @@ To keep PROJECT-HUB.md focused and scannable:
 ## CURRENT FOCUS
 
 **Active Phase:** Voice Tracks C-D + remaining backlog
-**Started:** February 21, 2026
+**Started:** February 22, 2026
 
 ### Working on TODAY:
-- [x] **Marketing & Brand Assets** — Playbook, pitch deck script, brand concepts (PR #18, Session 11)
+- [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** — Migration 020, pricing utility, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, owner form nightly rate, 289 tests (PR #20, Session 14)
 - [ ] Voice Experience Tracks C-D: Admin controls, observability
 
 ### Recently Completed:
+- [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** (Feb 22, Session 14). Migration 020: `nightly_rate` on listings (backfilled), `requested_check_in/out` on listing_bids, `source_listing_id/target_owner_only` on travel_requests. Shared `pricing.ts` utility replaces 4 duplicated calculateNights functions. Owner form switched to nightly rate input with live price summary. BidFormDialog dual-mode (bid vs date-proposal). InspiredTravelRequestDialog for "Request Similar Dates" from PropertyDetail. All displays use DB `nightly_rate`. 16 new tests (289 total). PR #20 merged.
 - [x] **PostgREST FK Fix + Mermaid Rendering** (Feb 21, Session 12). Migration 019: redirected 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` — fixes all PGRST200 "Could not find relationship" 400 errors across admin dashboard, bidding, travel requests, owner confirmations, escrow, edge functions. Also fixed `/architecture` Mermaid diagram rendering (vercel.json `/assets/*` rewrite before SPA catch-all). Created `docs/RAV-PRICING-TAXES-ACCOUNTING.md` partner 1-pager. Added Phases 19-21 to roadmap.
 - [x] **Marketing & Brand Assets** (Feb 21, Session 11). Created 3 comprehensive go-to-market documents in `docs/brand-assets/`: MARKETING-PLAYBOOK.md (master strategy — positioning, audiences, 5 campaign pillars, GTM timeline, content strategy, PR angles), PITCH-DECK-SCRIPT.md (19-slide presentation with speaker notes, visual direction, live demo script), BRAND-CONCEPTS.md (14 named product features incl. RAVIO, Vacation Wishes, Name Your Price, SmartPrice, TrustShield, PaySafe, ResortIQ; tagline collection, social hooks, email subject lines, one-pagers, campaign calendar). All assets use honesty framework: BUILT / INDUSTRY DATA / PROJECTED labels on every claim. PR #18 merged to main.
 - [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
@@ -154,28 +155,10 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-### 7. Phase 19: Flexible Date Booking + Per-Night Pricing
-**Status:** Planned — Next implementation priority
-**Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
-**Est. Time:** 10-13 hours
+### 7. ~~Phase 19: Flexible Date Booking + Per-Night Pricing~~ ✅ COMPLETE
+**Status:** Done (Session 14, Feb 22)
 
-**Option A: "Make an Offer" on a Listing (~4-6h)**
-- [ ] "Propose Different Dates" button on PropertyDetail alongside "Book Now"
-- [ ] Date range + price + message form (reuses bidding infrastructure)
-- [ ] Add `requested_check_in`, `requested_check_out` fields to `listing_bids`
-- [ ] Owner sees date proposals in bid manager, can accept or counter
-
-**Option B: "Inspired By" Travel Request (~6-8h)** — Follow-up
-- [ ] "Request Similar Dates" button on PropertyDetail
-- [ ] Pre-fills travel request with listing's location, brand, bedrooms
-- [ ] `source_listing_id` field on travel_requests for targeted owner notification
-- [ ] Checkbox: "Send to this owner first" vs "Open to all owners"
-
-**Per-Night Pricing Migration (~3-4h)** — Combined with Option A
-- [ ] Add `nightly_rate` column to listings (atomic unit)
-- [ ] Backfill from `owner_price / num_nights` for existing listings
-- [ ] Update all listing displays to show "$X/night" with "(N nights · $total total)"
-- [ ] Update bid forms, travel requests, Fair Value Score to use per-night rates
+All items complete: Migration 020 (nightly_rate + requested dates + source_listing_id), shared `pricing.ts` utility, owner form nightly rate, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, all displays use DB nightly_rate, seed manager updated. 16 new tests (289 total). PR #20 merged, migration deployed to DEV + PROD.
 
 ---
 
@@ -267,6 +250,7 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 ---
 
 ### Completed Priorities (Archived)
+- ~~Phase 19: Flexible Date Booking + Per-Night Pricing~~ ✅ (Feb 22, Session 14)
 - ~~Functional Search & Booking Flow~~ ✅ (Feb 21, Session 8)
 - ~~Executive Dashboard Polish~~ ✅ (Feb 21, Session 8)
 - ~~Phase 15: Fair Value Score~~ ✅ (Feb 21, Session 8)
@@ -281,6 +265,22 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 ## COMPLETED PHASES
 
 > Full details for all completed phases: [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+<details>
+<summary><strong>Phase 19: Flexible Date Booking + Per-Night Pricing</strong> — Completed Feb 22, 2026</summary>
+
+**What:** Switch platform to per-night pricing, add flexible date proposals on bids, and "Inspired By" travel requests from listing detail.
+
+**3 Tracks:**
+- **Per-Night Pricing:** Migration 020 adds `nightly_rate` column to listings (backfilled from `owner_price / nights`). Shared `src/lib/pricing.ts` utility replaces 4 duplicated `calculateNights()` functions. All displays (Rentals, PropertyDetail, Checkout, FeaturedResorts, MyListingsTable, PricingIntelligence) use DB `nightly_rate`. Owner listing form switched from "Your Asking Price" to "Nightly Rate" with live price summary (nights x rate, RAV fee, traveler total).
+- **Option A — Propose Different Dates:** BidFormDialog gains `mode` prop (`'bid'` | `'date-proposal'`). Date-proposal mode shows date pickers with auto-computed bid amount (`nightly_rate x proposed nights`). `listing_bids` gets `requested_check_in/out` columns. BidsManagerDialog shows proposed dates in blue badge. "Propose Different Dates" button on PropertyDetail.
+- **Option B — Inspired Travel Request:** `InspiredTravelRequestDialog` pre-fills TravelRequestForm with listing's location, dates, bedrooms, brand. "Send to this owner first" toggle (`target_owner_only`). `travel_requests` gets `source_listing_id` + `target_owner_only` columns. "Request Similar Dates" button on PropertyDetail.
+
+**Database:** Migration `020_flexible_dates_nightly_pricing.sql` — 3 ALTER TABLEs + backfill + constraint
+**New Files:** `src/lib/pricing.ts`, `src/lib/pricing.test.ts`, `src/components/bidding/InspiredTravelRequestDialog.tsx`, `src/components/bidding/BidFormDialog.test.tsx`
+**Modified:** ~20 files (types, hooks, components, pages, seed manager, flow manifests, email)
+**Tests:** 289 total (16 new), 0 type errors, 0 lint errors, build clean
+</details>
 
 <details>
 <summary><strong>Seed Data Management System</strong> — Completed Feb 21, 2026</summary>
@@ -704,6 +704,6 @@ All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-
 
 ---
 
-**Last updated:** February 21, 2026 (Session 11 — Marketing assets: playbook, pitch deck, brand concepts, PR #18 merged)
+**Last updated:** February 22, 2026 (Session 14 — Phase 19: Flexible Date Booking + Per-Night Pricing, PR #20 merged)
 **Maintained by:** Sujit
 **Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`

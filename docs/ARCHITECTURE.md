@@ -105,12 +105,13 @@ src/
 │   │   ├── AdminFinancials.tsx     # Revenue reports
 │   │   └── AdminCheckinIssues.tsx  # Traveler issue resolution
 │   ├── bidding/               # Bidding marketplace components
-│   │   ├── BidFormDialog.tsx       # Place a bid on listing
+│   │   ├── BidFormDialog.tsx       # Place a bid or propose different dates (mode: 'bid' | 'date-proposal')
 │   │   ├── BidsManagerDialog.tsx   # Owner manages incoming bids
 │   │   ├── OpenForBiddingDialog.tsx # Owner opens listing for bids
 │   │   ├── TravelRequestCard.tsx   # Display travel request
 │   │   ├── TravelRequestForm.tsx   # Create travel request (supports defaultValues prefill)
 │   │   ├── ProposalFormDialog.tsx  # Owner proposes to travel request
+│   │   ├── InspiredTravelRequestDialog.tsx # "Request Similar Dates" from listing detail (pre-fills TravelRequestForm)
 │   │   ├── DemandSignal.tsx       # Shows matching travel request count on listing form
 │   │   ├── PostRequestCTA.tsx     # Empty search results → "Post a Travel Request" CTA
 │   │   └── NotificationBell.tsx   # Real-time notification icon
@@ -166,6 +167,7 @@ src/
 ├── lib/
 │   ├── supabase.ts            # Supabase client initialization
 │   ├── email.ts               # Client-side email helpers (welcome, contact)
+│   ├── pricing.ts             # calculateNights() + computeListingPricing() (shared utility)
 │   ├── cancellation.ts        # Refund calculation logic
 │   └── utils.ts               # cn() class merge utility
 ├── pages/                     # Route-level page components
@@ -224,7 +226,7 @@ docs/
 ├── SETUP.md                   # Local dev setup guide
 ├── DEPLOYMENT.md              # CI/CD, env vars, CRON setup
 ├── ARCHITECTURE.md            # This file
-└── supabase-migrations/       # SQL migration scripts (001-006, 012-018)
+└── supabase-migrations/       # SQL migration scripts (001-006, 012-020)
 ```
 
 ---
@@ -340,7 +342,7 @@ auth.users (Supabase managed)
 | `user_roles` | RBAC assignments | `user_id`, `role` (enum) |
 | `properties` | Vacation club units | `owner_id`, `brand` (enum), `resort_name`, `location`, `bedrooms`, `amenities[]`, `images[]` |
 | `owner_agreements` | Commission contracts | `owner_id`, `commission_rate`, `markup_allowed`, `max_markup_percent`, `status` |
-| `listings` | Available rental periods | `property_id`, `owner_id`, `check_in_date`, `check_out_date`, `owner_price`, `rav_markup`, `final_price`, `status`, `cancellation_policy` |
+| `listings` | Available rental periods | `property_id`, `owner_id`, `check_in_date`, `check_out_date`, `nightly_rate`, `owner_price`, `rav_markup`, `final_price`, `status`, `cancellation_policy` |
 | `bookings` | Confirmed reservations | `listing_id`, `renter_id`, `total_amount`, `rav_commission`, `owner_payout`, `payment_intent_id`, `payout_status` |
 | `booking_confirmations` | Resort confirmation + owner acceptance tracking | `booking_id`, `resort_confirmation_number`, `confirmation_deadline`, `escrow_status`, `escrow_amount`, `owner_confirmation_status`, `owner_confirmation_deadline`, `extensions_used` |
 | `checkin_confirmations` | Arrival verification | `booking_id`, `traveler_id`, `confirmed_arrival`, `issue_reported`, `issue_type` |
@@ -353,8 +355,8 @@ auth.users (Supabase managed)
 
 | Table | Purpose | Key Fields |
 |-------|---------|-----------|
-| `listing_bids` | Bids on listings | `listing_id`, `bidder_id`, `bid_amount`, `status`, `counter_offer_amount` |
-| `travel_requests` | Traveler reverse-auctions | `traveler_id`, `destination_location`, dates, `budget_preference`, `proposals_deadline` |
+| `listing_bids` | Bids on listings | `listing_id`, `bidder_id`, `bid_amount`, `status`, `counter_offer_amount`, `requested_check_in`, `requested_check_out` |
+| `travel_requests` | Traveler reverse-auctions | `traveler_id`, `destination_location`, dates, `budget_preference`, `proposals_deadline`, `source_listing_id`, `target_owner_only` |
 | `travel_proposals` | Owner responses to requests | `request_id`, `property_id`, `owner_id`, `proposed_price`, `valid_until` |
 | `notifications` | In-app alerts | `user_id`, `type` (enum), `title`, `message`, linked IDs |
 
@@ -382,6 +384,7 @@ Run in order via Supabase SQL Editor:
 | 017 | `owner_dashboard.sql` | `profiles.annual_maintenance_fees` column, `get_owner_dashboard_stats(owner_id)` + `get_owner_monthly_earnings(owner_id)` RPCs |
 | 018 | `travel_request_enhancements.sql` | `notification_type` enum: `travel_request_expiring_soon`, `travel_request_matched` |
 | 019 | `profiles_fk_constraints.sql` | Redirects 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` for PostgREST embedding |
+| 020 | `flexible_dates_nightly_pricing.sql` | `listings.nightly_rate` column (backfilled), `listing_bids.requested_check_in/out` date proposal fields, `travel_requests.source_listing_id` + `target_owner_only` |
 
 ---
 

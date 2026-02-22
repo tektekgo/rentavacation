@@ -1,7 +1,104 @@
 # Completed Phases Archive
 
 > Detailed records of completed project phases, moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 21, 2026
+> **Last Archived:** February 22, 2026
+
+---
+
+## Phase 19: Flexible Date Booking + Per-Night Pricing
+
+**Completed:** February 22, 2026
+**Status:** Migration 020 deployed to both DEV + PROD, PR #20 merged to main
+**Migration:** `020_flexible_dates_nightly_pricing.sql`
+
+### What Was Done
+
+Switched the platform from lump-sum pricing to per-night pricing as the atomic unit, added the ability for travelers to propose different dates when bidding (Option A), and added "Inspired By" travel requests from listing detail (Option B).
+
+### Database (Migration 020)
+
+**Part 1 — Per-Night Pricing:**
+- `listings.nightly_rate NUMERIC NOT NULL DEFAULT 0` — the new atomic pricing unit
+- Backfill: `nightly_rate = ROUND(owner_price / GREATEST(nights, 1), 2)` for all existing listings
+- Non-negative constraint: `listings_nightly_rate_nonneg CHECK (nightly_rate >= 0)`
+
+**Part 2 — Date Proposals on Bids:**
+- `listing_bids.requested_check_in DATE` and `listing_bids.requested_check_out DATE`
+- Pair constraint: both null or both non-null with check_out > check_in
+
+**Part 3 — Inspired Travel Requests:**
+- `travel_requests.source_listing_id UUID REFERENCES listings(id) ON DELETE SET NULL`
+- `travel_requests.target_owner_only BOOLEAN NOT NULL DEFAULT false`
+
+### Shared Pricing Utility
+
+**New file:** `src/lib/pricing.ts`
+- `calculateNights(checkIn, checkOut)` — replaces 4 duplicated functions across Rentals, PropertyDetail, Checkout, FeaturedResorts
+- `computeListingPricing(nightlyRate, nights)` — returns `{ ownerPrice, ravMarkup, finalPrice }` with 15% RAV markup
+- `RAV_MARKUP_RATE` constant (0.15)
+
+**New file:** `src/lib/pricing.test.ts` — 11 unit tests (edge cases: same day, reversed dates, month boundaries, rounding)
+
+### Option A: Propose Different Dates
+
+- **BidFormDialog:** Added `mode` prop (`'bid' | 'date-proposal'`). Date-proposal mode shows date picker fields with auto-computed bid amount (`nightly_rate x proposed nights` via useEffect). Different dialog titles, success messages, submit button text per mode.
+- **useBidding:** `useCreateBid` insert now passes `requested_check_in` and `requested_check_out`
+- **BidsManagerDialog:** `BidCard` shows blue badge with proposed dates + night count when dates differ from listing
+- **PropertyDetail:** "Propose Different Dates" button (outline, Calendar icon) opens BidFormDialog with `mode="date-proposal"`
+- **New test file:** `src/components/bidding/BidFormDialog.test.tsx` — 5 tests
+
+### Option B: Inspired Travel Request
+
+- **New component:** `src/components/bidding/InspiredTravelRequestDialog.tsx` — Dialog wrapper that pre-fills TravelRequestForm with listing's destination, dates, bedrooms, guests, brand. "Inspired by [Resort Name]" banner. "Send to this owner first" toggle (`target_owner_only`). Passes `source_listing_id` in create mutation. Auth guard for unauthenticated users.
+- **TravelRequestForm:** Expanded `defaultValues` to accept `sourceListingId`, `brand`, `bedrooms`, `guestCount`, `targetOwnerOnly`
+- **PropertyDetail:** "Request Similar Dates" button (ghost, Sparkles icon) opens InspiredTravelRequestDialog
+
+### Owner Listing Form
+
+- **OwnerListings.tsx:** Form input changed from "Your Asking Price ($)" to "Nightly Rate ($)". Live price summary shows nights x rate, RAV service fee (15%), and traveler total. Submit logic uses `computeListingPricing()` to derive all 4 price fields. Edit handler loads `nightly_rate` from listing.
+- **Email:** `sendListingSubmittedEmail` updated to show `$X/night (N nights, $Y total)` format
+
+### Display Updates (all use DB `nightly_rate`)
+
+- `Rentals.tsx` — shared `calculateNights` import + `listing.nightly_rate` with fallback
+- `PropertyDetail.tsx` — shared `calculateNights` import + `listing?.nightly_rate` with fallback
+- `Checkout.tsx` — shared `calculateNights` import + `listing?.nightly_rate` with fallback
+- `FeaturedResorts.tsx` — shared `calculateNights` import + `listing.nightly_rate` with fallback
+- `MyListingsTable.tsx` — shows `$X/night` + `$Y total` instead of just `$Y`
+- `PricingIntelligence.tsx` — shows `$X/night ($Y total)` format
+
+### Type Updates
+
+- `database.ts` — `nightly_rate: number` on listings Row/Insert/Update
+- `bidding.ts` — `requested_check_in/out` on ListingBid + CreateBidInput; `source_listing_id` + `target_owner_only` on TravelRequest + CreateTravelRequestInput
+- `ownerDashboard.ts` — `nightly_rate: number` on OwnerListingRow
+- `useListings.ts` — `nightly_rate: number` on ActiveListing
+
+### Other Updates
+
+- **Seed manager:** Pricing changed from random ownerPrice to `nightlyRate = randomInt(100, 400)` → `ownerPrice = nightlyRate * stayLength`. Added `nightly_rate` to listing insert.
+- **Flow manifests:** `traveler-lifecycle.ts` — 2 new branches on `view_property` (date-proposal, inspired-request). `owner-lifecycle.ts` — updated `create_listing` description, `manage_bids` label.
+- **Test fixtures:** `mockListing()` includes `nightly_rate: 143`
+- **Existing tests:** AdminListings.test.tsx and MyListingsTable.test.tsx updated with `nightly_rate` values
+
+### Tests
+
+- 16 new tests: pricing.test.ts (11), BidFormDialog.test.tsx (5)
+- 289 total tests passing, 0 type errors, 0 lint errors, build clean
+
+### New Files (4)
+- `supabase/migrations/020_flexible_dates_nightly_pricing.sql`
+- `src/lib/pricing.ts`
+- `src/lib/pricing.test.ts`
+- `src/components/bidding/InspiredTravelRequestDialog.tsx`
+- `src/components/bidding/BidFormDialog.test.tsx`
+
+### Modified Files (~20)
+- Types: `database.ts`, `bidding.ts`, `ownerDashboard.ts`
+- Hooks: `useListings.ts`, `useBidding.ts`, `useOwnerListingsData.ts`
+- Components: `OwnerListings.tsx`, `BidFormDialog.tsx`, `BidsManagerDialog.tsx`, `TravelRequestForm.tsx`, `MyListingsTable.tsx`, `PricingIntelligence.tsx`, `FeaturedResorts.tsx`
+- Pages: `PropertyDetail.tsx`, `Rentals.tsx`, `Checkout.tsx`
+- Other: `email.ts`, `owner-lifecycle.ts`, `traveler-lifecycle.ts`, `seed-manager/index.ts`, test fixtures
 
 ---
 
