@@ -117,7 +117,46 @@ def create_branded_doc(title):
     return doc
 
 
-def add_logo_header(doc, subtitle=None):
+def add_page_numbers(doc):
+    """Add page numbers to the document footer."""
+    from datetime import datetime
+    for section in doc.sections:
+        footer = section.footer
+        footer.is_linked_to_previous = False
+        p = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
+
+        # "Page X of Y" using Word field codes
+        run1 = p.add_run("Page ")
+        run1.font.name = BRAND_FONT
+        run1.font.size = Pt(8)
+        run1.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+
+        # PAGE field
+        fld_begin = parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="begin"/></w:r>')
+        p._p.append(fld_begin)
+        fld_code = parse_xml(f'<w:r {nsdecls("w")}><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>')
+        p._p.append(fld_code)
+        fld_end = parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="end"/></w:r>')
+        p._p.append(fld_end)
+
+        run2 = p.add_run(" of ")
+        run2.font.name = BRAND_FONT
+        run2.font.size = Pt(8)
+        run2.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+
+        # NUMPAGES field
+        fld_begin2 = parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="begin"/></w:r>')
+        p._p.append(fld_begin2)
+        fld_code2 = parse_xml(f'<w:r {nsdecls("w")}><w:instrText xml:space="preserve"> NUMPAGES </w:instrText></w:r>')
+        p._p.append(fld_code2)
+        fld_end2 = parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="end"/></w:r>')
+        p._p.append(fld_end2)
+
+
+def add_logo_header(doc, doc_title=None):
     """Add branded logo header with RAVIO."""
     # RAV brand name as styled text
     p = doc.add_paragraph()
@@ -127,6 +166,18 @@ def add_logo_header(doc, subtitle=None):
     run.font.size = Pt(28)
     run.font.color.rgb = DEEP_TEAL
     run.font.bold = True
+
+    # Document title
+    if doc_title:
+        pt = doc.add_paragraph()
+        pt.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        pt.paragraph_format.space_before = Pt(2)
+        pt.paragraph_format.space_after = Pt(2)
+        run_t = pt.add_run(doc_title)
+        run_t.font.name = BRAND_FONT
+        run_t.font.size = Pt(16)
+        run_t.font.color.rgb = DARK_NAVY
+        run_t.font.bold = True
 
     # Tagline
     p2 = doc.add_paragraph()
@@ -152,7 +203,7 @@ def add_logo_header(doc, subtitle=None):
         run4.font.size = Pt(11)
         run4.font.color.rgb = DEEP_TEAL
         run4.font.bold = True
-        run5 = p3.add_run("  —  Just Say Where. RAVIO Does the Rest.")
+        run5 = p3.add_run("  \u2014  Just Say Where. RAVIO Does the Rest.")
         run5.font.name = BRAND_FONT
         run5.font.size = Pt(9)
         run5.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
@@ -260,27 +311,33 @@ def add_footer(doc, text):
 
 def generate_roadmap():
     doc = create_branded_doc("Roadmap")
-    add_logo_header(doc)
+    add_logo_header(doc, doc_title="Product Roadmap & Technical Overview \u2014 Draft")
+    add_page_numbers(doc)
 
     # Metadata
     add_metadata(doc, [
         ("Date", "February 22, 2026"),
         ("Version", "v0.9.0"),
-        ("Status", "Pre-Launch (Staff Only Mode — all features deployed, platform locked for internal testing)"),
+        ("Status", "Pre-Launch (Staff Only Mode \u2014 all features deployed, platform locked for internal testing)"),
+        ("Last Updated", "February 22, 2026 at 11:30 PM EST"),
     ])
     doc.add_paragraph()
 
     # 1. Executive Summary
     doc.add_heading("1. Executive Summary", level=1)
-    add_body(doc, "Rent-A-Vacation (RAV) is a peer-to-peer vacation rental marketplace purpose-built for vacation club and timeshare owners. The platform enables owners to list unused timeshare weeks and travelers to discover, negotiate, and book vacation rentals — with AI-powered search, transparent per-night pricing, and trust-first design.")
+    doc.add_heading("The Problem", level=2)
+    add_body(doc, "The vacation ownership (timeshare) industry is valued at $10.5 billion, yet owners of unused weeks have no efficient, trusted marketplace to monetize them. Existing options are fragmented \u2014 classified ads, Facebook groups, or legacy resale sites \u2014 with no pricing transparency, no buyer protection, and no tools for owners to manage their inventory. Meanwhile, travelers looking for vacation club properties have no way to discover available weeks, negotiate pricing, or book with confidence.")
+    doc.add_heading("The Solution", level=2)
+    add_body(doc, "Rent-A-Vacation (RAV) is a peer-to-peer vacation rental marketplace purpose-built for vacation club and timeshare owners. The platform creates a two-sided marketplace where owners list unused timeshare weeks and travelers discover, negotiate, and book vacation rentals \u2014 with transparent per-night pricing, a bidding engine that lets travelers propose their own terms, and trust infrastructure that protects both sides of every transaction.")
     add_body(doc, "The platform is feature-complete for MVP across 19 completed development phases, with 306 automated tests passing, zero type errors, and zero lint errors. All 21 database migrations and 17 edge functions are deployed to both development and production environments.")
     doc.add_paragraph()
     add_body(doc, "Key Differentiators:", bold=True)
     bullets = [
-        ("AI-First Search:", " Voice concierge (Ask RAVIO) and text chat (Chat with RAVIO) — the first AI-powered search in the vacation rental space"),
-        ("Traveler-Friendly Pricing:", " \"Name Your Price\" bidding system, date proposals, and per-night rate transparency"),
-        ("Owner-Centric Tools:", " \"Owner's Edge\" dashboard with earnings analytics, pricing intelligence, and maintenance fee tracking"),
-        ("Trust Infrastructure:", " TrustShield owner verification, PaySafe escrow, and admin-controlled approval workflows"),
+        ("Two-Sided Marketplace with Real-Time Negotiation:", " Travelers can book at listed prices, bid their own price (\"Name Your Price\"), propose different dates, or post wish lists (\"Vacation Wishes\") that owners compete to fulfill. Owners see live demand signals while creating listings. Auto-matching connects newly approved listings with open traveler requests."),
+        ("Traveler-Friendly Pricing:", " Per-night rate transparency (not lump-sum), flexible date proposals that auto-compute from nightly rate, and AI-powered fair value analysis so travelers know if a price is competitive."),
+        ("Owner-Centric Tools:", " Full business intelligence suite (\"Owner's Edge\") with earnings tracking against maintenance fee targets, pricing recommendations based on comparable accepted bids, bid activity feed, and idle week alerts."),
+        ("Trust & Payment Protection:", " Escrow system (PaySafe) holds funds until the traveler physically checks in. Owner verification (TrustShield) with progressive trust levels. Admin-controlled approval workflows. 4 cancellation policy tiers."),
+        ("AI-Enhanced Search:", " Voice concierge (Ask RAVIO) and text chat (Chat with RAVIO) provide natural language property search as an additional discovery channel \u2014 complementing the traditional search, filter, and browse experience."),
     ]
     for label, desc in bullets:
         p = doc.add_paragraph(style='List Bullet')
@@ -312,34 +369,22 @@ def generate_roadmap():
         ]
     )
 
-    # 2.2 AI-Powered Search
-    doc.add_heading("2.2 AI-Powered Search", level=2)
+    # 2.2 Bidding & Negotiation
+    doc.add_heading("2.2 Bidding & Negotiation", level=2)
     add_table_from_data(doc,
-        ["Feature", "Marketing Name", "Description", "Status"],
+        ["Feature", "Description", "Status"],
         [
-            ["Voice Search", "Ask RAVIO", "VAPI + Deepgram Nova-3 transcription, natural language queries, 300ms endpointing, smart denoising", "BUILT"],
-            ["Text Chat", "Chat with RAVIO", "OpenRouter LLM (Gemini 3 Flash), SSE streaming, tool calling for property search, context-aware prompts across 4 page types", "BUILT"],
-            ["Resort Knowledge", "ResortIQ", "117 partner resorts, 351 unit types, auto-populate listing specs from professional database", "BUILT"],
-        ]
-    )
-    add_body(doc, "Voice quota system: Tier-based daily limits with admin overrides and per-user controls.", italic=True, size=9)
-
-    # 2.3 Bidding & Negotiation
-    doc.add_heading("2.3 Bidding & Negotiation", level=2)
-    add_table_from_data(doc,
-        ["Feature", "Marketing Name", "Description", "Status"],
-        [
-            ["Place a Bid", "Name Your Price", "Travelers bid on any listing where the owner has opted in", "BUILT"],
-            ["Date Proposals", "—", "Travelers propose different dates; bid amount auto-computes from nightly rate × proposed nights", "BUILT"],
-            ["Travel Requests", "Vacation Wishes", "Reverse auction — travelers post dream trips, owners compete with proposals", "BUILT"],
-            ["Inspired Requests", "—", "\"Request Similar Dates\" from any listing detail page, pre-fills destination/dates/bedrooms, optional \"Send to this owner first\"", "BUILT"],
-            ["Auto-Matching", "—", "Newly approved listings are automatically matched against open travel requests by destination, dates, budget, and brand", "BUILT"],
-            ["Demand Signals", "—", "Owners see matching travel request count + max budget while creating listings", "BUILT"],
+            ["Place a Bid (Name Your Price)", "Travelers bid on any listing where the owner has opted in. Owners review, accept, reject, or counter-offer", "BUILT"],
+            ["Date Proposals", "Travelers propose different dates; bid amount auto-computes from nightly rate \u00d7 proposed nights. Owners see proposed dates highlighted in bid manager", "BUILT"],
+            ["Travel Requests (Vacation Wishes)", "Reverse auction \u2014 travelers post dream trips (destination, dates, budget, bedrooms), owners compete with proposals", "BUILT"],
+            ["Inspired Requests", "\"Request Similar Dates\" from any listing detail page \u2014 pre-fills destination, dates, bedrooms. Optional \"Send to this owner first\" targeting", "BUILT"],
+            ["Auto-Matching", "Newly approved listings are automatically matched against open travel requests by destination, dates (\u00b130 days), budget, bedrooms, and brand", "BUILT"],
+            ["Demand Signals", "Owners see matching travel request count + max disclosed budget while creating listings, helping them price competitively", "BUILT"],
         ]
     )
 
-    # 2.4 Pricing & Revenue
-    doc.add_heading("2.4 Pricing & Revenue", level=2)
+    # 2.3 Pricing & Revenue
+    doc.add_heading("2.3 Pricing & Revenue", level=2)
     add_table_from_data(doc,
         ["Aspect", "Detail"],
         [
@@ -352,15 +397,26 @@ def generate_roadmap():
         ]
     )
 
-    # 2.5 Business Intelligence
-    doc.add_heading("2.5 Business Intelligence", level=2)
+    # 2.4 Business Intelligence
+    doc.add_heading("2.4 Business Intelligence", level=2)
     add_table_from_data(doc,
-        ["Dashboard", "Marketing Name", "Audience", "Description"],
+        ["Dashboard", "Audience", "Description"],
         [
-            ["Executive Dashboard", "RAV Command", "RAV Owner", "Investor-grade, dark-themed. 6 sections: Headline KPIs, Business Performance (4 charts), Marketplace Health (Liquidity Score gauge, supply/demand map, voice funnel), Market Intelligence (AirDNA + STR benchmarks via BYOK), Industry Feed (NewsAPI + macro indicators), Unit Economics (CAC, LTV, take rate, MoM growth)"],
-            ["Owner Dashboard", "Owner's Edge", "Property Owners", "6 BI sections: Headline Stats (earned YTD, fees covered %, active bids), Earnings Timeline (AreaChart with fee target line), My Listings Table (status badges, Fair Value badges, idle week alerts), Bid Activity Feed, Pricing Intelligence (per-listing Fair Value + market range), Maintenance Fee Tracker (coverage progress bar)"],
-            ["Fair Value Score", "RAV SmartPrice", "All users", "PostgreSQL P25-P75 percentile analysis of comparable accepted bids. Tiers: below market (amber), fair value (emerald), above market (red). Role-specific messaging (owner vs traveler)"],
-            ["Maintenance Fee Calculator", "Fee Freedom Calculator", "Public (no auth)", "Break-even analysis across 9 vacation club brands, 4 unit types, live progress bars, CTA to owner signup"],
+            ["Owner Dashboard (Owner's Edge)", "Property Owners", "6 BI sections: Headline Stats (earned YTD, fees covered %, active bids), Earnings Timeline (chart with maintenance fee target line), My Listings Table (status badges, idle week alerts), Bid Activity Feed, Pricing Intelligence (per-listing fair value + market range), Maintenance Fee Tracker (coverage progress bar)"],
+            ["Fair Value Score (RAV SmartPrice)", "All users", "Analysis of comparable accepted bids using P25-P75 percentile range. Shows whether a listing is priced below market, at fair value, or above market. Different messaging for owners vs travelers"],
+            ["Maintenance Fee Calculator", "Public (no auth)", "Break-even analysis for 9 vacation club brands and 4 unit types \u2014 shows owners how many weeks to rent to cover annual maintenance fees. Live progress bars, CTA to owner signup"],
+            ["Executive Dashboard (RAV Command)", "RAV Leadership", "Investor-grade strategic dashboard. 6 sections: KPI headline bar, Business Performance (4 charts), Marketplace Health (proprietary Liquidity Score and Bid Spread Index), Market Intelligence (AirDNA + STR via BYOK), Industry Feed, Unit Economics"],
+        ]
+    )
+
+    # 2.5 AI-Enhanced Search
+    doc.add_heading("2.5 AI-Enhanced Search", level=2)
+    add_table_from_data(doc,
+        ["Feature", "Description", "Status"],
+        [
+            ["Voice Search (Ask RAVIO)", "Voice concierge powered by VAPI + Deepgram Nova-3. Natural language queries, 300ms endpointing, smart denoising. Tier-based daily limits with admin overrides", "BUILT"],
+            ["Text Chat (Chat with RAVIO)", "LLM-powered text assistant (OpenRouter / Gemini 3 Flash) with SSE streaming and tool calling. Context-aware across 4 page types", "BUILT"],
+            ["Resort Knowledge Base (ResortIQ)", "Database of 117 partner resorts and 351 unit types from 9 vacation club brands. Auto-populates listing specs when owners create listings", "BUILT"],
         ]
     )
 
@@ -836,8 +892,47 @@ def generate_roadmap():
     )
     add_blockquote(doc, "Honesty Framework: BUILT = deployed and demonstrable in the codebase. INDUSTRY DATA = published research from third-party sources. PROJECTED = forward-looking estimates based on industry benchmarks and internal modeling. Never present projections as actuals.")
 
+    # Glossary
+    doc.add_heading("Glossary", level=1)
+    add_body(doc, "All branded terms below are RAV-coined names \u2014 proprietary marketing terms created by Rent-A-Vacation. They are not industry-standard terms.", italic=True, size=9)
+
+    doc.add_heading("RAV-Coined Terms", level=2)
+    add_table_from_data(doc,
+        ["Term", "Definition"],
+        [
+            ["RAV", "Short for Rent-A-Vacation. Used in informal contexts, internal docs, and UI where space is limited"],
+            ["RAVIO", "Rent-A-Vacation Intelligent Operator. The AI assistant brand identity for both voice (Ask RAVIO) and text chat (Chat with RAVIO)"],
+            ["Name Your Price", "The bidding feature \u2014 travelers submit their own price offer on any listing where the owner has opted in"],
+            ["Vacation Wishes", "The travel request feature \u2014 reverse auction where travelers post their dream trip and owners compete with proposals"],
+            ["RAV SmartPrice", "Fair value scoring system using P25-P75 percentile analysis of comparable accepted bids"],
+            ["Fee Freedom Calculator", "Public break-even calculator showing owners how many weeks to rent to cover maintenance fees"],
+            ["TrustShield", "Owner verification program with progressive trust levels (New \u2192 Verified \u2192 Trusted \u2192 Premium). Includes document upload and admin review"],
+            ["PaySafe", "Escrow payment system \u2014 holds traveler funds from booking until check-in is confirmed. Owners receive payout after checkout + 5 days"],
+            ["ResortIQ", "Curated database of 117 resorts and 351 unit types from 9 vacation club brands. Auto-populates listing specs"],
+            ["RAV Command", "Executive dashboard with proprietary metrics, market data integrations, and live industry feed. For RAV leadership only"],
+            ["Owner's Edge", "Owner dashboard suite with 6 business intelligence sections: earnings, pricing, bids, listings, fee tracking"],
+            ["Liquidity Score", "Proprietary marketplace health metric measuring supply-demand matching efficiency"],
+            ["Bid Spread Index", "Proprietary price discovery metric measuring how closely bids track listed prices"],
+            ["Demand Signals", "Real-time indicators showing owners matching travel request count and max budget while creating listings"],
+        ]
+    )
+
+    doc.add_heading("Industry Terms", level=2)
+    add_table_from_data(doc,
+        ["Term", "Definition"],
+        [
+            ["Timeshare / Vacation Ownership", "Property ownership model where multiple buyers share rights to use a vacation property, typically in one-week intervals"],
+            ["Maintenance Fees", "Annual fees charged by vacation clubs for property upkeep, regardless of whether the owner uses their allotted time"],
+            ["Escrow", "Financial arrangement where a third party holds funds until conditions are met"],
+            ["Per-Night Rate", "Industry-standard pricing model charging per night of stay (vs lump-sum per-week)"],
+            ["P2P Marketplace", "Peer-to-peer marketplace connecting individual sellers directly with buyers"],
+            ["BYOK", "Bring Your Own Key \u2014 users supply their own API keys for third-party data integrations"],
+            ["RLS", "Row Level Security \u2014 PostgreSQL feature restricting database access based on user identity at the row level"],
+        ]
+    )
+
     # Footer
-    add_footer(doc, "Prepared for RAV Partners — Confidential — Draft\nGenerated February 22, 2026. All statistics verified against source code and database schema.\nRent-A-Vacation | rent-a-vacation.com | Name Your Price. Book Your Paradise.\nQuestions: support@rentavacation.com")
+    add_footer(doc, "Prepared for RAV Partners \u2014 Confidential \u2014 Draft\nGenerated February 22, 2026. All statistics verified against source code and database schema.\nRent-A-Vacation | rent-a-vacation.com | Name Your Price. Book Your Paradise.\nQuestions: support@rentavacation.com")
 
     output_path = os.path.join(SCRIPT_DIR, "RAV-roadmap-draft-02222026.docx")
     doc.save(output_path)
@@ -851,14 +946,16 @@ def generate_roadmap():
 
 def generate_status_report():
     doc = create_branded_doc("Status Report")
-    add_logo_header(doc)
+    add_logo_header(doc, doc_title="Development Status Report")
+    add_page_numbers(doc)
 
     # Metadata
     add_metadata(doc, [
         ("Date", "February 22, 2026"),
         ("Prepared by", "Sujit (RAV Owner / Lead Developer)"),
         ("Version", "v0.9.0"),
-        ("Platform Status", "Pre-Launch (Staff Only Mode — deployed to production, locked for internal testing)"),
+        ("Platform Status", "Pre-Launch (Staff Only Mode \u2014 deployed to production, locked for internal testing)"),
+        ("Last Updated", "February 22, 2026 at 11:30 PM EST"),
     ])
     doc.add_paragraph()
 
