@@ -22,6 +22,8 @@
 12. [State Management](#12-state-management)
 13. [Environments & Deployment](#13-environments--deployment)
 14. [Key Conventions](#14-key-conventions)
+15. [SEO & Meta Tags](#15-seo--meta-tags)
+16. [Voice Admin & Observability](#16-voice-admin--observability)
 
 ---
 
@@ -253,9 +255,11 @@ All routes are defined in `src/App.tsx`. Key mapping:
 | `/documentation` | `Documentation` | RAV Team | Admin product manual |
 | `/user-guide` | `UserGuide` | Public | Owner/traveler guide |
 | `/destinations` | `Destinations` | Public | Destination directory |
-| `/faq` | `FAQ` | Public | FAQ |
+| `/calculator` | `MaintenanceFeeCalculator` | Public | Free break-even calculator for timeshare owners (SEO magnet) |
+| `/faq` | `FAQ` | Public | FAQ (with JSON-LD FAQPage schema) |
 | `/terms` | `Terms` | Public | Terms of service |
 | `/privacy` | `Privacy` | Public | Privacy policy |
+| `/contact` | `Contact` | Public | Contact form |
 
 **Legacy redirects:** `/deals` → `/rentals`, `/owner-resources` `/pricing` `/success-stories` → `/how-it-works`, `/owner-faq` → `/faq`
 
@@ -706,6 +710,64 @@ Lovable Editor → GitHub main → Vercel auto-deploy → Production
 |--------|--------|-----------|
 | `property-images` | Public read, owner write | `{owner_id}/{filename}` |
 | `verification-documents` | Private | `{owner_id}/{filename}` |
+
+---
+
+## 15. SEO & Meta Tags
+
+### Per-Page Meta (`src/hooks/usePageMeta.ts`)
+
+Lightweight hook that sets `document.title` and meta description on mount, resets on unmount. Used by all 11 public pages.
+
+```typescript
+usePageMeta('Page Title', 'Meta description for search engines.');
+```
+
+### Static SEO Assets
+
+| File | Purpose |
+|------|---------|
+| `public/sitemap.xml` | 10 public routes, calculator at priority 0.9 |
+| `public/robots.txt` | Sitemap ref + disallow rules for admin/private routes |
+| `index.html` | OG image, twitter card, canonical URL, Organization JSON-LD |
+
+### Structured Data
+
+- **Organization** (`index.html`) — JSON-LD with name, logo, social links
+- **FAQPage** (`FAQ.tsx`) — JSON-LD for all 22 Q&A pairs, injected via useEffect
+
+### OG Image
+
+Uses `/android-chrome-512x512.png` (absolute URL with domain). The `.svg` logo exists but OG requires a raster image.
+
+---
+
+## 16. Voice Admin & Observability
+
+### Admin Voice Tab (`/admin` → Voice tab)
+
+5 management sections for the RAV team:
+
+| Component | Purpose |
+|-----------|---------|
+| `VoiceConfigInfo` | Current VAPI config display |
+| `VoiceTierQuotaManager` | Edit daily voice quotas per membership tier |
+| `VoiceUserOverrideManager` | Per-user disable/custom quota overrides |
+| `VoiceUsageDashboard` | Recharts usage charts + top users table |
+| `VoiceObservability` | Search log viewer + alert threshold config |
+
+### Quota Resolution Chain
+
+`get_user_voice_quota()` RPC resolves in order:
+1. RAV team → unlimited
+2. `voice_user_overrides` → custom quota (or disabled if `is_disabled = true`)
+3. `membership_tiers.voice_quota_daily` → tier-based (Free 5, Plus/Pro 25, Premium/Business -1=unlimited)
+4. Default → 5/day
+
+### Tables (Migration 021)
+
+- `voice_search_logs` — per-search log (user, query, results, latency)
+- `voice_user_overrides` — per-user voice controls
 
 ---
 

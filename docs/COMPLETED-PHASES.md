@@ -1,7 +1,94 @@
 # Completed Phases Archive
 
 > Detailed records of completed project phases, moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 22, 2026
+> **Last Archived:** February 23, 2026
+
+---
+
+## Session 17: SEO Optimization + Calculator Discoverability
+
+**Completed:** February 23, 2026
+**PR:** #24 merged to main
+
+### What Was Done
+
+Comprehensive SEO pass across the entire public-facing site, plus improved discoverability for the Maintenance Fee Calculator.
+
+### SEO Fixes
+
+- **OG Image (critical):** `index.html` referenced `/rav-logo.png` which doesn't exist. Updated `og:image`, `twitter:image`, and JSON-LD `logo` to use `https://rent-a-vacation.com/android-chrome-512x512.png` (absolute URL, proper PNG)
+- **Canonical URL:** Added `<link rel="canonical" href="https://rent-a-vacation.com/" />`
+- **JSON-LD:** Fixed `url` field from `rentavacation.com` to `rent-a-vacation.com`
+- **Sitemap:** New `public/sitemap.xml` with 10 public routes, calculator at priority 0.9
+- **robots.txt:** Added sitemap reference + disallow rules for admin, owner-dashboard, executive-dashboard, checkout, booking-success, pending-approval
+
+### Per-Page Meta Tags
+
+- **New hook:** `src/hooks/usePageMeta.ts` — sets `document.title` + meta description, resets on unmount
+- **Applied to 11 pages:** HowItWorksPage, Destinations, FAQ, Contact, UserGuide, Terms, Privacy, Login, Signup, MaintenanceFeeCalculator (refactored from manual useEffect)
+
+### Calculator Discoverability
+
+- **Homepage CTA:** New `src/components/CalculatorCTA.tsx` — "Are Your Maintenance Fees Worth It?" section between Testimonials and CTASection
+- **Header nav:** "Fee Calculator" with Calculator icon added to desktop Explore dropdown and mobile nav
+
+### FAQ Enhancements
+
+- **JSON-LD FAQPage schema:** Structured data for all 22 Q&A pairs, injected via useEffect
+- **Voice quota fix:** Corrected hardcoded "10 voice searches per day" → tier-based (Free 5/day, Plus/Pro 25/day, Premium/Business unlimited)
+
+### Verification
+
+- 306 tests passing, 0 type errors, 0 lint errors, build clean
+
+---
+
+## Session 16: Voice Tracks C-D — Admin Controls + Observability
+
+**Completed:** February 22, 2026
+**Migration:** `021_voice_admin_observability.sql` deployed to DEV + PROD
+
+### What Was Done
+
+Built the admin-facing voice search management system: per-user controls, tier quota management, usage analytics dashboard, and observability log viewer.
+
+### Database (Migration 021)
+
+- `voice_search_logs` — per-search log table (user, query, result count, latency, timestamp)
+- `voice_user_overrides` — per-user voice disable/custom quota overrides
+- 2 alert threshold settings in `system_settings`
+- Updated `get_user_voice_quota()` RPC with override chain: RAV team → user overrides → tier → default
+- 3 new RPCs: `log_voice_search`, `get_voice_usage_stats`, `get_voice_top_users`
+
+### Frontend
+
+- **Hooks:** `useVoiceAdminData` (4 queries), `useVoiceAdminMutations` (5 mutations incl. `useLogVoiceSearch`)
+- **Components (5):** VoiceConfigInfo, VoiceTierQuotaManager, VoiceUserOverrideManager, VoiceUsageDashboard (Recharts charts + top users), VoiceObservability (log viewer + alert threshold config)
+- **Admin Dashboard:** New "Voice" tab with VoiceControls container
+- **Integration:** `useVoiceSearch.ts` auto-logs all searches (fire-and-forget), disabled users see "Voice search has been disabled" message
+
+### Tests
+
+- 17 new tests (306 total): VoiceObservability (3), VoiceTierQuotaManager (3), VoiceUserOverrideManager (3), useVoiceAdminData (4), useVoiceAdminMutations (4)
+
+---
+
+## Session 15: Content Accuracy Audit
+
+**Completed:** February 22, 2026
+
+### What Was Done
+
+Systematic audit of all factual claims in the codebase against source-of-truth data. Fixed fabricated/incorrect content across code, tests, and documentation.
+
+### Fixes Applied
+
+- **Commission rate:** 10% → 15% in 7 code files + 3 test files (source: migration 011 + system_settings)
+- **Brand list:** Removed fabricated "Westgate", added WorldMark (8 → 9 brands, matching `VACATION_CLUB_BRANDS`)
+- **Voice quotas:** Flat "10/day" → tier-based (Free 5, Plus/Pro 25, Premium/Business unlimited)
+- **Documentation.tsx:** Added 9 missing sections to the admin manual
+- **CLAUDE.md:** Added "Content Accuracy (MANDATORY)" policy with source-of-truth table, cross-reference checklist, honesty framework labels, and anti-patterns
+- **Export documents:** Regenerated roadmap + status report `.md` and `.docx` with corrected data
 
 ---
 
