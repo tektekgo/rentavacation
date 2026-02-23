@@ -13,8 +13,8 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/tektekgo/rentavacation.git
-   cd rentavacation
+   git clone https://github.com/rent-a-vacation/rav-website.git
+   cd rav-website
    ```
 
 2. Install dependencies:

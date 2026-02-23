@@ -34,7 +34,7 @@
 
 ## Repository
 
-**GitHub:** https://github.com/tektekgo/rentavacation.git
+**GitHub:** https://github.com/rent-a-vacation/rav-website.git
 
 ---
 
@@ -62,8 +62,8 @@ Edge Functions must be deployed **manually via Supabase CLI** from your local ma
 
 ```bash
 # Clone repository (if not done)
-git clone https://github.com/tektekgo/rentavacation.git
-cd rentavacation
+git clone https://github.com/rent-a-vacation/rav-website.git
+cd rav-website
 
 # Install Supabase CLI (if not installed)
 npm install -g supabase

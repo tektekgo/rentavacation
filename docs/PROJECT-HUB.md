@@ -2,7 +2,7 @@
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
 > **Last Updated:** February 23, 2026 (Session 17 — SEO Optimization + Calculator Discoverability)
-> **Repository:** https://github.com/tektekgo/rentavacation
+> **Repository:** https://github.com/rent-a-vacation/rav-website
 > **App Version:** v0.9.0 (build version visible in footer)
 
 ---
@@ -660,7 +660,7 @@ Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, upda
 ### Infrastructure
 - **Production:** https://rent-a-vacation.com
 - **Vercel:** https://rentavacation.vercel.app
-- **GitHub:** https://github.com/tektekgo/rentavacation
+- **GitHub:** https://github.com/rent-a-vacation/rav-website
 - **Supabase PROD:** xzfllqndrlmhclqfybew
 - **Supabase DEV:** oukbxqnlxnkainnligfz
 
@@ -701,4 +701,4 @@ Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, upda
 
 **Last updated:** February 22, 2026 (Session 15 — Content Accuracy Audit + Documentation Fixes)
 **Maintained by:** Sujit
-**Claude Desktop:** Connected to GitHub `tektekgo/rentavacation/docs/`
+**Claude Desktop:** Connected to GitHub `rent-a-vacation/rav-website/docs/`
