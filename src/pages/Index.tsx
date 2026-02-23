@@ -9,6 +9,7 @@ import HowItWorks from "@/components/HowItWorks";
 import TrustBadges from "@/components/TrustBadges";
 import TopDestinations from "@/components/TopDestinations";
 import Testimonials from "@/components/Testimonials";
+import CalculatorCTA from "@/components/CalculatorCTA";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -84,6 +85,7 @@ const Index = () => {
         <HowItWorks />
         <TopDestinations />
         <Testimonials />
+        <CalculatorCTA />
         <CTASection />
       </main>
       <Footer />

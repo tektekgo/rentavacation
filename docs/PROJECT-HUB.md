@@ -1,7 +1,7 @@
 # PROJECT HUB - Rent-A-Vacation
 
 > **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 22, 2026 (Session 16 — Voice Tracks C-D: Admin Controls + Observability)
+> **Last Updated:** February 23, 2026 (Session 17 — SEO Optimization + Calculator Discoverability)
 > **Repository:** https://github.com/tektekgo/rentavacation
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -78,15 +78,14 @@ To keep PROJECT-HUB.md focused and scannable:
 
 ## CURRENT FOCUS
 
-**Active Phase:** Voice Tracks C-D + remaining backlog
-**Started:** February 22, 2026
+**Active Phase:** SEO Optimization + Calculator Discoverability
+**Started:** February 23, 2026
 
 ### Working on TODAY:
-- [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** — Migration 020, pricing utility, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, owner form nightly rate, 289 tests (PR #20, Session 14)
-- [x] **Content Accuracy Audit** — Fixed fabricated tier names, wrong edge function count, 10%→15% commission rate across 7 code files + 3 tests, brand list (Westgate→WorldMark), voice quota (10/day→tier-based), added 9 missing Documentation sections, CLAUDE.md Content Accuracy policy, regenerated export docs (Session 15)
-- [x] Voice Experience Tracks C-D: Admin controls, observability
+- [x] **SEO Optimization + Calculator Discoverability** — Fixed OG image (broken .png ref), added canonical URL, sitemap.xml, robots.txt disallow rules, usePageMeta hook on 11 public pages, CalculatorCTA homepage section, Fee Calculator in header nav (desktop + mobile), FAQ JSON-LD schema, fixed FAQ voice quota content (Session 17)
 
 ### Recently Completed:
+- [x] **SEO Optimization + Calculator Discoverability** (Feb 23, Session 17). Fixed broken OG image (was referencing non-existent `/rav-logo.png`, now uses `/android-chrome-512x512.png`). Added canonical URL. Created `public/sitemap.xml` (10 public routes) and updated `robots.txt` with sitemap ref + disallow rules for admin/private routes. New `usePageMeta` hook applied to 11 public pages (HowItWorks, Destinations, FAQ, Contact, UserGuide, Terms, Privacy, Login, Signup, MaintenanceFeeCalculator refactored). New `CalculatorCTA` homepage section between Testimonials and CTASection. "Fee Calculator" added to desktop Explore dropdown and mobile nav. FAQ page gets JSON-LD FAQPage structured data (22 Q&A pairs). Fixed FAQ voice quota content (was hardcoded "10 searches/day", now tier-based: Free 5/day, Plus/Pro 25/day, Premium/Business unlimited). 306 tests (all passing), 0 type errors, build clean.
 - [x] **Voice Tracks C-D: Admin Controls + Observability** (Feb 22, Session 16). Migration 021: `voice_search_logs` table (per-search observability), `voice_user_overrides` table (per-user voice disable/custom quota), 2 alert threshold system_settings, updated `get_user_voice_quota()` with override support, 3 new RPCs (log_voice_search, get_voice_usage_stats, get_voice_top_users). 5 new types. 2 admin hooks (useVoiceAdminData, useVoiceAdminMutations). Modified useVoiceSearch.ts for automatic search logging. 6 new components (VoiceControls + VoiceConfigInfo, VoiceTierQuotaManager, VoiceUserOverrideManager, VoiceUsageDashboard, VoiceObservability). Admin Dashboard "Voice" tab. Flow manifest updated. 17 new tests (306 total).
 - [x] **Content Accuracy Audit** (Feb 22, Session 15). Fixed 10%→15% commission rate in 7 code files + 3 test files. Fixed brand list (Westgate→WorldMark, 8→9 brands). Fixed voice quota (flat 10/day→tier-based). Added 9 missing sections to Documentation.tsx admin manual. Added Content Accuracy (MANDATORY) policy to CLAUDE.md. Regenerated export documents with correct data.
 - [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** (Feb 22, Session 14). Migration 020: `nightly_rate` on listings (backfilled), `requested_check_in/out` on listing_bids, `source_listing_id/target_owner_only` on travel_requests. Shared `pricing.ts` utility replaces 4 duplicated calculateNights functions. Owner form switched to nightly rate input with live price summary. BidFormDialog dual-mode (bid vs date-proposal). InspiredTravelRequestDialog for "Request Similar Dates" from PropertyDetail. All displays use DB `nightly_rate`. 16 new tests (289 total). PR #20 merged.

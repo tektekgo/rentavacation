@@ -1,7 +1,10 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const Privacy = () => {
+  usePageMeta('Privacy Policy', 'How Rent-A-Vacation protects your personal data and privacy.');
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

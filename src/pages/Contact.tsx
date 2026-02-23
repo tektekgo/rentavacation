@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Contact = () => {
+  usePageMeta('Contact Us', 'Get in touch with the Rent-A-Vacation team for support, questions, or partnership inquiries.');
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",

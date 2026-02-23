@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2, Rocket } from "lucide-react";
@@ -11,6 +12,7 @@ import { ActionSuccessCard } from "@/components/ActionSuccessCard";
 import { supabase } from "@/lib/supabase";
 
 const Signup = () => {
+  usePageMeta('Sign Up', 'Create your free Rent-A-Vacation account to start booking or listing vacation properties.');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",

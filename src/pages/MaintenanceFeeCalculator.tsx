@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calculator, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { usePageMeta } from '@/hooks/usePageMeta';
 import { OwnershipForm } from '@/components/calculator/OwnershipForm';
 import { BreakevenResults } from '@/components/calculator/BreakevenResults';
 import { CalculatorCTA } from '@/components/calculator/CalculatorCTA';
@@ -38,17 +39,10 @@ export default function MaintenanceFeeCalculator() {
       });
   }, []);
 
-  // Set page title for SEO
-  useEffect(() => {
-    document.title = 'Timeshare Maintenance Fee Calculator — Rent-A-Vacation';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'Calculate how many weeks you need to rent your timeshare to cover annual maintenance fees. Free tool for Hilton, Marriott, Disney, Wyndham owners.');
-    }
-    return () => {
-      document.title = 'Rent-A-Vacation';
-    };
-  }, []);
+  usePageMeta(
+    'Timeshare Maintenance Fee Calculator',
+    'Calculate how many weeks you need to rent your timeshare to cover annual maintenance fees. Free tool for Hilton, Marriott, Disney, Wyndham owners.'
+  );
 
   return (
     <div className="min-h-screen flex flex-col">

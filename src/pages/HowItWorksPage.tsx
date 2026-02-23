@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { useTextChat } from "@/hooks/useTextChat";
 import { TextChatButton } from "@/components/TextChatButton";
@@ -160,6 +161,7 @@ const faqs = [
 ];
 
 const HowItWorksPage = () => {
+  usePageMeta('How It Works', 'Learn how to rent vacation properties at up to 70% off through Rent-A-Vacation marketplace.');
   const location = useLocation();
   const { user } = useAuth();
   const isAuthenticated = !!user;

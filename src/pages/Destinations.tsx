@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { ArrowRight, MapPin } from "lucide-react";
 import keralaImage from "@/assets/kerala-backwaters.jpg";
 import utahImage from "@/assets/utah-arches.jpg";
@@ -107,6 +108,7 @@ const destinations = [
 ];
 
 const Destinations = () => {
+  usePageMeta('Top Destinations', 'Explore top vacation destinations with luxury resort stays at up to 70% off retail prices.');
   const featuredDestinations = destinations.filter((d) => d.featured);
   const allDestinations = destinations.filter((d) => !d.featured);
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -29,6 +30,7 @@ import {
 } from "lucide-react";
 
 const UserGuide = () => {
+  usePageMeta('User Guide', 'Step-by-step guide to using Rent-A-Vacation for renting and listing vacation properties.');
   const [activeSection, setActiveSection] = useState("getting-started");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);

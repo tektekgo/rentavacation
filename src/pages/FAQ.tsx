@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Search, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const faqCategories = [
   {
@@ -48,12 +49,12 @@ const faqCategories = [
       {
         question: "Why can't I use voice search?",
         answer:
-          "Voice search requires a logged-in, approved account. If the microphone icon is disabled, sign in first. If your account is pending approval, you'll need to wait for the approval email. If you've hit the daily limit of 10 searches, try again tomorrow or use the manual text search which has no limits.",
+          "Voice search requires a logged-in, approved account. If the microphone icon is disabled, sign in first. If your account is pending approval, you'll need to wait for the approval email. Voice search limits depend on your membership tier: Free members get 5 searches per day, Plus/Pro get 25 per day, and Premium/Business members get unlimited searches. If you've hit your daily limit, try again tomorrow or use the manual text search which has no limits.",
       },
       {
         question: "What is the daily voice search limit?",
         answer:
-          "Regular users can perform up to 10 voice searches per day, which resets at midnight. A badge near the search bar shows your remaining searches. This helps us manage costs while giving everyone fair access to this premium feature.",
+          "Voice search limits depend on your membership tier. Free members can perform up to 5 voice searches per day, Plus and Pro members get 25 per day, and Premium and Business members enjoy unlimited voice searches. Limits reset at midnight. A badge near the search bar shows your remaining searches. This tiered approach helps us manage costs while giving everyone fair access to this premium feature.",
       },
     ],
   },
@@ -140,9 +141,39 @@ const faqCategories = [
 ];
 
 const FAQ = () => {
+  usePageMeta('FAQ', 'Frequently asked questions about renting and listing vacation properties on Rent-A-Vacation.');
+
   const [openItems, setOpenItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("For Renters");
+
+  // Inject FAQPage JSON-LD structured data
+  useEffect(() => {
+    const allFaqs = faqCategories.flatMap((cat) => cat.faqs);
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: allFaqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    };
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "faq-schema";
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    return () => {
+      const existing = document.getElementById("faq-schema");
+      if (existing) existing.remove();
+    };
+  }, []);
 
   const toggleItem = (question: string) => {
     setOpenItems((prev) =>
