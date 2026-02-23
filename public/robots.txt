@@ -1,14 +1,10 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+Sitemap: https://rent-a-vacation.com/sitemap.xml
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /owner-dashboard
+Disallow: /executive-dashboard
+Disallow: /checkout
+Disallow: /booking-success
+Disallow: /pending-approval

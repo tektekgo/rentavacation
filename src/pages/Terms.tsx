@@ -1,7 +1,10 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const Terms = () => {
+  usePageMeta('Terms of Service', 'Terms and conditions for using Rent-A-Vacation marketplace.');
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

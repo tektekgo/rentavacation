@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3 } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
@@ -66,11 +66,18 @@ const Header = () => {
                   >
                     By Destination
                   </Link>
-                  <Link 
-                    to="/rentals?filter=deals" 
+                  <Link
+                    to="/rentals?filter=deals"
                     className="block px-4 py-2 rounded-lg hover:bg-muted transition-colors"
                   >
                     Last Minute Deals
+                  </Link>
+                  <Link
+                    to="/calculator"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <Calculator className="h-4 w-4" />
+                    Fee Calculator
                   </Link>
                 </div>
               )}
@@ -255,16 +262,24 @@ const Header = () => {
             >
               List Your Property
             </Link>
-            <Link 
-              to="/bidding" 
+            <Link
+              to="/bidding"
               className="text-foreground py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <Store className="h-4 w-4" />
               Vacation Marketplace
             </Link>
-            <Link 
-              to="/faq" 
+            <Link
+              to="/calculator"
+              className="text-foreground py-2 flex items-center gap-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Calculator className="h-4 w-4" />
+              Fee Calculator
+            </Link>
+            <Link
+              to="/faq"
               className="text-foreground py-2"
               onClick={() => setIsMenuOpen(false)}
             >
