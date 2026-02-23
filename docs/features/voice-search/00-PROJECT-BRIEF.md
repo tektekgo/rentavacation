@@ -556,7 +556,7 @@ VAPI_PRIVATE_KEY=your_vapi_private_key  # For server-side VAPI calls (future)
 ## Contact & Support
 
 - **Project Lead:** Sujit
-- **Repo:** https://github.com/tektekgo/rentavacation.git
+- **Repo:** https://github.com/rent-a-vacation/rav-website.git
 - **Supabase DEV:** `oukbxqnlxnkainnligfz`
 - **Supabase PROD:** `xzfllqndrlmhclqfybew`
 - **VAPI Account:** gsujit@gmail.com's Org

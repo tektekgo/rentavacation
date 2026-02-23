@@ -165,7 +165,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 **Environment:**
 - Production: https://rent-a-vacation.com
 - Vercel: https://rentavacation.vercel.app
-- GitHub: https://github.com/tektekgo/rentavacation
+- GitHub: https://github.com/rent-a-vacation/rav-website
 - Supabase PROD: xzfllqndrlmhclqfybew
 - Supabase DEV: oukbxqnlxnkainnligfz
 

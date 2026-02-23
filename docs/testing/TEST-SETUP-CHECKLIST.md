@@ -21,17 +21,17 @@ This checklist guides you through setting up a complete testing infrastructure f
 ### Step 1: Percy.io Account
 - [ ] Go to https://percy.io
 - [ ] Click "Sign in with Google"
-- [ ] Connect to GitHub repository: `tektekgo/rentavacation`
+- [ ] Connect to GitHub repository: `rent-a-vacation/rav-website`
 - [ ] Copy Percy token from Project Settings
 - [ ] Note: Private repos ARE supported on free tier
 
 ### Step 2: GitHub Repository Prep
-- [ ] Ensure you have push access to `tektekgo/rentavacation`
+- [ ] Ensure you have push access to `rent-a-vacation/rav-website`
 - [ ] Verify GitHub Actions is enabled (Settings → Actions)
 - [ ] Check current workflow files in `.github/workflows/`
 
 ### Step 3: Local Development Setup
-- [ ] Clone repo: `git clone https://github.com/tektekgo/rentavacation.git`
+- [ ] Clone repo: `git clone https://github.com/rent-a-vacation/rav-website.git`
 - [ ] Verify local setup works: `npm install && npm run dev`
 - [ ] Confirm Supabase connection (check console for errors)
 

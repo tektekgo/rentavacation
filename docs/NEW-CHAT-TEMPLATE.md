@@ -21,7 +21,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 **PROJECT INFO:**
 - **Path:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
 - **Production:** https://rent-a-vacation.com
-- **GitHub:** https://github.com/tektekgo/rentavacation
+- **GitHub:** https://github.com/rent-a-vacation/rav-website
 
 **ENVIRONMENT:**
 - **Supabase PROD:** xzfllqndrlmhclqfybew
@@ -92,7 +92,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 **PROJECT INFO:**
 - Path: C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
 - Production: https://rent-a-vacation.com
-- GitHub: https://github.com/tektekgo/rentavacation
+- GitHub: https://github.com/rent-a-vacation/rav-website
 
 **ENVIRONMENT:**
 - Supabase PROD: xzfllqndrlmhclqfybew
