@@ -5,6 +5,99 @@
 
 ---
 
+## Project Management — GitHub Issues & Milestones (MANDATORY)
+
+### Source of Truth (in priority order)
+1. **GitHub Issues & Milestones** — what to work on, current status, backlog
+2. **docs/PROJECT-HUB.md** — architectural decisions, session context, agent instructions
+3. **docs/COMPLETED-PHASES.md** — detailed technical record of completed work
+
+### At the START of every session
+1. List open issues in the current milestone:
+   ```bash
+   gh issue list --repo rent-a-vacation/rav-website --state open --label "pre-launch"
+   ```
+2. Read `docs/PROJECT-HUB.md` for architectural context and decisions
+3. Confirm with the user which issue to work on before starting any code
+
+### At the END of every session
+1. Close completed issues with a summary comment:
+   ```bash
+   gh issue close <number> --repo rent-a-vacation/rav-website --comment "Completed: [brief summary of what was built]"
+   ```
+2. Create new issues for anything discovered during the session (bugs, ideas, follow-up work)
+3. Update `docs/PROJECT-HUB.md` with any architectural decisions made
+4. Do NOT update PROJECT-HUB.md priority queue — GitHub Issues is now the source for priorities
+
+### Issue lifecycle
+- **New idea** → create issue with `idea` label, no milestone (Backlog)
+- **Ready to work** → add milestone, move to `Ready`
+- **In progress** → add `in-progress` label
+- **Done** → close issue with summary comment
+
+### Creating issues during a session
+```bash
+# Bug discovered
+gh issue create --repo rent-a-vacation/rav-website \
+  --title "Bug: [description]" \
+  --label "bug,platform" \
+  --body "[What's broken, steps to reproduce, expected vs actual]"
+
+# Enhancement identified
+gh issue create --repo rent-a-vacation/rav-website \
+  --title "[Feature name]" \
+  --label "enhancement,pre-launch,marketplace" \
+  --milestone "Phase 20: Accounting & Tax" \
+  --body "[What needs to be built and why]"
+```
+
+### What stays in PROJECT-HUB.md
+- KEY DECISIONS LOG (DEC-XXX entries)
+- Architecture notes and technical decisions
+- Session handoff context
+- Link to GitHub Project board: https://github.com/orgs/rent-a-vacation/projects/
+
+### What is now tracked in GitHub Issues
+- Everything previously in PRIORITY QUEUE
+- Everything previously in IDEAS BACKLOG
+- Bug tracking
+- Phase sub-tasks
+
+### Labels reference
+| Label | Use for |
+|-------|---------|
+| `bug` | Something broken |
+| `enhancement` | New feature or improvement |
+| `idea` | Unvalidated concept |
+| `docs` | Documentation only |
+| `refactor` | Code quality, no behavior change |
+| `marketplace` | Bidding, listings, booking engine |
+| `platform` | Auth, payments, infra, admin |
+| `experience` | UI, voice, mobile, discovery |
+| `pre-launch` | Required before public launch |
+| `post-launch` | Can wait until after launch |
+| `blocked` | Waiting on something |
+| `needs-decision` | Requires human decision before proceeding |
+
+---
+
+## Content Accuracy (MANDATORY)
+
+All content in the codebase must reflect verified, accurate data. Never use placeholder or estimated figures.
+
+### Verified facts (do not change without confirmation)
+- **Commission rate:** 15% (not 10%)
+- **Resort count:** 117 (Hilton 62, Marriott 40, Disney 15)
+- **Voice quota:** Tier-based — Free: 5/day, Plus/Pro: 25/day, Premium/Business: unlimited (not flat 10/day)
+- **App version:** v0.9.0 (visible in footer)
+
+### Before updating any statistic or business metric
+1. Check `docs/PROJECT-HUB.md` KEY DECISIONS LOG
+2. Check `docs/COMPLETED-PHASES.md` for when it was last verified
+3. If uncertain, flag with `needs-decision` label and ask the user
+
+---
+
 ## Flow Manifest Convention (MANDATORY)
 
 The application uses declarative **Flow Manifests** in `src/flows/` to auto-generate interactive architecture diagrams at `/architecture`. This keeps system documentation synchronized with code without manual Mermaid authoring.
@@ -104,184 +197,104 @@ feature/* (optional)
 1. Work locally on `dev` (or a feature branch off `dev`)
 2. Push to `dev` → Vercel creates a preview deploy → test against Supabase DEV
 3. When ready for production: create PR `dev` → `main`
-4. CI runs, reviewer approves, merge → Vercel auto-deploys to PROD
+4. PR requires: CI passing + 1 approval
+5. Merge to `main` → auto-deploys to production
 
-### Supabase Deployment
+### Commit message format
 
-- Test migrations on **DEV** first: `npx supabase db push --project-ref oukbxqnlxnkainnligfz`
-- Test edge functions on **DEV** first: `npx supabase functions deploy <name> --project-ref oukbxqnlxnkainnligfz`
-- Only after staging validation, deploy to **PROD**: `--project-ref xzfllqndrlmhclqfybew`
+```
+type(scope): description
 
-### Environment References
-
-| Environment | Supabase | Vercel | Branch |
-|-------------|----------|--------|--------|
-| Local Dev | DEV (`oukb...`) | n/a | `dev` |
-| Staging | DEV (`oukb...`) | Preview URL | `dev` |
-| Production | PROD (`xzfl...`) | rentavacation.com | `main` |
-
----
-
-## Project Conventions
-
-### Tech Stack
-- React 18 + TypeScript + Vite
-- Tailwind CSS + shadcn/ui (semantic design tokens only — never hardcode colors)
-- Supabase (Auth, PostgreSQL with RLS, Edge Functions)
-- TanStack React Query v5 for server state
-
-### File Organization
-- Pages in `src/pages/` (default exports)
-- Components in `src/components/` (named exports, colocated by feature)
-- Hooks in `src/hooks/` (custom data hooks)
-- Types in `src/types/`
-- Flow manifests in `src/flows/`
-
-### Auth & Roles
-- RBAC via `user_roles` table (never on profiles)
-- Roles: `rav_owner`, `rav_admin`, `rav_staff`, `property_owner`, `renter`
-- Use `isRavTeam()` for admin access checks
-- Security definer functions prevent RLS recursion
-
-### Edge Functions
-- Deploy via Supabase CLI (not in-editor)
-- Shared email template in `supabase/functions/_shared/`
-- Required secrets: `RESEND_API_KEY`, `STRIPE_SECRET_KEY`
-
----
-
-## Testing Requirements (MANDATORY)
-
-### Before Completing Any Task
-
-1. **Run tests**: `npm test` — all tests must pass
-2. **Run type check**: `npx tsc --noEmit` — no type errors
-3. **Run build**: `npm run build` — build must succeed
-
-### When Writing New Code
-
-- **New utility/lib function** → Write unit tests in the same directory (`*.test.ts`)
-- **New hook** → Write integration tests with mocked supabase (`*.test.ts`)
-- **New component with logic** → Write render tests (`*.test.tsx`)
-- **Bug fix** → Write a regression test that fails without the fix
-
-### Test Patterns
-
-```typescript
-// Unit test (pure functions)
-import { describe, it, expect } from "vitest";
-import { myFunction } from "./myModule";
-
-describe("myFunction", () => {
-  it("does the expected thing", () => {
-    expect(myFunction(input)).toBe(expected);
-  });
-});
-
-// Hook test (with providers)
-import { renderHook, waitFor } from "@testing-library/react";
-import { createHookWrapper } from "@/test/helpers/render";
-
-const { result } = renderHook(() => useMyHook(), {
-  wrapper: createHookWrapper(),
-});
-await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-// Supabase mocking
-vi.mock("@/lib/supabase", () => ({
-  supabase: { from: vi.fn() },
-  isSupabaseConfigured: () => true,
-}));
+feat(auth): add user approval system
+fix(voice): correct quota display for tier-based limits
+docs(hub): update PROJECT-HUB after session 17
+test(booking): add payment flow integration tests
+chore(deps): update supabase client to v2.x
 ```
 
-### Coverage Thresholds (Enforced by CI)
+---
 
-| Metric     | Minimum |
-|------------|---------|
-| Statements | 25%     |
-| Branches   | 25%     |
-| Functions  | 30%     |
-| Lines      | 25%     |
+## Testing (MANDATORY)
 
-Coverage applies to: `src/lib/**`, `src/hooks/**`, `src/contexts/**`
+### Rules for every code change
 
-### Test File Locations
+1. **Run tests before committing:**
+   ```bash
+   npm run test
+   npm run build
+   ```
+2. **Never commit if tests fail** — fix tests first, or explicitly discuss with user
+3. **Add tests for new business logic** — especially anything in `src/lib/`
+4. **Current baseline:** 306 tests passing, 0 TypeScript errors, 0 ESLint errors
 
-| Source | Test |
-|--------|------|
-| `src/lib/foo.ts` | `src/lib/foo.test.ts` |
-| `src/hooks/useFoo.ts` | `src/hooks/useFoo.test.ts` |
-| `src/contexts/FooContext.tsx` | `src/contexts/FooContext.test.tsx` |
+### Test file locations
 
-### Test Helpers Available
+```
+src/lib/*.test.ts          # Unit tests for pure functions
+src/hooks/*.test.ts        # Integration tests for hooks
+src/contexts/*.test.tsx    # Integration tests for contexts
+e2e/smoke/                 # Playwright E2E smoke tests
+e2e/visual/                # Percy visual regression tests
+```
 
-- `src/test/helpers/render.tsx` — `renderWithProviders()`, `createHookWrapper()`
-- `src/test/helpers/supabase-mock.ts` — `createSupabaseMock()`, `emptyResponse()`, `errorResponse()`
-- `src/test/fixtures/listings.ts` — `mockListing()`, `mockListings(count)`
-- `src/test/fixtures/users.ts` — `mockUser()`, `mockSession()`, `mockAuthContext()`
+### Running tests
 
-### Definition of Done
+```bash
+npm run test              # Vitest unit + integration (watch mode)
+npm run test:coverage     # With coverage report
+npm run test:e2e          # Playwright E2E
+npm run test:e2e:headed   # Playwright with browser visible
+```
 
-A task is only done when ALL of the following are true:
-
-- [ ] Feature code is written
-- [ ] Tests are written and passing (`npm test`)
-- [ ] Types check (`npx tsc --noEmit`)
-- [ ] Build succeeds (`npm run build`)
-- [ ] No lint errors (`npm run lint`)
-
-### Commands Reference
-
-| Command | Purpose |
-|---------|---------|
-| `npm test` | Run all unit + integration tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
-| `npm run test:e2e` | Run Playwright E2E tests |
-| `npm run build` | Production build |
-| `npm run lint` | ESLint check |
+### Coverage thresholds (enforced in CI)
+- Statements: 25%
+- Branches: 25%
+- Functions: 30%
+- Lines: 25%
 
 ---
 
-## Content Accuracy (MANDATORY)
+## Repository Information
 
-### Core Rule
+- **GitHub:** https://github.com/rent-a-vacation/rav-website
+- **Production:** https://rent-a-vacation.com
+- **Vercel:** https://rentavacation.vercel.app
+- **Supabase PROD:** xzfllqndrlmhclqfybew
+- **Supabase DEV:** oukbxqnlxnkainnligfz
 
-**Never fabricate names, statistics, counts, or other factual claims.** Always verify against source code or database before including in documentation, export reports, or UI text.
+---
 
-### Source of Truth Locations
+## Environment & Tech Stack
 
-| Data Point | Source of Truth | Notes |
-|-----------|----------------|-------|
-| Membership tiers | Migration `011_membership_tiers.sql` | Free/Plus/Premium (traveler), Free/Pro/Business (owner) |
-| Vacation club brands | `src/lib/calculatorLogic.ts` → `VACATION_CLUB_BRANDS` | 9 brands (includes "Other / Independent Resort") |
-| Edge functions | `supabase/functions/*/` directory listing | Count actual directories, not estimates |
-| Commission rate | Migration `011` + `system_settings` table | Default 15%, admin-configurable. Pro −2%, Business −5% |
-| Test count | `npm test` output | Always run before citing a count |
-| Migration count | `supabase/migrations/` directory listing | Count actual `.sql` files |
+- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui
+- **Backend:** Supabase (PostgreSQL + Edge Functions + Auth)
+- **Payments:** Stripe
+- **Voice:** VAPI (Deepgram STT + GPT-4o-mini + ElevenLabs TTS)
+- **Deployment:** Vercel (auto-deploy on push to main)
+- **Testing:** Vitest + Playwright + Percy + Qase
 
-### Cross-Reference Checklist
+---
 
-Before committing any document, report, or export that contains factual claims:
+## Key Architectural Decisions
 
-1. **Tier names** — Verify against migration 011 (never invent tier names)
-2. **Counts** (edge functions, tests, migrations) — Run the actual count command
-3. **Rates/percentages** — Check `system_settings` defaults and code constants
-4. **Brand lists** — Match `VACATION_CLUB_BRANDS` in `calculatorLogic.ts`
-5. **Feature status** — Check `docs/PROJECT-HUB.md` and git log
+> Full decisions log: `docs/PROJECT-HUB.md` → KEY DECISIONS LOG  
+> Archived decisions: `docs/DECISIONS.md`
 
-### Honesty Framework Labels
+Key active decisions agents must respect:
+- **DEC-011:** Native mobile via Capacitor (not React Native) — after PWA validates demand
+- **DEC-014:** Executive Dashboard is `/executive-dashboard` standalone page, not an admin tab
+- **DEC-015:** Seed data system is DEV-only, production-guarded
+- **DEC-020:** Text Chat Agent supersedes Phase 10 Track D AI Support Agent
+- **Voice quota:** Tier-based (not flat) — Free 5/day, Plus/Pro 25/day, Premium/Business unlimited
 
-When creating marketing, pitch, or investor-facing content, label every claim:
+---
 
-- **BUILT** — Feature exists in the codebase and is deployed
-- **INDUSTRY DATA** — Sourced from published research (cite source)
-- **PROJECTED** — Forward-looking estimate (clearly mark as projection)
+## What NOT to Do
 
-### Anti-Patterns
-
-- ❌ Do NOT invent tier names (e.g., "Explorer", "Diamond") — use actual names from migration 011
-- ❌ Do NOT round or estimate counts — run the actual query/listing
-- ❌ Do NOT hardcode commission rates without noting they are admin-configurable
-- ❌ Do NOT copy brand lists from memory — always reference `VACATION_CLUB_BRANDS`
-- ❌ Do NOT claim features exist without verifying the code is deployed
+- ❌ Never push directly to `main`
+- ❌ Never commit with failing tests
+- ❌ Never hardcode business metrics without verifying against docs
+- ❌ Never update GitHub Issues priority — that's the human's job
+- ❌ Never skip updating flow manifests when adding routes
+- ❌ Never use placeholder content or fake statistics
+- ❌ Never modify production Supabase (xzfllqndrlmhclqfybew) without explicit human confirmation
