@@ -275,7 +275,7 @@ const Signup = () => {
                 <div className="flex items-start gap-2">
                   <input type="checkbox" className="rounded border-border mt-1" required />
                   <span className="text-sm text-muted-foreground">
-                    I agree to Rent-A-Vacation's{" "}
+                    I am 18 years or older and agree to Rent-A-Vacation's{" "}
                     <Link to="/terms" className="text-primary hover:underline">
                       Terms of Service
                     </Link>{" "}

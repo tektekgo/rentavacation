@@ -6,6 +6,7 @@ import { mockListings, resetListingCounter } from "@/test/fixtures/listings";
 // Mock the supabase module
 const mockSelect = vi.fn();
 const mockEq = vi.fn();
+const mockGte = vi.fn();
 const mockOrder = vi.fn();
 const mockSingle = vi.fn();
 const mockFrom = vi.fn();
@@ -34,9 +35,11 @@ describe("useActiveListings", () => {
     mockFrom.mockReturnValue({
       select: mockSelect.mockReturnValue({
         eq: mockEq.mockReturnValue({
-          order: mockOrder.mockResolvedValue({
-            data: listings,
-            error: null,
+          gte: mockGte.mockReturnValue({
+            order: mockOrder.mockResolvedValue({
+              data: listings,
+              error: null,
+            }),
           }),
         }),
       }),
@@ -56,9 +59,11 @@ describe("useActiveListings", () => {
     mockFrom.mockReturnValue({
       select: mockSelect.mockReturnValue({
         eq: mockEq.mockReturnValue({
-          order: mockOrder.mockResolvedValue({
-            data: [],
-            error: null,
+          gte: mockGte.mockReturnValue({
+            order: mockOrder.mockResolvedValue({
+              data: [],
+              error: null,
+            }),
           }),
         }),
       }),
@@ -76,9 +81,11 @@ describe("useActiveListings", () => {
     mockFrom.mockReturnValue({
       select: mockSelect.mockReturnValue({
         eq: mockEq.mockReturnValue({
-          order: mockOrder.mockResolvedValue({
-            data: null,
-            error: { message: "Database error" },
+          gte: mockGte.mockReturnValue({
+            order: mockOrder.mockResolvedValue({
+              data: null,
+              error: { message: "Database error" },
+            }),
           }),
         }),
       }),
@@ -130,9 +137,11 @@ describe("useActiveListingsCount", () => {
   it("returns count of active listings", async () => {
     mockFrom.mockReturnValue({
       select: mockSelect.mockReturnValue({
-        eq: mockEq.mockResolvedValue({
-          count: 5,
-          error: null,
+        eq: mockEq.mockReturnValue({
+          gte: mockGte.mockResolvedValue({
+            count: 5,
+            error: null,
+          }),
         }),
       }),
     });

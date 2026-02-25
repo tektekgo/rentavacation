@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Rentals from "./pages/Rentals";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -111,6 +112,7 @@ const App = () => (
         <OfflineBanner />
         <PWAInstallBanner />
         <BrowserRouter>
+          <ErrorBoundary>
           <AuthEventHandler />
           <Routes>
             {/* Public routes */}
@@ -153,6 +155,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </ErrorBoundary>
         </BrowserRouter>
         </div>
       </TooltipProvider>

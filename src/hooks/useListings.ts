@@ -46,11 +46,12 @@ export interface ActiveListing {
   };
 }
 
-// Fetch all active listings for the Rentals page
+// Fetch all active listings for the Rentals page (excludes past check-out dates)
 export function useActiveListings() {
   return useQuery({
     queryKey: ['listings', 'active'],
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('listings')
         .select(`
@@ -62,6 +63,7 @@ export function useActiveListings() {
           )
         `)
         .eq('status', 'active')
+        .gte('check_out_date', today)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -102,10 +104,12 @@ export function useActiveListingsCount() {
   return useQuery({
     queryKey: ['listings', 'active-count'],
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       const { count, error } = await supabase
         .from('listings')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .gte('check_out_date', today);
 
       if (error) throw error;
       return count || 0;
