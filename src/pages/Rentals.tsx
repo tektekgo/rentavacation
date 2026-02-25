@@ -116,7 +116,7 @@ const Rentals = () => {
   const [brandFilter, setBrandFilter] = useState("");
 
   // Auth state for voice search gating
-  const { user } = useAuth();
+  const { user, isPropertyOwner, isRavTeam } = useAuth();
   const isAuthenticated = !!user;
 
   // Voice feature flags (DB-controlled)
@@ -599,12 +599,14 @@ const Rentals = () => {
                 Be among the first to list or browse when we launch.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/list-property">
-                  <Button size="lg">
-                    <Home className="w-4 h-4 mr-2" />
-                    List Your Property
-                  </Button>
-                </Link>
+                {(isPropertyOwner() || isRavTeam()) && (
+                  <Link to="/list-property">
+                    <Button size="lg">
+                      <Home className="w-4 h-4 mr-2" />
+                      List Your Property
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/bidding">
                   <Button variant="outline" size="lg">
                     Browse Bidding Marketplace

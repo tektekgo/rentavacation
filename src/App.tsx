@@ -59,8 +59,8 @@ function AuthEventHandler() {
   return null;
 }
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, profile, isRavTeam, isLoading } = useAuth();
+function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: 'property_owner' | 'renter' }) {
+  const { user, profile, isRavTeam, isPropertyOwner, hasRole, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -78,13 +78,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     // Redirect pending users to the pending page
     if (profile?.approval_status === "pending_approval") {
       navigate("/pending-approval");
+      return;
     }
-  }, [user, profile, isRavTeam, isLoading, navigate, location]);
+
+    // Check role-specific access
+    if (requiredRole && !hasRole(requiredRole)) {
+      navigate("/rentals");
+    }
+  }, [user, profile, isRavTeam, isPropertyOwner, hasRole, isLoading, navigate, location, requiredRole]);
 
   // Show nothing while checking auth (prevents flash of content)
   if (isLoading) return null;
   if (!user) return null;
   if (!isRavTeam() && profile?.approval_status !== "approved") return null;
+  if (requiredRole && !isRavTeam() && !hasRole(requiredRole)) return null;
 
   return <>{children}</>;
 }
@@ -127,8 +134,8 @@ const App = () => (
 
             {/* Protected routes — require approved account */}
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
-            <Route path="/list-property" element={<ProtectedRoute><ListProperty /></ProtectedRoute>} />
-            <Route path="/owner-dashboard" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
+            <Route path="/list-property" element={<ProtectedRoute requiredRole="property_owner"><ListProperty /></ProtectedRoute>} />
+            <Route path="/owner-dashboard" element={<ProtectedRoute requiredRole="property_owner"><OwnerDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />

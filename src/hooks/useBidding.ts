@@ -30,12 +30,13 @@ import type {
 // LISTING BIDS - Owner-initiated bidding
 // ============================================================
 
-// Fetch listings open for bidding (for travelers)
+// Fetch listings open for bidding (for travelers — excludes own listings)
 export function useListingsOpenForBidding() {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['listings', 'open-for-bidding'],
+    queryKey: ['listings', 'open-for-bidding', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('listings')
         .select(`
           *,
@@ -43,8 +44,14 @@ export function useListingsOpenForBidding() {
         `)
         .eq('open_for_bidding', true)
         .eq('status', 'active')
-        .gt('bidding_ends_at', new Date().toISOString())
-        .order('bidding_ends_at', { ascending: true });
+        .gt('bidding_ends_at', new Date().toISOString());
+
+      // Exclude the current user's own listings
+      if (user?.id) {
+        query = query.neq('owner_id', user.id);
+      }
+
+      const { data, error } = await query.order('bidding_ends_at', { ascending: true });
 
       if (error) throw error;
       return data as ListingWithBidding[];
