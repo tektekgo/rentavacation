@@ -107,7 +107,7 @@ const BiddingMarketplace = () => {
                   onClick={() => setChatOpen(true)}
                   className="gap-2"
                 >
-                  <img src="/ravio-the-chat-genie-64px.svg" alt="" className="h-6 w-6" />
+                  <img src="/ravio-v2.png" alt="" className="h-6 w-6" />
                   Ask RAVIO
                 </Button>
               </div>

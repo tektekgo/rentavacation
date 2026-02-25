@@ -146,7 +146,7 @@ export function TextChatPanel({
         <SheetHeader className="px-4 py-3 border-b shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/ravio-the-chat-genie-64px.svg" alt="RAVIO" className="h-7 w-7" />
+              <img src="/ravio-v2.png" alt="RAVIO" className="h-7 w-7" />
               <SheetTitle className="text-base">RAVIO</SheetTitle>
               <Badge variant="secondary" className="text-xs">
                 {CONTEXT_LABELS[context]}
@@ -183,7 +183,7 @@ export function TextChatPanel({
             {/* Empty state with suggested prompts */}
             {messages.length === 0 && (
               <div className="text-center py-8">
-                <img src="/ravio-the-chat-genie-128px.svg" alt="RAVIO" className="h-16 w-16 mx-auto mb-3" />
+                <img src="/ravio-v2.png" alt="RAVIO" className="h-16 w-16 mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground mb-4">
                   Ask RAVIO anything about vacation rentals!
                 </p>
