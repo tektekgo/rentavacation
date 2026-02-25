@@ -1,7 +1,9 @@
 # PROJECT HUB - Rent-A-Vacation
 
-> **The Single Source of Truth** for project status, roadmap, and decisions
-> **Last Updated:** February 23, 2026 (Session 17 — SEO Optimization + Calculator Discoverability)
+> **Architectural decisions, session context, and agent instructions**
+> **Task tracking has moved to [GitHub Issues & Milestones](https://github.com/rent-a-vacation/rav-website/issues)**
+> **Project board: [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1)**
+> **Last Updated:** February 24, 2026 (Migrated to GitHub Issues)
 > **Repository:** https://github.com/rent-a-vacation/rav-website
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -11,40 +13,42 @@
 
 **Read this section before making any changes to PROJECT-HUB.md**
 
+### What This File Is For (and What It's NOT For)
+
+**This file is for:**
+- KEY DECISIONS LOG (DEC-XXX entries)
+- Architecture notes and technical decisions
+- Session handoff context
+- Known issues and blocked items
+
+**This file is NOT for:**
+- Task tracking → use [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues)
+- Priority ordering → use [GitHub Milestones](https://github.com/rent-a-vacation/rav-website/milestones)
+- Board view → use [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1)
+- Completed phase details → use [COMPLETED-PHASES.md](COMPLETED-PHASES.md)
+
+### GitHub Issues Workflow (see CLAUDE.md for full details)
+
+**At START of every session:**
+```bash
+gh issue list --repo rent-a-vacation/rav-website --state open --label "pre-launch"
+```
+
+**At END of every session:**
+```bash
+# Close completed issues with summary
+gh issue close <number> --repo rent-a-vacation/rav-website --comment "Completed: [summary]"
+
+# Create issues for anything discovered
+gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." --body "..."
+```
+
 ### When to Update This File
 
 **ALWAYS update at the END of your session if you:**
-- Complete a task from PRIORITY QUEUE
-- Start working on a new priority
-- Make an architectural decision
-- Discover a bug or issue
-- Deploy anything to production
-
-### How to Update This File
-
-**Step 1: Update "CURRENT FOCUS" section**
-- Move completed items from "Working on TODAY" to checkboxes marked [x]
-- Add new items you're starting
-- Update "Blocked/Waiting" if applicable
-
-**Step 2: Update "PRIORITY QUEUE" section**
-- Mark completed tasks as [x]
-- If you finish an entire priority item, move it to COMPLETED PHASES section
-- Re-order priorities if dependencies changed
-
-**Step 3: Add to "COMPLETED PHASES" section**
-- When a phase is 100% done and deployed to production
-- Add a one-line summary with link to `COMPLETED-PHASES.md`
-- For recently completed phases, use `<details>` collapse format inline
-
-**Step 4: Update "Last Updated" date** at top of file
-
-**Step 5: Commit changes**
-```bash
-git add docs/PROJECT-HUB.md
-git commit -m "docs: Update PROJECT-HUB after [task name]"
-git push
-```
+- Make an architectural decision (add to KEY DECISIONS LOG)
+- Discover a known issue or blocker
+- Need to pass context to the next session
 
 ### Decision Logging
 **When you make a technical or product decision:**
@@ -52,208 +56,49 @@ git push
 2. Use format: DEC-XXX (next sequential number)
 3. Include: Date, Decision, Rationale, Status
 
-### Document Size Management
-
-To keep PROJECT-HUB.md focused and scannable:
-
-**Completed Phases → `docs/COMPLETED-PHASES.md`**
-- When a phase has been complete for 2+ weeks, move its `<details>` block from the "COMPLETED PHASES" section into `docs/COMPLETED-PHASES.md`
-- Leave a one-line summary with a link in PROJECT-HUB: `- Phase X: [summary] → [details](COMPLETED-PHASES.md#phase-x)`
-- Keep the 2-3 most recent completed phases inline for quick reference
-
-**Decisions Log → `docs/DECISIONS.md`**
+**Decisions Log archival → `docs/DECISIONS.md`**
 - When a decision is 1+ month old and status is final, move it to `docs/DECISIONS.md`
-- Leave a one-line entry in PROJECT-HUB: `- DEC-XXX: [title] → [details](DECISIONS.md#dec-xxx)`
+- Leave a one-line entry: `- DEC-XXX: [title] → [details](DECISIONS.md#dec-xxx)`
 - Keep recent/pending decisions inline
 
-**Target:** PROJECT-HUB.md should stay under ~600 lines. Archive when it exceeds ~800 lines.
-
 ### What NOT to Do
-- Don't delete information (move to COMPLETED or archive instead)
-- Don't create duplicate sections
-- Don't leave "CURRENT FOCUS" outdated
-- Don't skip the commit step
+- Don't track tasks here — use GitHub Issues
+- Don't update priority queues here — use GitHub Milestones
+- Don't delete information (move to COMPLETED-PHASES.md or DECISIONS.md)
+- Don't skip updating "Last Updated" date at the bottom
 
 ---
 
-## CURRENT FOCUS
+## CURRENT STATUS
 
-**Active Phase:** SEO Optimization + Calculator Discoverability
-**Started:** February 23, 2026
+> **Task tracking has moved to GitHub Issues.** See [open issues](https://github.com/rent-a-vacation/rav-website/issues) and the [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) board.
 
-### Working on TODAY:
-- [x] **SEO Optimization + Calculator Discoverability** — Fixed OG image (broken .png ref), added canonical URL, sitemap.xml, robots.txt disallow rules, usePageMeta hook on 11 public pages, CalculatorCTA homepage section, Fee Calculator in header nav (desktop + mobile), FAQ JSON-LD schema, fixed FAQ voice quota content (Session 17)
+### Quick Links
+- **Open issues:** `gh issue list --repo rent-a-vacation/rav-website --state open`
+- **Current milestone:** `gh issue list --repo rent-a-vacation/rav-website --milestone "Phase 20: Accounting & Tax"`
+- **Project board:** https://github.com/orgs/rent-a-vacation/projects/1
 
-### Recently Completed:
-- [x] **SEO Optimization + Calculator Discoverability** (Feb 23, Session 17). Fixed broken OG image (was referencing non-existent `/rav-logo.png`, now uses `/android-chrome-512x512.png`). Added canonical URL. Created `public/sitemap.xml` (10 public routes) and updated `robots.txt` with sitemap ref + disallow rules for admin/private routes. New `usePageMeta` hook applied to 11 public pages (HowItWorks, Destinations, FAQ, Contact, UserGuide, Terms, Privacy, Login, Signup, MaintenanceFeeCalculator refactored). New `CalculatorCTA` homepage section between Testimonials and CTASection. "Fee Calculator" added to desktop Explore dropdown and mobile nav. FAQ page gets JSON-LD FAQPage structured data (22 Q&A pairs). Fixed FAQ voice quota content (was hardcoded "10 searches/day", now tier-based: Free 5/day, Plus/Pro 25/day, Premium/Business unlimited). 306 tests (all passing), 0 type errors, build clean.
-- [x] **Voice Tracks C-D: Admin Controls + Observability** (Feb 22, Session 16). Migration 021: `voice_search_logs` table (per-search observability), `voice_user_overrides` table (per-user voice disable/custom quota), 2 alert threshold system_settings, updated `get_user_voice_quota()` with override support, 3 new RPCs (log_voice_search, get_voice_usage_stats, get_voice_top_users). 5 new types. 2 admin hooks (useVoiceAdminData, useVoiceAdminMutations). Modified useVoiceSearch.ts for automatic search logging. 6 new components (VoiceControls + VoiceConfigInfo, VoiceTierQuotaManager, VoiceUserOverrideManager, VoiceUsageDashboard, VoiceObservability). Admin Dashboard "Voice" tab. Flow manifest updated. 17 new tests (306 total).
-- [x] **Content Accuracy Audit** (Feb 22, Session 15). Fixed 10%→15% commission rate in 7 code files + 3 test files. Fixed brand list (Westgate→WorldMark, 8→9 brands). Fixed voice quota (flat 10/day→tier-based). Added 9 missing sections to Documentation.tsx admin manual. Added Content Accuracy (MANDATORY) policy to CLAUDE.md. Regenerated export documents with correct data.
-- [x] **Phase 19: Flexible Date Booking + Per-Night Pricing** (Feb 22, Session 14). Migration 020: `nightly_rate` on listings (backfilled), `requested_check_in/out` on listing_bids, `source_listing_id/target_owner_only` on travel_requests. Shared `pricing.ts` utility replaces 4 duplicated calculateNights functions. Owner form switched to nightly rate input with live price summary. BidFormDialog dual-mode (bid vs date-proposal). InspiredTravelRequestDialog for "Request Similar Dates" from PropertyDetail. All displays use DB `nightly_rate`. 16 new tests (289 total). PR #20 merged.
-- [x] **PostgREST FK Fix + Mermaid Rendering** (Feb 21, Session 12). Migration 019: redirected 10 tables' user FK columns from `auth.users(id)` to `profiles(id)` — fixes all PGRST200 "Could not find relationship" 400 errors across admin dashboard, bidding, travel requests, owner confirmations, escrow, edge functions. Also fixed `/architecture` Mermaid diagram rendering (vercel.json `/assets/*` rewrite before SPA catch-all). Created `docs/RAV-PRICING-TAXES-ACCOUNTING.md` partner 1-pager. Added Phases 19-21 to roadmap.
-- [x] **Marketing & Brand Assets** (Feb 21, Session 11). Created 3 comprehensive go-to-market documents in `docs/brand-assets/`: MARKETING-PLAYBOOK.md (master strategy — positioning, audiences, 5 campaign pillars, GTM timeline, content strategy, PR angles), PITCH-DECK-SCRIPT.md (19-slide presentation with speaker notes, visual direction, live demo script), BRAND-CONCEPTS.md (14 named product features incl. RAVIO, Vacation Wishes, Name Your Price, SmartPrice, TrustShield, PaySafe, ResortIQ; tagline collection, social hooks, email subject lines, one-pagers, campaign calendar). All assets use honesty framework: BUILT / INDUSTRY DATA / PROJECTED labels on every claim. PR #18 merged to main.
-- [x] **Phase 18: Travel Request Enhancements** (Feb 21, Session 9). 4 enhancements: match-travel-requests edge function, DemandSignal on listing form, PostRequestCTA on empty Rentals, expiry warning in process-deadline-reminders. TravelRequestForm defaultValues prop. Migration 018. 9 new tests (273 total).
-- [x] **Phase 17: Owner Dashboard** (Feb 21, Session 9). 6 business intelligence sections in Overview tab: HeadlineStats (earned YTD, fees covered %, active bids), EarningsTimeline (AreaChart with monthly/quarterly + fee target line), MyListingsTable (status badges, FairValue badges, idle week alerts), BidActivityFeed (event stream), PricingIntelligence (per-listing FairValue + market range), MaintenanceFeeTracker (inline editor, coverage bar). 4 data hooks, migration 017, types. 30 new tests (264 total).
-- [x] **Phase 15: Fair Value Score** (Feb 21, Session 8). PostgreSQL RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge` components. Wired into Rentals listing cards, PropertyDetail sidebar, OwnerListings management. Owner vs traveler messaging. 14 new tests (222 total).
-- [x] **Phase 16: Maintenance Fee Calculator** (Feb 21, Session 8). Public `/calculator` route (no auth). Pure calculation logic in `calculatorLogic.ts`, `OwnershipForm`, `BreakevenResults`, `BreakevenBar`, `CalculatorCTA` components. 9 vacation club brands, 4 unit types, live break-even analysis, color-coded progress bars, CTA to owner signup. Footer link added. 12 new tests (234 total).
-- [x] **Functional Search Bar** (Feb 21, Session 8). Calendar date picker (Popover + Calendar), date range filter, all filter panel inputs wired (price/guests/bedrooms/brand), Search button, Apply/Clear handlers, active filter count badge, URL not persisted yet.
-- [x] **Exec Dashboard Polish** (Feb 21, Session 8). STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards), Bid Activity tooltip fix (was showing $ on count values), Bid Spread Index tooltip fix (was showing $ on percentages).
-- [x] **Text Chat Agent — Deployed & Working** (Feb 21). 26 tests (208 total). DEC-020.
-- [x] **Seed Data System** — 3-layer seed system, Migration 015 (PR #17, Feb 21)
+### Open Milestones
+| Milestone | Due | Issues |
+|-----------|-----|--------|
+| [Phase 20: Accounting & Tax](https://github.com/rent-a-vacation/rav-website/milestone/23) | Apr 2026 | #60-#65 (Fee Breakdown, Stripe Tax, Tax Reporting, QuickBooks, 1099-K, Tax Filing) |
+| [Security Hardening](https://github.com/rent-a-vacation/rav-website/milestone/24) | Apr 2026 | #66-#69 (CSP, Rate Limiting, Sentry, Cookie Consent) |
+| [Phase 3: Voice Everywhere](https://github.com/rent-a-vacation/rav-website/milestone/25) | Jun 2026 | Voice-assisted listing, booking, bidding |
+| [Phase 12: Native Mobile](https://github.com/rent-a-vacation/rav-website/milestone/26) | — | Capacitor Android + iOS (DEC-011) |
+| [Phase 21: Partial-Week Booking](https://github.com/rent-a-vacation/rav-website/milestone/27) | — | Calendar sub-range selection + listing splits |
+| [Phase 6: Advanced Features](https://github.com/rent-a-vacation/rav-website/milestone/28) | Sep 2026 | Saved searches, advanced filtering, analytics |
+| [Maintenance & Bugs](https://github.com/rent-a-vacation/rav-website/milestone/29) | — | Catch-all for fixes and maintenance |
 
-### Blocked/Waiting:
-- Phase 10 Track D (AI Support Agent) — superseded by Text Chat Agent (DEC-009 → DEC-020)
-
-### Known Issues:
+### Known Issues
 - **PropertyDetail/Checkout dates are read-only** — By design for timeshare listings (owner sets fixed dates), but users may expect date selection.
 - **VAPI overrides limited** — Transcriber (nova-3), keyword boosts, and speaking plans cause 400 errors via SDK overrides. Must configure in VAPI dashboard Advanced tab.
-- ~~Admin dashboard 400 errors~~ — **FIXED** (Session 12, migration 019). All 10 tables' user FK columns now reference `profiles(id)` directly.
 - Edge functions require `--no-verify-jwt` deployment flag
 
----
-
-## PRIORITY QUEUE (In Order)
-
-### 1. ~~Functional Search & Booking Flow Hardening~~ ✅ COMPLETE
-**Status:** Done (Session 8, Feb 21)
-
-**Track A:** All 6 items complete — calendar picker, date filter, search button, filter panel, Apply/Clear, active filter badge.
-**Track B:** All 3 items complete — voice, text chat, and direct search all navigate/filter correctly.
-**Remaining:** URL search params persistence (deferred — nice to have, not blocking).
-
----
-
-### 2. ~~Executive Dashboard Polish~~ ✅ COMPLETE
-**Status:** Done (Session 8, Feb 21)
-
-All 3 items complete: STR-focused news keywords, IndustryFeed tooltips (3 sections), MarketIntelligence tooltips (3 cards). Also fixed Bid Activity and Bid Spread Index tooltip formatting (was showing $ on counts/percentages).
-
----
-
-### 3. ~~Phase 15: Fair Value Score~~ ✅ COMPLETE
-**Status:** Done (Session 8, Feb 21)
-
-All items complete: Migration 016, RPC function, `useFairValueScore` hook, `FairValueBadge` + `FairValueCard` + `ListingFairValueBadge`, wired into Rentals + PropertyDetail + OwnerListings. 14 tests.
-
----
-
-### 4. ~~Phase 16: Maintenance Fee Calculator~~ ✅ COMPLETE
-**Status:** Done (Session 8, Feb 21)
-
-All items complete: Public `/calculator` route, `calculatorLogic.ts` (pure functions), `MaintenanceFeeCalculator` page + 4 components, 9 brands, SEO meta tags, Footer link, CTA to owner signup. 12 tests.
-
----
-
-### 5. ~~Phase 17: Owner Dashboard~~ ✅ COMPLETE
-**Status:** Done (Session 9, Feb 21)
-
-All items complete in 1 session: Migration 017, types, 4 data hooks (useOwnerDashboardStats, useOwnerEarnings, useOwnerListingsData, useOwnerBidActivity), 6 components (OwnerHeadlineStats, EarningsTimeline, MyListingsTable, BidActivityFeed, PricingIntelligence, MaintenanceFeeTracker). 30 new tests (264 total).
-
----
-
-### 6. ~~Phase 18: Travel Request Enhancements~~ ✅ COMPLETE
-**Status:** Done (Session 9, Feb 21)
-
-All 4 enhancements complete: (1) match-travel-requests edge function + fire-and-forget trigger on admin listing approval, (2) DemandSignal component wired into OwnerListings form with 500ms debounce, (3) PostRequestCTA on empty Rentals results with prefill params → BiddingMarketplace, (4) expiry warning scan in process-deadline-reminders edge function. TravelRequestForm now accepts defaultValues prop. Migration 018. 9 new tests (273 total).
-
----
-
-### 7. ~~Phase 19: Flexible Date Booking + Per-Night Pricing~~ ✅ COMPLETE
-**Status:** Done (Session 14, Feb 22)
-
-All items complete: Migration 020 (nightly_rate + requested dates + source_listing_id), shared `pricing.ts` utility, owner form nightly rate, BidFormDialog date-proposal mode, InspiredTravelRequestDialog, all displays use DB nightly_rate, seed manager updated. 16 new tests (289 total). PR #20 merged, migration deployed to DEV + PROD.
-
----
-
-### 8. Phase 20: Accounting, Tax & Fee Framework
-**Status:** Planned — Required before public launch
-**Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
-**Decision:** DEC-022
-
-**Phase A: Fee Breakdown (~4-6h)**
-- [ ] Separate fee line items on bookings: `nightly_rate`, `base_amount`, `service_fee`, `cleaning_fee`, `tax_amount`, `total_charged`
-- [ ] Add `cleaning_fee`, `resort_fee` optional fields to listings
-- [ ] Price breakdown display on PropertyDetail and Checkout
-- [ ] Update payout calculation: owner gets base_amount + cleaning_fee
-
-**Phase B: Stripe Tax Integration (~6-8h)** — Pre-launch requirement
-- [ ] Integrate Stripe Tax for auto-calculated occupancy + sales tax
-- [ ] Tax line item at checkout based on property location
-- [ ] Store tax amounts on booking records
-
-**Phase C: Admin Tax Reporting (~4-6h)**
-- [ ] Tax collected report (by jurisdiction, by month)
-- [ ] Owner payout summary report
-- [ ] Platform revenue report (service fees only)
-
-**Phase D: QuickBooks Integration (~8-12h)** — Post-launch
-- [ ] Sync Stripe transactions → QuickBooks Online via API
-- [ ] Automated revenue recognition
-- [ ] Owner payout reconciliation
-
-**Phase E: 1099-K Compliance (~4-8h)** — Before Jan 2027
-- [ ] Track owner earnings (>$600/year threshold)
-- [ ] Generate 1099-K forms (Gusto or TaxJar)
-- [ ] Owner tax info collection (W-9 equivalent)
-
-**Phase F: Automated Tax Filing (~8-16h)** — When volume justifies
-- [ ] Avalara or TaxJar integration for auto-filing per jurisdiction
-- [ ] Quarterly remittance reports
-
----
-
-### 9. Phase 21: Partial-Week Booking (Future — Nice to Have)
-**Status:** Backlog — Consider after Options A+B validate demand
-**Est. Time:** 20-30 hours
-
-- [ ] Owner marks listing as "flexible dates" (allow sub-ranges)
-- [ ] Per-night pricing enables subset selection on calendar
-- [ ] Listing splits: booked portion + remaining days become new listing
-- [ ] Escrow, confirmation, payout all work per-split
-- [ ] Handle edge cases: cleaning gaps, minimum stay, resort check-in days
-
----
-
-### 10. ~~Voice Experience Tracks C-D~~ ✅ COMPLETE
-**Status:** Done (Session 16, Feb 22)
-
-Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, updated `get_user_voice_quota()` with override support, 2 alert threshold settings. Admin Dashboard "Voice" tab with 5 sections: config info, tier quota manager, per-user overrides, usage dashboard (charts + top users), observability (log viewer + alert thresholds). Voice search auto-logging integrated. 17 new tests (306 total).
-
----
-
-### 11. Phase 3: Voice Everywhere (Q2 2026)
-**Status:** Planned — After Voice Tracks C-D
-**Prerequisite:** Voice Experience Quality complete
-- Voice-assisted property listing, booking, bidding
-- **Est. Time:** 3-4 weeks
-
----
-
-### 12. Phase 12: Native App Shells (Capacitor) — Android + iOS
-**Status:** Planned — After PWA validates demand
-**Est. Time:** 2-3 weeks | **Decision:** DEC-011
-- Track A: Capacitor setup (~2 days)
-- Track B: Native features — push notifications, camera, biometric (~1 week)
-- Track C: App Store publishing (~1 week)
-- Track D: CI/CD for mobile (~2-3 days)
-
----
-
-### 13. Phase 6: Advanced Features (Q3 2026)
-**Status:** Backlog
-- Saved searches & search alerts, advanced filtering, owner analytics, calendar integration
-
----
-
-### Completed Priorities (Archived)
-- ~~Phase 19: Flexible Date Booking + Per-Night Pricing~~ ✅ (Feb 22, Session 14)
-- ~~Functional Search & Booking Flow~~ ✅ (Feb 21, Session 8)
-- ~~Executive Dashboard Polish~~ ✅ (Feb 21, Session 8)
-- ~~Phase 15: Fair Value Score~~ ✅ (Feb 21, Session 8)
-- ~~Phase 16: Maintenance Fee Calculator~~ ✅ (Feb 21, Session 8)
-- ~~Mobile UX & Post-Login Experience~~ ✅ (Feb 20)
-- ~~Phase 14: Executive Dashboard~~ ✅ (Feb 20)
-- ~~Text Chat Agent~~ ✅ (Feb 21)
-- ~~Phase 10 Track D: AI Support Agent~~ → Superseded by Text Chat Agent (DEC-020)
+### Platform Status
+- **306 automated tests** (all passing), 0 type errors, 0 lint errors, build clean
+- **Migrations deployed:** 001-021 on both DEV + PROD
+- **PROD platform:** locked (Staff Only Mode enabled)
+- **Supabase CLI:** currently linked to DEV
 
 ---
 
@@ -422,19 +267,15 @@ Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, upda
 
 ---
 
-## IDEAS BACKLOG (Unscheduled)
+## IDEAS BACKLOG
 
-**Marketing & Growth:**
-- SEO optimization, blog/content marketing, email campaigns, referral program
-
-**Platform Enhancements:**
-- Instant booking, dynamic pricing, multi-property management
-
-**Technical:**
-- Performance optimization, error monitoring (Sentry), A/B testing framework
-
-**Integrations:**
-- Google Calendar sync, Stripe Connect for payouts, SMS notifications, social login (Facebook, Apple)
+> **Ideas are now tracked as GitHub Issues with the `idea` label.**
+> View: `gh issue list --repo rent-a-vacation/rav-website --label "idea"`
+>
+> To add a new idea:
+> ```bash
+> gh issue create --repo rent-a-vacation/rav-website --title "Idea: [description]" --label "idea" --body "[details]"
+> ```
 
 ---
 
@@ -669,36 +510,36 @@ Migration 021: `voice_search_logs` + `voice_user_overrides` tables, 3 RPCs, upda
 ## HOW TO USE THIS HUB
 
 ### For Humans (Starting a Session)
-1. **Read "CURRENT FOCUS"** (30 seconds) - What's being worked on?
-2. **Check "PRIORITY QUEUE"** (1 minute) - What's next?
-3. **Review recent "COMPLETED PHASES"** (optional) - What changed?
+1. **Check GitHub Issues** — `gh issue list --repo rent-a-vacation/rav-website --state open`
+2. **Check the project board** — https://github.com/orgs/rent-a-vacation/projects/1
+3. **Read this file** — for architectural context and decisions
 4. **Use "NEW CHAT TEMPLATE"** (`docs/guides/NEW-CHAT-TEMPLATE.md`) for fresh Claude chats
 
 ### For Humans (Ending a Session)
-1. **Update "CURRENT FOCUS"** - Move completed items, add new work
-2. **Update "PRIORITY QUEUE"** - Check off tasks, re-order if needed
-3. **Add decisions to log** - If you made architectural/product choices
-4. **Update "Last Updated" date** at top
-5. **Commit and push** - `git commit -m "docs: Update PROJECT-HUB after [task]"`
+1. **Close completed issues** — `gh issue close <number> --comment "Completed: [summary]"`
+2. **Create issues for discoveries** — bugs, ideas, follow-up work
+3. **Add decisions to KEY DECISIONS LOG** — if architectural/product choices were made
+4. **Commit and push** — `git commit -m "docs: Update PROJECT-HUB after [task]"`
 
-### For AI Agents (See instructions at top of file)
+### For AI Agents (See CLAUDE.md § Project Management)
 
 ---
 
 ## CRITICAL REMINDERS
 
 **Before Every Work Session:**
-- Read this file (2 min)
-- Check "CURRENT FOCUS" and "PRIORITY QUEUE"
-- Verify you're working on highest-value item
+- Check [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) (what's open?)
+- Read this file for architectural context and decisions
+- Confirm with user which issue to work on
 
 **After Every Work Session:**
-- Update this file (see "How to Update" in AI instructions)
-- Commit changes to GitHub
-- This keeps context fresh for next session
+- Close completed issues on GitHub with summary comments
+- Create new issues for anything discovered
+- Update this file only if architectural decisions were made
+- Commit and push
 
 ---
 
-**Last updated:** February 22, 2026 (Session 15 — Content Accuracy Audit + Documentation Fixes)
+**Last updated:** February 24, 2026 (Migrated to GitHub Issues & Milestones)
 **Maintained by:** Sujit
-**Claude Desktop:** Connected to GitHub `rent-a-vacation/rav-website/docs/`
+**Tracking:** [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) · [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) · [Milestones](https://github.com/rent-a-vacation/rav-website/milestones)
