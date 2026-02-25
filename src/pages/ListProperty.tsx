@@ -95,26 +95,87 @@ type ResortSummary = Pick<
   "id" | "brand" | "resort_name" | "location" | "guest_rating"
 >;
 
+const DRAFT_STORAGE_KEY = "rav-list-property-draft";
+
+interface ListPropertyDraft {
+  formStep: number;
+  selectedBrand: VacationClubBrand | "";
+  isManualEntry: boolean;
+  resortName: string;
+  location: string;
+  bedrooms: string;
+  bathrooms: string;
+  sleeps: string;
+  description: string;
+}
+
+function saveDraft(draft: ListPropertyDraft) {
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  } catch { /* quota exceeded — ignore */ }
+}
+
+function loadDraft(): ListPropertyDraft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_STORAGE_KEY);
+}
+
 const ListProperty = () => {
   const navigate = useNavigate();
   const { user, isPropertyOwner } = useAuth();
-  const [formStep, setFormStep] = useState(1);
+
+  // Load draft from localStorage (survives page refresh after role upgrade)
+  const draft = loadDraft();
+
+  const [formStep, setFormStep] = useState(draft?.formStep || 1);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   // Resort selection state
-  const [selectedBrand, setSelectedBrand] = useState<VacationClubBrand | "">("");
+  const [selectedBrand, setSelectedBrand] = useState<VacationClubBrand | "">(draft?.selectedBrand || "");
   const [selectedResort, setSelectedResort] = useState<ResortSummary | null>(null);
   const [resortDetails, setResortDetails] = useState<Resort | null>(null);
   const [selectedUnitType, setSelectedUnitType] = useState<ResortUnitType | null>(null);
-  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [isManualEntry, setIsManualEntry] = useState(draft?.isManualEntry || false);
 
   // Form fields (auto-populated from resort/unit selection)
-  const [resortName, setResortName] = useState("");
-  const [location, setLocation] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [bathrooms, setBathrooms] = useState("");
-  const [sleeps, setSleeps] = useState("");
-  const [description, setDescription] = useState("");
+  const [resortName, setResortName] = useState(draft?.resortName || "");
+  const [location, setLocation] = useState(draft?.location || "");
+  const [bedrooms, setBedrooms] = useState(draft?.bedrooms || "");
+  const [bathrooms, setBathrooms] = useState(draft?.bathrooms || "");
+  const [sleeps, setSleeps] = useState(draft?.sleeps || "");
+  const [description, setDescription] = useState(draft?.description || "");
+
+  // Clear draft once user is an owner and navigates to dashboard
+  useEffect(() => {
+    if (user && isPropertyOwner() && draft) {
+      clearDraft();
+    }
+  }, [user, isPropertyOwner]);
+
+  // Auto-save draft on form changes
+  useEffect(() => {
+    if (formStep > 1 || selectedBrand || resortName) {
+      saveDraft({
+        formStep,
+        selectedBrand,
+        isManualEntry,
+        resortName,
+        location,
+        bedrooms,
+        bathrooms,
+        sleeps,
+        description,
+      });
+    }
+  }, [formStep, selectedBrand, isManualEntry, resortName, location, bedrooms, bathrooms, sleeps, description]);
 
   // Load full resort details when selected
   useEffect(() => {
@@ -193,6 +254,7 @@ const ListProperty = () => {
             size="xl"
             onClick={() => {
               if (user) {
+                clearDraft();
                 navigate("/owner-dashboard?tab=properties");
               } else {
                 document.getElementById('listing-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -575,6 +637,7 @@ const ListProperty = () => {
                         if (!user) {
                           navigate("/signup");
                         } else if (isPropertyOwner()) {
+                          clearDraft();
                           navigate("/owner-dashboard?tab=properties");
                         } else {
                           setUpgradeDialogOpen(true);

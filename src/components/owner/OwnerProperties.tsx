@@ -61,7 +61,7 @@ const getBrandLabel = (brand: VacationClubBrand): string => {
 };
 
 interface PropertyFormData {
-  brand: VacationClubBrand;
+  brand: VacationClubBrand | "";
   resort_name: string;
   location: string;
   description: string;
@@ -72,7 +72,7 @@ interface PropertyFormData {
 }
 
 const initialFormData: PropertyFormData = {
-  brand: "hilton_grand_vacations",
+  brand: "",
   resort_name: "",
   location: "",
   description: "",
@@ -122,6 +122,11 @@ const OwnerProperties = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    if (!formData.brand) {
+      toast.error("Please select a vacation club brand");
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -313,9 +318,9 @@ const OwnerProperties = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="brand">Vacation Club Brand</Label>
+                  <Label htmlFor="brand">Vacation Club Brand *</Label>
                   <Select
-                    value={formData.brand}
+                    value={formData.brand || undefined}
                     onValueChange={(value: VacationClubBrand) =>
                       setFormData((prev) => ({ ...prev, brand: value }))
                     }
@@ -432,7 +437,7 @@ const OwnerProperties = () => {
                 <Button type="button" variant="outline" onClick={() => handleDialogChange(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving || !formData.brand}>
                   {isSaving ? "Saving..." : editingProperty ? "Update" : "Add Property"}
                 </Button>
               </DialogFooter>
