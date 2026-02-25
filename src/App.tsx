@@ -136,8 +136,8 @@ const App = () => (
             <Route path="/rentals" element={<ProtectedRoute><Rentals /></ProtectedRoute>} />
             <Route path="/list-property" element={<ProtectedRoute requiredRole="property_owner"><ListProperty /></ProtectedRoute>} />
             <Route path="/owner-dashboard" element={<ProtectedRoute requiredRole="property_owner"><OwnerDashboard /></ProtectedRoute>} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/executive-dashboard" element={<ProtectedRoute><ExecutiveDashboard /></ProtectedRoute>} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="/bidding" element={<ProtectedRoute><BiddingMarketplace /></ProtectedRoute>} />
