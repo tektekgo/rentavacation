@@ -48,7 +48,7 @@ export function ProposalFormDialog({ request, open, onOpenChange }: ProposalForm
   const [proposedCheckIn, setProposedCheckIn] = useState(request.check_in_date);
   const [proposedCheckOut, setProposedCheckOut] = useState(request.check_out_date);
   const [validUntil, setValidUntil] = useState(
-    format(addDays(new Date(), 7), 'yyyy-MM-dd')
+    format(addDays(new Date(), 1), 'yyyy-MM-dd')
   );
 
   // Fetch owner's properties
@@ -107,7 +107,7 @@ export function ProposalFormDialog({ request, open, onOpenChange }: ProposalForm
     setMessage('');
     setProposedCheckIn(request.check_in_date);
     setProposedCheckOut(request.check_out_date);
-    setValidUntil(format(addDays(new Date(), 7), 'yyyy-MM-dd'));
+    setValidUntil(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   };
 
   const selectedProperty = properties.find(p => p.id === selectedPropertyId);

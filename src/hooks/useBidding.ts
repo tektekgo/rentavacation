@@ -421,35 +421,78 @@ export function useCreateProposal() {
 }
 
 // Update proposal status (for travelers accepting/rejecting)
+// When accepting a proposal that has no listing_id, auto-creates a listing
 export function useUpdateProposalStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      proposalId, 
-      status 
-    }: { 
-      proposalId: string; 
+    mutationFn: async ({
+      proposalId,
+      status
+    }: {
+      proposalId: string;
       status: ProposalStatus;
     }) => {
-      const { data, error } = await supabase
+      // First, update the proposal status
+      const { data: proposal, error } = await supabase
         .from('travel_proposals')
         .update({
           status,
           responded_at: new Date().toISOString()
         } as never)
         .eq('id', proposalId)
-        .select()
+        .select('*, property:properties(*)')
         .single();
 
       if (error) throw error;
-      return data;
+
+      // If accepted and no listing exists, auto-create one from proposal data
+      if (status === 'accepted' && !proposal.listing_id) {
+        const nights = Math.max(1, Math.ceil(
+          (new Date(proposal.proposed_check_out).getTime() - new Date(proposal.proposed_check_in).getTime()) / (1000 * 60 * 60 * 24)
+        ));
+        const nightlyRate = Math.round(proposal.proposed_price / nights);
+        const ownerPrice = nightlyRate * nights;
+        const ravMarkup = Math.round(ownerPrice * 0.15);
+        const finalPrice = ownerPrice + ravMarkup;
+
+        const { data: listing, error: listingError } = await supabase
+          .from('listings')
+          .insert({
+            property_id: proposal.property_id,
+            owner_id: proposal.owner_id,
+            check_in_date: proposal.proposed_check_in,
+            check_out_date: proposal.proposed_check_out,
+            nightly_rate: nightlyRate,
+            owner_price: ownerPrice,
+            rav_markup: ravMarkup,
+            final_price: finalPrice,
+            status: 'active',
+            notes: `Auto-created from accepted travel request proposal`,
+            cancellation_policy: 'moderate',
+          } as never)
+          .select()
+          .single();
+
+        if (listingError) throw listingError;
+
+        // Link the listing back to the proposal
+        await supabase
+          .from('travel_proposals')
+          .update({ listing_id: listing.id } as never)
+          .eq('id', proposalId);
+
+        return { ...proposal, listing_id: listing.id };
+      }
+
+      return proposal;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       queryClient.invalidateQueries({ queryKey: ['travel-requests'] });
-      const message = variables.status === 'accepted' 
-        ? 'Proposal accepted!' 
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+      const message = variables.status === 'accepted'
+        ? 'Proposal accepted! You can now proceed to checkout.'
         : 'Proposal updated';
       toast.success(message);
     },
