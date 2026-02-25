@@ -24,7 +24,7 @@ const Signup = () => {
   const [isSignupComplete, setIsSignupComplete] = useState(false);
   const [staffOnlyMode, setStaffOnlyMode] = useState(false);
 
-  const { signUp, isConfigured } = useAuth();
+  const { signUp, signInWithGoogle, isConfigured } = useAuth();
 
   // Check if platform is in staff-only mode
   useEffect(() => {
@@ -164,7 +164,12 @@ const Signup = () => {
 
               {/* Social Signup */}
               <div className="space-y-3 mb-6">
-                <Button variant="outline" className="w-full" type="button">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                  onClick={() => signInWithGoogle()}
+                >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
