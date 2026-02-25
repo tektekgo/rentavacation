@@ -33,7 +33,7 @@ import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import type { ListingWithBidding } from '@/types/bidding';
 
 const BiddingMarketplace = () => {
-  const { user, isRenter } = useAuth();
+  const { user, isRenter, isPropertyOwner } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const { data: biddableListings, isLoading: listingsLoading } = useListingsOpenForBidding();
@@ -107,7 +107,7 @@ const BiddingMarketplace = () => {
                   onClick={() => setChatOpen(true)}
                   className="gap-2"
                 >
-                  <img src="/ravio-the-chat-genie-64px.svg" alt="" className="h-6 w-6" />
+                  <img src="/ravio-v2.png" alt="" className="h-6 w-6" />
                   Ask RAVIO
                 </Button>
               </div>
@@ -162,10 +162,11 @@ const BiddingMarketplace = () => {
               ) : biddableListings && biddableListings.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {biddableListings.map((listing) => (
-                    <BiddableListingCard 
-                      key={listing.id} 
+                    <BiddableListingCard
+                      key={listing.id}
                       listing={listing}
                       onBidClick={() => handleBidClick(listing)}
+                      canBid={!isPropertyOwner() || isRenter()}
                     />
                   ))}
                 </div>
@@ -346,9 +347,10 @@ const BiddingMarketplace = () => {
 interface BiddableListingCardProps {
   listing: ListingWithBidding;
   onBidClick: () => void;
+  canBid: boolean;
 }
 
-function BiddableListingCard({ listing, onBidClick }: BiddableListingCardProps) {
+function BiddableListingCard({ listing, onBidClick, canBid }: BiddableListingCardProps) {
   const stayDuration = differenceInDays(
     new Date(listing.check_out_date), 
     new Date(listing.check_in_date)
@@ -453,11 +455,20 @@ function BiddableListingCard({ listing, onBidClick }: BiddableListingCardProps) 
         </div>
 
         {/* CTA */}
-        <Button onClick={onBidClick} className="w-full group-hover:bg-accent group-hover:text-accent-foreground">
-          <Gavel className="h-4 w-4 mr-2" />
-          Place Your Bid
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
+        {canBid ? (
+          <Button onClick={onBidClick} className="w-full group-hover:bg-accent group-hover:text-accent-foreground">
+            <Gavel className="h-4 w-4 mr-2" />
+            Place Your Bid
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        ) : (
+          <Button variant="outline" className="w-full" asChild>
+            <Link to={`/property/${listing.id}`}>
+              View Listing Details
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

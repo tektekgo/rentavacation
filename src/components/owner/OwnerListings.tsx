@@ -36,7 +36,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Calendar, MapPin, Edit, Trash2, XCircle, Gavel, Eye, ShieldCheck } from "lucide-react";
+import { Plus, Calendar, MapPin, Edit, Trash2, XCircle, Gavel, Eye, ShieldCheck, Building2 } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import type { Property, Listing, ListingStatus, CancellationPolicy, Database } from "@/types/database";
 import { CANCELLATION_POLICY_LABELS, CANCELLATION_POLICY_DESCRIPTIONS } from "@/types/database";
@@ -395,6 +395,22 @@ const OwnerListings = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Don't see your property?{" "}
+                  <button
+                    type="button"
+                    className="text-primary hover:underline font-medium"
+                    onClick={() => {
+                      handleDialogChange(false);
+                      const url = new URL(window.location.href);
+                      url.searchParams.set("tab", "properties");
+                      window.history.replaceState({}, "", url.toString());
+                      window.dispatchEvent(new PopStateEvent("popstate"));
+                    }}
+                  >
+                    Add it in the Properties tab first
+                  </button>
+                </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -535,9 +551,20 @@ const OwnerListings = () => {
       {properties.length === 0 && (
         <Card className="border-dashed mb-6">
           <CardContent className="flex flex-col items-center justify-center py-8">
-            <p className="text-muted-foreground text-center">
-              You need to add a property before creating listings.
+            <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
+            <h3 className="text-lg font-semibold mb-2">No properties registered yet</h3>
+            <p className="text-muted-foreground text-center mb-4">
+              Add your vacation club property first, then you can create listings for it.
             </p>
+            <Button onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set("tab", "properties");
+              window.history.replaceState({}, "", url.toString());
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Your Property
+            </Button>
           </CardContent>
         </Card>
       )}

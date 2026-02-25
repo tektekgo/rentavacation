@@ -89,9 +89,11 @@ const Header = () => {
               <Store className="h-4 w-4" />
               Marketplace
             </Link>
-            <Link to="/list-property" className="text-muted-foreground hover:text-foreground transition-colors">
-              List Your Property
-            </Link>
+            {(isPropertyOwner() || isRavTeam() || !user) && (
+              <Link to="/list-property" className="text-muted-foreground hover:text-foreground transition-colors">
+                List Your Property
+              </Link>
+            )}
           </nav>
 
           {/* Desktop CTA */}
@@ -255,13 +257,15 @@ const Header = () => {
             >
               How It Works
             </Link>
-            <Link 
-              to="/list-property" 
-              className="text-foreground py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              List Your Property
-            </Link>
+            {(isPropertyOwner() || isRavTeam() || !user) && (
+              <Link
+                to="/list-property"
+                className="text-foreground py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                List Your Property
+              </Link>
+            )}
             <Link
               to="/bidding"
               className="text-foreground py-2 flex items-center gap-2"

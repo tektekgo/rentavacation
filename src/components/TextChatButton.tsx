@@ -36,7 +36,7 @@ export function TextChatButton({
           )}
           aria-label={disabled && disabledReason ? disabledReason : "Ask RAVIO"}
         >
-          <img src="/ravio-the-chat-genie-64px.svg" alt="RAVIO" className="h-5 w-5" />
+          <img src="/ravio-v2.png" alt="RAVIO" className="h-5 w-5" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
