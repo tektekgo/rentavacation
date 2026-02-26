@@ -34,7 +34,8 @@ import {
   LayoutDashboard,
   Compass,
   BarChart3,
-  Database
+  Database,
+  Wrench
 } from "lucide-react";
 
 const Documentation = () => {
@@ -76,6 +77,7 @@ const Documentation = () => {
     { id: "executive-dashboard", label: "Executive Dashboard", icon: BarChart3 },
     { id: "seed-data", label: "Seed Data System", icon: Database },
     { id: "per-night-pricing", label: "Per-Night Pricing", icon: DollarSign },
+    { id: "platform-improvements", label: "Platform Improvements", icon: Wrench },
   ];
 
   const currentDate = new Date().toLocaleDateString('en-US', { 
@@ -2193,6 +2195,86 @@ const Documentation = () => {
                     <code className="text-xs bg-muted px-1 rounded">calculateNights()</code> + <code className="text-xs bg-muted px-1 rounded">computeListingPricing()</code>
                     (15% RAV markup). Migration: <code className="text-xs bg-muted px-1 rounded">020_flexible_dates_nightly_pricing.sql</code>.
                   </p>
+                </div>
+              </section>
+            )}
+
+            {/* Platform Improvements */}
+            {(activeSection === "platform-improvements" || isPrinting) && (
+              <section id="platform-improvements" className="space-y-8">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Platform Improvements</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Recent bug fixes, safety features, and UX improvements.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Error Boundaries</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      A React Error Boundary wraps all application routes to catch unexpected crashes gracefully.
+                      Instead of a white screen, users see a friendly error message with "Try Again" and "Go Home" options,
+                      plus a link to contact support. Error details are displayed for debugging.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Component: <code className="bg-muted px-1 rounded">src/components/ErrorBoundary.tsx</code>
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Auto-Expire Listings</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Listings with past check-out dates are automatically filtered from public-facing views
+                      (Rentals page, bidding marketplace, listing counts). Owners see an "Expired" orange badge
+                      on their dashboard for listings that have passed their checkout date.
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Age Verification & Terms</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Signup requires users to confirm they are 18 years or older and agree to the Terms of Service
+                      and Privacy Policy. Metadata (<code className="bg-muted px-1 rounded text-xs">age_verified</code>, <code className="bg-muted px-1 rounded text-xs">terms_accepted_at</code>)
+                      is stored in Supabase auth for compliance records.
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Google OAuth</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      "Continue with Google" buttons on both Login and Signup pages are fully functional,
+                      using Supabase OAuth with Google provider. Users can sign in or create accounts with
+                      their Google identity in a single click.
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Form Draft Persistence</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      The List Property form auto-saves progress to localStorage as users fill it out.
+                      If they navigate away or refresh, their progress is restored automatically.
+                      The draft is cleared once the property is submitted or the user navigates to their dashboard.
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Proposal Acceptance Flow</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      When a renter accepts an owner's proposal on a travel request, a listing is now auto-created
+                      from the proposal details (dates, pricing) so the "Proceed to Checkout" button works immediately.
+                      Proposals expire after 24 hours (previously 7 days) to keep the marketplace responsive.
+                    </p>
+                  </div>
+
+                  <div className="bg-card rounded-xl p-6 border">
+                    <h3 className="font-semibold text-lg mb-4">Property Dropdown Fix</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      The "Add Property" vacation club brand dropdown no longer pre-selects a default brand.
+                      Users must explicitly choose their brand, preventing accidental misclassification.
+                      The submit button is disabled until a brand is selected.
+                    </p>
+                  </div>
                 </div>
               </section>
             )}

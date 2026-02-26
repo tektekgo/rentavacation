@@ -1,7 +1,46 @@
 # Completed Phases Archive
 
 > Detailed records of completed project phases, moved from [PROJECT-HUB.md](PROJECT-HUB.md) to keep the hub concise.
-> **Last Archived:** February 23, 2026
+> **Last Archived:** February 25, 2026
+
+---
+
+## Sessions 18-20: Pre-Launch Bug Fix Sprint
+
+**Completed:** February 24-25, 2026
+**PRs:** #116, #122, #123, #124 merged to main
+**Issues Closed:** #85, #86, #90, #94, #109, #110, #111, #112, #113, #114, #118, #121
+
+### What Was Done
+
+Comprehensive bug fix sprint resolving 12 pre-launch issues across marketplace, platform, and experience categories.
+
+### Marketplace Fixes
+- **#112 Proposal acceptance workflow:** `useUpdateProposalStatus` now auto-creates a listing from proposal data (dates, pricing with 15% markup) when accepting proposals without a `listing_id`, enabling the checkout flow
+- **#111 Proposal validity:** Changed from 7-day to 24-hour expiry to keep marketplace responsive
+- **#114/#121 Property-to-listing flow:** Fixed navigation and data flow from property creation to listing creation
+- **#85 Auto-expire listings:** Added `.gte('check_out_date', today)` to `useActiveListings`, `useActiveListingsCount`, `useListingsOpenForBidding`. Added orange "Expired" badge in OwnerListings
+
+### Platform Fixes
+- **#110/#113 Role-based access:** Enforced owners can't bid and renters can't list; admin routes protected
+- **#109 Property dropdown:** Changed default from pre-selected "Hilton Grand Vacations" to empty with placeholder; added validation and disabled submit until brand selected
+- **#118 Form draft persistence:** ListProperty form auto-saves to localStorage; restores on page load; clears on completion
+- **#86 Google OAuth:** Wired `signInWithGoogle()` onClick handlers on Login and Signup pages; removed non-functional GitHub button
+- **#90 Age verification:** Signup checkbox includes "I am 18 years or older"; `terms_accepted_at` and `age_verified` stored in Supabase auth metadata
+- **#94 React Error Boundaries:** `ErrorBoundary` class component wraps `<Routes>` in App.tsx; friendly fallback UI with Try Again/Go Home/Contact Support
+
+### Documentation Updates (Session 20)
+- **UserGuide.tsx:** Fixed voice quotas from incorrect "10/day" to tier-based (Free: 5, Plus/Pro: 25, Premium/Business: unlimited) in 4 locations
+- **Documentation.tsx:** Added "Platform Improvements" section covering ErrorBoundary, auto-expire, age verification, Google OAuth, draft persistence, proposal flow, property dropdown
+- **Flow manifests:** Added `/calculator` to owner-lifecycle, `/destinations` to traveler-lifecycle
+- **PROJECT-HUB.md:** Added session handoff context, removed stale "Open Milestones" table (now references GitHub Milestones)
+- **MEMORY.md:** Updated from Session 17 to Session 20
+
+### Files Modified
+~25 files across hooks, components, pages, contexts, flows, docs, and tests
+
+### Test Status
+306 tests passing, 0 TypeScript errors, 0 lint errors, build clean
 
 ---
 
