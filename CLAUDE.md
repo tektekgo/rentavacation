@@ -216,6 +216,35 @@ chore(deps): update supabase client to v2.x
 
 ## Testing (MANDATORY)
 
+### Tests-With-Features Policy
+
+**Every feature or bug fix MUST include corresponding tests.** This is non-negotiable.
+
+When building a new feature or fixing a bug, you MUST:
+
+1. **Write tests alongside the code** — not as a separate follow-up task
+2. **At minimum, test:**
+   - Any new function in `src/lib/` (pure unit tests — highest ROI)
+   - Any new hook in `src/hooks/` (mock Supabase, test logic branches)
+   - Any new context method (extend existing context tests)
+   - Any new edge function's corresponding frontend integration (mutation hooks)
+3. **What to cover:**
+   - Happy path + at least one error case
+   - Edge cases for financial calculations (pricing, fees, commissions, refunds)
+   - Conditional logic branches (role checks, status checks, date comparisons)
+4. **Before committing, verify** the test count has increased if new logic was added
+
+### Pre-commit checklist
+
+```
+✅ New functions in src/lib/ have unit tests?
+✅ New hooks have integration tests?
+✅ New context methods have test cases in the context test file?
+✅ Financial calculations have edge-case coverage?
+✅ npm run test passes?
+✅ npm run build passes?
+```
+
 ### Rules for every code change
 
 1. **Run tests before committing:**
@@ -225,16 +254,26 @@ chore(deps): update supabase client to v2.x
    ```
 2. **Never commit if tests fail** — fix tests first, or explicitly discuss with user
 3. **Add tests for new business logic** — especially anything in `src/lib/`
-4. **Current baseline:** 306 tests passing, 0 TypeScript errors, 0 ESLint errors
 
 ### Test file locations
 
 ```
-src/lib/*.test.ts          # Unit tests for pure functions
-src/hooks/*.test.ts        # Integration tests for hooks
-src/contexts/*.test.tsx    # Integration tests for contexts
-e2e/smoke/                 # Playwright E2E smoke tests
-e2e/visual/                # Percy visual regression tests
+src/lib/*.test.ts              # Unit tests for pure functions
+src/hooks/*.test.ts            # Integration tests for hooks
+src/hooks/**/__tests__/*.ts    # Integration tests for nested hooks
+src/contexts/*.test.tsx        # Integration tests for contexts
+e2e/smoke/                     # Playwright E2E smoke tests
+e2e/visual/                    # Percy visual regression tests
+```
+
+### Test helpers
+
+```
+src/test/fixtures/users.ts        # mockUser(), mockSession(), mockProfile(), mockAuthContext()
+src/test/fixtures/listings.ts     # Listing fixtures
+src/test/fixtures/memberships.ts  # Membership tier fixtures
+src/test/helpers/render.tsx       # createHookWrapper(), renderWithProviders()
+src/test/helpers/supabase-mock.ts # createSupabaseMock(), emptyResponse(), errorResponse()
 ```
 
 ### Running tests
@@ -293,6 +332,7 @@ Key active decisions agents must respect:
 
 - ❌ Never push directly to `main`
 - ❌ Never commit with failing tests
+- ❌ Never ship new business logic without corresponding tests (see Tests-With-Features Policy)
 - ❌ Never hardcode business metrics without verifying against docs
 - ❌ Never update GitHub Issues priority — that's the human's job
 - ❌ Never skip updating flow manifests when adding routes
