@@ -123,9 +123,9 @@ export const ownerLifecycle: FlowDefinition = {
       label: 'Booking Confirmed',
       component: 'OwnerBookings',
       tab: 'bookings',
-      description: 'Renter payment captured, booking created',
+      description: 'Renter payment captured, booking created (verified by webhook + client)',
       tables: ['bookings', 'booking_confirmations'],
-      edgeFunctions: ['verify-booking-payment'],
+      edgeFunctions: ['verify-booking-payment', 'stripe-webhook'],
     },
     {
       id: 'owner_confirmation',

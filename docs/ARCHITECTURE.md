@@ -208,7 +208,8 @@ supabase/
     │   ├── email-template.ts  # Unified email layout (buildEmailHtml, detailRow, infoBox)
     │   └── property-search.ts # Shared search query builder (used by voice-search + text-chat)
     ├── create-booking-checkout/   # Stripe checkout session creation
-    ├── verify-booking-payment/    # Stripe webhook → update booking + send confirmation email
+    ├── verify-booking-payment/    # Client-side payment verification → update booking + send confirmation email
+    ├── stripe-webhook/            # Stripe webhook handler (server-side safety net for payment verification, session expiry, refunds)
     ├── send-email/                # Generic email dispatch via Resend
     ├── send-booking-confirmation-reminder/  # Owner deadline reminders + owner confirmation notifications
     ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
@@ -405,7 +406,7 @@ Traveler browses /rentals → views /property/:id
         ↓
 Traveler clicks "Book Now" → Edge Function: create-booking-checkout
         ↓
-Stripe Checkout → payment captured → webhook: verify-booking-payment
+Stripe Checkout → payment captured → verify-booking-payment (client) + stripe-webhook (server)
         ↓
 Booking created (status: confirmed) + booking_confirmation created
         ↓
@@ -471,7 +472,8 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | Function | Trigger | Purpose |
 |----------|---------|---------|
 | `create-booking-checkout` | Client call | Creates Stripe Checkout session with listing details |
-| `verify-booking-payment` | Stripe webhook | Validates payment, updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
+| `verify-booking-payment` | Client call (post-redirect) | Client-side payment verification after Stripe redirect — updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
+| `stripe-webhook` | **Stripe webhook** | Server-side safety net for payment verification (catches browser closures). Handles `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`. Idempotent — skips if booking already confirmed. |
 | `send-email` | Client call | Generic email dispatch via Resend API |
 | `send-approval-email` | Client call | Sends approval/rejection emails for listings and users (4 variants) |
 | `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |
@@ -492,7 +494,8 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | Secret | Used by |
 |--------|---------|
 | `RESEND_API_KEY` | All email functions (domain: `updates.rent-a-vacation.com`) |
-| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment |
+| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment, stripe-webhook |
+| `STRIPE_WEBHOOK_SECRET` | stripe-webhook (webhook signature verification) |
 | `NEWSAPI_KEY` | fetch-industry-news |
 | `OPENROUTER_API_KEY` | text-chat |
 | `IS_DEV_ENVIRONMENT` | seed-manager (production guard) |

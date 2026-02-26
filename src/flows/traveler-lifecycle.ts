@@ -115,7 +115,7 @@ export const travelerLifecycle: FlowDefinition = {
       component: 'Checkout',
       nodeStyle: 'external',
       description: 'Secure payment via Stripe Checkout — full payment captured at booking',
-      edgeFunctions: ['create-booking-checkout'],
+      edgeFunctions: ['create-booking-checkout', 'stripe-webhook'],
       tables: ['bookings'],
     },
     {
@@ -124,7 +124,7 @@ export const travelerLifecycle: FlowDefinition = {
       label: 'Booking Confirmed',
       component: 'BookingSuccess',
       description: 'Payment confirmed, reservation details shown, funds held in escrow',
-      edgeFunctions: ['verify-booking-payment'],
+      edgeFunctions: ['verify-booking-payment', 'stripe-webhook'],
       tables: ['bookings', 'booking_confirmations'],
     },
     {

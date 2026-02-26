@@ -76,6 +76,7 @@ supabase functions deploy send-booking-confirmation-reminder
 supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
+supabase functions deploy stripe-webhook
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
@@ -89,6 +90,7 @@ supabase functions deploy send-booking-confirmation-reminder
 supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
+supabase functions deploy stripe-webhook
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
@@ -121,6 +123,7 @@ Set these in **both DEV and PROD** Supabase projects:
 # Via CLI
 supabase secrets set RESEND_API_KEY=re_your_key --project-ref <PROJECT_REF>
 supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx --project-ref <PROJECT_REF>
+supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_xxx --project-ref <PROJECT_REF>
 
 # Or via Supabase Dashboard:
 # Project Settings → Edge Functions → Secrets
@@ -131,6 +134,7 @@ supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx --project-ref <PROJECT_REF>
 |--------|-------------|
 | `RESEND_API_KEY` | Email delivery via Resend (`updates.rent-a-vacation.com` domain) |
 | `STRIPE_SECRET_KEY` | Stripe payment processing |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signature verification (`whsec_...`) |
 | `NEWSAPI_KEY` | Industry news feed for Executive Dashboard |
 
 **Required Secrets (GitHub Repository):**
@@ -259,10 +263,29 @@ Currently in **Test Mode** for both environments.
 - Test cards: `4242 4242 4242 4242`
 - Dashboard: https://dashboard.stripe.com/test
 
-**For Production:**
+### Webhook Setup
+
+Configure webhook endpoints in **both** Stripe test and live dashboards:
+
+1. Go to Stripe Dashboard → Developers → Webhooks
+2. Add endpoint:
+   - **DEV:** `https://oukbxqnlxnkainnligfz.supabase.co/functions/v1/stripe-webhook`
+   - **PROD:** `https://xzfllqndrlmhclqfybew.supabase.co/functions/v1/stripe-webhook`
+3. Select events: `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`
+4. Copy the signing secret (`whsec_...`) and set as `STRIPE_WEBHOOK_SECRET` in Supabase Edge Function secrets
+
+**What the webhook handles:**
+| Event | Action |
+|-------|--------|
+| `checkout.session.completed` | Confirms booking if still pending (safety net for browser closures) |
+| `checkout.session.expired` | Cancels pending booking when session expires without payment |
+| `charge.refunded` | Tracks refund, cancels booking if full refund |
+
+### For Production
 1. Activate Stripe account
 2. Switch to live keys
 3. Update `STRIPE_SECRET_KEY` in Supabase Edge Function secrets
+4. Create live webhook endpoint and update `STRIPE_WEBHOOK_SECRET`
 
 ---
 

@@ -732,6 +732,10 @@ const Documentation = () => {
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
                         <span><strong>Auto-confirmation</strong> - Booking recorded on success</span>
                       </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
+                        <span><strong>Webhook Safety Net</strong> - Server-side verification catches payments even if browser closes</span>
+                      </li>
                     </ul>
                   </div>
 
