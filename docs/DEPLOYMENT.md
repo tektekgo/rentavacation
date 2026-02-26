@@ -126,12 +126,25 @@ supabase secrets set STRIPE_SECRET_KEY=sk_test_xxx --project-ref <PROJECT_REF>
 # Project Settings → Edge Functions → Secrets
 ```
 
-**Required Secrets:**
+**Required Secrets (Supabase Edge Functions):**
 | Secret | Description |
 |--------|-------------|
-| `RESEND_API_KEY` | Email delivery via Resend |
+| `RESEND_API_KEY` | Email delivery via Resend (`updates.rent-a-vacation.com` domain) |
 | `STRIPE_SECRET_KEY` | Stripe payment processing |
 | `NEWSAPI_KEY` | Industry news feed for Executive Dashboard |
+
+**Required Secrets (GitHub Repository):**
+| Secret | Description |
+|--------|-------------|
+| `RESEND_GITHUB_NOTIFICATIONS_KEY` | Resend API key for GitHub Actions issue notification emails |
+
+### GitHub Actions
+
+**Issue Notifications** (`.github/workflows/issue-notifications.yml`):
+- Triggers on: issue assigned, issue closed, new issue comment
+- Sends email via Resend API to RAV team (sujit, ajumon, celin, sandhya @rent-a-vacation.com)
+- FROM: `RAV Updates <notifications@updates.rent-a-vacation.com>`
+- Uses separate Resend API key (`RESEND_GITHUB_NOTIFICATIONS_KEY`) from edge functions
 
 ---
 

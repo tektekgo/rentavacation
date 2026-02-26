@@ -491,11 +491,17 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 
 | Secret | Used by |
 |--------|---------|
-| `RESEND_API_KEY` | All email functions |
+| `RESEND_API_KEY` | All email functions (domain: `updates.rent-a-vacation.com`) |
 | `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment |
 | `NEWSAPI_KEY` | fetch-industry-news |
 | `OPENROUTER_API_KEY` | text-chat |
 | `IS_DEV_ENVIRONMENT` | seed-manager (production guard) |
+
+### Required Secrets (GitHub Repository)
+
+| Secret | Used by |
+|--------|---------|
+| `RESEND_GITHUB_NOTIFICATIONS_KEY` | `.github/workflows/issue-notifications.yml` — emails RAV team on issue events |
 
 ---
 
