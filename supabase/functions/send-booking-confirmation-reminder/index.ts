@@ -85,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [ownerEmail],
         subject: `New Booking! Action Required – ${resortName}`,
         html,
@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [ownerEmail],
         subject: `Reminder: ${hoursRemaining}h left to submit confirmation – ${resortName}`,
         html,
@@ -170,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [ownerEmail],
         subject: `Action Required: Confirm booking – ${resortName}`,
         html,
@@ -209,7 +209,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [renterEmail],
         subject: `Booking Update – Owner requested more time for ${resortName}`,
         html,
@@ -246,7 +246,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         await resend.emails.send({
-          from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+          from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
           to: [ownerEmail],
           subject: `Booking Cancelled – Confirmation timed out for ${resortName}`,
           html: ownerHtml,
@@ -270,7 +270,7 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         await resend.emails.send({
-          from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+          from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
           to: [renterEmail],
           subject: `Booking Cancelled – Full refund for ${resortName}`,
           html: renterHtml,
@@ -308,7 +308,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [travelerEmail],
         subject: `Time to confirm your check-in at ${resortName}!`,
         html,

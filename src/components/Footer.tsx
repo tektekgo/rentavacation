@@ -53,9 +53,9 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-white mb-6">Contact Us</h4>
             <ul className="space-y-4">
               <li>
-                <a href="mailto:support@rentavacation.com" className="flex items-start gap-3 hover:text-white transition-colors">
+                <a href="mailto:support@rent-a-vacation.com" className="flex items-start gap-3 hover:text-white transition-colors">
                   <Mail className="w-5 h-5 mt-0.5 text-primary" />
-                  <span>support@rentavacation.com</span>
+                  <span>support@rent-a-vacation.com</span>
                 </a>
               </li>
               <li>

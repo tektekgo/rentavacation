@@ -544,7 +544,7 @@ infoBox(content, variant): string // Colored info/warning/success/error box
 | User Approved | Admin approves user | User |
 | User Rejected | Admin rejects user | User |
 | Verification Doc Uploaded | Doc upload | RAV admin |
-| Contact Form | Form submission | support@rentavacation.com |
+| Contact Form | Form submission | support@rent-a-vacation.com |
 
 ---
 
@@ -781,4 +781,4 @@ Uses `/android-chrome-512x512.png` (absolute URL with domain). The `.svg` logo e
 6. Look at `src/hooks/useBidding.ts` for data fetching patterns
 7. Reference this document for architecture decisions and flow understanding
 
-**Questions?** Reach out to the team at support@rentavacation.com | 1-800-RAV-0800
+**Questions?** Reach out to the team at support@rent-a-vacation.com | 1-800-RAV-0800

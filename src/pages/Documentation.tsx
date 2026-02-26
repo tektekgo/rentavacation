@@ -1269,8 +1269,12 @@ const Documentation = () => {
                   <div className="bg-card rounded-xl p-6 border">
                     <h3 className="font-semibold mb-3">Sender Configuration</h3>
                     <div className="bg-muted/50 rounded-lg p-4">
-                      <p className="text-sm font-mono">rav@mail.ai-focus.org</p>
-                      <p className="text-xs text-muted-foreground mt-1">Rent-A-Vacation Official</p>
+                      <p className="text-sm font-mono">notifications@updates.rent-a-vacation.com</p>
+                      <p className="text-xs text-muted-foreground mt-1">Transactional emails (bookings, approvals, reminders)</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4 mt-3">
+                      <p className="text-sm font-mono">support@updates.rent-a-vacation.com</p>
+                      <p className="text-xs text-muted-foreground mt-1">Contact form replies and support notifications</p>
                     </div>
                   </div>
 

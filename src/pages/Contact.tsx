@@ -187,7 +187,7 @@ const Contact = () => {
                 <ul className="space-y-4">
                   <li>
                     <a
-                      href="mailto:support@rentavacation.com"
+                      href="mailto:support@rent-a-vacation.com"
                       className="flex items-start gap-3 group"
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -196,7 +196,7 @@ const Contact = () => {
                       <div>
                         <p className="font-medium text-foreground">Email</p>
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                          support@rentavacation.com
+                          support@rent-a-vacation.com
                         </p>
                       </div>
                     </a>

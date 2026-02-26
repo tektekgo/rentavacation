@@ -42,7 +42,7 @@ All code is deployed to production and currently locked behind "Staff Only Mode"
 | **Database** | Supabase PostgreSQL | Row Level Security (RLS), pg_cron, pg_net |
 | **Backend** | Supabase Edge Functions (Deno) | 17 serverless functions |
 | **Payments** | Stripe Checkout | Payment capture, escrow hold, webhooks |
-| **Email** | Resend API | Branded transactional emails from `rav@mail.ai-focus.org` |
+| **Email** | Resend API | Branded transactional emails from `notifications@updates.rent-a-vacation.com` |
 | **Voice AI** | VAPI + Deepgram Nova-3 | Voice transcription and natural language property search |
 | **Text AI** | OpenRouter (Gemini 3 Flash) | LLM chat with SSE streaming and tool calling |
 | **Charts** | Recharts | Dashboard analytics and data visualization |
@@ -202,7 +202,7 @@ All code is deployed to production and currently locked behind "Staff Only Mode"
 | | Denied | Owner denies | Traveler |
 | | Counter-Offer | Owner counter-offers | Traveler |
 | **Verification** | Document Uploaded | Doc upload | RAV admin |
-| **Support** | Contact Form | Form submission | support@rentavacation.com |
+| **Support** | Contact Form | Form submission | support@rent-a-vacation.com |
 
 ---
 
