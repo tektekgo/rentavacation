@@ -128,7 +128,24 @@ export const travelerLifecycle: FlowDefinition = {
       tables: ['bookings', 'booking_confirmations'],
       branches: [
         { condition: 'Renter cancels', targetStepId: 'renter_cancellation', label: 'Cancel booking', edgeStyle: 'dashed' },
+        { condition: 'View bookings', targetStepId: 'my_bookings', label: 'My Bookings' },
       ],
+    },
+    {
+      id: 'my_bookings',
+      route: '/my-bookings',
+      label: 'My Bookings',
+      component: 'MyBookings',
+      description: 'Renter views all bookings (upcoming, past, cancelled) with status tracking and cancellation option',
+      tables: ['bookings', 'listings', 'properties'],
+    },
+    {
+      id: 'account_settings',
+      route: '/account',
+      label: 'Account Settings',
+      component: 'AccountSettings',
+      description: 'User manages profile (name, phone), password, and account preferences',
+      tables: ['profiles'],
     },
     {
       id: 'renter_cancellation',

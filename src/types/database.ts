@@ -347,6 +347,8 @@ export interface Database {
           rav_markup: number;
           final_price: number;
           nightly_rate: number;
+          cleaning_fee: number;
+          resort_fee: number;
           notes: string | null;
           cancellation_policy: CancellationPolicy;
           approved_by: string | null;
@@ -365,6 +367,8 @@ export interface Database {
           rav_markup?: number;
           final_price: number;
           nightly_rate: number;
+          cleaning_fee?: number;
+          resort_fee?: number;
           notes?: string | null;
           cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;
@@ -383,6 +387,8 @@ export interface Database {
           rav_markup?: number;
           final_price?: number;
           nightly_rate?: number;
+          cleaning_fee?: number;
+          resort_fee?: number;
           notes?: string | null;
           cancellation_policy?: CancellationPolicy;
           approved_by?: string | null;
@@ -454,6 +460,13 @@ export interface Database {
           renter_id: string;
           status: BookingStatus;
           total_amount: number;
+          base_amount: number | null;
+          service_fee: number | null;
+          cleaning_fee: number;
+          tax_amount: number;
+          tax_rate: number;
+          tax_jurisdiction: string | null;
+          stripe_tax_calculation_id: string | null;
           rav_commission: number;
           owner_payout: number;
           guest_count: number;
@@ -474,6 +487,13 @@ export interface Database {
           renter_id: string;
           status?: BookingStatus;
           total_amount: number;
+          base_amount?: number | null;
+          service_fee?: number | null;
+          cleaning_fee?: number;
+          tax_amount?: number;
+          tax_rate?: number;
+          tax_jurisdiction?: string | null;
+          stripe_tax_calculation_id?: string | null;
           rav_commission: number;
           owner_payout: number;
           guest_count?: number;
@@ -494,6 +514,13 @@ export interface Database {
           renter_id?: string;
           status?: BookingStatus;
           total_amount?: number;
+          base_amount?: number | null;
+          service_fee?: number | null;
+          cleaning_fee?: number;
+          tax_amount?: number;
+          tax_rate?: number;
+          tax_jurisdiction?: string | null;
+          stripe_tax_calculation_id?: string | null;
           rav_commission?: number;
           owner_payout?: number;
           guest_count?: number;

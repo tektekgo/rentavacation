@@ -105,10 +105,17 @@ serve(async (req) => {
       commissionRate = baseRate - tierDiscount;
       logStep("Using tier-aware commission rate", { baseRate, tierDiscount, commissionRate });
     }
-    const totalAmount = listing.final_price;
-    const ravCommission = Math.round(totalAmount * (commissionRate / 100) * 100) / 100;
-    const ownerPayout = totalAmount - ravCommission;
-    logStep("Commission calculated", { commissionRate, totalAmount, ravCommission, ownerPayout });
+    // Fee breakdown calculation
+    const checkIn = new Date(listing.check_in_date);
+    const checkOut = new Date(listing.check_out_date);
+    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const baseAmount = Math.round(listing.nightly_rate * nights * 100) / 100;
+    const cleaningFee = listing.cleaning_fee || 0;
+    const serviceFee = Math.round(baseAmount * (commissionRate / 100) * 100) / 100;
+    const totalAmount = baseAmount + serviceFee + cleaningFee;
+    const ravCommission = serviceFee;
+    const ownerPayout = baseAmount + cleaningFee;
+    logStep("Fee breakdown calculated", { baseAmount, serviceFee, cleaningFee, totalAmount, ravCommission, ownerPayout, commissionRate });
 
     // Initialize Stripe
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
@@ -121,11 +128,6 @@ serve(async (req) => {
       logStep("Existing Stripe customer found", { customerId });
     }
 
-    // Calculate stay dates for description
-    const checkIn = new Date(listing.check_in_date);
-    const checkOut = new Date(listing.check_out_date);
-    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-
     // Create a pending booking record
     const { data: booking, error: bookingError } = await supabaseClient
       .from("bookings")
@@ -134,6 +136,9 @@ serve(async (req) => {
         renter_id: user.id,
         status: "pending",
         total_amount: totalAmount,
+        base_amount: baseAmount,
+        service_fee: serviceFee,
+        cleaning_fee: cleaningFee,
         rav_commission: ravCommission,
         owner_payout: ownerPayout,
         guest_count: guestCount || 1,
@@ -145,24 +150,54 @@ serve(async (req) => {
     if (bookingError) throw new Error(`Failed to create booking: ${bookingError.message}`);
     logStep("Booking created", { bookingId: booking.id });
 
-    // Create Stripe checkout session
+    // Build line items with separate fees for transparency
+    const lineItems = [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `${listing.property?.resort_name || "Vacation Rental"}`,
+            description: `${nights} nights • ${checkIn.toLocaleDateString()} - ${checkOut.toLocaleDateString()} • ${listing.property?.location || ""}`,
+            tax_code: "txcd_99999999", // General lodging / short-term rental
+          },
+          unit_amount: Math.round(baseAmount * 100),
+        },
+        quantity: 1,
+      },
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "RAV Service Fee",
+            tax_code: "txcd_10000000", // Service charge — generally non-taxable
+          },
+          unit_amount: Math.round(serviceFee * 100),
+        },
+        quantity: 1,
+      },
+    ];
+
+    if (cleaningFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Cleaning Fee",
+            tax_code: "txcd_99999999",
+          },
+          unit_amount: Math.round(cleaningFee * 100),
+        },
+        quantity: 1,
+      });
+    }
+
+    // Create Stripe checkout session with automatic tax calculation
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: `${listing.property?.resort_name || "Vacation Rental"}`,
-              description: `${nights} nights • ${checkIn.toLocaleDateString()} - ${checkOut.toLocaleDateString()} • ${listing.property?.location || ""}`,
-            },
-            unit_amount: Math.round(totalAmount * 100), // Convert to cents
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode: "payment",
+      automatic_tax: { enabled: true },
       success_url: `${req.headers.get("origin")}/booking-success?booking_id=${booking.id}`,
       cancel_url: `${req.headers.get("origin")}/property/${listing.property_id}?cancelled=true`,
       metadata: {

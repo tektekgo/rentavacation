@@ -34,6 +34,8 @@ import Architecture from "./pages/Architecture";
 import Contact from "./pages/Contact";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import MaintenanceFeeCalculator from "./pages/MaintenanceFeeCalculator";
+import MyBookings from "./pages/MyBookings";
+import AccountSettings from "./pages/AccountSettings";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
@@ -144,6 +146,8 @@ const App = () => (
             <Route path="/booking-success" element={<ProtectedRoute><BookingSuccess /></ProtectedRoute>} />
             <Route path="/bidding" element={<ProtectedRoute><BiddingMarketplace /></ProtectedRoute>} />
             <Route path="/my-bids" element={<ProtectedRoute><MyBidsDashboard /></ProtectedRoute>} />
+            <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+            <Route path="/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
             <Route path="/checkin" element={<ProtectedRoute><TravelerCheckin /></ProtectedRoute>} />
 
             {/* Legacy routes - redirect to proper sections */}

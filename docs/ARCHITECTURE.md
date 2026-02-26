@@ -254,6 +254,8 @@ All routes are defined in `src/App.tsx`. Key mapping:
 | `/executive-dashboard` | `ExecutiveDashboard` | RAV Owner | Investor-grade strategy dashboard (dark theme) |
 | `/bidding` | `BiddingMarketplace` | Auth | Browse biddable listings + travel requests |
 | `/my-bids` | `MyBidsDashboard` | Auth | Traveler's bid & request management |
+| `/my-bookings` | `MyBookings` | Auth | Renter booking history (upcoming/past/cancelled) |
+| `/account` | `AccountSettings` | Auth | Profile editing, password change, account info |
 | `/checkin` | `TravelerCheckin` | Auth | Post-arrival confirmation |
 | `/booking-success` | `BookingSuccess` | Auth | Post-payment summary |
 | `/documentation` | `Documentation` | RAV Team | Admin product manual |

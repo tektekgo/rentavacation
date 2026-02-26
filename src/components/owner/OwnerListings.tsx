@@ -84,6 +84,8 @@ interface ListingFormData {
   check_in_date: string;
   check_out_date: string;
   nightly_rate: number;
+  cleaning_fee: number;
+  resort_fee: number;
   notes: string;
   cancellation_policy: CancellationPolicy;
 }
@@ -93,6 +95,8 @@ const initialFormData: ListingFormData = {
   check_in_date: "",
   check_out_date: "",
   nightly_rate: 0,
+  cleaning_fee: 0,
+  resort_fee: 0,
   notes: "",
   cancellation_policy: "moderate",
 };
@@ -185,6 +189,8 @@ const OwnerListings = () => {
           check_in_date: formData.check_in_date,
           check_out_date: formData.check_out_date,
           nightly_rate: formData.nightly_rate,
+          cleaning_fee: formData.cleaning_fee || 0,
+          resort_fee: formData.resort_fee || 0,
           owner_price: pricing.ownerPrice,
           rav_markup: pricing.ravMarkup,
           final_price: pricing.finalPrice,
@@ -210,6 +216,8 @@ const OwnerListings = () => {
           check_in_date: formData.check_in_date,
           check_out_date: formData.check_out_date,
           nightly_rate: formData.nightly_rate,
+          cleaning_fee: formData.cleaning_fee || 0,
+          resort_fee: formData.resort_fee || 0,
           owner_price: newPricing.ownerPrice,
           rav_markup: newPricing.ravMarkup,
           final_price: newPricing.finalPrice,
@@ -271,6 +279,8 @@ const OwnerListings = () => {
       check_in_date: listing.check_in_date,
       check_out_date: listing.check_out_date,
       nightly_rate: editNightlyRate,
+      cleaning_fee: (listing as { cleaning_fee?: number }).cleaning_fee || 0,
+      resort_fee: (listing as { resort_fee?: number }).resort_fee || 0,
       notes: listing.notes || "",
       cancellation_policy: listing.cancellation_policy || "moderate",
     });
@@ -492,6 +502,39 @@ const OwnerListings = () => {
                 <p className="text-xs text-muted-foreground">
                   Set your per-night rate. Your earnings and the traveler's total price are computed automatically.
                 </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cleaning_fee">Cleaning Fee ($)</Label>
+                  <Input
+                    id="cleaning_fee"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={formData.cleaning_fee || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, cleaning_fee: parseFloat(e.target.value) || 0 }))
+                    }
+                    placeholder="0"
+                  />
+                  <p className="text-xs text-muted-foreground">Optional. Passed through to you.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="resort_fee">Resort Fee ($)</Label>
+                  <Input
+                    id="resort_fee"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={formData.resort_fee || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, resort_fee: parseFloat(e.target.value) || 0 }))
+                    }
+                    placeholder="0"
+                  />
+                  <p className="text-xs text-muted-foreground">Paid at resort, not collected by RAV.</p>
+                </div>
               </div>
 
               <div className="space-y-2">
