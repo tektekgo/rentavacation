@@ -39,12 +39,16 @@ import {
   Clock,
   DollarSign,
   FileCheck,
+  Loader2,
   MapPin,
+  PauseCircle,
+  PlayCircle,
   Search,
   Shield,
   Timer,
   User,
   XCircle,
+  Zap,
   ExternalLink,
 } from "lucide-react";
 import { format, differenceInDays, addDays, isPast } from "date-fns";
@@ -117,6 +121,8 @@ const AdminEscrow = () => {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verificationNotes, setVerificationNotes] = useState("");
+  const [isAutoReleasing, setIsAutoReleasing] = useState(false);
+  const [holdingEscrowId, setHoldingEscrowId] = useState<string | null>(null);
 
   const fetchEscrows = useCallback(async () => {
     try {
@@ -272,6 +278,107 @@ const AdminEscrow = () => {
     }
   };
 
+  const handleAutoRelease = async () => {
+    setIsAutoReleasing(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke(
+        "process-escrow-release"
+      );
+
+      if (fnError) throw new Error(fnError.message);
+
+      const result = data as { released: number; payouts_initiated: number; skipped: number; errors?: string[] };
+      toast({
+        title: "Auto-Release Complete",
+        description: `Released: ${result.released}, Payouts: ${result.payouts_initiated}, Skipped: ${result.skipped}${
+          result.errors?.length ? ` (${result.errors.length} errors)` : ""
+        }`,
+      });
+
+      fetchEscrows();
+    } catch (error) {
+      console.error("Auto-release error:", error);
+      toast({
+        title: "Auto-Release Failed",
+        description: error instanceof Error ? error.message : "Failed to run auto-release.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAutoReleasing(false);
+    }
+  };
+
+  const handleToggleHold = async (escrow: EscrowWithDetails) => {
+    if (!user) return;
+
+    const isCurrentlyHeld = escrow.payout_held;
+
+    if (!isCurrentlyHeld) {
+      const reason = window.prompt("Enter reason for holding this payout:");
+      if (!reason) return;
+
+      setHoldingEscrowId(escrow.id);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("booking_confirmations")
+          .update({
+            payout_held: true,
+            payout_held_reason: reason,
+            payout_held_by: user.id,
+          })
+          .eq("id", escrow.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Payout Held",
+          description: "This escrow will be skipped by auto-release until unhold.",
+        });
+        fetchEscrows();
+      } catch (error) {
+        console.error("Hold error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to hold payout.",
+          variant: "destructive",
+        });
+      } finally {
+        setHoldingEscrowId(null);
+      }
+    } else {
+      setHoldingEscrowId(escrow.id);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("booking_confirmations")
+          .update({
+            payout_held: false,
+            payout_held_reason: null,
+            payout_held_by: null,
+          })
+          .eq("id", escrow.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Hold Removed",
+          description: "This escrow is now eligible for auto-release.",
+        });
+        fetchEscrows();
+      } catch (error) {
+        console.error("Unhold error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to remove hold.",
+          variant: "destructive",
+        });
+      } finally {
+        setHoldingEscrowId(null);
+      }
+    }
+  };
+
   const canReleaseFunds = (escrow: EscrowWithDetails) => {
     // Can release if verified and checkout date + 5 days has passed
     if (escrow.escrow_status !== "verified") return false;
@@ -331,6 +438,18 @@ const AdminEscrow = () => {
           </p>
         </div>
         <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handleAutoRelease}
+            disabled={isAutoReleasing}
+          >
+            {isAutoReleasing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Zap className="h-4 w-4 mr-2" />
+            )}
+            {isAutoReleasing ? "Running..." : "Run Auto-Release"}
+          </Button>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
@@ -497,10 +616,24 @@ const AdminEscrow = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${ESCROW_STATUS_CONFIG[escrow.escrow_status].color} flex items-center gap-1 w-fit`}>
-                          {ESCROW_STATUS_CONFIG[escrow.escrow_status].icon}
-                          {ESCROW_STATUS_CONFIG[escrow.escrow_status].label}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={`${ESCROW_STATUS_CONFIG[escrow.escrow_status].color} flex items-center gap-1 w-fit`}>
+                            {ESCROW_STATUS_CONFIG[escrow.escrow_status].icon}
+                            {ESCROW_STATUS_CONFIG[escrow.escrow_status].label}
+                          </Badge>
+                          {escrow.payout_held && (
+                            <Badge variant="outline" className="text-orange-600 border-orange-600 w-fit text-xs">
+                              <PauseCircle className="h-3 w-3 mr-1" />
+                              Held
+                            </Badge>
+                          )}
+                          {escrow.auto_released && (
+                            <Badge variant="outline" className="text-blue-600 border-blue-600 w-fit text-xs">
+                              <Zap className="h-3 w-3 mr-1" />
+                              Auto-released
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {escrow.escrow_status === "pending_confirmation" ? (
@@ -511,7 +644,19 @@ const AdminEscrow = () => {
                             </span>
                           </div>
                         ) : escrow.escrow_status === "verified" ? (
-                          isReadyForRelease ? (
+                          escrow.payout_held ? (
+                            <div>
+                              <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                <PauseCircle className="h-3 w-3 mr-1" />
+                                Held
+                              </Badge>
+                              {escrow.payout_held_reason && (
+                                <p className="text-xs text-muted-foreground mt-1 max-w-[150px] truncate" title={escrow.payout_held_reason}>
+                                  {escrow.payout_held_reason}
+                                </p>
+                              )}
+                            </div>
+                          ) : isReadyForRelease ? (
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               Ready to Release
                             </Badge>
@@ -540,9 +685,26 @@ const AdminEscrow = () => {
                               Verify
                             </Button>
                           )}
-                          {isReadyForRelease && (
-                            <Button 
-                              size="sm" 
+                          {escrow.escrow_status === "verified" && (
+                            <Button
+                              size="sm"
+                              variant={escrow.payout_held ? "default" : "outline"}
+                              onClick={() => handleToggleHold(escrow)}
+                              disabled={holdingEscrowId === escrow.id}
+                            >
+                              {holdingEscrowId === escrow.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : escrow.payout_held ? (
+                                <PlayCircle className="h-3 w-3 mr-1" />
+                              ) : (
+                                <PauseCircle className="h-3 w-3 mr-1" />
+                              )}
+                              {escrow.payout_held ? "Unhold" : "Hold"}
+                            </Button>
+                          )}
+                          {isReadyForRelease && !escrow.payout_held && (
+                            <Button
+                              size="sm"
                               onClick={() => handleReleaseFunds(escrow)}
                             >
                               Release Funds
