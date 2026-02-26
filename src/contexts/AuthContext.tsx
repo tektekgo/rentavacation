@@ -16,6 +16,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>;
+  resendVerificationEmail: () => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   clearPasswordRecovery: () => void;
   // Role checks
@@ -23,6 +24,7 @@ interface AuthContextType {
   isRavTeam: () => boolean;
   isPropertyOwner: () => boolean;
   isRenter: () => boolean;
+  isEmailVerified: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -180,6 +182,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const resendVerificationEmail = async () => {
+    if (!user?.email) return { error: { message: 'No email address found' } as AuthError };
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    return { error };
+  };
+
   const clearPasswordRecovery = () => setIsPasswordRecovery(false);
 
   const signOut = async () => {
@@ -201,6 +213,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isRenter = (): boolean => hasRole('renter');
 
+  const isEmailVerified = (): boolean => {
+    if (!user) return false;
+    // Google OAuth users are always verified
+    if (user.app_metadata?.provider === 'google') return true;
+    return user.email_confirmed_at != null;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -215,12 +234,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signInWithGoogle,
         resetPasswordForEmail,
+        resendVerificationEmail,
         signOut,
         clearPasswordRecovery,
         hasRole,
         isRavTeam,
         isPropertyOwner,
         isRenter,
+        isEmailVerified,
       }}
     >
       {children}

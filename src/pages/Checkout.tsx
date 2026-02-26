@@ -24,11 +24,12 @@ import {
 } from "lucide-react";
 import type { Resort, ResortUnitType } from "@/types/database";
 import { calculateNights } from "@/lib/pricing";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, isEmailVerified } = useAuth();
 
   const listingId = searchParams.get("listing");
   const guestsParam = Number(searchParams.get("guests")) || 1;
@@ -126,6 +127,19 @@ const Checkout = () => {
             Browse Rentals
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // Email verification guard
+  if (user && !isEmailVerified()) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24">
+          <EmailVerificationBanner blockedAction="book a property" />
+        </div>
+        <Footer />
       </div>
     );
   }

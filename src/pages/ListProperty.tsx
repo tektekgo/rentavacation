@@ -31,6 +31,7 @@ import type { VacationClubBrand, Resort, ResortUnitType } from "@/types/database
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 const benefits = [
   {
@@ -130,7 +131,7 @@ function clearDraft() {
 
 const ListProperty = () => {
   const navigate = useNavigate();
-  const { user, isPropertyOwner } = useAuth();
+  const { user, isPropertyOwner, isEmailVerified } = useAuth();
 
   // Load draft from localStorage (survives page refresh after role upgrade)
   const draft = loadDraft();
@@ -627,31 +628,35 @@ const ListProperty = () => {
                       We only charge a small service fee when you receive a booking.
                     </p>
                   </div>
-                  <div className="flex gap-4">
-                    <Button variant="outline" onClick={() => setFormStep(2)}>
-                      Back
-                    </Button>
-                    <Button
-                      className="flex-1"
-                      onClick={() => {
-                        if (!user) {
-                          navigate("/signup");
-                        } else if (isPropertyOwner()) {
-                          clearDraft();
-                          navigate("/owner-dashboard?tab=properties");
-                        } else {
-                          setUpgradeDialogOpen(true);
-                        }
-                      }}
-                    >
-                      {!user
-                        ? "Create Account & List"
-                        : isPropertyOwner()
-                          ? "Go to Owner Dashboard"
-                          : "Become a Property Owner"}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </div>
+                  {user && !isEmailVerified() ? (
+                    <EmailVerificationBanner blockedAction="list a property" />
+                  ) : (
+                    <div className="flex gap-4">
+                      <Button variant="outline" onClick={() => setFormStep(2)}>
+                        Back
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        onClick={() => {
+                          if (!user) {
+                            navigate("/signup");
+                          } else if (isPropertyOwner()) {
+                            clearDraft();
+                            navigate("/owner-dashboard?tab=properties");
+                          } else {
+                            setUpgradeDialogOpen(true);
+                          }
+                        }}
+                      >
+                        {!user
+                          ? "Create Account & List"
+                          : isPropertyOwner()
+                            ? "Go to Owner Dashboard"
+                            : "Become a Property Owner"}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                  )}
 
                   <RoleUpgradeDialog
                     open={upgradeDialogOpen}
