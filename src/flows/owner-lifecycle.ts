@@ -168,8 +168,9 @@ export const ownerLifecycle: FlowDefinition = {
       component: 'OwnerEarnings',
       tab: 'earnings',
       nodeStyle: 'end',
-      description: 'Owner receives payout after checkout + 5 days',
-      tables: ['bookings'],
+      description: 'Owner receives automated payout via Stripe Connect (or manual Zelle/bank) after checkout + 5 days',
+      tables: ['bookings', 'profiles'],
+      edgeFunctions: ['create-connect-account', 'create-stripe-payout'],
     },
   ],
 };

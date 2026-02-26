@@ -67,6 +67,18 @@ serve(async (req) => {
         await handleChargeRefunded(supabase, event.data.object);
         break;
 
+      case "account.updated":
+        await handleAccountUpdated(supabase, event.data.object);
+        break;
+
+      case "transfer.created":
+        await handleTransferCreated(supabase, event.data.object);
+        break;
+
+      case "transfer.reversed":
+        await handleTransferReversed(supabase, event.data.object);
+        break;
+
       default:
         logStep("Unhandled event type", { type: event.type });
     }
@@ -435,4 +447,143 @@ async function handleChargeRefunded(
     refundedAmount: refundedAmountDollars,
     isFullRefund,
   });
+}
+
+/**
+ * Handle account.updated (Stripe Connect)
+ * Sync the owner's Connect account status when Stripe sends updates
+ * (e.g., after onboarding completion, verification changes).
+ */
+async function handleAccountUpdated(
+  supabase: ReturnType<typeof createClient>,
+  account: Stripe.Account
+) {
+  logStep("Processing account.updated", {
+    accountId: account.id,
+    chargesEnabled: account.charges_enabled,
+    payoutsEnabled: account.payouts_enabled,
+  });
+
+  // Find the owner by stripe_account_id
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("stripe_account_id", account.id)
+    .single();
+
+  if (error || !profile) {
+    logStep("No profile found for Stripe account", { accountId: account.id });
+    return;
+  }
+
+  const onboardingComplete = !!(account.charges_enabled && account.payouts_enabled);
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({
+      stripe_charges_enabled: account.charges_enabled ?? false,
+      stripe_payouts_enabled: account.payouts_enabled ?? false,
+      stripe_onboarding_complete: onboardingComplete,
+    })
+    .eq("id", profile.id);
+
+  if (updateError) {
+    logStep("Failed to update profile", { error: updateError.message });
+  } else {
+    logStep("Profile updated with Connect status", {
+      ownerId: profile.id,
+      onboardingComplete,
+    });
+  }
+}
+
+/**
+ * Handle transfer.created (Stripe Connect)
+ * Confirm payout was initiated — update booking payout_status.
+ */
+async function handleTransferCreated(
+  supabase: ReturnType<typeof createClient>,
+  transfer: Stripe.Transfer
+) {
+  const bookingId = transfer.metadata?.booking_id;
+  logStep("Processing transfer.created", {
+    transferId: transfer.id,
+    bookingId,
+    amount: transfer.amount,
+  });
+
+  if (!bookingId) {
+    // Try looking up by stripe_transfer_id
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select("id")
+      .eq("stripe_transfer_id", transfer.id)
+      .single();
+
+    if (!booking) {
+      logStep("No booking found for transfer", { transferId: transfer.id });
+      return;
+    }
+
+    await supabase
+      .from("bookings")
+      .update({
+        payout_status: "paid",
+        payout_date: new Date().toISOString(),
+        status: "completed",
+      })
+      .eq("id", booking.id);
+
+    logStep("Booking payout marked as paid", { bookingId: booking.id });
+    return;
+  }
+
+  await supabase
+    .from("bookings")
+    .update({
+      payout_status: "paid",
+      payout_date: new Date().toISOString(),
+      stripe_transfer_id: transfer.id,
+      status: "completed",
+    })
+    .eq("id", bookingId);
+
+  logStep("Booking payout marked as paid", { bookingId });
+}
+
+/**
+ * Handle transfer.reversed (Stripe Connect)
+ * Mark payout as failed if a transfer is reversed.
+ */
+async function handleTransferReversed(
+  supabase: ReturnType<typeof createClient>,
+  transfer: Stripe.Transfer
+) {
+  logStep("Processing transfer.reversed", {
+    transferId: transfer.id,
+    amount: transfer.amount,
+    amountReversed: transfer.amount_reversed,
+  });
+
+  // Look up booking by transfer ID
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("stripe_transfer_id", transfer.id)
+    .single();
+
+  if (!booking) {
+    logStep("No booking found for reversed transfer", { transferId: transfer.id });
+    return;
+  }
+
+  await supabase
+    .from("bookings")
+    .update({
+      payout_status: "failed",
+      payout_notes: `Transfer reversed: ${transfer.id}`,
+    })
+    .eq("id", booking.id);
+
+  logStep("Booking payout marked as failed due to reversal", { bookingId: booking.id });
 }

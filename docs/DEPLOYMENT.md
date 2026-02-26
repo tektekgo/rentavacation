@@ -77,6 +77,8 @@ supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
 supabase functions deploy stripe-webhook
+supabase functions deploy create-connect-account
+supabase functions deploy create-stripe-payout
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
@@ -91,6 +93,8 @@ supabase functions deploy process-deadline-reminders
 supabase functions deploy create-booking-checkout
 supabase functions deploy verify-booking-payment
 supabase functions deploy stripe-webhook
+supabase functions deploy create-connect-account
+supabase functions deploy create-stripe-payout
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
@@ -271,7 +275,7 @@ Configure webhook endpoints in **both** Stripe test and live dashboards:
 2. Add endpoint:
    - **DEV:** `https://oukbxqnlxnkainnligfz.supabase.co/functions/v1/stripe-webhook`
    - **PROD:** `https://xzfllqndrlmhclqfybew.supabase.co/functions/v1/stripe-webhook`
-3. Select events: `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`
+3. Select events: `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`, `account.updated`, `transfer.created`, `transfer.reversed`
 4. Copy the signing secret (`whsec_...`) and set as `STRIPE_WEBHOOK_SECRET` in Supabase Edge Function secrets
 
 **What the webhook handles:**
@@ -280,6 +284,9 @@ Configure webhook endpoints in **both** Stripe test and live dashboards:
 | `checkout.session.completed` | Confirms booking if still pending (safety net for browser closures) |
 | `checkout.session.expired` | Cancels pending booking when session expires without payment |
 | `charge.refunded` | Tracks refund, cancels booking if full refund |
+| `account.updated` | Syncs Connect account status (onboarding, charges/payouts enabled) |
+| `transfer.created` | Marks booking payout as paid, sets status to completed |
+| `transfer.reversed` | Marks booking payout as failed |
 
 ### For Production
 1. Activate Stripe account

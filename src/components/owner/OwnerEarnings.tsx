@@ -18,6 +18,7 @@ import { format, addDays, startOfMonth, subMonths, isAfter } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import type { Booking, Listing, Property, PayoutStatus } from "@/types/database";
 import { useOwnerCommission } from "@/hooks/useOwnerCommission";
+import StripeConnectBanner from "./StripeConnectBanner";
 
 interface BookingWithListing extends Booking {
   listing: Listing & { property: Property };
@@ -235,6 +236,11 @@ const OwnerEarnings = () => {
         <p className="text-muted-foreground">
           Track your earnings, payout status, and performance
         </p>
+      </div>
+
+      {/* Stripe Connect Setup Banner */}
+      <div className="mb-6">
+        <StripeConnectBanner />
       </div>
 
       {/* Commission Rate Card */}

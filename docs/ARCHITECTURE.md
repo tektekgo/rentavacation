@@ -209,7 +209,9 @@ supabase/
     │   └── property-search.ts # Shared search query builder (used by voice-search + text-chat)
     ├── create-booking-checkout/   # Stripe checkout session creation
     ├── verify-booking-payment/    # Client-side payment verification → update booking + send confirmation email
-    ├── stripe-webhook/            # Stripe webhook handler (server-side safety net for payment verification, session expiry, refunds)
+    ├── stripe-webhook/            # Stripe webhook handler (payment verification, session expiry, refunds, Connect account + transfer events)
+    ├── create-connect-account/    # Stripe Connect: create Express account + onboarding link for owners
+    ├── create-stripe-payout/      # Stripe Connect: initiate transfer to owner's connected account (admin only)
     ├── send-email/                # Generic email dispatch via Resend
     ├── send-booking-confirmation-reminder/  # Owner deadline reminders + owner confirmation notifications
     ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
@@ -473,7 +475,9 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 |----------|---------|---------|
 | `create-booking-checkout` | Client call | Creates Stripe Checkout session with listing details |
 | `verify-booking-payment` | Client call (post-redirect) | Client-side payment verification after Stripe redirect — updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
-| `stripe-webhook` | **Stripe webhook** | Server-side safety net for payment verification (catches browser closures). Handles `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`. Idempotent — skips if booking already confirmed. |
+| `stripe-webhook` | **Stripe webhook** | Server-side safety net for payment verification, session expiry, refunds, Connect account updates, and transfer tracking. Handles 6 event types. Idempotent. |
+| `create-connect-account` | Client call (owner) | Creates Stripe Express account for owner + generates onboarding link. Stores account ID in profiles. |
+| `create-stripe-payout` | Client call (admin) | Initiates Stripe Transfer to owner's connected account. Updates booking payout_status + sends notification email. |
 | `send-email` | Client call | Generic email dispatch via Resend API |
 | `send-approval-email` | Client call | Sends approval/rejection emails for listings and users (4 variants) |
 | `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |
@@ -494,7 +498,7 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | Secret | Used by |
 |--------|---------|
 | `RESEND_API_KEY` | All email functions (domain: `updates.rent-a-vacation.com`) |
-| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment, stripe-webhook |
+| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment, stripe-webhook, create-connect-account, create-stripe-payout |
 | `STRIPE_WEBHOOK_SECRET` | stripe-webhook (webhook signature verification) |
 | `NEWSAPI_KEY` | fetch-industry-news |
 | `OPENROUTER_API_KEY` | text-chat |
