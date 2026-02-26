@@ -36,6 +36,7 @@ export function useListingsOpenForBidding() {
   return useQuery({
     queryKey: ['listings', 'open-for-bidding', user?.id],
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       let query = supabase
         .from('listings')
         .select(`
@@ -44,7 +45,8 @@ export function useListingsOpenForBidding() {
         `)
         .eq('open_for_bidding', true)
         .eq('status', 'active')
-        .gt('bidding_ends_at', new Date().toISOString());
+        .gt('bidding_ends_at', new Date().toISOString())
+        .gte('check_out_date', today);
 
       // Exclude the current user's own listings
       if (user?.id) {

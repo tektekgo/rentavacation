@@ -147,6 +147,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: {
           full_name: fullName,
           account_type: accountType || 'renter',
+          terms_accepted_at: new Date().toISOString(),
+          age_verified: true,
         },
       },
     });

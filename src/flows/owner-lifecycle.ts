@@ -49,12 +49,22 @@ export const ownerLifecycle: FlowDefinition = {
       edgeFunctions: ['send-verification-notification'],
     },
     {
+      id: 'fee_calculator',
+      route: '/calculator',
+      label: 'Maintenance Fee Calculator',
+      component: 'MaintenanceFeeCalculator',
+      description: 'Calculate breakeven point and projected savings vs. maintenance fees',
+      branches: [
+        { condition: 'Convinced to list', targetStepId: 'create_property', label: 'List my property' },
+      ],
+    },
+    {
       id: 'create_property',
       route: '/list-property',
       label: 'Create Property',
       component: 'ListProperty',
       roles: ['property_owner'],
-      description: 'Define vacation club unit details, amenities, images',
+      description: 'Define vacation club unit details, amenities, images. Form draft auto-saves to localStorage.',
       tables: ['properties'],
     },
     {

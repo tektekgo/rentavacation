@@ -36,11 +36,21 @@ export const travelerLifecycle: FlowDefinition = {
       ],
     },
     {
+      id: 'explore_destinations',
+      route: '/destinations',
+      label: 'Explore Destinations',
+      component: 'Destinations',
+      description: 'Browse featured vacation destinations by region and state',
+      branches: [
+        { condition: 'Select destination', targetStepId: 'search_listings', label: 'Search in destination' },
+      ],
+    },
+    {
       id: 'search_listings',
       route: '/rentals',
       label: 'Search Listings',
       component: 'Rentals',
-      description: 'Browse, filter, and search active listings via text chat or voice search',
+      description: 'Browse, filter, and search active listings via text chat or voice search. Expired listings auto-filtered.',
       tables: ['listings', 'properties'],
       edgeFunctions: ['voice-search', 'text-chat'],
       branches: [

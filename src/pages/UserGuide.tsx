@@ -679,7 +679,7 @@ const UserGuide = () => {
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• You must be logged in to use voice search</li>
-                    <li>• Regular users get 10 voice searches per day (resets at midnight)</li>
+                    <li>• Voice search quotas are tier-based: Free (5/day), Plus/Pro (25/day), Premium/Business (unlimited)</li>
                     <li>• Manual text search is always available with no limits</li>
                   </ul>
                 </div>
@@ -750,7 +750,8 @@ const UserGuide = () => {
                     <li>• "Properties with pool under $300 per night"</li>
                   </ul>
                   <p className="text-xs text-muted-foreground">
-                    Voice search requires a logged-in account. You have 10 voice searches per day.
+                    Voice search requires a logged-in account. Your daily quota depends on your membership tier:
+                    Free (5/day), Plus/Pro (25/day), Premium/Business (unlimited).
                     A quota indicator next to the search bar shows your remaining searches.
                   </p>
                 </div>
@@ -1005,9 +1006,9 @@ const UserGuide = () => {
 
                 <div className="space-y-4">
                   {[
-                    { q: "Why can't I use voice search?", a: "Voice search requires a logged-in, approved account. If you see a disabled microphone icon, sign in first. If your account is pending approval, wait for the approval email. If you've reached the daily limit of 10 searches, try again tomorrow or use manual text search." },
+                    { q: "Why can't I use voice search?", a: "Voice search requires a logged-in, approved account. If you see a disabled microphone icon, sign in first. If your account is pending approval, wait for the approval email. If you've reached your daily quota (Free: 5, Plus/Pro: 25, Premium/Business: unlimited), try again tomorrow or use manual text search." },
                     { q: "How do I get my account approved?", a: "After signing up, your account is reviewed by our team. You'll receive an email notification once approved (typically within 24 hours). Until then, you'll see a 'Pending Approval' page." },
-                    { q: "What is the daily voice search limit?", a: "Regular users can perform up to 10 voice searches per day, resetting at midnight. A badge near the search bar shows your remaining searches. Manual text search has no limits." },
+                    { q: "What is the daily voice search limit?", a: "Voice search quotas are tier-based: Free members get 5/day, Plus/Pro get 25/day, and Premium/Business members have unlimited searches. Quotas reset at midnight. A badge near the search bar shows your remaining searches. Manual text search has no limits." },
                     { q: "Is my payment secure?", a: "Yes, all payments are processed through Stripe and held in escrow until your stay completes successfully." },
                     { q: "What if the owner doesn't confirm?", a: "If the owner doesn't confirm within 48 hours, your booking is automatically cancelled with a full refund." },
                     { q: "Can I cancel my booking?", a: "Yes, but refund amount depends on the listing's cancellation policy (Flexible, Moderate, Strict, Super Strict)." },

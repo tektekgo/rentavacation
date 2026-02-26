@@ -591,8 +591,14 @@ const OwnerListings = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge className={STATUS_COLORS[listing.status]}>
-                        {STATUS_LABELS[listing.status]}
+                      <Badge className={
+                        listing.status === 'active' && isPast(new Date(listing.check_out_date))
+                          ? 'bg-orange-500'
+                          : STATUS_COLORS[listing.status]
+                      }>
+                        {listing.status === 'active' && isPast(new Date(listing.check_out_date))
+                          ? 'Expired'
+                          : STATUS_LABELS[listing.status]}
                       </Badge>
                       {/* Bidding Status Badge */}
                       {listing.open_for_bidding && listing.bidding_ends_at && (

@@ -3,7 +3,7 @@
 > **Architectural decisions, session context, and agent instructions**
 > **Task tracking has moved to [GitHub Issues & Milestones](https://github.com/rent-a-vacation/rav-website/issues)**
 > **Project board: [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1)**
-> **Last Updated:** February 24, 2026 (Migrated to GitHub Issues)
+> **Last Updated:** February 25, 2026 (Bug Fix Sprint — Sessions 18-20)
 > **Repository:** https://github.com/rent-a-vacation/rav-website
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -79,15 +79,7 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - **Project board:** https://github.com/orgs/rent-a-vacation/projects/1
 
 ### Open Milestones
-| Milestone | Due | Issues |
-|-----------|-----|--------|
-| [Phase 20: Accounting & Tax](https://github.com/rent-a-vacation/rav-website/milestone/23) | Apr 2026 | #60-#65 (Fee Breakdown, Stripe Tax, Tax Reporting, QuickBooks, 1099-K, Tax Filing) |
-| [Security Hardening](https://github.com/rent-a-vacation/rav-website/milestone/24) | Apr 2026 | #66-#69 (CSP, Rate Limiting, Sentry, Cookie Consent) |
-| [Phase 3: Voice Everywhere](https://github.com/rent-a-vacation/rav-website/milestone/25) | Jun 2026 | Voice-assisted listing, booking, bidding |
-| [Phase 12: Native Mobile](https://github.com/rent-a-vacation/rav-website/milestone/26) | — | Capacitor Android + iOS (DEC-011) |
-| [Phase 21: Partial-Week Booking](https://github.com/rent-a-vacation/rav-website/milestone/27) | — | Calendar sub-range selection + listing splits |
-| [Phase 6: Advanced Features](https://github.com/rent-a-vacation/rav-website/milestone/28) | Sep 2026 | Saved searches, advanced filtering, analytics |
-| [Maintenance & Bugs](https://github.com/rent-a-vacation/rav-website/milestone/29) | — | Catch-all for fixes and maintenance |
+> See [GitHub Milestones](https://github.com/rent-a-vacation/rav-website/milestones) for the current list. Do not duplicate here.
 
 ### Known Issues
 - **PropertyDetail/Checkout dates are read-only** — By design for timeshare listings (owner sets fixed dates), but users may expect date selection.
@@ -99,6 +91,25 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - **Migrations deployed:** 001-021 on both DEV + PROD
 - **PROD platform:** locked (Staff Only Mode enabled)
 - **Supabase CLI:** currently linked to DEV
+
+### Session Handoff (Sessions 18-20, Feb 24-25)
+
+**Bug Fix Sprint — 11 issues closed across 3 PRs:**
+- PR #116: Role-based access control (#110, #113), property-to-listing flow (#114, #121)
+- PR #122: Proposal acceptance auto-creates listing (#112), 24hr proposal validity (#111)
+- PR #123: Property dropdown default (#109), form draft persistence (#118), Google OAuth wiring (#86)
+- PR #124: Auto-expire listings (#85), React Error Boundaries (#94), age verification at signup (#90)
+
+**Key architectural changes:**
+- `ErrorBoundary` wraps all `<Routes>` in App.tsx for graceful crash handling
+- `useActiveListings`, `useActiveListingsCount`, `useListingsOpenForBidding` now filter by `check_out_date >= today`
+- `useUpdateProposalStatus` auto-creates listings from accepted proposals (no separate listing needed)
+- `ListProperty` form uses localStorage draft persistence
+- `signUp` metadata now includes `terms_accepted_at` + `age_verified`
+- Flow manifests updated: added `/calculator` (owner journey), `/destinations` (traveler journey)
+- `Documentation.tsx` gains "Platform Improvements" section; `UserGuide.tsx` voice quotas corrected to tier-based
+
+**Next:** Phase 20 (Accounting & Tax) or remaining pre-launch issues — see [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues?q=is%3Aopen+label%3Apre-launch)
 
 ---
 
@@ -540,6 +551,6 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ---
 
-**Last updated:** February 24, 2026 (Migrated to GitHub Issues & Milestones)
+**Last updated:** February 25, 2026 (Bug Fix Sprint — Sessions 18-20)
 **Maintained by:** Sujit
 **Tracking:** [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) · [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) · [Milestones](https://github.com/rent-a-vacation/rav-website/milestones)
