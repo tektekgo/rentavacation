@@ -3,7 +3,7 @@
 > **Architectural decisions, session context, and agent instructions**
 > **Task tracking has moved to [GitHub Issues & Milestones](https://github.com/rent-a-vacation/rav-website/issues)**
 > **Project board: [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1)**
-> **Last Updated:** February 25, 2026 (Bug Fix Sprint — Sessions 18-20)
+> **Last Updated:** February 26, 2026 (Sessions 21-23: Payments, Cancellations, Accounting)
 > **Repository:** https://github.com/rent-a-vacation/rav-website
 > **App Version:** v0.9.0 (build version visible in footer)
 
@@ -75,7 +75,7 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ### Quick Links
 - **Open issues:** `gh issue list --repo rent-a-vacation/rav-website --state open`
-- **Current milestone:** `gh issue list --repo rent-a-vacation/rav-website --milestone "Phase 20: Accounting & Tax"`
+- **Pre-launch issues:** `gh issue list --repo rent-a-vacation/rav-website --state open --label "pre-launch"`
 - **Project board:** https://github.com/orgs/rent-a-vacation/projects/1
 
 ### Open Milestones
@@ -88,28 +88,39 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ### Platform Status
 - **306 automated tests** (all passing), 0 type errors, 0 lint errors, build clean
-- **Migrations deployed:** 001-021 on both DEV + PROD
+- **Migrations deployed:** 001-023 on both DEV + PROD
+- **Edge functions deployed:** 22 on both DEV + PROD
 - **PROD platform:** locked (Staff Only Mode enabled)
 - **Supabase CLI:** currently linked to DEV
+- **dev branch:** 42 commits ahead of main — PR needed before next code session
 
-### Session Handoff (Sessions 18-20, Feb 24-25)
+### Session Handoff (Sessions 21-23, Feb 25-26)
 
-**Bug Fix Sprint — 11 issues closed across 3 PRs:**
-- PR #116: Role-based access control (#110, #113), property-to-listing flow (#114, #121)
-- PR #122: Proposal acceptance auto-creates listing (#112), 24hr proposal validity (#111)
-- PR #123: Property dropdown default (#109), form draft persistence (#118), Google OAuth wiring (#86)
-- PR #124: Auto-expire listings (#85), React Error Boundaries (#94), age verification at signup (#90)
+**Payments & Cancellations (Sessions 21-22):**
+- PR #126: Merged — Stripe webhook (#75), Stripe Connect (#78), renter cancellation (#76), owner cancellation (#77)
+- `stripe-webhook` edge function: 6 Stripe events, idempotent processing
+- `create-connect-account` + `create-stripe-payout` edge functions for owner payouts
+- `process-cancellation` edge function: policy-based refunds (flexible/moderate/strict/super_strict)
+- Migration 022: Stripe Connect fields on profiles, stripe_transfer_id on bookings
 
-**Key architectural changes:**
-- `ErrorBoundary` wraps all `<Routes>` in App.tsx for graceful crash handling
-- `useActiveListings`, `useActiveListingsCount`, `useListingsOpenForBidding` now filter by `check_out_date >= today`
-- `useUpdateProposalStatus` auto-creates listings from accepted proposals (no separate listing needed)
-- `ListProperty` form uses localStorage draft persistence
-- `signUp` metadata now includes `terms_accepted_at` + `age_verified`
-- Flow manifests updated: added `/calculator` (owner journey), `/destinations` (traveler journey)
-- `Documentation.tsx` gains "Platform Improvements" section; `UserGuide.tsx` voice quotas corrected to tier-based
+**Accounting & User Pages (Session 23):**
+- Fee Breakdown UI (#60): Itemized display on Checkout (base, service fee, cleaning fee, taxes)
+- Stripe Tax Integration (#61): `automatic_tax: { enabled: true }`, tax codes on line items, tax extraction in verify-booking-payment
+- My Bookings page (#83): `/my-bookings` route with tabs, cancel button, property links
+- Account Settings (#84): `/account` route with profile editing, password change, roles display
+- Migration 023: fee breakdown + tax fields on bookings, cleaning_fee/resort_fee on listings
+- `computeFeeBreakdown()` added to `src/lib/pricing.ts`
+- OwnerListings form now has cleaning_fee and resort_fee inputs
+- Header nav updated with My Bookings + Account Settings links
 
-**Next:** Phase 20 (Accounting & Tax) or remaining pre-launch issues — see [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues?q=is%3Aopen+label%3Apre-launch)
+**Blocker discovered:**
+- **#127 Business Formation & Stripe Tax Activation** — Cannot fully activate Stripe Tax without business entity, EIN, and state tax registrations. Code is forward-compatible (tax = $0 until activated). Pre-launch blocker.
+
+**Open issues summary:** 21 pre-launch, 17 post-launch, 2 other (40 total)
+
+**Next recommended work:**
+- Create PR `dev → main` (42 commits) to sync production
+- Then pick from pre-launch milestones: Security Hardening (#66-69), Launch Readiness (#79-89), Phase 20 remaining (#62, #64, #91, #92), or Analytics (#73-74)
 
 ---
 
@@ -551,6 +562,6 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ---
 
-**Last updated:** February 25, 2026 (Bug Fix Sprint — Sessions 18-20)
+**Last updated:** February 26, 2026 (Sessions 21-23: Payments, Cancellations, Accounting)
 **Maintained by:** Sujit
 **Tracking:** [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) · [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) · [Milestones](https://github.com/rent-a-vacation/rav-website/milestones)
