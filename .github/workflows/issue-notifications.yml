@@ -1,0 +1,58 @@
+name: Issue Notifications
+
+on:
+  issues:
+    types: [assigned, closed]
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email notification
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_GITHUB_NOTIFICATIONS_KEY }}
+        run: |
+          # Determine event type and build subject/body
+          EVENT="${{ github.event_name }}"
+          ACTION="${{ github.event.action }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          SENDER="${{ github.actor }}"
+
+          if [ "$EVENT" = "issues" ] && [ "$ACTION" = "closed" ]; then
+            SUBJECT="✅ Closed: #${ISSUE_NUMBER} ${ISSUE_TITLE}"
+            BODY_TEXT="Issue #${ISSUE_NUMBER} has been closed by ${SENDER}.\n\nTitle: ${ISSUE_TITLE}\nLink: ${ISSUE_URL}"
+            BODY_HTML="<h2>✅ Issue Closed</h2><p><strong>#${ISSUE_NUMBER} — ${ISSUE_TITLE}</strong></p><p>Closed by <strong>${SENDER}</strong></p><p><a href='${ISSUE_URL}'>View Issue →</a></p>"
+
+          elif [ "$EVENT" = "issues" ] && [ "$ACTION" = "assigned" ]; then
+            ASSIGNEE="${{ github.event.assignee.login }}"
+            SUBJECT="👤 Assigned: #${ISSUE_NUMBER} ${ISSUE_TITLE}"
+            BODY_TEXT="Issue #${ISSUE_NUMBER} has been assigned to ${ASSIGNEE} by ${SENDER}.\n\nTitle: ${ISSUE_TITLE}\nLink: ${ISSUE_URL}"
+            BODY_HTML="<h2>👤 Issue Assigned</h2><p><strong>#${ISSUE_NUMBER} — ${ISSUE_TITLE}</strong></p><p>Assigned to <strong>${ASSIGNEE}</strong> by ${SENDER}</p><p><a href='${ISSUE_URL}'>View Issue →</a></p>"
+
+          elif [ "$EVENT" = "issue_comment" ]; then
+            COMMENT="${{ github.event.comment.body }}"
+            COMMENT_URL="${{ github.event.comment.html_url }}"
+            SUBJECT="💬 Comment: #${ISSUE_NUMBER} ${ISSUE_TITLE}"
+            BODY_TEXT="New comment on issue #${ISSUE_NUMBER} by ${SENDER}.\n\nTitle: ${ISSUE_TITLE}\nComment: ${COMMENT}\nLink: ${COMMENT_URL}"
+            BODY_HTML="<h2>💬 New Comment</h2><p><strong>#${ISSUE_NUMBER} — ${ISSUE_TITLE}</strong></p><p>Comment by <strong>${SENDER}</strong>:</p><blockquote>${COMMENT}</blockquote><p><a href='${COMMENT_URL}'>View Comment →</a></p>"
+          fi
+
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"from\": \"RAV Updates <notifications@updates.rent-a-vacation.com>\",
+              \"to\": [
+                \"sujit@rent-a-vacation.com\",
+                \"ajumon@rent-a-vacation.com\",
+                \"celin@rent-a-vacation.com\",
+                \"sandhya@rent-a-vacation.com\"
+              ],
+              \"subject\": \"${SUBJECT}\",
+              \"text\": \"${BODY_TEXT}\",
+              \"html\": \"${BODY_HTML}\"
+            }"
