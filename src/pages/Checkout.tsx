@@ -307,12 +307,35 @@ const Checkout = () => {
                       <span className="text-muted-foreground">
                         ${pricePerNight}/night × {nights} nights
                       </span>
-                      <span>${listing.final_price.toLocaleString()}</span>
+                      <span>${(pricePerNight * nights).toLocaleString()}</span>
                     </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">RAV service fee</span>
+                      <span>${Math.round((pricePerNight * nights) * 0.15).toLocaleString()}</span>
+                    </div>
+                    {(listing.cleaning_fee || 0) > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Cleaning fee</span>
+                        <span>${listing.cleaning_fee.toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>Taxes</span>
+                      <span>Calculated at payment</span>
+                    </div>
+                    {(listing.resort_fee || 0) > 0 && (
+                      <div className="flex justify-between text-sm text-muted-foreground/70 italic">
+                        <span>Resort fee (paid at check-in)</span>
+                        <span>${listing.resort_fee.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-semibold text-lg pt-3 border-t">
-                      <span>Total</span>
+                      <span>Subtotal</span>
                       <span>${listing.final_price.toLocaleString()}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Applicable taxes will be calculated by Stripe at checkout.
+                    </p>
 
                     {error && (
                       <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">

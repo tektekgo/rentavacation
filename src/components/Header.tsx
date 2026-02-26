@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator, BookOpen, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
@@ -124,12 +124,18 @@ const Header = () => {
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuItem asChild>
+                      <Link to="/my-bookings" className="flex items-center gap-2 cursor-pointer">
+                        <BookOpen className="h-4 w-4" />
+                        My Bookings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/my-bids" className="flex items-center gap-2 cursor-pointer">
                         <Gavel className="h-4 w-4" />
                         My Bids & Requests
                       </Link>
                     </DropdownMenuItem>
-                    
+
                     {isRavTeam() && (
                       <DropdownMenuItem asChild>
                         <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
@@ -157,7 +163,13 @@ const Header = () => {
                     )}
                     
                     {(isRavTeam() || isPropertyOwner()) && <DropdownMenuSeparator />}
-                    
+
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="h-4 w-4" />
+                        Account Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
@@ -293,8 +305,16 @@ const Header = () => {
             {user && (
               <>
                 <div className="border-t border-border pt-4">
-                  <Link 
-                    to="/my-bids" 
+                  <Link
+                    to="/my-bookings"
+                    className="flex items-center gap-2 text-foreground py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    My Bookings
+                  </Link>
+                  <Link
+                    to="/my-bids"
                     className="flex items-center gap-2 text-foreground py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -322,8 +342,8 @@ const Header = () => {
                     </Link>
                   )}
                   {isPropertyOwner() && (
-                    <Link 
-                      to="/owner-dashboard" 
+                    <Link
+                      to="/owner-dashboard"
                       className="flex items-center gap-2 text-foreground py-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -331,6 +351,14 @@ const Header = () => {
                       Owner Dashboard
                     </Link>
                   )}
+                  <Link
+                    to="/account"
+                    className="flex items-center gap-2 text-foreground py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Account Settings
+                  </Link>
                 </div>
               </>
             )}

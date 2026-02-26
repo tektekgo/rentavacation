@@ -109,12 +109,20 @@ serve(async (req) => {
     });
 
     if (session.payment_status === "paid") {
-      // Update booking to confirmed
+      // Extract tax info from Stripe session
+      const taxAmount = session.total_details?.amount_tax
+        ? session.total_details.amount_tax / 100
+        : 0;
+      logStep("Tax info from Stripe", { taxAmount, totalDetails: session.total_details });
+
+      // Update booking to confirmed with tax info
       const { error: updateError } = await supabaseClient
         .from("bookings")
         .update({
           status: "confirmed",
           paid_at: new Date().toISOString(),
+          tax_amount: taxAmount,
+          total_amount: session.amount_total ? session.amount_total / 100 : booking.total_amount,
         })
         .eq("id", bookingId);
 

@@ -8,3 +8,6 @@ Disallow: /executive-dashboard
 Disallow: /checkout
 Disallow: /booking-success
 Disallow: /pending-approval
+Disallow: /my-bookings
+Disallow: /my-bids
+Disallow: /account

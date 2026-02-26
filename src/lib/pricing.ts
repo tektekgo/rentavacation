@@ -40,3 +40,30 @@ export function computeListingPricing(nightlyRate: number, nights: number): List
   const finalPrice = ownerPrice + ravMarkup;
   return { ownerPrice, ravMarkup, finalPrice };
 }
+
+export interface FeeBreakdown {
+  baseAmount: number;
+  serviceFee: number;
+  cleaningFee: number;
+  subtotal: number;
+  ownerPayout: number;
+}
+
+/**
+ * Compute itemized fee breakdown for display.
+ * baseAmount   = nightlyRate * nights
+ * serviceFee   = round(baseAmount * 0.15)
+ * subtotal     = baseAmount + serviceFee + cleaningFee
+ * ownerPayout  = baseAmount + cleaningFee
+ */
+export function computeFeeBreakdown(
+  nightlyRate: number,
+  nights: number,
+  cleaningFee = 0
+): FeeBreakdown {
+  const baseAmount = Math.round(nightlyRate * nights);
+  const serviceFee = Math.round(baseAmount * RAV_MARKUP_RATE);
+  const subtotal = baseAmount + serviceFee + cleaningFee;
+  const ownerPayout = baseAmount + cleaningFee;
+  return { baseAmount, serviceFee, cleaningFee, subtotal, ownerPayout };
+}
