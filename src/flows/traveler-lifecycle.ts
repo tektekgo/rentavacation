@@ -126,6 +126,19 @@ export const travelerLifecycle: FlowDefinition = {
       description: 'Payment confirmed, reservation details shown, funds held in escrow',
       edgeFunctions: ['verify-booking-payment', 'stripe-webhook'],
       tables: ['bookings', 'booking_confirmations'],
+      branches: [
+        { condition: 'Renter cancels', targetStepId: 'renter_cancellation', label: 'Cancel booking', edgeStyle: 'dashed' },
+      ],
+    },
+    {
+      id: 'renter_cancellation',
+      route: '/booking-success',
+      label: 'Renter Cancellation',
+      component: 'CancelBookingDialog',
+      description: 'Renter-initiated cancellation with policy-based refund (flexible/moderate/strict/super_strict). Stripe refund processed automatically.',
+      edgeFunctions: ['process-cancellation', 'send-cancellation-email'],
+      tables: ['cancellation_requests', 'bookings'],
+      nodeStyle: 'end',
     },
     {
       id: 'awaiting_owner_confirmation',

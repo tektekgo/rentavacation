@@ -212,6 +212,7 @@ supabase/
     ├── stripe-webhook/            # Stripe webhook handler (payment verification, session expiry, refunds, Connect account + transfer events)
     ├── create-connect-account/    # Stripe Connect: create Express account + onboarding link for owners
     ├── create-stripe-payout/      # Stripe Connect: initiate transfer to owner's connected account (admin only)
+    ├── process-cancellation/      # Booking cancellation: policy-based refund, Stripe refund, status updates
     ├── send-email/                # Generic email dispatch via Resend
     ├── send-booking-confirmation-reminder/  # Owner deadline reminders + owner confirmation notifications
     ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
@@ -478,6 +479,7 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | `stripe-webhook` | **Stripe webhook** | Server-side safety net for payment verification, session expiry, refunds, Connect account updates, and transfer tracking. Handles 6 event types. Idempotent. |
 | `create-connect-account` | Client call (owner) | Creates Stripe Express account for owner + generates onboarding link. Stores account ID in profiles. |
 | `create-stripe-payout` | Client call (admin) | Initiates Stripe Transfer to owner's connected account. Updates booking payout_status + sends notification email. |
+| `process-cancellation` | Client call (renter/owner) | Processes booking cancellation with policy-based refund. Creates Stripe refund, cancellation request record, updates booking/listing/escrow status, sends cancellation email. |
 | `send-email` | Client call | Generic email dispatch via Resend API |
 | `send-approval-email` | Client call | Sends approval/rejection emails for listings and users (4 variants) |
 | `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |

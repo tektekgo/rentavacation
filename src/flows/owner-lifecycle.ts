@@ -126,6 +126,22 @@ export const ownerLifecycle: FlowDefinition = {
       description: 'Renter payment captured, booking created (verified by webhook + client)',
       tables: ['bookings', 'booking_confirmations'],
       edgeFunctions: ['verify-booking-payment', 'stripe-webhook'],
+      branches: [
+        { condition: 'Direct booking', targetStepId: 'owner_confirmation' },
+        { condition: 'Owner cancels', targetStepId: 'owner_cancellation', label: 'Cancel booking', edgeStyle: 'dashed' },
+      ],
+    },
+    {
+      id: 'owner_cancellation',
+      route: '/owner-dashboard',
+      label: 'Owner Cancellation',
+      component: 'CancelBookingDialog',
+      tab: 'bookings',
+      roles: ['property_owner'],
+      description: 'Owner-initiated cancellation with full refund to renter. Tracked in owner cancellation count (affects trust score).',
+      edgeFunctions: ['process-cancellation', 'send-cancellation-email'],
+      tables: ['cancellation_requests', 'bookings', 'owner_verifications'],
+      nodeStyle: 'end',
     },
     {
       id: 'owner_confirmation',

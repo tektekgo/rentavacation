@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, Users, DollarSign, Clock, CheckCircle, XCircle, Mail } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Clock, CheckCircle, XCircle, Mail, Ban } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, BookingStatus, Property, Listing, Profile } from "@/types/database";
+import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
+import { Button } from "@/components/ui/button";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property };
@@ -33,6 +35,7 @@ const OwnerBookings = () => {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
 
   // Fetch bookings for owner's listings
   const fetchBookings = async () => {
@@ -250,6 +253,21 @@ const OwnerBookings = () => {
                         </a>
                       </div>
                     )}
+
+                    {/* Cancel Button */}
+                    {booking.status === "confirmed" && (
+                      <div className="mt-4 pt-4 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                          onClick={() => setCancelBookingId(booking.id)}
+                        >
+                          <Ban className="mr-2 h-4 w-4" />
+                          Cancel Booking
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -257,6 +275,27 @@ const OwnerBookings = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Cancel Booking Dialog */}
+      {cancelBookingId && (() => {
+        const target = bookings.find((b) => b.id === cancelBookingId);
+        if (!target) return null;
+        return (
+          <CancelBookingDialog
+            open={!!cancelBookingId}
+            onOpenChange={(open) => { if (!open) setCancelBookingId(null); }}
+            bookingId={target.id}
+            totalAmount={target.total_amount}
+            checkInDate={target.listing?.check_in_date}
+            cancellationPolicy={target.listing?.cancellation_policy || "moderate"}
+            cancelledBy="owner"
+            onCancelled={() => {
+              setCancelBookingId(null);
+              fetchBookings();
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };

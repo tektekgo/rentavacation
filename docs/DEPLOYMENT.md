@@ -79,6 +79,7 @@ supabase functions deploy verify-booking-payment
 supabase functions deploy stripe-webhook
 supabase functions deploy create-connect-account
 supabase functions deploy create-stripe-payout
+supabase functions deploy process-cancellation
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
@@ -95,6 +96,7 @@ supabase functions deploy verify-booking-payment
 supabase functions deploy stripe-webhook
 supabase functions deploy create-connect-account
 supabase functions deploy create-stripe-payout
+supabase functions deploy process-cancellation
 supabase functions deploy fetch-industry-news
 supabase functions deploy fetch-macro-indicators
 supabase functions deploy fetch-airdna-data
