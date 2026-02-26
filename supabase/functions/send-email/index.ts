@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending ${type || 'general'} email to: ${to}`);
 
     const emailResponse = await resend.emails.send({
-      from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+      from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
       to: [to],
       subject: subject,
       html: html,

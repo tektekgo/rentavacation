@@ -576,7 +576,7 @@ const TravelerCheckin = () => {
                     Need immediate help?
                   </p>
                   <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                    For urgent issues, contact our support team at support@rentavacation.com
+                    For urgent issues, contact our support team at support@rent-a-vacation.com
                   </p>
                 </div>
               </div>

@@ -134,7 +134,7 @@ const faqCategories = [
       {
         question: "How do I contact customer support?",
         answer:
-          "You can reach us via email at support@rentavacation.com, by phone at 1-800-RAV-0800, or through the Contact Us page on our website. We're available 24/7.",
+          "You can reach us via email at support@rent-a-vacation.com, by phone at 1-800-RAV-0800, or through the Contact Us page on our website. We're available 24/7.",
       },
     ],
   },

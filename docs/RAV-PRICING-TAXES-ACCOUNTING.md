@@ -179,4 +179,4 @@ As a marketplace that processes payments, RAV is classified as a **marketplace f
 ---
 
 *Prepared for RAV Partners — February 2026*
-*Questions: support@rentavacation.com*
+*Questions: support@rent-a-vacation.com*

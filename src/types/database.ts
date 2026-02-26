@@ -177,6 +177,10 @@ export interface Database {
           approved_at: string | null;
           rejection_reason: string | null;
           is_seed_foundation: boolean;
+          stripe_account_id: string | null;
+          stripe_onboarding_complete: boolean;
+          stripe_charges_enabled: boolean;
+          stripe_payouts_enabled: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -191,6 +195,10 @@ export interface Database {
           approved_at?: string | null;
           rejection_reason?: string | null;
           is_seed_foundation?: boolean;
+          stripe_account_id?: string | null;
+          stripe_onboarding_complete?: boolean;
+          stripe_charges_enabled?: boolean;
+          stripe_payouts_enabled?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -205,6 +213,10 @@ export interface Database {
           approved_at?: string | null;
           rejection_reason?: string | null;
           is_seed_foundation?: boolean;
+          stripe_account_id?: string | null;
+          stripe_onboarding_complete?: boolean;
+          stripe_charges_enabled?: boolean;
+          stripe_payouts_enabled?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -452,6 +464,7 @@ export interface Database {
           payout_date: string | null;
           payout_reference: string | null;
           payout_notes: string | null;
+          stripe_transfer_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -471,6 +484,7 @@ export interface Database {
           payout_date?: string | null;
           payout_reference?: string | null;
           payout_notes?: string | null;
+          stripe_transfer_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -490,6 +504,7 @@ export interface Database {
           payout_date?: string | null;
           payout_reference?: string | null;
           payout_notes?: string | null;
+          stripe_transfer_id?: string | null;
           updated_at?: string;
         };
         Relationships: [];

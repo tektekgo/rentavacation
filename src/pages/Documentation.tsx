@@ -732,6 +732,10 @@ const Documentation = () => {
                         <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
                         <span><strong>Auto-confirmation</strong> - Booking recorded on success</span>
                       </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
+                        <span><strong>Webhook Safety Net</strong> - Server-side verification catches payments even if browser closes</span>
+                      </li>
                     </ul>
                   </div>
 
@@ -1269,8 +1273,12 @@ const Documentation = () => {
                   <div className="bg-card rounded-xl p-6 border">
                     <h3 className="font-semibold mb-3">Sender Configuration</h3>
                     <div className="bg-muted/50 rounded-lg p-4">
-                      <p className="text-sm font-mono">rav@mail.ai-focus.org</p>
-                      <p className="text-xs text-muted-foreground mt-1">Rent-A-Vacation Official</p>
+                      <p className="text-sm font-mono">notifications@updates.rent-a-vacation.com</p>
+                      <p className="text-xs text-muted-foreground mt-1">Transactional emails (bookings, approvals, reminders)</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4 mt-3">
+                      <p className="text-sm font-mono">support@updates.rent-a-vacation.com</p>
+                      <p className="text-xs text-muted-foreground mt-1">Contact form replies and support notifications</p>
                     </div>
                   </div>
 
@@ -1282,9 +1290,22 @@ const Documentation = () => {
                       </div>
                       <div>
                         <p className="font-medium">Resend</p>
-                        <p className="text-xs text-muted-foreground">Transactional email delivery</p>
+                        <p className="text-xs text-muted-foreground">Transactional email delivery via updates.rent-a-vacation.com</p>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">GitHub Issue Notifications</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    A GitHub Action (<code className="bg-muted px-1 rounded text-xs">.github/workflows/issue-notifications.yml</code>)
+                    sends email notifications to the RAV team when issues are assigned, closed, or commented on.
+                  </p>
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <p className="text-sm"><strong>FROM:</strong> <code className="text-xs">RAV Updates &lt;notifications@updates.rent-a-vacation.com&gt;</code></p>
+                    <p className="text-sm mt-1"><strong>TO:</strong> sujit, ajumon, celin, sandhya @rent-a-vacation.com</p>
+                    <p className="text-sm mt-1"><strong>Secret:</strong> <code className="text-xs">RESEND_GITHUB_NOTIFICATIONS_KEY</code> (GitHub repo secret, separate from Supabase key)</p>
                   </div>
                 </div>
               </section>

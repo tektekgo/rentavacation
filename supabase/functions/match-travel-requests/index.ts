@@ -159,7 +159,7 @@ const handler = async (req: Request): Promise<Response> => {
               : `A listing matching your request just listed in ${city} — ${bedroomStr} for $${listing.final_price.toLocaleString()}.`;
 
           await resend.emails.send({
-            from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+            from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
             to: [traveler.email],
             subject: `New listing matches your travel request in ${city}!`,
             html: buildEmailHtml({

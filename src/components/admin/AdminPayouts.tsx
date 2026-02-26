@@ -13,9 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Wallet, Clock, CheckCircle, DollarSign, User, AlertCircle } from "lucide-react";
+import { Wallet, Clock, CheckCircle, DollarSign, User, AlertCircle, CreditCard, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, Listing, Property, Profile } from "@/types/database";
+import { useInitiateStripePayout } from "@/hooks/usePayouts";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property };
@@ -26,6 +27,7 @@ interface OwnerPayout {
   ownerId: string;
   ownerName: string;
   ownerEmail: string;
+  stripeConnected: boolean;
   totalPending: number;
   totalCompleted: number;
   pendingBookings: BookingWithDetails[];
@@ -37,6 +39,7 @@ const AdminPayouts = () => {
   const [payouts, setPayouts] = useState<OwnerPayout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedOwner, setExpandedOwner] = useState<string | null>(null);
+  const stripePayout = useInitiateStripePayout();
 
   const fetchPayouts = async () => {
     try {
@@ -59,10 +62,10 @@ const AdminPayouts = () => {
       // Get unique owner IDs
       const ownerIds = [...new Set((bookingsData || []).map((b: { listing: { owner_id: string } }) => b.listing?.owner_id))];
 
-      // Fetch owner profiles
+      // Fetch owner profiles with Stripe Connect status
       const { data: ownersData } = await supabase
         .from("profiles")
-        .select("*")
+        .select("*, stripe_account_id, stripe_payouts_enabled")
         .in("id", ownerIds);
 
       const ownersMap = new Map((ownersData || []).map((o: Profile) => [o.id, o]));
@@ -81,6 +84,7 @@ const AdminPayouts = () => {
             ownerId,
             ownerName: owner?.full_name || "Unknown",
             ownerEmail: owner?.email || "",
+            stripeConnected: !!(owner?.stripe_account_id && owner?.stripe_payouts_enabled),
             totalPending: 0,
             totalCompleted: 0,
             pendingBookings: [],
@@ -133,6 +137,24 @@ const AdminPayouts = () => {
       toast({
         title: "Error",
         description: "Failed to update booking status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStripePayout = async (bookingId: string) => {
+    try {
+      const result = await stripePayout.mutateAsync({ bookingId });
+      toast({
+        title: "Stripe Payout Initiated",
+        description: `Transfer ${result.transfer_id} created for $${result.amount.toLocaleString()}.`,
+      });
+      fetchPayouts();
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to initiate payout";
+      toast({
+        title: "Payout Failed",
+        description: msg,
         variant: "destructive",
       });
     }
@@ -203,16 +225,18 @@ const AdminPayouts = () => {
         </Card>
       </div>
 
-      {/* Manual Payout Info */}
+      {/* Payout Info */}
       <Card className="mb-6 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <CreditCard className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <p className="font-medium text-blue-800 dark:text-blue-200">Manual Payout Process</p>
+              <p className="font-medium text-blue-800 dark:text-blue-200">Payout Options</p>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                Payouts are currently processed manually via Zelle or bank transfer. 
-                After completing a payout, mark the booking as "Completed" to update the records.
+                <strong>Stripe Connect:</strong> Owners with connected Stripe accounts receive automated payouts. Use "Pay via Stripe" for instant transfers.
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                <strong>Manual:</strong> For owners without Stripe, use Zelle or bank transfer and "Mark Paid" to update records.
               </p>
             </div>
           </div>
@@ -249,7 +273,15 @@ const AdminPayouts = () => {
                     <div className="flex items-center gap-3">
                       <User className="h-5 w-5 text-muted-foreground" />
                       <div className="text-left">
-                        <p className="font-medium">{payout.ownerName}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{payout.ownerName}</p>
+                          {payout.stripeConnected && (
+                            <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                              <CreditCard className="h-3 w-3 mr-1" />
+                              Stripe
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{payout.ownerEmail}</p>
                       </div>
                     </div>
@@ -298,14 +330,30 @@ const AdminPayouts = () => {
                                     ${booking.owner_payout.toLocaleString()}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleMarkAsPaid(booking.id)}
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-1" />
-                                      Mark Paid
-                                    </Button>
+                                    <div className="flex items-center justify-end gap-2">
+                                      {payout.stripeConnected && (
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleStripePayout(booking.id)}
+                                          disabled={stripePayout.isPending}
+                                        >
+                                          {stripePayout.isPending ? (
+                                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                          ) : (
+                                            <CreditCard className="h-4 w-4 mr-1" />
+                                          )}
+                                          Pay via Stripe
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleMarkAsPaid(booking.id)}
+                                      >
+                                        <CheckCircle className="h-4 w-4 mr-1" />
+                                        Mark Paid
+                                      </Button>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ))}

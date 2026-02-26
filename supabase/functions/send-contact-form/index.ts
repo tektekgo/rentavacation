@@ -48,7 +48,7 @@ function buildEmailHtml(heading: string, body: string, recipientName?: string): 
           <div style="font-size: 15px; color: #2d3748; line-height: 1.7;">${body}</div>
           <p style="font-size: 15px; color: #2d3748; line-height: 1.6; margin: 24px 0 0 0;">
             If you have any questions, feel free to reach out at
-            <a href="mailto:support@rentavacation.com" style="color: #0d6b5c; text-decoration: none;">support@rentavacation.com</a>.
+            <a href="mailto:support@rent-a-vacation.com" style="color: #0d6b5c; text-decoration: none;">support@rent-a-vacation.com</a>.
           </p>
           <p style="font-size: 15px; color: #2d3748; margin: 24px 0 4px 0;">Best,</p>
           <p style="font-size: 15px; color: #2d3748; margin: 0;"><strong>&mdash;The Rent-A-Vacation Team</strong></p>
@@ -100,8 +100,8 @@ serve(async (req: Request) => {
     );
 
     const supportEmail = await resend.emails.send({
-      from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
-      to: ["support@rentavacation.com"],
+      from: "Rent-A-Vacation Support <support@updates.rent-a-vacation.com>",
+      to: ["support@rent-a-vacation.com"],
       replyTo: email,
       subject: `[Contact Form] ${subjectLabel} — from ${name}`,
       html: supportHtml,
@@ -122,7 +122,7 @@ serve(async (req: Request) => {
     );
 
     const confirmEmail = await resend.emails.send({
-      from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+      from: "Rent-A-Vacation Support <support@updates.rent-a-vacation.com>",
       to: [email],
       subject: "We received your message — Rent-A-Vacation",
       html: confirmHtml,

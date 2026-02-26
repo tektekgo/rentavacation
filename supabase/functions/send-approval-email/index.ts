@@ -240,7 +240,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const emailResponse = await resend.emails.send({
-      from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+      from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
       to: [profile.email],
       subject,
       html,

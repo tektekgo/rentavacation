@@ -76,7 +76,7 @@ export function buildEmailHtml(options: EmailTemplateOptions): string {
 
               <p style="font-size: 15px; color: ${TEXT_COLOR}; line-height: 1.6; margin: 24px 0 0 0;">
                 If you have any questions, please feel free to reach out to us at
-                <a href="mailto:support@rentavacation.com" style="color: ${BRAND_COLOR}; text-decoration: none;">support@rentavacation.com</a>.
+                <a href="mailto:support@rent-a-vacation.com" style="color: ${BRAND_COLOR}; text-decoration: none;">support@rent-a-vacation.com</a>.
               </p>
 
               <p style="font-size: 15px; color: ${TEXT_COLOR}; margin: 24px 0 4px 0;">Best,</p>

@@ -4,9 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, ArrowLeft, Calendar, MapPin, Users, Loader2, XCircle, Mail, Clock } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Calendar, MapPin, Users, Loader2, XCircle, Mail, Clock, Ban } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, Listing, Property } from "@/types/database";
+import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property };
@@ -20,6 +21,7 @@ const BookingSuccess = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const bookingId = searchParams.get("booking_id");
 
@@ -223,6 +225,20 @@ const BookingSuccess = () => {
           </CardContent>
         </Card>
 
+        {/* Cancel Booking */}
+        {booking.status === "confirmed" && (
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setCancelDialogOpen(true)}
+            >
+              <Ban className="mr-2 h-4 w-4" />
+              Cancel Booking
+            </Button>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4">
           <Button variant="outline" className="flex-1" onClick={() => navigate("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -232,6 +248,19 @@ const BookingSuccess = () => {
             Browse More Rentals
           </Button>
         </div>
+
+        {booking.status === "confirmed" && (
+          <CancelBookingDialog
+            open={cancelDialogOpen}
+            onOpenChange={setCancelDialogOpen}
+            bookingId={booking.id}
+            totalAmount={booking.total_amount}
+            checkInDate={booking.listing?.check_in_date}
+            cancellationPolicy={booking.listing?.cancellation_policy || "moderate"}
+            cancelledBy="renter"
+            onCancelled={() => navigate("/")}
+          />
+        )}
       </div>
     </div>
   );

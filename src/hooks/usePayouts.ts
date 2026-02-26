@@ -103,6 +103,69 @@ export function useMarkPayoutProcessed() {
   });
 }
 
+// Owner: get Stripe Connect account status
+export function useStripeConnectStatus() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['stripe-connect-status', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('stripe_account_id, stripe_onboarding_complete, stripe_charges_enabled, stripe_payouts_enabled')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+}
+
+// Owner: create or resume Stripe Connect onboarding
+export function useCreateConnectAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ returnUrl }: { returnUrl?: string } = {}) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await supabase.functions.invoke('create-connect-account', {
+        body: { returnUrl },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      return response.data as { success: boolean; url?: string; account_id: string; already_complete?: boolean };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stripe-connect-status'] });
+    },
+  });
+}
+
+// Admin: initiate Stripe Connect payout for a booking
+export function useInitiateStripePayout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ bookingId }: { bookingId: string }) => {
+      const response = await supabase.functions.invoke('create-stripe-payout', {
+        body: { bookingId },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      return response.data as { success: boolean; transfer_id: string; amount: number };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payouts'] });
+    },
+  });
+}
+
 // Payout stats for the owner
 export function useOwnerPayoutStats() {
   const { data: payouts = [], isLoading } = useOwnerPayouts();

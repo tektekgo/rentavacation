@@ -208,7 +208,11 @@ supabase/
     │   ├── email-template.ts  # Unified email layout (buildEmailHtml, detailRow, infoBox)
     │   └── property-search.ts # Shared search query builder (used by voice-search + text-chat)
     ├── create-booking-checkout/   # Stripe checkout session creation
-    ├── verify-booking-payment/    # Stripe webhook → update booking + send confirmation email
+    ├── verify-booking-payment/    # Client-side payment verification → update booking + send confirmation email
+    ├── stripe-webhook/            # Stripe webhook handler (payment verification, session expiry, refunds, Connect account + transfer events)
+    ├── create-connect-account/    # Stripe Connect: create Express account + onboarding link for owners
+    ├── create-stripe-payout/      # Stripe Connect: initiate transfer to owner's connected account (admin only)
+    ├── process-cancellation/      # Booking cancellation: policy-based refund, Stripe refund, status updates
     ├── send-email/                # Generic email dispatch via Resend
     ├── send-booking-confirmation-reminder/  # Owner deadline reminders + owner confirmation notifications
     ├── send-approval-email/              # Admin approval/rejection notifications (listings + users)
@@ -405,7 +409,7 @@ Traveler browses /rentals → views /property/:id
         ↓
 Traveler clicks "Book Now" → Edge Function: create-booking-checkout
         ↓
-Stripe Checkout → payment captured → webhook: verify-booking-payment
+Stripe Checkout → payment captured → verify-booking-payment (client) + stripe-webhook (server)
         ↓
 Booking created (status: confirmed) + booking_confirmation created
         ↓
@@ -471,7 +475,11 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 | Function | Trigger | Purpose |
 |----------|---------|---------|
 | `create-booking-checkout` | Client call | Creates Stripe Checkout session with listing details |
-| `verify-booking-payment` | Stripe webhook | Validates payment, updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
+| `verify-booking-payment` | Client call (post-redirect) | Client-side payment verification after Stripe redirect — updates booking status, creates booking_confirmation with owner acceptance timer, **sends traveler confirmation email + owner confirmation request** |
+| `stripe-webhook` | **Stripe webhook** | Server-side safety net for payment verification, session expiry, refunds, Connect account updates, and transfer tracking. Handles 6 event types. Idempotent. |
+| `create-connect-account` | Client call (owner) | Creates Stripe Express account for owner + generates onboarding link. Stores account ID in profiles. |
+| `create-stripe-payout` | Client call (admin) | Initiates Stripe Transfer to owner's connected account. Updates booking payout_status + sends notification email. |
+| `process-cancellation` | Client call (renter/owner) | Processes booking cancellation with policy-based refund. Creates Stripe refund, cancellation request record, updates booking/listing/escrow status, sends cancellation email. |
 | `send-email` | Client call | Generic email dispatch via Resend API |
 | `send-approval-email` | Client call | Sends approval/rejection emails for listings and users (4 variants) |
 | `send-booking-confirmation-reminder` | Client/internal | Reminds owner to submit resort confirmation + owner acceptance notifications (request, extension, timeout) |
@@ -491,11 +499,18 @@ All edge functions live in `supabase/functions/` and run on Deno. They share a c
 
 | Secret | Used by |
 |--------|---------|
-| `RESEND_API_KEY` | All email functions |
-| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment |
+| `RESEND_API_KEY` | All email functions (domain: `updates.rent-a-vacation.com`) |
+| `STRIPE_SECRET_KEY` | create-booking-checkout, verify-booking-payment, stripe-webhook, create-connect-account, create-stripe-payout |
+| `STRIPE_WEBHOOK_SECRET` | stripe-webhook (webhook signature verification) |
 | `NEWSAPI_KEY` | fetch-industry-news |
 | `OPENROUTER_API_KEY` | text-chat |
 | `IS_DEV_ENVIRONMENT` | seed-manager (production guard) |
+
+### Required Secrets (GitHub Repository)
+
+| Secret | Used by |
+|--------|---------|
+| `RESEND_GITHUB_NOTIFICATIONS_KEY` | `.github/workflows/issue-notifications.yml` — emails RAV team on issue events |
 
 ---
 
@@ -544,7 +559,7 @@ infoBox(content, variant): string // Colored info/warning/success/error box
 | User Approved | Admin approves user | User |
 | User Rejected | Admin rejects user | User |
 | Verification Doc Uploaded | Doc upload | RAV admin |
-| Contact Form | Form submission | support@rentavacation.com |
+| Contact Form | Form submission | support@rent-a-vacation.com |
 
 ---
 
@@ -781,4 +796,4 @@ Uses `/android-chrome-512x512.png` (absolute URL with domain). The `.svg` logo e
 6. Look at `src/hooks/useBidding.ts` for data fetching patterns
 7. Reference this document for architecture decisions and flow understanding
 
-**Questions?** Reach out to the team at support@rentavacation.com | 1-800-RAV-0800
+**Questions?** Reach out to the team at support@rent-a-vacation.com | 1-800-RAV-0800

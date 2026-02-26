@@ -435,7 +435,7 @@ def generate_roadmap():
 
     # 2.7 Communication
     doc.add_heading("2.7 Communication", level=2)
-    add_body(doc, "17 transactional email types via Resend API (rav@mail.ai-focus.org):", bold=True)
+    add_body(doc, "17 transactional email types via Resend API (notifications@updates.rent-a-vacation.com):", bold=True)
     add_table_from_data(doc,
         ["Category", "Emails"],
         [
@@ -932,7 +932,7 @@ def generate_roadmap():
     )
 
     # Footer
-    add_footer(doc, "Prepared for RAV Partners \u2014 Confidential \u2014 Draft\nGenerated February 22, 2026. All statistics verified against source code and database schema.\nRent-A-Vacation | rent-a-vacation.com | Name Your Price. Book Your Paradise.\nQuestions: support@rentavacation.com")
+    add_footer(doc, "Prepared for RAV Partners \u2014 Confidential \u2014 Draft\nGenerated February 22, 2026. All statistics verified against source code and database schema.\nRent-A-Vacation | rent-a-vacation.com | Name Your Price. Book Your Paradise.\nQuestions: support@rent-a-vacation.com")
 
     output_path = os.path.join(SCRIPT_DIR, "RAV-roadmap-draft-02222026.docx")
     doc.save(output_path)
@@ -992,7 +992,7 @@ def generate_status_report():
             ["Database", "Supabase PostgreSQL", "Row Level Security (RLS), pg_cron, pg_net"],
             ["Backend", "Supabase Edge Functions (Deno)", "17 serverless functions"],
             ["Payments", "Stripe Checkout", "Payment capture, escrow hold, webhooks"],
-            ["Email", "Resend API", "Branded transactional emails from rav@mail.ai-focus.org"],
+            ["Email", "Resend API", "Branded transactional emails from notifications@updates.rent-a-vacation.com"],
             ["Voice AI", "VAPI + Deepgram Nova-3", "Voice transcription and natural language property search"],
             ["Text AI", "OpenRouter (Gemini 3 Flash)", "LLM chat with SSE streaming and tool calling"],
             ["Charts", "Recharts", "Dashboard analytics and data visualization"],

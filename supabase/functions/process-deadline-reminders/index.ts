@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       await resend.emails.send({
-        from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+        from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
         to: [ownerEmail],
         subject,
         html,
@@ -197,7 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
             });
 
             await resend.emails.send({
-              from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+              from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
               to: [travelerEmail],
               subject: `Time to confirm your check-in at ${resortName}!`,
               html,
@@ -291,7 +291,7 @@ const handler = async (req: Request): Promise<Response> => {
             });
 
             await resend.emails.send({
-              from: "Rent-A-Vacation <rav@mail.ai-focus.org>",
+              from: "Rent-A-Vacation <notifications@updates.rent-a-vacation.com>",
               to: [traveler.email],
               subject,
               html,

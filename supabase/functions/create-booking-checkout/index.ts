@@ -170,6 +170,13 @@ serve(async (req) => {
         listing_id: listingId,
         renter_id: user.id,
       },
+      payment_intent_data: {
+        metadata: {
+          booking_id: booking.id,
+          listing_id: listingId,
+          renter_id: user.id,
+        },
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

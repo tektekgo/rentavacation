@@ -97,7 +97,7 @@ The platform is feature-complete for MVP across 19 completed development phases,
 
 ### 2.7 Communication
 
-**17 transactional email types** via Resend API (`rav@mail.ai-focus.org`):
+**17 transactional email types** via Resend API (`notifications@updates.rent-a-vacation.com`):
 
 | Category | Emails |
 |----------|--------|
@@ -551,4 +551,4 @@ All branded terms below are **RAV-coined names** — proprietary marketing terms
 *Prepared for RAV Partners — Confidential — Draft*
 *Generated February 22, 2026. All statistics verified against source code and database schema.*
 *Rent-A-Vacation | rent-a-vacation.com | Name Your Price. Book Your Paradise.*
-*Questions: support@rentavacation.com*
+*Questions: support@rent-a-vacation.com*
