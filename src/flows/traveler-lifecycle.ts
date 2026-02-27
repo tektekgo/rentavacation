@@ -149,6 +149,7 @@ export const travelerLifecycle: FlowDefinition = {
       description: 'User manages profile (name, phone), password, data export, and GDPR account deletion (14-day grace period)',
       tables: ['profiles'],
       edgeFunctions: ['export-user-data', 'delete-user-account'],
+      branches: [],
     },
     {
       id: 'report_issue',
@@ -157,6 +158,7 @@ export const travelerLifecycle: FlowDefinition = {
       component: 'ReportIssueDialog',
       description: 'Renter reports a problem with a booking — submits dispute for admin review',
       tables: ['disputes'],
+      branches: [],
     },
     {
       id: 'renter_cancellation',

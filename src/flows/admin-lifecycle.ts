@@ -81,6 +81,7 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_admin'],
       description: 'Review owner verification documents, update trust level',
       tables: ['owner_verifications', 'verification_documents'],
+      branches: [],
     },
 
     // ── Track 3: Booking Operations ──
@@ -124,6 +125,7 @@ export const adminLifecycle: FlowDefinition = {
       description: 'Track and process owner payouts via Stripe Connect or manual methods',
       tables: ['bookings'],
       edgeFunctions: ['create-stripe-payout'],
+      branches: [],
     },
 
     // ── Track 4: Support & Disputes ──
@@ -181,6 +183,7 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_owner', 'rav_admin'],
       description: 'Voice search admin controls: tier quotas, per-user overrides, usage dashboard, observability logs, and alert thresholds',
       tables: ['voice_search_logs', 'voice_user_overrides', 'voice_search_usage', 'membership_tiers', 'system_settings'],
+      branches: [],
     },
     {
       id: 'executive_dashboard',

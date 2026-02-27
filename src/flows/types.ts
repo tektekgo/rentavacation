@@ -85,8 +85,11 @@ export function flowToMermaid(flow: FlowDefinition): string {
     const current = flow.steps[i];
     const next = flow.steps[i + 1];
 
-    // If current step has branches, use those instead of sequential
-    if (current.branches && current.branches.length > 0) {
+    // END nodes are terminal — no outgoing edges
+    if (current.nodeStyle === 'end') continue;
+
+    // If step has branches array, use those (empty array = terminal, no sequential edge)
+    if (current.branches) {
       for (const branch of current.branches) {
         const style = branch.edgeStyle === 'dashed' ? '-.->' : '-->';
         const label = branch.label || branch.condition;
