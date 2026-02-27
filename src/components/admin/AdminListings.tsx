@@ -31,10 +31,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, MapPin, Search, Check, X, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Search, Check, X, DollarSign, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import type { Listing, Property, Profile, ListingStatus } from "@/types/database";
 import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
+import { AgeBadge } from "./AgeBadge";
 
 const REJECTION_TEMPLATES = [
   "Incomplete property details",
@@ -76,6 +78,9 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectingListingId, setRejectingListingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkRejecting, setIsBulkRejecting] = useState(false);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   useEffect(() => {
     if (initialSearch) setSearchQuery(initialSearch);
@@ -207,6 +212,105 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
     }
   };
 
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    let successCount = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const listing = listings.find((l) => l.id === id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("listings")
+          .update({
+            status: "active",
+            approved_by: user?.id,
+            approved_at: new Date().toISOString(),
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+        successCount++;
+
+        // Send approval email (non-blocking)
+        if (listing?.owner?.id) {
+          sendApprovalEmail(listing.owner.id, "approved");
+        }
+
+        // Trigger travel request matching (fire-and-forget)
+        supabase.functions.invoke("match-travel-requests", {
+          body: { listing_id: id },
+        }).catch((err) => console.error("Match trigger failed:", err));
+      } catch (error) {
+        console.error(`Error approving listing ${id}:`, error);
+      }
+    }
+
+    toast({
+      title: "Bulk Approve Complete",
+      description: `${successCount} of ${selectedIds.size} listings approved.`,
+    });
+    setSelectedIds(new Set());
+    setIsBulkProcessing(false);
+    fetchListings();
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedIds.size === 0 || !rejectionReason.trim()) return;
+    setIsBulkProcessing(true);
+    let successCount = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const listing = listings.find((l) => l.id === id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("listings")
+          .update({
+            status: "cancelled",
+            rejection_reason: rejectionReason.trim(),
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+        successCount++;
+
+        if (listing?.owner?.id) {
+          sendApprovalEmail(listing.owner.id, "rejected");
+        }
+      } catch (error) {
+        console.error(`Error rejecting listing ${id}:`, error);
+      }
+    }
+
+    toast({
+      title: "Bulk Reject Complete",
+      description: `${successCount} of ${selectedIds.size} listings rejected.`,
+    });
+    setSelectedIds(new Set());
+    setIsBulkProcessing(false);
+    setRejectDialogOpen(false);
+    setIsBulkRejecting(false);
+    fetchListings();
+  };
+
+  const openBulkRejectDialog = () => {
+    setIsBulkRejecting(true);
+    setRejectingListingId(null);
+    setRejectionReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const filteredListings = listings.filter((l) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q ||
@@ -281,6 +385,28 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={
+                        filteredListings.filter((l) => l.status === "pending_approval").length > 0 &&
+                        filteredListings
+                          .filter((l) => l.status === "pending_approval")
+                          .every((l) => selectedIds.has(l.id))
+                      }
+                      onCheckedChange={(checked) => {
+                        const pendingIds = filteredListings
+                          .filter((l) => l.status === "pending_approval")
+                          .map((l) => l.id);
+                        if (checked) {
+                          setSelectedIds(new Set([...selectedIds, ...pendingIds]));
+                        } else {
+                          const next = new Set(selectedIds);
+                          pendingIds.forEach((id) => next.delete(id));
+                          setSelectedIds(next);
+                        }
+                      }}
+                    />
+                  </TableHead>
                   <TableHead>Property</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Dates</TableHead>
@@ -292,6 +418,16 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
               <TableBody>
                 {filteredListings.map((listing) => (
                   <TableRow key={listing.id}>
+                    <TableCell>
+                      {listing.status === "pending_approval" ? (
+                        <Checkbox
+                          checked={selectedIds.has(listing.id)}
+                          onCheckedChange={() => toggleSelected(listing.id)}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium">{listing.property?.resort_name}</p>
@@ -325,14 +461,19 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={STATUS_COLORS[listing.status]}>
-                        {STATUS_LABELS[listing.status]}
-                      </Badge>
-                      {listing.status === "cancelled" && listing.rejection_reason && (
-                        <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate" title={listing.rejection_reason}>
-                          {listing.rejection_reason}
-                        </p>
-                      )}
+                      <div className="flex flex-col gap-1">
+                        <Badge className={STATUS_COLORS[listing.status]}>
+                          {STATUS_LABELS[listing.status]}
+                        </Badge>
+                        {listing.status === "pending_approval" && (
+                          <AgeBadge date={listing.created_at} thresholds={{ warning: 2, critical: 5 }} />
+                        )}
+                        {listing.status === "cancelled" && listing.rejection_reason && (
+                          <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate" title={listing.rejection_reason}>
+                            {listing.rejection_reason}
+                          </p>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {listing.status === "pending_approval" && (
@@ -366,13 +507,56 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background border rounded-lg shadow-lg px-6 py-3 flex items-center gap-4">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <Button
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleBulkApprove}
+            disabled={isBulkProcessing}
+          >
+            {isBulkProcessing ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4 mr-1" />
+            )}
+            Approve All
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={openBulkRejectDialog}
+            disabled={isBulkProcessing}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Reject All
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
+
       {/* Rejection Reason Dialog */}
-      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+      <Dialog open={rejectDialogOpen} onOpenChange={(open) => {
+        setRejectDialogOpen(open);
+        if (!open) setIsBulkRejecting(false);
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Reject Listing</DialogTitle>
+            <DialogTitle>
+              {isBulkRejecting ? `Reject ${selectedIds.size} Listings` : "Reject Listing"}
+            </DialogTitle>
             <DialogDescription>
-              Provide a reason for rejecting this listing. The owner will see this.
+              {isBulkRejecting
+                ? `Provide a reason for rejecting ${selectedIds.size} listings. All owners will see this.`
+                : "Provide a reason for rejecting this listing. The owner will see this."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -404,10 +588,13 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
             </Button>
             <Button
               variant="destructive"
-              onClick={handleReject}
-              disabled={!rejectionReason.trim()}
+              onClick={isBulkRejecting ? handleBulkReject : handleReject}
+              disabled={!rejectionReason.trim() || isBulkProcessing}
             >
-              Reject Listing
+              {isBulkProcessing ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : null}
+              {isBulkRejecting ? `Reject ${selectedIds.size} Listings` : "Reject Listing"}
             </Button>
           </DialogFooter>
         </DialogContent>

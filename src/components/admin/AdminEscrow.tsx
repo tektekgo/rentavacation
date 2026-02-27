@@ -64,6 +64,7 @@ import type {
 } from "@/types/database";
 import { AdminEntityLink } from "./AdminEntityLink";
 import { DateRangeFilter } from "./DateRangeFilter";
+import { AgeBadge } from "./AgeBadge";
 
 interface EscrowWithDetails extends BookingConfirmation {
   booking: Booking & {
@@ -649,6 +650,9 @@ const AdminEscrow = ({ initialSearch = "", onNavigateToEntity }: { initialSearch
                               <Zap className="h-3 w-3 mr-1" />
                               Auto-released
                             </Badge>
+                          )}
+                          {["pending_confirmation", "confirmation_submitted"].includes(escrow.escrow_status) && (
+                            <AgeBadge date={escrow.created_at} useHours thresholds={{ warning: 1, critical: 3 }} />
                           )}
                         </div>
                       </TableCell>

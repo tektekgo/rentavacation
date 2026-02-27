@@ -44,8 +44,9 @@ import {
   Eye,
   XCircle,
 } from "lucide-react";
-import type { Database } from "@/types/database";
+import type { Database, Profile } from "@/types/database";
 import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
+import { AgeBadge } from "./AgeBadge";
 
 type DisputeStatus = Database["public"]["Enums"]["dispute_status"];
 type DisputeCategory = Database["public"]["Enums"]["dispute_category"];
@@ -140,7 +141,9 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   const [disputes, setDisputes] = useState<DisputeWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("active");
+  const [assignmentFilter, setAssignmentFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [ravTeamMembers, setRavTeamMembers] = useState<Pick<Profile, "id" | "full_name">[]>([]);
 
   useEffect(() => {
     if (initialSearch) setSearchTerm(initialSearch);
@@ -333,6 +336,43 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
     }
   };
 
+  // Fetch RAV team members for assignment dropdown
+  useEffect(() => {
+    const fetchTeam = async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["rav_owner", "rav_admin", "rav_staff"]);
+      if (data && data.length > 0) {
+        const ids = [...new Set(data.map((r: { user_id: string }) => r.user_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", ids);
+        if (profiles) setRavTeamMembers(profiles);
+      }
+    };
+    fetchTeam();
+  }, []);
+
+  const handleAssign = async (disputeId: string, assigneeId: string | null) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from("disputes")
+        .update({ assigned_to: assigneeId })
+        .eq("id", disputeId);
+      if (error) throw error;
+      const name = assigneeId
+        ? ravTeamMembers.find((m) => m.id === assigneeId)?.full_name || "team member"
+        : "nobody";
+      toast({ title: `Dispute assigned to ${name}` });
+      fetchDisputes();
+    } catch {
+      toast({ title: "Failed to assign dispute", variant: "destructive" });
+    }
+  };
+
   // Stats
   const openCount = disputes.filter((d) => d.status === "open").length;
   const investigatingCount = disputes.filter((d) => d.status === "investigating").length;
@@ -345,17 +385,20 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   }).length;
 
   // Filtered disputes
-  const filteredDisputes = searchTerm
-    ? disputes.filter(
-        (d) =>
-          d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          d.reporter?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          d.booking?.listing?.property?.resort_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          d.id.includes(searchTerm)
-      )
-    : disputes;
+  const filteredDisputes = disputes.filter((d) => {
+    const matchesSearch = !searchTerm ||
+      d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.reporter?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.booking?.listing?.property?.resort_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.id.includes(searchTerm);
+
+    const matchesAssignment =
+      assignmentFilter === "all" ||
+      (assignmentFilter === "mine" && d.assigned_to === user?.id) ||
+      (assignmentFilter === "unassigned" && !d.assigned_to);
+
+    return matchesSearch && matchesAssignment;
+  });
 
   const isResolved = (status: DisputeStatus) =>
     ["resolved_full_refund", "resolved_partial_refund", "resolved_no_refund", "closed"].includes(
@@ -428,6 +471,17 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
           </SelectContent>
         </Select>
 
+        <Select value={assignmentFilter} onValueChange={setAssignmentFilter}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Assignment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="mine">My Disputes</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+          </SelectContent>
+        </Select>
+
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -457,7 +511,8 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                 <TableHead>Resort</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Age</TableHead>
+                <TableHead>Assigned To</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -510,9 +565,34 @@ const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(dispute.created_at).toLocaleDateString()}
-                    </span>
+                    <AgeBadge date={dispute.created_at} thresholds={{ warning: 2, critical: 5 }} />
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={dispute.assigned_to || "unassigned"}
+                      onValueChange={(v) => handleAssign(dispute.id, v === "unassigned" ? null : v)}
+                    >
+                      <SelectTrigger className="h-7 w-32 text-xs">
+                        <SelectValue>
+                          {dispute.assigned_to
+                            ? ravTeamMembers.find((m) => m.id === dispute.assigned_to)?.full_name || "Assigned"
+                            : "Unassigned"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {user && (
+                          <SelectItem value={user.id}>Me</SelectItem>
+                        )}
+                        {ravTeamMembers
+                          .filter((m) => m.id !== user?.id)
+                          .map((m) => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.full_name || "Unknown"}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">

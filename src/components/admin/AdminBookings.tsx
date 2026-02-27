@@ -27,6 +27,7 @@ import type { DateRange } from "react-day-picker";
 import type { Booking, Listing, Property, Profile, BookingStatus } from "@/types/database";
 import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
 import { DateRangeFilter } from "./DateRangeFilter";
+import { AgeBadge } from "./AgeBadge";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property; owner: Profile };
@@ -245,14 +246,19 @@ const AdminBookings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Badge className={STATUS_COLORS[booking.status]}>
-                          {STATUS_LABELS[booking.status]}
-                        </Badge>
-                        {booking.paid_at && (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
-                            Paid
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className={STATUS_COLORS[booking.status]}>
+                            {STATUS_LABELS[booking.status]}
                           </Badge>
+                          {booking.paid_at && (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              Paid
+                            </Badge>
+                          )}
+                        </div>
+                        {booking.status === "pending" && (
+                          <AgeBadge date={booking.created_at} thresholds={{ warning: 1, critical: 3 }} />
                         )}
                       </div>
                     </TableCell>
