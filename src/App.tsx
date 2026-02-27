@@ -31,7 +31,7 @@ import PendingApproval from "./pages/PendingApproval";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
-import Architecture from "./pages/Architecture";
+import UserJourneys from "./pages/UserJourneys";
 import Contact from "./pages/Contact";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import MaintenanceFeeCalculator from "./pages/MaintenanceFeeCalculator";
@@ -145,7 +145,7 @@ const App = () => (
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/documentation" element={<Documentation />} />
             <Route path="/user-guide" element={<UserGuide />} />
-            <Route path="/architecture" element={<Architecture />} />
+            <Route path="/user-journeys" element={<UserJourneys />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/calculator" element={<MaintenanceFeeCalculator />} />
 

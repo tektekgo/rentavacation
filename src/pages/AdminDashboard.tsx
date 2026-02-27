@@ -148,9 +148,9 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               {hasRole("rav_owner") && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/architecture")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/user-journeys")}>
                   <Network className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Architecture</span>
+                  <span className="hidden sm:inline">User Journeys</span>
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={() => navigate("/documentation")}>

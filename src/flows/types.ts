@@ -2,7 +2,7 @@
  * Flow Manifest Type Definitions
  * 
  * Declarative data structures that describe user journeys through the application.
- * The /architecture page auto-generates interactive Mermaid diagrams from these manifests.
+ * The /user-journeys page auto-generates interactive Mermaid diagrams from these manifests.
  * 
  * Convention: When adding a new route or workflow step, update the relevant manifest.
  * See CLAUDE.md for AI agent instructions.

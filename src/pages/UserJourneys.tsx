@@ -179,7 +179,7 @@ function StepTable({ flow }: { flow: FlowDefinition }) {
   );
 }
 
-export default function Architecture() {
+export default function UserJourneys() {
   const { user, roles, isRavTeam, isLoading } = useAuth();
   const navigate = useNavigate();
   const [rolesChecked, setRolesChecked] = useState(false);
@@ -188,7 +188,7 @@ export default function Architecture() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      navigate('/login', { state: { from: '/architecture' } });
+      navigate('/login', { state: { from: '/user-journeys' } });
       return;
     }
     // Give roles time to load (they're fetched in setTimeout in AuthContext)
@@ -212,7 +212,7 @@ export default function Architecture() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold font-display text-foreground">
-              System Architecture
+              User Journeys
             </h1>
             <Badge className="bg-primary text-primary-foreground">RAV Team</Badge>
           </div>

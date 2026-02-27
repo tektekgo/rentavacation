@@ -183,9 +183,9 @@ const Header = () => {
                     )}
                     {isRavTeam() && (
                       <DropdownMenuItem asChild>
-                        <Link to="/architecture" className="flex items-center gap-2 cursor-pointer">
+                        <Link to="/user-journeys" className="flex items-center gap-2 cursor-pointer">
                           <GitBranch className="h-4 w-4" />
-                          Architecture
+                          User Journeys
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -380,12 +380,12 @@ const Header = () => {
                   )}
                   {isRavTeam() && (
                     <Link
-                      to="/architecture"
+                      to="/user-journeys"
                       className="flex items-center gap-2 text-foreground py-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <GitBranch className="h-4 w-4" />
-                      Architecture
+                      User Journeys
                     </Link>
                   )}
                   {isPropertyOwner() && (
