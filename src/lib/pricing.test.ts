@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateNights, computeListingPricing } from './pricing';
+import { calculateNights, computeListingPricing, computeFeeBreakdown } from './pricing';
 
 describe('calculateNights', () => {
   it('returns correct nights for a standard week', () => {
@@ -61,5 +61,70 @@ describe('computeListingPricing', () => {
     expect(result.ownerPrice).toBe(495);
     expect(result.ravMarkup).toBe(74); // round(495 * 0.15) = round(74.25) = 74
     expect(result.finalPrice).toBe(569);
+  });
+});
+
+describe('computeFeeBreakdown', () => {
+  it('computes correct breakdown for $200/night x 7 nights, no cleaning fee', () => {
+    const result = computeFeeBreakdown(200, 7);
+    expect(result.baseAmount).toBe(1400);
+    expect(result.serviceFee).toBe(210); // round(1400 * 0.15)
+    expect(result.cleaningFee).toBe(0);
+    expect(result.subtotal).toBe(1610); // 1400 + 210 + 0
+    expect(result.ownerPayout).toBe(1400); // 1400 + 0
+  });
+
+  it('includes cleaning fee in subtotal and owner payout', () => {
+    const result = computeFeeBreakdown(200, 7, 150);
+    expect(result.baseAmount).toBe(1400);
+    expect(result.serviceFee).toBe(210);
+    expect(result.cleaningFee).toBe(150);
+    expect(result.subtotal).toBe(1760); // 1400 + 210 + 150
+    expect(result.ownerPayout).toBe(1550); // 1400 + 150
+  });
+
+  it('returns zeros for 0 nights', () => {
+    const result = computeFeeBreakdown(200, 0);
+    expect(result.baseAmount).toBe(0);
+    expect(result.serviceFee).toBe(0);
+    expect(result.subtotal).toBe(0);
+    expect(result.ownerPayout).toBe(0);
+  });
+
+  it('returns zeros for $0/night', () => {
+    const result = computeFeeBreakdown(0, 7);
+    expect(result.baseAmount).toBe(0);
+    expect(result.serviceFee).toBe(0);
+    expect(result.subtotal).toBe(0);
+    expect(result.ownerPayout).toBe(0);
+  });
+
+  it('handles cleaning fee with zero base', () => {
+    const result = computeFeeBreakdown(0, 0, 100);
+    expect(result.baseAmount).toBe(0);
+    expect(result.serviceFee).toBe(0);
+    expect(result.cleaningFee).toBe(100);
+    expect(result.subtotal).toBe(100);
+    expect(result.ownerPayout).toBe(100);
+  });
+
+  it('rounds base amount to whole dollars', () => {
+    const result = computeFeeBreakdown(99, 3);
+    expect(result.baseAmount).toBe(297);
+    expect(result.serviceFee).toBe(45); // round(297 * 0.15) = round(44.55) = 45
+    expect(result.subtotal).toBe(342);
+  });
+
+  it('service fee is 15% of base (not base + cleaning)', () => {
+    const result = computeFeeBreakdown(100, 1, 500);
+    expect(result.baseAmount).toBe(100);
+    expect(result.serviceFee).toBe(15); // 15% of 100, NOT 15% of 600
+    expect(result.subtotal).toBe(615); // 100 + 15 + 500
+    expect(result.ownerPayout).toBe(600); // 100 + 500
+  });
+
+  it('defaults cleaning fee to 0 when not provided', () => {
+    const result = computeFeeBreakdown(100, 1);
+    expect(result.cleaningFee).toBe(0);
   });
 });

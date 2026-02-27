@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { searchProperties } from "../_shared/property-search.ts";
 import type { SearchParams, SearchResult } from "../_shared/property-search.ts";
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 // --- CORS: Same allowlist pattern as voice-search ---
 function isAllowedOrigin(origin: string): boolean {
@@ -195,6 +196,16 @@ serve(async (req) => {
       );
     }
     logStep("User authenticated", { userId: user.id });
+
+    // Database-backed rate limit (per-user, complements IP-based limit above)
+    const rateLimitClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false },
+    });
+    const rateCheck = await checkRateLimit(rateLimitClient, user.id, RATE_LIMITS.TEXT_CHAT);
+    if (!rateCheck.allowed) {
+      logStep("Rate limited (per-user)", { userId: user.id });
+      return rateLimitResponse(rateCheck.retryAfterSeconds);
+    }
 
     // Parse request
     const { message, conversationHistory, context }: TextChatRequest = await req.json();

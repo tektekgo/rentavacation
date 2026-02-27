@@ -26,7 +26,12 @@ import {
   Camera,
   MessageSquare,
   Clock,
-  Plane
+  Plane,
+  Bell,
+  Settings,
+  Ban,
+  Wallet,
+  MailCheck
 } from "lucide-react";
 
 const UserGuide = () => {
@@ -52,6 +57,8 @@ const UserGuide = () => {
     { id: "manage-bids", label: "Manage Bids & Proposals", icon: Gavel },
     { id: "confirm-bookings", label: "Confirm Bookings", icon: Calendar },
     { id: "receive-payouts", label: "Receive Payouts", icon: DollarSign },
+    { id: "cancellations", label: "Cancellations", icon: Ban },
+    { id: "account-settings", label: "Account & Preferences", icon: Settings },
     { id: "owner-faq", label: "Owner FAQ", icon: MessageSquare },
   ];
 
@@ -60,8 +67,10 @@ const UserGuide = () => {
     { id: "search-book", label: "Search & Book", icon: Search },
     { id: "travel-requests", label: "Submit Travel Requests", icon: Plane },
     { id: "place-bids", label: "Place Bids on Listings", icon: Gavel },
+    { id: "my-bookings", label: "My Bookings & Cancellations", icon: Calendar },
     { id: "checkin", label: "Check-In Process", icon: Key },
     { id: "protection", label: "Renter Protection", icon: Shield },
+    { id: "account-settings", label: "Account & Preferences", icon: Settings },
     { id: "renter-faq", label: "Renter FAQ", icon: MessageSquare },
   ];
 
@@ -95,7 +104,7 @@ const UserGuide = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <img src="/rav-logo.png" alt="RAV Logo" className="h-8 w-8" />
+            <img src="/rav-logo.svg" alt="RAV Logo" className="h-8 w-8" />
             <div>
               <h1 className="text-lg font-bold text-foreground">Rent-A-Vacation</h1>
               <p className="text-xs text-muted-foreground">User Guide</p>
@@ -187,7 +196,7 @@ const UserGuide = () => {
             {isPrinting && (
               <section className="print:break-after-page hidden print:block">
                 <div className="min-h-[90vh] flex flex-col items-center justify-center text-center">
-                  <img src="/rav-logo.png" alt="RAV Logo" className="h-24 w-24 mb-8" />
+                  <img src="/rav-logo.svg" alt="RAV Logo" className="h-24 w-24 mb-8" />
                   <h1 className="text-5xl font-bold text-foreground mb-4">Rent-A-Vacation</h1>
                   <p className="text-2xl text-primary font-medium mb-2">
                     {activeRole === "owner" ? "Property Owner Guide" : "Renter Guide"}
@@ -244,11 +253,13 @@ const UserGuide = () => {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Quick Start Checklist</h3>
                   {[
-                    { step: 1, title: "Create your account", desc: "Sign up with your email. Your account will be reviewed by our team before you can access the platform." },
-                    { step: 2, title: "Register your property", desc: "Once approved, add your vacation club resort and unit details" },
-                    { step: 3, title: "Get verified", desc: "Upload ID and ownership documents for the verified badge" },
-                    { step: 4, title: "Create your first listing", desc: "Set dates, pricing, and open for bookings" },
-                    { step: 5, title: "Receive bookings", desc: "Confirm reservations and collect payouts" },
+                    { step: 1, title: "Create your account", desc: "Sign up with your email and verify your email address by clicking the link we send you." },
+                    { step: 2, title: "Get approved", desc: "Your account will be reviewed by our team. You'll receive an email once approved (typically within 24 hours)." },
+                    { step: 3, title: "Register your property", desc: "Once approved, add your vacation club resort and unit details" },
+                    { step: 4, title: "Get verified", desc: "Upload ID and ownership documents for the verified badge" },
+                    { step: 5, title: "Connect Stripe", desc: "Set up Stripe Connect to receive automated payouts directly to your bank account" },
+                    { step: 6, title: "Create your first listing", desc: "Set nightly rates, dates, and open for bookings" },
+                    { step: 7, title: "Receive bookings", desc: "Confirm reservations and collect payouts" },
                   ].map((item) => (
                     <div key={item.step} className="flex gap-4 p-4 bg-card rounded-xl border">
                       <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold flex-shrink-0">
@@ -365,7 +376,13 @@ const UserGuide = () => {
                     <li className="flex gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <strong>Set your price</strong> — Total price for the stay (you'll receive 85% after platform commission)
+                        <strong>Set your nightly rate</strong> — Per-night pricing (total is calculated automatically based on dates)
+                      </div>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Add optional fees</strong> — Cleaning fee and/or resort fee (shown separately to renters at checkout)
                       </div>
                     </li>
                     <li className="flex gap-3">
@@ -393,7 +410,7 @@ const UserGuide = () => {
                   <div className="bg-muted/50 rounded-xl p-6">
                     <h4 className="font-semibold mb-3">Standard Listing</h4>
                     <p className="text-sm text-muted-foreground">
-                      Set a fixed price. Renters book directly at your listed rate through Stripe secure checkout.
+                      Set a nightly rate plus optional cleaning and resort fees. Renters book directly through Stripe secure checkout with a full fee breakdown.
                     </p>
                   </div>
                   <div className="bg-primary/5 rounded-xl p-6 border border-primary/20">
@@ -588,10 +605,175 @@ const UserGuide = () => {
                   </div>
                 </div>
 
+                <div className="bg-primary/5 rounded-xl p-6 border border-primary/20">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Set Up Stripe Connect
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    To receive automated payouts directly to your bank account, connect your Stripe account:
+                  </p>
+                  <ol className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">1</span>
+                      <span>Go to Owner Dashboard → "Earnings" tab</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">2</span>
+                      <span>Click "Connect Stripe Account" in the banner at the top</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">3</span>
+                      <span>Complete the Stripe onboarding (identity verification, bank details)</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">4</span>
+                      <span>Once connected, payouts are processed automatically after the 5-day hold period</span>
+                    </li>
+                  </ol>
+                </div>
+
                 <div className="bg-card rounded-xl p-6 border">
                   <h3 className="font-semibold mb-3">Track Your Earnings</h3>
                   <p className="text-sm text-muted-foreground">
                     View all earnings, pending payouts, and transaction history in Owner Dashboard → "Earnings" tab.
+                    You can see your Stripe connection status and payout history at any time.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Owner Cancellations */}
+            {activeRole === "owner" && (isPrinting || activeSection === "cancellations") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Cancellations</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Understand when and how to cancel bookings as an owner.
+                  </p>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                  <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    Owner Cancellation Policy
+                  </h4>
+                  <p className="text-sm text-red-700">
+                    If you cancel a confirmed booking, the renter receives a full refund regardless of the cancellation policy.
+                    Repeated cancellations may affect your account standing and search ranking.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4">How to Cancel a Booking</h3>
+                  <ol className="space-y-3 text-sm">
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">1</span>
+                      <span>Go to Owner Dashboard → "Bookings" tab</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">2</span>
+                      <span>Find the booking you need to cancel</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">3</span>
+                      <span>Click "Cancel Booking" and provide a reason</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">4</span>
+                      <span>The renter is automatically refunded in full and notified via email</span>
+                    </li>
+                  </ol>
+                </div>
+
+                <div className="bg-muted/50 rounded-xl p-6">
+                  <h3 className="font-semibold mb-3">Renter Cancellation Policies</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    When a renter cancels, the refund amount depends on the cancellation policy you set on the listing:
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Flexible</span>
+                      <span className="text-muted-foreground">Full refund up to 24 hours before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Moderate</span>
+                      <span className="text-muted-foreground">Full refund up to 5 days before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Strict</span>
+                      <span className="text-muted-foreground">50% refund up to 7 days before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Super Strict</span>
+                      <span className="text-muted-foreground">No refund after booking confirmation</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Owner Account & Preferences */}
+            {activeRole === "owner" && (isPrinting || activeSection === "account-settings") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Account & Preferences</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Manage your profile, security settings, and notification preferences.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    Profile Settings
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Go to <strong>Account Settings</strong> (click your avatar in the header) to manage:
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Full Name & Phone</strong> — Update your contact information</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Password</strong> — Change your password (minimum 6 characters)</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Account Info</strong> — View your roles and membership date</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-primary" />
+                    Notification Preferences
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Control which emails you receive. Go to Account Settings → Notification Preferences to toggle:
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• <strong>Booking Updates</strong> — Booking confirmations, cancellations, payout notifications</li>
+                    <li>• <strong>Bidding & Proposals</strong> — New bids on your listings, bid acceptance, bidding deadline reminders</li>
+                    <li>• <strong>Travel Requests</strong> — New matching travel requests, proposal acceptance</li>
+                    <li>• <strong>Marketing & Updates</strong> — Product updates, tips, and platform news</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Transactional emails (password resets, security alerts) cannot be disabled.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                  <h4 className="font-medium text-amber-800 mb-2 flex items-center gap-2">
+                    <MailCheck className="h-5 w-5" />
+                    Email Verification
+                  </h4>
+                  <p className="text-sm text-amber-700">
+                    Your email must be verified to use all platform features. If you haven't verified yet,
+                    check your inbox for the verification link or request a new one from the notification banner.
                   </p>
                 </div>
               </section>
@@ -610,7 +792,7 @@ const UserGuide = () => {
                 <div className="space-y-4">
                   {[
                     { q: "How much does it cost to list?", a: "Listing is free. We only charge a 15% commission when your property is booked." },
-                    { q: "What if I need to cancel a booking?", a: "Contact RAV support immediately. Depending on timing and reason, refund policies apply. Repeated cancellations may affect your account standing." },
+                    { q: "What if I need to cancel a booking?", a: "Go to Owner Dashboard → Bookings, click 'Cancel Booking' on the reservation. The renter receives a full refund automatically. Repeated cancellations affect your account standing and search ranking. See the Cancellations section for details." },
                     { q: "How do I get the verified badge?", a: "Upload your government ID and vacation club membership documentation in Owner Dashboard → Verification tab." },
                     { q: "Can I set a minimum bid amount?", a: "Yes, when enabling bidding you can set a 'reserve price' - the minimum you'll accept. Bids below this are marked accordingly." },
                     { q: "What cancellation policy should I choose?", a: "Flexible policies attract more bookings but carry more risk. Strict policies protect your income but may reduce bookings. Start with Moderate." },
@@ -662,12 +844,16 @@ const UserGuide = () => {
 
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
                   <h4 className="font-medium text-amber-800 mb-2 flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Account Approval Required
+                    <MailCheck className="h-5 w-5" />
+                    Email Verification & Account Approval
                   </h4>
-                  <p className="text-sm text-amber-700">
-                    After signing up, your account will be reviewed by our team. You'll receive an email once approved,
+                  <p className="text-sm text-amber-700 mb-2">
+                    After signing up, verify your email address by clicking the link sent to your inbox.
+                    Then your account will be reviewed by our team — you'll receive an email once approved,
                     typically within 24 hours. Until then, you'll see a "Pending Approval" page when you log in.
+                  </p>
+                  <p className="text-xs text-amber-600">
+                    Didn't receive the verification email? Check your spam folder or click "Resend" on the verification banner.
                   </p>
                 </div>
 
@@ -769,6 +955,10 @@ const UserGuide = () => {
                     </li>
                     <li className="flex gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span>Review the fee breakdown (nightly rate, service fee, cleaning fee, applicable taxes)</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>Complete secure payment via Stripe</span>
                     </li>
                     <li className="flex gap-3">
@@ -780,6 +970,35 @@ const UserGuide = () => {
                       <span>Receive confirmation email with details</span>
                     </li>
                   </ol>
+                </div>
+
+                <div className="bg-muted/50 rounded-xl p-6">
+                  <h3 className="font-semibold mb-3">Understanding the Fee Breakdown</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    At checkout, you'll see a transparent breakdown of all charges:
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Nightly rate × number of nights</span>
+                      <span className="font-medium">Base price</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Service fee (15%)</span>
+                      <span className="font-medium">Platform fee</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cleaning fee (if applicable)</span>
+                      <span className="font-medium">Set by owner</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Taxes</span>
+                      <span className="font-medium">Calculated by location</span>
+                    </div>
+                    <div className="border-t pt-2 flex justify-between font-bold">
+                      <span>Total</span>
+                      <span>All-in price</span>
+                    </div>
+                  </div>
                 </div>
               </section>
             )}
@@ -890,6 +1109,99 @@ const UserGuide = () => {
               </section>
             )}
 
+            {/* My Bookings & Cancellations */}
+            {activeRole === "renter" && (isPrinting || activeSection === "my-bookings") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">My Bookings & Cancellations</h1>
+                  <p className="text-xl text-muted-foreground">
+                    View, manage, and cancel your bookings from one place.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    My Bookings Page
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Access your bookings from the header navigation or go to <strong>/my-bookings</strong>. You can filter by:
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>All Bookings</strong> — See every booking you've made</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Upcoming</strong> — Future bookings that haven't checked in yet</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Past</strong> — Completed stays and cancelled bookings</span>
+                    </li>
+                  </ul>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    Each booking card shows the resort name, dates, status badge (confirmed, pending, cancelled),
+                    and total amount paid.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Ban className="h-5 w-5 text-primary" />
+                    How to Cancel a Booking
+                  </h3>
+                  <ol className="space-y-3 text-sm">
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">1</span>
+                      <span>Go to My Bookings and find the booking you want to cancel</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">2</span>
+                      <span>Click the "Cancel" button on the booking card</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">3</span>
+                      <span>Review the refund amount based on the listing's cancellation policy</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">4</span>
+                      <span>Confirm the cancellation — your refund is processed via Stripe</span>
+                    </li>
+                  </ol>
+                </div>
+
+                <div className="bg-muted/50 rounded-xl p-6">
+                  <h3 className="font-semibold mb-3">Cancellation Policies & Refunds</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Refund amounts depend on the cancellation policy set by the owner:
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Flexible</span>
+                      <span className="text-muted-foreground">Full refund up to 24 hours before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Moderate</span>
+                      <span className="text-muted-foreground">Full refund up to 5 days before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Strict</span>
+                      <span className="text-muted-foreground">50% refund up to 7 days before check-in</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-background rounded">
+                      <span className="font-medium">Super Strict</span>
+                      <span className="text-muted-foreground">No refund after booking confirmation</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    The cancellation policy is displayed on the listing page and at checkout. Always review it before booking.
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* Check-in Process */}
             {activeRole === "renter" && (isPrinting || activeSection === "checkin") && (
               <section className="space-y-8 print:break-after-page">
@@ -994,6 +1306,61 @@ const UserGuide = () => {
               </section>
             )}
 
+            {/* Renter Account & Preferences */}
+            {activeRole === "renter" && (isPrinting || activeSection === "account-settings") && (
+              <section className="space-y-8 print:break-after-page">
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-4">Account & Preferences</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Manage your profile, security, and email notification preferences.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    Account Settings
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Click your avatar in the header and select "Account Settings" or go to <strong>/account</strong>.
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Profile</strong> — Update your full name and phone number</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Security</strong> — Change your password (minimum 6 characters)</span>
+                    </li>
+                    <li className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <span><strong>Account Info</strong> — View your roles and member-since date</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-card rounded-xl p-6 border">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-primary" />
+                    Notification Preferences
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Control which emails you receive from Rent-A-Vacation:
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• <strong>Booking Updates</strong> — Confirmation, cancellation, and payout emails</li>
+                    <li>• <strong>Bidding & Proposals</strong> — Bid status and proposal notifications</li>
+                    <li>• <strong>Travel Requests</strong> — Updates on your posted travel requests</li>
+                    <li>• <strong>Marketing & Updates</strong> — Product news, tips, and platform updates</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Toggle each preference on or off. Transactional emails (password resets, security alerts) cannot be disabled.
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* Renter FAQ */}
             {activeRole === "renter" && (isPrinting || activeSection === "renter-faq") && (
               <section className="space-y-8 print:break-after-page">
@@ -1011,7 +1378,7 @@ const UserGuide = () => {
                     { q: "What is the daily voice search limit?", a: "Voice search quotas are tier-based: Free members get 5/day, Plus/Pro get 25/day, and Premium/Business members have unlimited searches. Quotas reset at midnight. A badge near the search bar shows your remaining searches. Manual text search has no limits." },
                     { q: "Is my payment secure?", a: "Yes, all payments are processed through Stripe and held in escrow until your stay completes successfully." },
                     { q: "What if the owner doesn't confirm?", a: "If the owner doesn't confirm within 48 hours, your booking is automatically cancelled with a full refund." },
-                    { q: "Can I cancel my booking?", a: "Yes, but refund amount depends on the listing's cancellation policy (Flexible, Moderate, Strict, Super Strict)." },
+                    { q: "Can I cancel my booking?", a: "Yes — go to My Bookings, click 'Cancel' on the booking card, and confirm. Your refund depends on the listing's cancellation policy: Flexible (full refund 24h before), Moderate (full refund 5 days before), Strict (50% refund 7 days before), or Super Strict (no refund). See the My Bookings & Cancellations section for details." },
                     { q: "What if the property isn't as described?", a: "Report the issue during check-in. RAV support will work to resolve it, potentially including relocation or refund." },
                     { q: "How do I contact the owner?", a: "Owner contact information is provided after booking confirmation, 24 hours before check-in." },
                     { q: "Are these real vacation club properties?", a: "Yes, all properties are from verified vacation club and timeshare owners. Verified owners have confirmed ownership documents." },
@@ -1028,7 +1395,7 @@ const UserGuide = () => {
 
             {/* Footer */}
             <footer className="mt-16 pt-8 border-t text-center text-sm text-muted-foreground">
-              <p>Rent-A-Vacation © 2024 — A Techsilon Group Company</p>
+              <p>Rent-A-Vacation © {new Date().getFullYear()} — A Techsilon Group Company</p>
               <p className="mt-1">Jacksonville, FL • 1-800-RAV-0800 • rentavacation.com</p>
             </footer>
           </div>

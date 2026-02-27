@@ -9,6 +9,7 @@ const mockOnAuthStateChange = vi.fn();
 const mockSignUp = vi.fn();
 const mockSignInWithPassword = vi.fn();
 const mockSignOut = vi.fn();
+const mockResend = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase", () => ({
@@ -21,6 +22,7 @@ vi.mock("@/lib/supabase", () => ({
       signInWithOAuth: vi.fn().mockResolvedValue({ error: null }),
       signOut: (...args: unknown[]) => mockSignOut(...args),
       resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      resend: (...args: unknown[]) => mockResend(...args),
     },
     from: (...args: unknown[]) => mockFrom(...args),
   },
@@ -190,6 +192,202 @@ describe("AuthContext", () => {
     expect(mockSignInWithPassword).toHaveBeenCalledWith({
       email: "test@test.com",
       password: "password",
+    });
+  });
+
+  describe("isEmailVerified", () => {
+    it("returns false when no user", async () => {
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.isEmailVerified()).toBe(false);
+    });
+
+    it("returns true when user has email_confirmed_at", async () => {
+      const user = mockUser({ email_confirmed_at: "2026-01-01T00:00:00Z" });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockOnAuthStateChange.mockImplementation((callback: (...args: any[]) => void) => {
+        callback("SIGNED_IN", {
+          user,
+          access_token: "token",
+          refresh_token: "refresh",
+          expires_in: 3600,
+          token_type: "bearer",
+        });
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: {
+          session: {
+            user,
+            access_token: "token",
+            refresh_token: "refresh",
+            expires_in: 3600,
+            token_type: "bearer",
+          },
+        },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.user).not.toBeNull());
+      expect(result.current.isEmailVerified()).toBe(true);
+    });
+
+    it("returns false when email_confirmed_at is null", async () => {
+      const user = mockUser({ email_confirmed_at: undefined });
+      // Remove the property entirely to simulate null
+      delete (user as Record<string, unknown>).email_confirmed_at;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockOnAuthStateChange.mockImplementation((callback: (...args: any[]) => void) => {
+        callback("SIGNED_IN", {
+          user,
+          access_token: "token",
+          refresh_token: "refresh",
+          expires_in: 3600,
+          token_type: "bearer",
+        });
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: {
+          session: {
+            user,
+            access_token: "token",
+            refresh_token: "refresh",
+            expires_in: 3600,
+            token_type: "bearer",
+          },
+        },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.user).not.toBeNull());
+      expect(result.current.isEmailVerified()).toBe(false);
+    });
+
+    it("returns true for Google OAuth users even without email_confirmed_at", async () => {
+      const user = mockUser({
+        email_confirmed_at: undefined,
+        app_metadata: { provider: "google", providers: ["google"] },
+      });
+      delete (user as Record<string, unknown>).email_confirmed_at;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockOnAuthStateChange.mockImplementation((callback: (...args: any[]) => void) => {
+        callback("SIGNED_IN", {
+          user,
+          access_token: "token",
+          refresh_token: "refresh",
+          expires_in: 3600,
+          token_type: "bearer",
+        });
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: {
+          session: {
+            user,
+            access_token: "token",
+            refresh_token: "refresh",
+            expires_in: 3600,
+            token_type: "bearer",
+          },
+        },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.user).not.toBeNull());
+      expect(result.current.isEmailVerified()).toBe(true);
+    });
+  });
+
+  describe("resendVerificationEmail", () => {
+    it("calls supabase.auth.resend with correct params", async () => {
+      mockResend.mockResolvedValue({ error: null });
+
+      const user = mockUser({ email: "verify@test.com" });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockOnAuthStateChange.mockImplementation((callback: (...args: any[]) => void) => {
+        callback("SIGNED_IN", {
+          user,
+          access_token: "token",
+          refresh_token: "refresh",
+          expires_in: 3600,
+          token_type: "bearer",
+        });
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      });
+
+      mockGetSession.mockResolvedValue({
+        data: {
+          session: {
+            user,
+            access_token: "token",
+            refresh_token: "refresh",
+            expires_in: 3600,
+            token_type: "bearer",
+          },
+        },
+        error: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.user).not.toBeNull());
+
+      let resendResult: { error: unknown };
+      await act(async () => {
+        resendResult = await result.current.resendVerificationEmail();
+      });
+
+      expect(mockResend).toHaveBeenCalledWith({
+        type: "signup",
+        email: "verify@test.com",
+        options: expect.objectContaining({
+          emailRedirectTo: expect.any(String),
+        }),
+      });
+      expect(resendResult!.error).toBeNull();
+    });
+
+    it("returns error when no user email", async () => {
+      const { result } = renderHook(() => useAuth(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      let resendResult: { error: unknown };
+      await act(async () => {
+        resendResult = await result.current.resendVerificationEmail();
+      });
+
+      expect(mockResend).not.toHaveBeenCalled();
+      expect(resendResult!.error).toEqual(
+        expect.objectContaining({ message: "No email address found" })
+      );
     });
   });
 });

@@ -21,14 +21,16 @@ import {
   Home,
   Check,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import type { Resort, ResortUnitType } from "@/types/database";
 import { calculateNights } from "@/lib/pricing";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, isEmailVerified } = useAuth();
 
   const listingId = searchParams.get("listing");
   const guestsParam = Number(searchParams.get("guests")) || 1;
@@ -126,6 +128,19 @@ const Checkout = () => {
             Browse Rentals
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // Email verification guard
+  if (user && !isEmailVerified()) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24">
+          <EmailVerificationBanner blockedAction="book a property" />
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -320,7 +335,7 @@ const Checkout = () => {
                       </div>
                     )}
                     <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Taxes</span>
+                      <span>Taxes & fees</span>
                       <span>Calculated at payment</span>
                     </div>
                     {(listing.resort_fee || 0) > 0 && (
@@ -333,9 +348,27 @@ const Checkout = () => {
                       <span>Subtotal</span>
                       <span>${listing.final_price.toLocaleString()}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Applicable taxes will be calculated by Stripe at checkout.
-                    </p>
+
+                    {/* Tax Disclosure Notice */}
+                    <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+                      <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p>
+                          Applicable occupancy taxes and transient lodging taxes
+                          {resort?.location?.state
+                            ? ` for ${resort.location.state}`
+                            : ""}{" "}
+                          will be calculated and collected at payment.
+                        </p>
+                        <p className="mt-1">
+                          Rent-A-Vacation collects and remits taxes as a marketplace
+                          facilitator where required by law.{" "}
+                          <a href="/terms" className="underline hover:text-foreground">
+                            Learn more
+                          </a>
+                        </p>
+                      </div>
+                    </div>
 
                     {error && (
                       <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
