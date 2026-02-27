@@ -615,9 +615,14 @@ export type Database = {
           created_at: string
           email_bid_accepted: boolean
           email_bidding_ending: boolean
+          email_booking_cancelled: boolean
+          email_booking_confirmed: boolean
+          email_marketing: boolean
           email_new_bid: boolean
           email_new_proposal: boolean
           email_new_travel_request: boolean
+          email_payout_sent: boolean
+          email_product_updates: boolean
           email_proposal_accepted: boolean
           email_request_expiring: boolean
           id: string
@@ -629,9 +634,14 @@ export type Database = {
           created_at?: string
           email_bid_accepted?: boolean
           email_bidding_ending?: boolean
+          email_booking_cancelled?: boolean
+          email_booking_confirmed?: boolean
+          email_marketing?: boolean
           email_new_bid?: boolean
           email_new_proposal?: boolean
           email_new_travel_request?: boolean
+          email_payout_sent?: boolean
+          email_product_updates?: boolean
           email_proposal_accepted?: boolean
           email_request_expiring?: boolean
           id?: string
@@ -643,9 +653,14 @@ export type Database = {
           created_at?: string
           email_bid_accepted?: boolean
           email_bidding_ending?: boolean
+          email_booking_cancelled?: boolean
+          email_booking_confirmed?: boolean
+          email_marketing?: boolean
           email_new_bid?: boolean
           email_new_proposal?: boolean
           email_new_travel_request?: boolean
+          email_payout_sent?: boolean
+          email_product_updates?: boolean
           email_proposal_accepted?: boolean
           email_request_expiring?: boolean
           id?: string

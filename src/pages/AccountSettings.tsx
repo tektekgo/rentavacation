@@ -13,7 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User, Mail, Phone, Lock, Shield, Calendar, Save, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  useNotificationPreferences,
+  useUpdateNotificationPreference,
+  NOTIFICATION_CATEGORIES,
+  type EmailPrefKey,
+} from "@/hooks/useNotificationPreferences";
+import { User, Mail, Phone, Lock, Shield, Calendar, Save, Loader2, Bell } from "lucide-react";
 
 const AccountSettings = () => {
   usePageMeta("Account Settings", "Manage your Rent-A-Vacation account profile, security, and preferences.");
@@ -31,6 +38,10 @@ const AccountSettings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  // Notification preferences
+  const { data: notifPrefs, isLoading: notifLoading } = useNotificationPreferences();
+  const updatePref = useUpdateNotificationPreference();
 
   // Sync profile data into form when loaded
   useEffect(() => {
@@ -331,7 +342,58 @@ const AccountSettings = () => {
               </CardContent>
             </Card>
 
-            {/* ─── Section 3: Account Info ─── */}
+            {/* ─── Section 3: Notification Preferences ─── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  Notification Preferences
+                </CardTitle>
+                <CardDescription>
+                  Control which emails you receive from Rent-A-Vacation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {notifLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  NOTIFICATION_CATEGORIES.map((category) => (
+                    <div key={category.label}>
+                      <div className="mb-3">
+                        <p className="text-sm font-semibold text-foreground">{category.label}</p>
+                        <p className="text-xs text-muted-foreground">{category.description}</p>
+                      </div>
+                      <div className="space-y-3 ml-1">
+                        {category.prefs.map((pref) => (
+                          <div key={pref.key} className="flex items-center justify-between">
+                            <label htmlFor={pref.key} className="text-sm text-foreground cursor-pointer">
+                              {pref.label}
+                            </label>
+                            <Switch
+                              id={pref.key}
+                              checked={notifPrefs?.[pref.key] as boolean ?? true}
+                              onCheckedChange={(checked) =>
+                                updatePref.mutate({ key: pref.key as EmailPrefKey, value: checked })
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <Separator className="mt-4" />
+                    </div>
+                  ))
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Transactional emails (password resets, security alerts) cannot be disabled.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* ─── Section 4: Account Info ─── */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -372,20 +434,12 @@ const AccountSettings = () => {
 
                 <Separator />
 
-                {/* Future links */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-foreground">Notification Preferences</p>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Coming soon
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-foreground">Delete Account</p>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Coming soon
-                    </span>
-                  </div>
+                {/* Delete Account placeholder */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-foreground">Delete Account</p>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                    Coming soon
+                  </span>
                 </div>
               </CardContent>
             </Card>
