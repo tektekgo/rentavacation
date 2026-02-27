@@ -38,6 +38,7 @@ import MyBookings from "./pages/MyBookings";
 import AccountSettings from "./pages/AccountSettings";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,7 @@ const App = () => (
         <Sonner />
         <OfflineBanner />
         <PWAInstallBanner />
+        <CookieConsentBanner />
         <BrowserRouter>
           <ErrorBoundary>
           <AuthEventHandler />
