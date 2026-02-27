@@ -8,12 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Clock, Mail, Shield } from "lucide-react";
+import { Clock, Mail, Shield, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function PendingApproval() {
   const { user, profile, signOut, isRavTeam } = useAuth();
   const navigate = useNavigate();
+
+  const isRejected = profile?.approval_status === "rejected";
 
   useEffect(() => {
     if (!user) {
@@ -29,35 +32,72 @@ export default function PendingApproval() {
     <div className="min-h-screen flex items-center justify-center bg-muted/50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <Clock className="w-6 h-6 text-primary" />
+          <div className={`mx-auto w-12 h-12 ${isRejected ? "bg-destructive/10" : "bg-primary/10"} rounded-full flex items-center justify-center mb-4`}>
+            {isRejected ? (
+              <XCircle className="w-6 h-6 text-destructive" />
+            ) : (
+              <Clock className="w-6 h-6 text-primary" />
+            )}
           </div>
-          <CardTitle className="text-2xl">Account Pending Approval</CardTitle>
+          <CardTitle className="text-2xl">
+            {isRejected ? "Account Not Approved" : "Account Pending Approval"}
+          </CardTitle>
           <CardDescription>
-            Your account is currently being reviewed by our team
+            {isRejected
+              ? "Your account was not approved at this time"
+              : "Your account is currently being reviewed by our team"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-muted-foreground mt-0.5" />
-              <div>
-                <h3 className="font-medium text-sm">Why the wait?</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  We're currently in beta and carefully reviewing all new
-                  accounts to ensure the best experience for our community.
-                </p>
+          {/* Rejection Reason */}
+          {isRejected && profile?.rejection_reason && (
+            <div className="border border-destructive/30 bg-destructive/5 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="destructive" className="text-xs">Reason</Badge>
               </div>
+              <p className="text-sm">{profile.rejection_reason}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Please address the above and contact support to resubmit.
+              </p>
             </div>
+          )}
+
+          <div className="space-y-4">
+            {!isRejected && (
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-sm">Why the wait?</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    We're currently in beta and carefully reviewing all new
+                    accounts to ensure the best experience for our community.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-start gap-3">
               <Mail className="w-5 h-5 text-muted-foreground mt-0.5" />
               <div>
-                <h3 className="font-medium text-sm">What happens next?</h3>
+                <h3 className="font-medium text-sm">
+                  {isRejected ? "Need help?" : "What happens next?"}
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  You'll receive an email at{" "}
-                  <strong>{profile?.email}</strong> within 24 hours once your
-                  account is approved.
+                  {isRejected ? (
+                    <>
+                      Contact us at{" "}
+                      <a href="mailto:support@rent-a-vacation.com" className="text-primary hover:underline">
+                        support@rent-a-vacation.com
+                      </a>{" "}
+                      to discuss your account.
+                    </>
+                  ) : (
+                    <>
+                      You'll receive an email at{" "}
+                      <strong>{profile?.email}</strong> within 24 hours once your
+                      account is approved.
+                    </>
+                  )}
                 </p>
               </div>
             </div>

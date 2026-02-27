@@ -95,9 +95,10 @@ describe("AdminListings email notifications", () => {
     });
   });
 
-  it("calls send-approval-email after rejecting a listing", async () => {
+  it("calls send-approval-email after rejecting a listing with reason", async () => {
     const { default: AdminListings } = await import("./AdminListings");
     const { renderWithProviders } = await import("@/test/helpers/render");
+    const { fireEvent } = await import("@testing-library/react");
 
     const listingData = [
       {
@@ -116,10 +117,26 @@ describe("AdminListings email notifications", () => {
 
     setupMocks(listingData);
 
-    const { findByText } = renderWithProviders(<AdminListings />);
+    const { findByText, findByPlaceholderText } = renderWithProviders(<AdminListings />);
 
+    // Click Reject to open dialog
     const rejectBtn = await findByText("Reject");
     rejectBtn.click();
+
+    // Wait for dialog to appear and fill in rejection reason
+    await vi.waitFor(async () => {
+      const textarea = document.querySelector('textarea[placeholder="Enter rejection reason..."]') as HTMLTextAreaElement;
+      expect(textarea).toBeTruthy();
+      fireEvent.change(textarea, { target: { value: "Pricing appears unrealistic" } });
+    });
+
+    // Click confirm reject button in the dialog
+    await vi.waitFor(async () => {
+      const buttons = document.querySelectorAll("button");
+      const confirmBtn = Array.from(buttons).find((b) => b.textContent === "Reject Listing");
+      expect(confirmBtn).toBeTruthy();
+      confirmBtn!.click();
+    });
 
     await vi.waitFor(() => {
       expect(mockInvoke).toHaveBeenCalledWith("send-approval-email", {

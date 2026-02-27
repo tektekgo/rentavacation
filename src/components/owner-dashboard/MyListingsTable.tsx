@@ -16,6 +16,8 @@ const STATUS_COLORS: Record<string, string> = {
   active: 'bg-emerald-100 text-emerald-700',
   booked: 'bg-blue-100 text-blue-700',
   completed: 'bg-slate-100 text-slate-500',
+  cancelled: 'bg-red-100 text-red-700',
+  pending_approval: 'bg-orange-100 text-orange-700',
 };
 
 function isIdleWeek(listing: OwnerListingRow) {
@@ -111,6 +113,16 @@ export function MyListingsTable({ listings, isLoading }: MyListingsTableProps) {
                     No bids yet — {listing.days_until_checkin} days until check-in.
                     Consider lowering your price or enabling bidding.
                   </span>
+                </div>
+              )}
+              {/* Rejection reason */}
+              {listing.status === 'cancelled' && listing.rejection_reason && (
+                <div className="flex items-start gap-2 mt-1 ml-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
+                  <AlertTriangle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Rejected: </span>
+                    <span>{listing.rejection_reason}</span>
+                  </div>
                 </div>
               )}
             </div>

@@ -26,6 +26,7 @@ export interface OwnerListingRow {
   bid_count: number;
   highest_bid: number | null;
   days_until_checkin: number;
+  rejection_reason?: string | null;
 }
 
 export interface BidEvent {

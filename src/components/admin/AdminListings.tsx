@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -22,10 +23,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Calendar, MapPin, Search, Check, X, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import type { Listing, Property, Profile, ListingStatus } from "@/types/database";
 import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
+
+const REJECTION_TEMPLATES = [
+  "Incomplete property details",
+  "Photos do not meet quality standards",
+  "Pricing appears unrealistic",
+  "Duplicate listing",
+];
 
 interface ListingWithDetails extends Listing {
   property: Property;
@@ -57,6 +73,9 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectingListingId, setRejectingListingId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
     if (initialSearch) setSearchQuery(initialSearch);
@@ -142,17 +161,26 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
     }
   };
 
-  const handleReject = async (listingId: string) => {
+  const openRejectDialog = (listingId: string) => {
+    setRejectingListingId(listingId);
+    setRejectionReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectingListingId || !rejectionReason.trim()) return;
+
     try {
-      const listing = listings.find((l) => l.id === listingId);
+      const listing = listings.find((l) => l.id === rejectingListingId);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from("listings")
         .update({
           status: "cancelled",
+          rejection_reason: rejectionReason.trim(),
         })
-        .eq("id", listingId);
+        .eq("id", rejectingListingId);
 
       if (error) throw error;
 
@@ -163,9 +191,11 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
 
       toast({
         title: "Listing Rejected",
-        description: "The listing has been rejected.",
+        description: "The listing has been rejected with a reason.",
       });
 
+      setRejectDialogOpen(false);
+      setRejectingListingId(null);
       fetchListings();
     } catch (error) {
       console.error("Error rejecting listing:", error);
@@ -298,6 +328,11 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                       <Badge className={STATUS_COLORS[listing.status]}>
                         {STATUS_LABELS[listing.status]}
                       </Badge>
+                      {listing.status === "cancelled" && listing.rejection_reason && (
+                        <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate" title={listing.rejection_reason}>
+                          {listing.rejection_reason}
+                        </p>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       {listing.status === "pending_approval" && (
@@ -315,7 +350,7 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
                             size="sm"
                             variant="outline"
                             className="text-red-600 hover:text-red-700"
-                            onClick={() => handleReject(listing.id)}
+                            onClick={() => openRejectDialog(listing.id)}
                           >
                             <X className="h-4 w-4 mr-1" />
                             Reject
@@ -330,6 +365,53 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
           )}
         </CardContent>
       </Card>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject Listing</DialogTitle>
+            <DialogDescription>
+              Provide a reason for rejecting this listing. The owner will see this.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex flex-wrap gap-2">
+              {REJECTION_TEMPLATES.map((template) => (
+                <Button
+                  key={template}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => setRejectionReason(
+                    rejectionReason ? `${rejectionReason}\n${template}` : template
+                  )}
+                >
+                  {template}
+                </Button>
+              ))}
+            </div>
+            <Textarea
+              placeholder="Enter rejection reason..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={!rejectionReason.trim()}
+            >
+              Reject Listing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
