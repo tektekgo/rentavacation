@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,6 +64,13 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
+
+    // Rate limit check
+    const rateCheck = await checkRateLimit(supabase, user.id, RATE_LIMITS.CANCELLATION);
+    if (!rateCheck.allowed) {
+      logStep("Rate limited", { userId: user.id });
+      return rateLimitResponse(rateCheck.retryAfterSeconds);
+    }
 
     const { bookingId, reason, cancelledBy } = await req.json();
     if (!bookingId) throw new Error("Booking ID is required");

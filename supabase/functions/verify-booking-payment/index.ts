@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { buildEmailHtml, detailRow } from "../_shared/email-template.ts";
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -57,6 +58,13 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
+
+    // Rate limit check
+    const rateCheck = await checkRateLimit(supabaseClient, user.id, RATE_LIMITS.VERIFY_PAYMENT);
+    if (!rateCheck.allowed) {
+      logStep("Rate limited", { userId: user.id });
+      return rateLimitResponse(rateCheck.retryAfterSeconds);
+    }
 
     const { bookingId } = await req.json();
     if (!bookingId) throw new Error("Booking ID is required");

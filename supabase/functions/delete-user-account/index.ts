@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,6 +38,13 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
+
+    // Rate limit check
+    const rateCheck = await checkRateLimit(supabase, user.id, RATE_LIMITS.ACCOUNT_DELETION);
+    if (!rateCheck.allowed) {
+      logStep("Rate limited", { userId: user.id });
+      return rateLimitResponse(rateCheck.retryAfterSeconds);
+    }
 
     const { action, reason } = await req.json();
 
