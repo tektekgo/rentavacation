@@ -17,6 +17,7 @@ import { Wallet, Clock, CheckCircle, DollarSign, User, AlertCircle, CreditCard, 
 import { format } from "date-fns";
 import type { Booking, Listing, Property, Profile } from "@/types/database";
 import { useInitiateStripePayout } from "@/hooks/usePayouts";
+import { AdminEntityLink } from "./AdminEntityLink";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property };
@@ -34,7 +35,7 @@ interface OwnerPayout {
   completedBookings: BookingWithDetails[];
 }
 
-const AdminPayouts = () => {
+const AdminPayouts = ({ onNavigateToEntity }: { onNavigateToEntity?: (tab: string, search?: string) => void }) => {
   const { toast } = useToast();
   const [payouts, setPayouts] = useState<OwnerPayout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -274,7 +275,9 @@ const AdminPayouts = () => {
                       <User className="h-5 w-5 text-muted-foreground" />
                       <div className="text-left">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{payout.ownerName}</p>
+                          <AdminEntityLink tab="users" search={payout.ownerEmail} onNavigate={onNavigateToEntity}>
+                            <span className="font-medium">{payout.ownerName}</span>
+                          </AdminEntityLink>
                           {payout.stripeConnected && (
                             <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
                               <CreditCard className="h-3 w-3 mr-1" />

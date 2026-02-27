@@ -60,9 +60,17 @@ const AdminDashboard = () => {
   const [roleRequestCount, setRoleRequestCount] = useState(0);
 
   const activeTab = searchParams.get("tab") || "overview";
+  const initialSearch = searchParams.get("search") || "";
 
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
+  };
+
+  /** Navigate to a tab with an optional pre-filled search term */
+  const navigateToEntity = (tab: string, search?: string) => {
+    const params: Record<string, string> = { tab };
+    if (search) params.search = search;
+    setSearchParams(params);
   };
 
   // Redirect if not authorized
@@ -244,19 +252,31 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="properties">
-            <AdminProperties />
+            <AdminProperties
+              initialSearch={activeTab === "properties" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="listings">
-            <AdminListings />
+            <AdminListings
+              initialSearch={activeTab === "listings" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="bookings">
-            <AdminBookings />
+            <AdminBookings
+              initialSearch={activeTab === "bookings" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="escrow">
-            <AdminEscrow />
+            <AdminEscrow
+              initialSearch={activeTab === "escrow" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="issues">
@@ -264,7 +284,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="disputes">
-            <AdminDisputes />
+            <AdminDisputes
+              initialSearch={activeTab === "disputes" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="verifications">
@@ -276,11 +299,15 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="payouts">
-            <AdminPayouts />
+            <AdminPayouts
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="users">
-            <AdminUsers />
+            <AdminUsers
+              initialSearch={activeTab === "users" ? initialSearch : ""}
+            />
           </TabsContent>
 
           <TabsContent value="pending-approvals">

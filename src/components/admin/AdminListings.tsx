@@ -25,6 +25,7 @@ import {
 import { Calendar, MapPin, Search, Check, X, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import type { Listing, Property, Profile, ListingStatus } from "@/types/database";
+import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
 
 interface ListingWithDetails extends Listing {
   property: Property;
@@ -49,13 +50,17 @@ const STATUS_LABELS: Record<ListingStatus, string> = {
   cancelled: "Cancelled",
 };
 
-const AdminListings = () => {
+const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigationProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [listings, setListings] = useState<ListingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
 
   const fetchListings = async () => {
     try {
@@ -173,10 +178,13 @@ const AdminListings = () => {
   };
 
   const filteredListings = listings.filter((l) => {
-    const matchesSearch =
-      l.property?.resort_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.property?.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.owner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      l.property?.resort_name?.toLowerCase().includes(q) ||
+      l.property?.location?.toLowerCase().includes(q) ||
+      l.owner?.full_name?.toLowerCase().includes(q) ||
+      l.owner?.email?.toLowerCase().includes(q) ||
+      l.id.toLowerCase().includes(q);
 
     const matchesStatus = statusFilter === "all" || l.status === statusFilter;
 
@@ -220,7 +228,7 @@ const AdminListings = () => {
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search listings..."
+              placeholder="Search by name, location, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -264,7 +272,9 @@ const AdminListings = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="text-sm">{listing.owner?.full_name || "Unknown"}</p>
+                      <AdminEntityLink tab="users" search={listing.owner?.email || ""} onNavigate={onNavigateToEntity}>
+                        <p className="text-sm font-medium">{listing.owner?.full_name || "Unknown"}</p>
+                      </AdminEntityLink>
                       <p className="text-xs text-muted-foreground">{listing.owner?.email}</p>
                     </TableCell>
                     <TableCell>

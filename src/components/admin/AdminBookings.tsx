@@ -24,6 +24,7 @@ import {
 import { Calendar, Search, DollarSign, User, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, Listing, Property, Profile, BookingStatus } from "@/types/database";
+import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property; owner: Profile };
@@ -44,12 +45,17 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
   completed: "Completed",
 };
 
-const AdminBookings = () => {
+const AdminBookings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigationProps) => {
   const { toast } = useToast();
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // Sync initialSearch when navigating from another tab
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
 
   const fetchBookings = async () => {
     try {
@@ -106,10 +112,15 @@ const AdminBookings = () => {
   };
 
   const filteredBookings = bookings.filter((b) => {
-    const matchesSearch =
-      b.listing?.property?.resort_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.renter?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.renter?.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      b.listing?.property?.resort_name?.toLowerCase().includes(q) ||
+      b.renter?.full_name?.toLowerCase().includes(q) ||
+      b.renter?.email?.toLowerCase().includes(q) ||
+      b.listing?.owner?.full_name?.toLowerCase().includes(q) ||
+      b.id.toLowerCase().includes(q) ||
+      (b.payment_intent_id && b.payment_intent_id.toLowerCase().includes(q)) ||
+      (b.stripe_transfer_id && b.stripe_transfer_id.toLowerCase().includes(q));
 
     const matchesStatus = statusFilter === "all" || b.status === statusFilter;
 
@@ -150,7 +161,7 @@ const AdminBookings = () => {
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search bookings..."
+              placeholder="Search by name, email, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -190,18 +201,25 @@ const AdminBookings = () => {
                       <p className="text-xs text-muted-foreground">
                         {booking.listing?.property?.location}
                       </p>
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                        {booking.id.slice(0, 8)}
+                      </p>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div>
-                          <p className="text-sm">{booking.renter?.full_name || "Unknown"}</p>
+                          <AdminEntityLink tab="users" search={booking.renter?.email || ""} onNavigate={onNavigateToEntity}>
+                            <p className="text-sm font-medium">{booking.renter?.full_name || "Unknown"}</p>
+                          </AdminEntityLink>
                           <p className="text-xs text-muted-foreground">{booking.renter?.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="text-sm">{booking.listing?.owner?.full_name || "Unknown"}</p>
+                      <AdminEntityLink tab="users" search={booking.listing?.owner?.email || ""} onNavigate={onNavigateToEntity}>
+                        <p className="text-sm font-medium">{booking.listing?.owner?.full_name || "Unknown"}</p>
+                      </AdminEntityLink>
                     </TableCell>
                     <TableCell>
                       <p className="text-sm">

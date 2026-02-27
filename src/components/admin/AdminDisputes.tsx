@@ -45,6 +45,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { Database } from "@/types/database";
+import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
 
 type DisputeStatus = Database["public"]["Enums"]["dispute_status"];
 type DisputeCategory = Database["public"]["Enums"]["dispute_category"];
@@ -132,14 +133,18 @@ const STATUS_COLORS: Record<DisputeStatus, string> = {
   closed: "bg-slate-100 text-slate-600",
 };
 
-const AdminDisputes = () => {
+const AdminDisputes = ({ initialSearch = "", onNavigateToEntity }: AdminNavigationProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
   const [disputes, setDisputes] = useState<DisputeWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("active");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  useEffect(() => {
+    if (initialSearch) setSearchTerm(initialSearch);
+  }, [initialSearch]);
 
   // Detail dialog
   const [selectedDispute, setSelectedDispute] = useState<DisputeWithDetails | null>(null);
@@ -426,7 +431,7 @@ const AdminDisputes = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search disputes..."
+            placeholder="Search by name, resort, or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -461,9 +466,11 @@ const AdminDisputes = () => {
                 <TableRow key={dispute.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm">
-                        {dispute.reporter?.full_name || "Unknown"}
-                      </p>
+                      <AdminEntityLink tab="users" search={dispute.reporter?.email || ""} onNavigate={onNavigateToEntity}>
+                        <p className="font-medium text-sm">
+                          {dispute.reporter?.full_name || "Unknown"}
+                        </p>
+                      </AdminEntityLink>
                       <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {dispute.description}
                       </p>

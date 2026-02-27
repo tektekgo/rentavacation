@@ -15,6 +15,7 @@ import {
 import { Building2, MapPin, User, Search, Bed, Bath, Users } from "lucide-react";
 import { format } from "date-fns";
 import type { Property, Profile, VacationClubBrand } from "@/types/database";
+import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
 
 interface PropertyWithOwner extends Property {
   owner: Profile;
@@ -32,10 +33,14 @@ const BRAND_LABELS: Record<VacationClubBrand, string> = {
   other: "Other",
 };
 
-const AdminProperties = () => {
+const AdminProperties = ({ initialSearch = "", onNavigateToEntity }: AdminNavigationProps) => {
   const [properties, setProperties] = useState<PropertyWithOwner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -87,7 +92,7 @@ const AdminProperties = () => {
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search properties..."
+            placeholder="Search by name, location, or owner..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -135,9 +140,11 @@ const AdminProperties = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                        <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div>
-                          <p className="text-sm">{property.owner?.full_name || "Unknown"}</p>
+                          <AdminEntityLink tab="users" search={property.owner?.email || ""} onNavigate={onNavigateToEntity}>
+                            <p className="text-sm font-medium">{property.owner?.full_name || "Unknown"}</p>
+                          </AdminEntityLink>
                           <p className="text-xs text-muted-foreground">{property.owner?.email}</p>
                         </div>
                       </div>

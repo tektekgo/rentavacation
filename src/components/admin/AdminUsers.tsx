@@ -40,13 +40,17 @@ interface UserWithRoles extends Profile {
   roles: AppRole[];
 }
 
-const AdminUsers = () => {
+const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
   const { user: currentUser, hasRole } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [roleFilter, setRoleFilter] = useState<string>("all");
+
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [newRole, setNewRole] = useState<AppRole | "">("");
   const [isAddingRole, setIsAddingRole] = useState(false);
@@ -153,9 +157,11 @@ const AdminUsers = () => {
   };
 
   const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      u.full_name?.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.id.toLowerCase().includes(q);
 
     const matchesRole = roleFilter === "all" || u.roles.includes(roleFilter as AppRole);
 
@@ -197,7 +203,7 @@ const AdminUsers = () => {
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder="Search by name, email, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
