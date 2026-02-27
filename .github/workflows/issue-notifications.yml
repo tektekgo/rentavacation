@@ -2,7 +2,7 @@ name: Issue Notifications
 
 on:
   issues:
-    types: [assigned, closed]
+    types: [opened, assigned, closed]
   issue_comment:
     types: [created]
 
@@ -22,7 +22,14 @@ jobs:
           ISSUE_NUMBER="${{ github.event.issue.number }}"
           SENDER="${{ github.actor }}"
 
-          if [ "$EVENT" = "issues" ] && [ "$ACTION" = "closed" ]; then
+          if [ "$EVENT" = "issues" ] && [ "$ACTION" = "opened" ]; then
+            LABELS="${{ join(github.event.issue.labels.*.name, ', ') }}"
+            MILESTONE="${{ github.event.issue.milestone.title }}"
+            SUBJECT="🆕 New: #${ISSUE_NUMBER} ${ISSUE_TITLE}"
+            BODY_TEXT="New issue #${ISSUE_NUMBER} created by ${SENDER}.\n\nTitle: ${ISSUE_TITLE}\nLabels: ${LABELS}\nMilestone: ${MILESTONE:-None}\nLink: ${ISSUE_URL}"
+            BODY_HTML="<h2>🆕 New Issue</h2><p><strong>#${ISSUE_NUMBER} — ${ISSUE_TITLE}</strong></p><p>Created by <strong>${SENDER}</strong></p><p>Labels: ${LABELS:-None}<br/>Milestone: ${MILESTONE:-None}</p><p><a href='${ISSUE_URL}'>View Issue →</a></p>"
+
+          elif [ "$EVENT" = "issues" ] && [ "$ACTION" = "closed" ]; then
             SUBJECT="✅ Closed: #${ISSUE_NUMBER} ${ISSUE_TITLE}"
             BODY_TEXT="Issue #${ISSUE_NUMBER} has been closed by ${SENDER}.\n\nTitle: ${ISSUE_TITLE}\nLink: ${ISSUE_URL}"
             BODY_HTML="<h2>✅ Issue Closed</h2><p><strong>#${ISSUE_NUMBER} — ${ISSUE_TITLE}</strong></p><p>Closed by <strong>${SENDER}</strong></p><p><a href='${ISSUE_URL}'>View Issue →</a></p>"

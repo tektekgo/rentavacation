@@ -97,7 +97,7 @@ export function useMyBids() {
         .from('listing_bids')
         .select(`
           *,
-          listing:listings(*, property:properties(*))
+          listing:listings(*, property:properties(*), owner:profiles!listings_owner_id_fkey(id, full_name))
         `)
         .eq('bidder_id', user.id)
         .order('created_at', { ascending: false });
@@ -144,7 +144,7 @@ export function useCreateBid() {
   });
 }
 
-// Update bid status (for owners)
+// Update bid status (owners: accept/reject/counter; renters: withdraw, accept/decline counter)
 export function useUpdateBidStatus() {
   const queryClient = useQueryClient();
 
@@ -182,11 +182,13 @@ export function useUpdateBidStatus() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['bids'] });
-      const message = variables.status === 'accepted' 
-        ? 'Bid accepted!' 
-        : variables.status === 'rejected' 
-          ? 'Bid rejected' 
-          : 'Bid updated';
+      const message = variables.status === 'accepted'
+        ? 'Bid accepted!'
+        : variables.status === 'rejected'
+          ? 'Bid declined'
+          : variables.status === 'withdrawn'
+            ? 'Bid withdrawn'
+            : 'Bid updated';
       toast.success(message);
     },
     onError: (error: Error) => {

@@ -1,0 +1,143 @@
+name: Daily Summary Report
+
+on:
+  schedule:
+    # 9 PM EST = 02:00 UTC next day (EST is UTC-5)
+    # Adjust if team is in a different timezone
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate and send daily summary
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_GITHUB_NOTIFICATIONS_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="rent-a-vacation/rav-website"
+          # 24-hour window: from 9 PM yesterday to 9 PM today (in UTC: 02:00 yesterday to 02:00 today)
+          SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
+          TODAY=$(date -u '+%Y-%m-%d')
+          REPORT_DATE=$(date -u -d '5 hours ago' '+%B %d, %Y')  # Display date in EST
+
+          echo "Gathering activity since ${SINCE}..."
+
+          # --- Commits on dev branch (last 24h) ---
+          COMMITS=$(gh api "repos/${REPO}/commits?sha=dev&since=${SINCE}&per_page=50" \
+            --jq '.[] | "• [\(.sha[0:7])] \(.commit.message | split("\n")[0]) — \(.commit.author.name)"' 2>/dev/null || echo "")
+          COMMIT_COUNT=$(echo "$COMMITS" | grep -c '•' 2>/dev/null || echo "0")
+
+          # --- Issues opened (last 24h) ---
+          OPENED=$(gh api "repos/${REPO}/issues?state=all&since=${SINCE}&per_page=50&sort=created&direction=desc" \
+            --jq '[.[] | select(.pull_request == null and (.created_at >= "'"${SINCE}"'"))] | .[] | "• #\(.number) \(.title) [\(.labels | map(.name) | join(", "))]"' 2>/dev/null || echo "")
+          OPENED_COUNT=$(echo "$OPENED" | grep -c '•' 2>/dev/null || echo "0")
+
+          # --- Issues closed (last 24h) ---
+          CLOSED=$(gh api "repos/${REPO}/issues?state=closed&since=${SINCE}&per_page=50&sort=updated&direction=desc" \
+            --jq '[.[] | select(.pull_request == null and (.closed_at >= "'"${SINCE}"'"))] | .[] | "• #\(.number) \(.title)"' 2>/dev/null || echo "")
+          CLOSED_COUNT=$(echo "$CLOSED" | grep -c '•' 2>/dev/null || echo "0")
+
+          # --- PRs merged (last 24h) ---
+          MERGED=$(gh api "repos/${REPO}/pulls?state=closed&sort=updated&direction=desc&per_page=20" \
+            --jq '[.[] | select(.merged_at != null and (.merged_at >= "'"${SINCE}"'"))] | .[] | "• PR #\(.number) \(.title) → \(.base.ref)"' 2>/dev/null || echo "")
+          MERGED_COUNT=$(echo "$MERGED" | grep -c '•' 2>/dev/null || echo "0")
+
+          # --- Open issue counts by milestone ---
+          OPEN_PRELAUNCH=$(gh api "repos/${REPO}/issues?state=open&labels=pre-launch&per_page=1" --jq 'length' 2>/dev/null || echo "?")
+          OPEN_TOTAL=$(gh api "repos/${REPO}/issues?state=open&per_page=1" -i 2>/dev/null | grep -i 'link:' | grep -oP 'page=\K[0-9]+(?=>; rel="last")' || echo "?")
+
+          # --- Build plain text ---
+          TEXT="RAV Daily Summary — ${REPORT_DATE}\n\n"
+          TEXT+="COMMITS (${COMMIT_COUNT}):\n${COMMITS:-  None}\n\n"
+          TEXT+="ISSUES OPENED (${OPENED_COUNT}):\n${OPENED:-  None}\n\n"
+          TEXT+="ISSUES CLOSED (${CLOSED_COUNT}):\n${CLOSED:-  None}\n\n"
+          TEXT+="PRs MERGED (${MERGED_COUNT}):\n${MERGED:-  None}\n\n"
+          TEXT+="OPEN ISSUES: ~${OPEN_TOTAL} total, ${OPEN_PRELAUNCH} pre-launch"
+
+          # --- Build HTML ---
+          # Helper: convert newline-separated bullet items to HTML list
+          to_html_list() {
+            if [ -z "$1" ]; then
+              echo "<li style='color:#6b7280;'>None</li>"
+            else
+              echo "$1" | sed 's/^• /<li>/;s/$/<\/li>/'
+            fi
+          }
+
+          COMMITS_HTML=$(to_html_list "$COMMITS")
+          OPENED_HTML=$(to_html_list "$OPENED")
+          CLOSED_HTML=$(to_html_list "$CLOSED")
+          MERGED_HTML=$(to_html_list "$MERGED")
+
+          BODY_HTML="<div style='font-family:system-ui,-apple-system,sans-serif;max-width:640px;margin:0 auto;'>"
+          BODY_HTML+="<div style='background:#0d7377;color:white;padding:20px 24px;border-radius:8px 8px 0 0;'>"
+          BODY_HTML+="<h1 style='margin:0;font-size:20px;'>RAV Daily Summary</h1>"
+          BODY_HTML+="<p style='margin:4px 0 0;opacity:0.9;font-size:14px;'>${REPORT_DATE}</p>"
+          BODY_HTML+="</div>"
+          BODY_HTML+="<div style='border:1px solid #e5e7eb;border-top:none;padding:24px;border-radius:0 0 8px 8px;'>"
+
+          # Commits section
+          BODY_HTML+="<h2 style='font-size:16px;color:#1a3038;border-bottom:1px solid #e5e7eb;padding-bottom:8px;'>"
+          BODY_HTML+="Commits (${COMMIT_COUNT})</h2>"
+          BODY_HTML+="<ul style='padding-left:20px;font-size:14px;line-height:1.6;'>${COMMITS_HTML}</ul>"
+
+          # Issues opened
+          BODY_HTML+="<h2 style='font-size:16px;color:#1a3038;border-bottom:1px solid #e5e7eb;padding-bottom:8px;'>"
+          BODY_HTML+="Issues Opened (${OPENED_COUNT})</h2>"
+          BODY_HTML+="<ul style='padding-left:20px;font-size:14px;line-height:1.6;'>${OPENED_HTML}</ul>"
+
+          # Issues closed
+          BODY_HTML+="<h2 style='font-size:16px;color:#1a3038;border-bottom:1px solid #e5e7eb;padding-bottom:8px;'>"
+          BODY_HTML+="Issues Closed (${CLOSED_COUNT})</h2>"
+          BODY_HTML+="<ul style='padding-left:20px;font-size:14px;line-height:1.6;'>${CLOSED_HTML}</ul>"
+
+          # PRs merged
+          BODY_HTML+="<h2 style='font-size:16px;color:#1a3038;border-bottom:1px solid #e5e7eb;padding-bottom:8px;'>"
+          BODY_HTML+="PRs Merged (${MERGED_COUNT})</h2>"
+          BODY_HTML+="<ul style='padding-left:20px;font-size:14px;line-height:1.6;'>${MERGED_HTML}</ul>"
+
+          # Summary footer
+          BODY_HTML+="<div style='margin-top:20px;padding:12px 16px;background:#f0fafa;border-radius:6px;font-size:14px;'>"
+          BODY_HTML+="<strong>Open Issues:</strong> ~${OPEN_TOTAL} total &middot; ${OPEN_PRELAUNCH} pre-launch"
+          BODY_HTML+="</div>"
+
+          BODY_HTML+="<p style='margin-top:16px;font-size:12px;color:#9ca3af;text-align:center;'>"
+          BODY_HTML+="<a href='https://github.com/rent-a-vacation/rav-website' style='color:#0d7377;'>View Repository</a>"
+          BODY_HTML+=" &middot; <a href='https://github.com/orgs/rent-a-vacation/projects/1' style='color:#0d7377;'>Project Board</a>"
+          BODY_HTML+="</p>"
+
+          BODY_HTML+="</div></div>"
+
+          # --- Skip if nothing happened ---
+          if [ "$COMMIT_COUNT" = "0" ] && [ "$OPENED_COUNT" = "0" ] && [ "$CLOSED_COUNT" = "0" ] && [ "$MERGED_COUNT" = "0" ]; then
+            echo "No activity in the last 24 hours. Skipping email."
+            exit 0
+          fi
+
+          # --- Send email via Resend ---
+          SUBJECT="RAV Daily Summary — ${REPORT_DATE}"
+
+          # Escape for JSON
+          TEXT_ESCAPED=$(echo -e "$TEXT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
+          HTML_ESCAPED=$(echo "$BODY_HTML" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
+
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"from\": \"RAV Updates <notifications@updates.rent-a-vacation.com>\",
+              \"to\": [
+                \"sujit@rent-a-vacation.com\",
+                \"ajumon@rent-a-vacation.com\",
+                \"celin@rent-a-vacation.com\",
+                \"sandhya@rent-a-vacation.com\"
+              ],
+              \"subject\": \"${SUBJECT}\",
+              \"text\": ${TEXT_ESCAPED},
+              \"html\": ${HTML_ESCAPED}
+            }"
+
+          echo ""
+          echo "Daily summary sent for ${REPORT_DATE}"
