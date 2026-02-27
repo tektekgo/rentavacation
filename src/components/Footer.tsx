@@ -95,8 +95,8 @@ const Footer = () => {
             </div>
           </div>
           <div className="text-center mt-4">
-            <span className="text-xs text-white/30 font-mono">
-              v{__APP_VERSION__}.{__BUILD_NUMBER__} · {__BUILD_HASH__}
+            <span className="text-xs text-white/30 font-mono" title={`Build ${__BUILD_NUMBER__} · ${__BUILD_HASH__} · ${__BUILD_TIME__}`}>
+              v{__APP_VERSION__} · {new Date(__BUILD_TIME__).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {__BUILD_HASH__}
             </span>
           </div>
         </div>
