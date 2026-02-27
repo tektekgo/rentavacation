@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -31,13 +32,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Users, Search, Shield, Plus, X } from "lucide-react";
+import { Users, Search, Shield, Plus, X, MessageSquare, StickyNote } from "lucide-react";
 import { format } from "date-fns";
 import type { Profile, AppRole } from "@/types/database";
 import { ROLE_LABELS, ROLE_COLORS } from "@/types/database";
 
+interface AdminNote {
+  id: string;
+  text: string;
+  author_id: string;
+  author_name: string;
+  created_at: string;
+}
+
 interface UserWithRoles extends Profile {
   roles: AppRole[];
+  admin_notes?: AdminNote[];
 }
 
 const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
@@ -54,8 +64,13 @@ const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [newRole, setNewRole] = useState<AppRole | "">("");
   const [isAddingRole, setIsAddingRole] = useState(false);
+  const [notesUser, setNotesUser] = useState<UserWithRoles | null>(null);
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
+  const [newNoteText, setNewNoteText] = useState("");
+  const [isSavingNote, setIsSavingNote] = useState(false);
 
   const isRavOwner = hasRole("rav_owner");
+  const isRavTeam = hasRole("rav_owner") || hasRole("rav_admin") || hasRole("rav_staff");
 
   const fetchUsers = async () => {
     try {
@@ -156,6 +171,51 @@ const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
     }
   };
 
+  const handleAddNote = async () => {
+    if (!notesUser || !newNoteText.trim() || !currentUser) return;
+
+    setIsSavingNote(true);
+    try {
+      const existingNotes: AdminNote[] = Array.isArray(notesUser.admin_notes) ? notesUser.admin_notes : [];
+      const newNote: AdminNote = {
+        id: crypto.randomUUID(),
+        text: newNoteText.trim(),
+        author_id: currentUser.id,
+        author_name: currentUser.user_metadata?.full_name || currentUser.email || "Unknown",
+        created_at: new Date().toISOString(),
+      };
+      const updatedNotes = [newNote, ...existingNotes];
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .from("profiles")
+        .update({ admin_notes: updatedNotes })
+        .eq("id", notesUser.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Note Added",
+        description: `Note saved for ${notesUser.full_name || notesUser.email}.`,
+      });
+
+      setNewNoteText("");
+      // Update local state
+      setNotesUser({ ...notesUser, admin_notes: updatedNotes });
+      // Refresh the users list to reflect note count
+      fetchUsers();
+    } catch (error) {
+      console.error("Error adding note:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save note.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingNote(false);
+    }
+  };
+
   const filteredUsers = users.filter((u) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q ||
@@ -240,7 +300,8 @@ const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
                   <TableHead>User</TableHead>
                   <TableHead>Roles</TableHead>
                   <TableHead>Registered</TableHead>
-                  {isRavOwner && <TableHead className="text-right">Actions</TableHead>}
+                  {isRavTeam && <TableHead>Notes</TableHead>}
+                  {isRavTeam && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -275,52 +336,75 @@ const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "MMM d, yyyy")}
                     </TableCell>
-                    {isRavOwner && (
+                    {isRavTeam && (
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1"
+                          onClick={() => {
+                            setNotesUser(user);
+                            setNewNoteText("");
+                            setIsNotesDialogOpen(true);
+                          }}
+                        >
+                          <StickyNote className="h-4 w-4" />
+                          {Array.isArray(user.admin_notes) && user.admin_notes.length > 0 && (
+                            <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                              {user.admin_notes.length}
+                            </Badge>
+                          )}
+                        </Button>
+                      </TableCell>
+                    )}
+                    {isRavTeam && (
                       <TableCell className="text-right">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedUser(user)}
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Add Role
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Add Role</DialogTitle>
-                              <DialogDescription>
-                                Add a new role to {selectedUser?.full_name || selectedUser?.email}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="py-4">
-                              <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {(["rav_owner", "rav_admin", "rav_staff", "property_owner", "renter"] as AppRole[])
-                                    .filter((r) => !selectedUser?.roles.includes(r))
-                                    .map((role) => (
-                                      <SelectItem key={role} value={role}>
-                                        {ROLE_LABELS[role]}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <DialogFooter>
+                        {isRavOwner && (
+                          <Dialog>
+                            <DialogTrigger asChild>
                               <Button
-                                onClick={handleAddRole}
-                                disabled={!newRole || isAddingRole}
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedUser(user)}
                               >
-                                {isAddingRole ? "Adding..." : "Add Role"}
+                                <Plus className="h-4 w-4 mr-1" />
+                                Add Role
                               </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add Role</DialogTitle>
+                                <DialogDescription>
+                                  Add a new role to {selectedUser?.full_name || selectedUser?.email}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="py-4">
+                                <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a role" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {(["rav_owner", "rav_admin", "rav_staff", "property_owner", "renter"] as AppRole[])
+                                      .filter((r) => !selectedUser?.roles.includes(r))
+                                      .map((role) => (
+                                        <SelectItem key={role} value={role}>
+                                          {ROLE_LABELS[role]}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  onClick={handleAddRole}
+                                  disabled={!newRole || isAddingRole}
+                                >
+                                  {isAddingRole ? "Adding..." : "Add Role"}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                       </TableCell>
                     )}
                   </TableRow>
@@ -330,6 +414,56 @@ const AdminUsers = ({ initialSearch = "" }: { initialSearch?: string }) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Notes Dialog */}
+      <Dialog open={isNotesDialogOpen} onOpenChange={setIsNotesDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Notes for {notesUser?.full_name || notesUser?.email}
+            </DialogTitle>
+            <DialogDescription>
+              Internal notes visible only to RAV team members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="Add a note..."
+                value={newNoteText}
+                onChange={(e) => setNewNoteText(e.target.value)}
+                rows={2}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleAddNote}
+                disabled={!newNoteText.trim() || isSavingNote}
+                className="self-end"
+              >
+                {isSavingNote ? "Saving..." : "Add"}
+              </Button>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto space-y-3">
+              {(!notesUser?.admin_notes || notesUser.admin_notes.length === 0) ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No notes yet
+                </p>
+              ) : (
+                notesUser.admin_notes.map((note) => (
+                  <div key={note.id} className="border rounded-lg p-3 text-sm">
+                    <p className="whitespace-pre-wrap">{note.text}</p>
+                    <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                      <span>{note.author_name}</span>
+                      <span>{format(new Date(note.created_at), "MMM d, yyyy h:mm a")}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

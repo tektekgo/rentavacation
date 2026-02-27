@@ -22,9 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar, Search, DollarSign, User, CheckCircle, XCircle } from "lucide-react";
-import { format } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import type { Booking, Listing, Property, Profile, BookingStatus } from "@/types/database";
 import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
+import { DateRangeFilter } from "./DateRangeFilter";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property; owner: Profile };
@@ -51,6 +53,7 @@ const AdminBookings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   // Sync initialSearch when navigating from another tab
   useEffect(() => {
@@ -124,7 +127,12 @@ const AdminBookings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
 
     const matchesStatus = statusFilter === "all" || b.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const matchesDateRange = !dateRange?.from || isWithinInterval(
+      new Date(b.created_at),
+      { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to || dateRange.from) }
+    );
+
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
   if (isLoading) {
@@ -158,6 +166,7 @@ const AdminBookings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

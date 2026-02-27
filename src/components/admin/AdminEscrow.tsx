@@ -51,7 +51,8 @@ import {
   Zap,
   ExternalLink,
 } from "lucide-react";
-import { format, differenceInDays, addDays, isPast } from "date-fns";
+import { format, differenceInDays, addDays, isPast, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import type {
   BookingConfirmation,
   Booking,
@@ -62,6 +63,7 @@ import type {
   OwnerConfirmationStatus
 } from "@/types/database";
 import { AdminEntityLink } from "./AdminEntityLink";
+import { DateRangeFilter } from "./DateRangeFilter";
 
 interface EscrowWithDetails extends BookingConfirmation {
   booking: Booking & {
@@ -118,6 +120,7 @@ const AdminEscrow = ({ initialSearch = "", onNavigateToEntity }: { initialSearch
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedEscrow, setSelectedEscrow] = useState<EscrowWithDetails | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -408,7 +411,12 @@ const AdminEscrow = ({ initialSearch = "", onNavigateToEntity }: { initialSearch
 
     const matchesStatus = statusFilter === "all" || e.escrow_status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const matchesDateRange = !dateRange?.from || isWithinInterval(
+      new Date(e.created_at),
+      { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to || dateRange.from) }
+    );
+
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
   // Stats
@@ -468,6 +476,7 @@ const AdminEscrow = ({ initialSearch = "", onNavigateToEntity }: { initialSearch
               <SelectItem value="disputed">Disputed</SelectItem>
             </SelectContent>
           </Select>
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
