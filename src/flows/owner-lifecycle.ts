@@ -153,6 +153,7 @@ export const ownerLifecycle: FlowDefinition = {
       nodeStyle: 'decision',
       description: 'Owner confirms they can fulfill the booking within configurable time window. Can request time extensions.',
       tables: ['booking_confirmations'],
+      edgeFunctions: ['process-deadline-reminders'],
       branches: [
         { condition: 'Owner confirms', targetStepId: 'submit_confirmation', label: 'Confirmed' },
         { condition: 'Owner declines or times out', targetStepId: 'booking_confirmed', label: 'Cancelled', edgeStyle: 'dashed' },

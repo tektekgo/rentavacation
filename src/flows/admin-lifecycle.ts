@@ -27,7 +27,7 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_admin'],
       description: 'Approve or reject new user registrations',
       tables: ['profiles'],
-      edgeFunctions: ['send-approval-email'],
+      edgeFunctions: ['send-approval-email', 'send-email'],
       branches: [
         { condition: 'Approve', targetStepId: 'role_management', label: 'Approved' },
         { condition: 'Reject', targetStepId: 'dashboard', label: 'Rejected', edgeStyle: 'dashed' },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator, BookOpen, Settings } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator, BookOpen, Settings, GitBranch } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
@@ -178,6 +178,14 @@ const Header = () => {
                         <Link to="/executive-dashboard" className="flex items-center gap-2 cursor-pointer">
                           <BarChart3 className="h-4 w-4" />
                           Executive Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isRavTeam() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/architecture" className="flex items-center gap-2 cursor-pointer">
+                          <GitBranch className="h-4 w-4" />
+                          Architecture
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -368,6 +376,16 @@ const Header = () => {
                     >
                       <BarChart3 className="h-4 w-4" />
                       Executive Dashboard
+                    </Link>
+                  )}
+                  {isRavTeam() && (
+                    <Link
+                      to="/architecture"
+                      className="flex items-center gap-2 text-foreground py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <GitBranch className="h-4 w-4" />
+                      Architecture
                     </Link>
                   )}
                   {isPropertyOwner() && (
