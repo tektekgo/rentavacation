@@ -77,12 +77,10 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/property/:id',
       label: 'Place Bid',
       component: 'BidFormDialog',
-      description: 'Submit a bid offer on a biddable listing (owner opted in at listing time)',
+      description: 'Submit a bid or date proposal on a listing. After submission, renter tracks the response on My Bids page.',
       tables: ['listing_bids', 'notifications'],
       branches: [
-        { condition: 'Bid accepted', targetStepId: 'checkout', label: 'Accepted → Pay' },
-        { condition: 'Counter-offer', targetStepId: 'place_bid', label: 'Counter', edgeStyle: 'dashed' },
-        { condition: 'Rejected', targetStepId: 'search_listings', label: 'Rejected', edgeStyle: 'dashed' },
+        { condition: 'Bid submitted', targetStepId: 'my_bids_dashboard', label: 'Track on My Bids' },
       ],
     },
     {
@@ -93,19 +91,20 @@ export const travelerLifecycle: FlowDefinition = {
       description: 'Renter posts a reverse-auction request specifying destination, dates, budget — owners respond with proposals',
       tables: ['travel_requests'],
       branches: [
-        { condition: 'Proposal received', targetStepId: 'review_proposals', label: 'Proposals in' },
+        { condition: 'Request posted', targetStepId: 'my_bids_dashboard', label: 'Track on My Bids' },
       ],
     },
     {
-      id: 'review_proposals',
+      id: 'my_bids_dashboard',
       route: '/my-bids',
-      label: 'Review Proposals',
+      label: 'My Bids & Proposals',
       component: 'MyBidsDashboard',
-      description: 'Review owner proposals on travel request and accept or reject',
-      tables: ['travel_proposals'],
+      description: 'Renter tracks all listing bids and reviews owner proposals on travel requests. Owner responses (accept/reject/counter) appear here.',
+      tables: ['listing_bids', 'travel_proposals'],
       branches: [
-        { condition: 'Accept proposal', targetStepId: 'checkout', label: 'Accept → Pay' },
-        { condition: 'Reject all', targetStepId: 'search_listings', label: 'Reject all', edgeStyle: 'dashed' },
+        { condition: 'Bid or proposal accepted', targetStepId: 'checkout', label: 'Pay now' },
+        { condition: 'Counter-offer received', targetStepId: 'my_bids_dashboard', label: 'Review counter', edgeStyle: 'dashed' },
+        { condition: 'All rejected or expired', targetStepId: 'search_listings', label: 'Search again', edgeStyle: 'dashed' },
       ],
     },
     {
