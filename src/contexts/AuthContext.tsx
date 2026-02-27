@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { setSentryUser } from '@/lib/sentry';
 import type { AppRole, Profile } from '@/types/database';
 
 interface AuthContextType {
@@ -105,10 +106,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ]);
             setProfile(userProfile);
             setRoles(userRoles);
+            setSentryUser(currentSession.user.id, userRoles[0]);
           }, 0);
         } else {
           setProfile(null);
           setRoles([]);
+          setSentryUser(null);
         }
 
         setIsLoading(false);
