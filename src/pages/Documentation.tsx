@@ -156,7 +156,7 @@ const Documentation = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <img src="/rav-logo.png" alt="RAV Logo" className="h-8 w-8" />
+            <img src="/rav-logo.svg" alt="RAV Logo" className="h-8 w-8" />
             <div>
               <h1 className="text-lg font-bold text-foreground">Rent-A-Vacation</h1>
               <p className="text-xs text-muted-foreground">Admin Manual v1.0</p>
@@ -219,7 +219,7 @@ const Documentation = () => {
             {isPrinting && (
               <section className="print:break-after-page hidden print:block">
                 <div className="min-h-[90vh] flex flex-col items-center justify-center text-center">
-                  <img src="/rav-logo.png" alt="RAV Logo" className="h-24 w-24 mb-8" />
+                  <img src="/rav-logo.svg" alt="RAV Logo" className="h-24 w-24 mb-8" />
                   <h1 className="text-5xl font-bold text-foreground mb-4">Rent-A-Vacation</h1>
                   <p className="text-2xl text-primary font-medium mb-2">Administrator Manual</p>
                   <p className="text-xl text-muted-foreground mb-8">Name Your Price. Book Your Paradise.</p>
