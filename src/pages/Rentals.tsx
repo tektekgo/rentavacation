@@ -250,7 +250,7 @@ const Rentals = () => {
       <Header />
 
       {/* Search Header */}
-      <section className="pt-24 pb-8 bg-muted/50">
+      <section id="main-content" className="pt-24 pb-8 bg-muted/50">
         <div className="container mx-auto px-4">
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
             Browse Vacation Rentals
@@ -392,15 +392,19 @@ const Rentals = () => {
               <span className="text-sm text-muted-foreground">
                 {filteredListings.length} {filteredListings.length === 1 ? "property" : "properties"} found
               </span>
-              <div className="flex border rounded-lg overflow-hidden">
+              <div className="flex border rounded-lg overflow-hidden" role="group" aria-label="View mode">
                 <button
                   onClick={() => setViewMode("grid")}
+                  aria-label="Grid view"
+                  aria-pressed={viewMode === "grid"}
                   className={`p-2 ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "bg-card"}`}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
+                  aria-label="List view"
+                  aria-pressed={viewMode === "list"}
                   className={`p-2 ${viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-card"}`}
                 >
                   <List className="w-4 h-4" />
@@ -414,28 +418,28 @@ const Rentals = () => {
             <div className="bg-card rounded-xl shadow-card p-6 mb-6 animate-fade-in">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Filters</h3>
-                <button onClick={() => setShowFilters(false)}>
+                <button onClick={() => setShowFilters(false)} aria-label="Close filters">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Price Range</label>
+                  <span className="text-sm font-medium mb-2 block" id="price-range-label">Price Range</span>
                   <div className="flex gap-2">
-                    <Input placeholder="Min" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
-                    <Input placeholder="Max" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+                    <Input placeholder="Min" type="number" aria-label="Minimum price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+                    <Input placeholder="Max" type="number" aria-label="Maximum price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Guests</label>
-                  <Input placeholder="Min guests" type="number" value={minGuests} onChange={(e) => setMinGuests(e.target.value)} />
+                  <label htmlFor="filter-guests" className="text-sm font-medium mb-2 block">Guests</label>
+                  <Input id="filter-guests" placeholder="Min guests" type="number" value={minGuests} onChange={(e) => setMinGuests(e.target.value)} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Bedrooms</label>
-                  <Input placeholder="Min bedrooms" type="number" value={minBedrooms} onChange={(e) => setMinBedrooms(e.target.value)} />
+                  <label htmlFor="filter-bedrooms" className="text-sm font-medium mb-2 block">Bedrooms</label>
+                  <Input id="filter-bedrooms" placeholder="Min bedrooms" type="number" value={minBedrooms} onChange={(e) => setMinBedrooms(e.target.value)} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Resort Brand</label>
+                  <label htmlFor="filter-brand" className="text-sm font-medium mb-2 block">Resort Brand</label>
                   <Select value={brandFilter} onValueChange={setBrandFilter}>
                     <SelectTrigger>
                       <SelectValue placeholder="All Brands" />
@@ -557,6 +561,7 @@ const Rentals = () => {
               </span>
               <button
                 onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
                 className="ml-auto text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
@@ -715,6 +720,8 @@ const Rentals = () => {
                         e.preventDefault();
                         toggleLike(listing.id);
                       }}
+                      aria-label={favoriteIds.includes(listing.id) ? "Remove from favorites" : "Add to favorites"}
+                      aria-pressed={favoriteIds.includes(listing.id)}
                       className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
                     >
                       <Heart

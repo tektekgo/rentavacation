@@ -193,7 +193,7 @@ const PropertyDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-20">
+      <main id="main-content" className="pt-20">
         {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -225,20 +225,25 @@ const PropertyDetail = () => {
               <>
                 <button
                   onClick={prevImage}
+                  aria-label="Previous image"
                   className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={nextImage}
+                  aria-label="Next image"
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2" role="tablist" aria-label="Image gallery">
                   {images.map((_, index) => (
                     <button
                       key={index}
+                      role="tab"
+                      aria-selected={index === currentImage}
+                      aria-label={`Image ${index + 1} of ${images.length}`}
                       onClick={() => setCurrentImage(index)}
                       className={`w-2 h-2 rounded-full transition-all ${
                         index === currentImage ? "w-8 bg-white" : "bg-white/50"
@@ -251,11 +256,13 @@ const PropertyDetail = () => {
             <div className="absolute top-4 right-4 flex gap-2">
               <button
                 onClick={handleToggleFavorite}
+                aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
+                aria-pressed={isLiked}
                 className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
               >
                 <Heart className={`w-5 h-5 ${isLiked ? "fill-accent text-accent" : ""}`} />
               </button>
-              <button className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors">
+              <button aria-label="Share this property" className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors">
                 <Share2 className="w-5 h-5" />
               </button>
             </div>
@@ -439,22 +446,23 @@ const PropertyDetail = () => {
 
                   <div className="space-y-4 mb-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Check-in</label>
+                      <span className="block text-sm font-medium mb-2">Check-in</span>
                       <div className="p-3 bg-muted/50 rounded-lg text-sm">
                         {new Date(listing.check_in_date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Check-out</label>
+                      <span className="block text-sm font-medium mb-2">Check-out</span>
                       <div className="p-3 bg-muted/50 rounded-lg text-sm">
                         {new Date(listing.check_out_date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Guests</label>
+                      <label htmlFor="guest-select" className="block text-sm font-medium mb-2">Guests</label>
                       <div className="relative">
                         <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <select
+                          id="guest-select"
                           className="w-full h-10 rounded-md border border-input bg-background pl-10 pr-3"
                           value={guests}
                           onChange={(e) => setGuests(Number(e.target.value))}

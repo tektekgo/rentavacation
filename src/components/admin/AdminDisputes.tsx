@@ -124,7 +124,7 @@ const PRIORITY_COLORS: Record<DisputePriority, string> = {
 
 const STATUS_COLORS: Record<DisputeStatus, string> = {
   open: "bg-red-100 text-red-700",
-  investigating: "bg-yellow-100 text-yellow-700",
+  investigating: "bg-yellow-100 text-yellow-800",
   awaiting_response: "bg-purple-100 text-purple-700",
   resolved_full_refund: "bg-green-100 text-green-700",
   resolved_partial_refund: "bg-green-100 text-green-700",

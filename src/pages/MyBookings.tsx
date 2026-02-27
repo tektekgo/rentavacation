@@ -21,10 +21,10 @@ interface BookingWithListing extends Booking {
 }
 
 const STATUS_COLORS: Record<BookingStatus, string> = {
-  pending: "bg-yellow-500",
-  confirmed: "bg-green-500",
-  cancelled: "bg-red-500",
-  completed: "bg-purple-500",
+  pending: "bg-yellow-100 text-yellow-800",
+  confirmed: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
+  completed: "bg-purple-100 text-purple-800",
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -128,7 +128,7 @@ const MyBookings = () => {
               )}
             </div>
             <Badge
-              className={`${STATUS_COLORS[booking.status]} text-white shrink-0`}
+              className={`${STATUS_COLORS[booking.status]} shrink-0`}
             >
               {STATUS_LABELS[booking.status]}
             </Badge>
@@ -276,7 +276,7 @@ const MyBookings = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-20 md:pt-24 pb-12 px-4">
+      <main id="main-content" className="flex-1 pt-20 md:pt-24 pb-12 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">My Bookings</h1>

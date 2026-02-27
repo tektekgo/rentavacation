@@ -163,7 +163,8 @@ export function PropertyImageUpload({ propertyId, onImagesChange }: PropertyImag
               )}
               <button
                 onClick={() => handleDelete(img)}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Delete image ${index + 1}`}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
               >
                 <X className="w-4 h-4" />
               </button>

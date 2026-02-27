@@ -77,7 +77,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main>
+      <main id="main-content">
         <HeroSection />
         {user && !isLoading && <WelcomeBanner />}
         <TrustBadges />

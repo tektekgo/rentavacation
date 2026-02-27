@@ -197,10 +197,10 @@ const AdminPayouts = () => {
         <Card className="border-yellow-200 bg-yellow-50/50 dark:border-yellow-900 dark:bg-yellow-950/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <Clock className="h-4 w-4 text-yellow-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-yellow-700">
               ${totalPending.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -287,7 +287,7 @@ const AdminPayouts = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       {payout.totalPending > 0 && (
-                        <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                        <Badge variant="outline" className="text-yellow-700 border-yellow-700">
                           <Clock className="mr-1 h-3 w-3" />
                           Pending: ${payout.totalPending.toLocaleString()}
                         </Badge>
@@ -304,7 +304,7 @@ const AdminPayouts = () => {
                       {payout.pendingBookings.length > 0 && (
                         <div className="mb-4">
                           <h4 className="font-medium mb-2 flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-yellow-600" />
+                            <Clock className="h-4 w-4 text-yellow-700" />
                             Pending Payouts
                           </h4>
                           <Table>
