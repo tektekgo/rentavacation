@@ -114,6 +114,26 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_admin', 'rav_staff'],
       description: 'Resolve renter check-in complaints and disputes',
       tables: ['checkin_confirmations'],
+      branches: [
+        { condition: 'Escalated to dispute', targetStepId: 'dispute_resolution', label: 'Escalate' },
+      ],
+    },
+    {
+      id: 'dispute_resolution',
+      route: '/admin',
+      label: 'Dispute Resolution',
+      component: 'AdminDisputes',
+      tab: 'disputes',
+      roles: ['rav_admin', 'rav_staff'],
+      nodeStyle: 'decision',
+      description: 'Manage renter/owner disputes: investigate, communicate, issue refunds',
+      tables: ['disputes', 'dispute_messages', 'bookings'],
+      edgeFunctions: ['process-dispute-refund'],
+      branches: [
+        { condition: 'Full refund', targetStepId: 'payout_tracking', label: 'Refund', edgeStyle: 'dashed' },
+        { condition: 'Partial refund', targetStepId: 'payout_tracking', label: 'Partial' },
+        { condition: 'No refund', targetStepId: 'financials', label: 'Closed' },
+      ],
     },
     {
       id: 'financials',

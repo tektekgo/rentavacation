@@ -29,7 +29,8 @@ import {
   Crown,
   Network,
   Wrench,
-  Mic
+  Mic,
+  Scale
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -47,6 +48,7 @@ import { SystemSettings } from "@/components/admin/SystemSettings";
 import { AdminMemberships } from "@/components/admin/AdminMemberships";
 import { DevTools } from "@/components/admin/DevTools";
 import { VoiceControls } from "@/components/admin/VoiceControls";
+import AdminDisputes from "@/components/admin/AdminDisputes";
 
 const IS_DEV = import.meta.env.VITE_SUPABASE_URL?.includes("oukbxqnlxnkainnligfz");
 
@@ -188,6 +190,10 @@ const AdminDashboard = () => {
               <MessageSquareWarning className="h-4 w-4" />
               <span className="hidden sm:inline">Issues</span>
             </TabsTrigger>
+            <TabsTrigger value="disputes" className="gap-2">
+              <Scale className="h-4 w-4" />
+              <span className="hidden sm:inline">Disputes</span>
+            </TabsTrigger>
             <TabsTrigger value="verifications" className="gap-2">
               <FileCheck className="h-4 w-4" />
               <span className="hidden sm:inline">Verifications</span>
@@ -255,6 +261,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="issues">
             <AdminCheckinIssues />
+          </TabsContent>
+
+          <TabsContent value="disputes">
+            <AdminDisputes />
           </TabsContent>
 
           <TabsContent value="verifications">

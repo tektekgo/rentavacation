@@ -6,12 +6,13 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
+import ReportIssueDialog from "@/components/booking/ReportIssueDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, BookingStatus, Listing, Property } from "@/types/database";
 
@@ -40,7 +41,9 @@ const MyBookings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingWithListing | null>(null);
+  const [reportBooking, setReportBooking] = useState<BookingWithListing | null>(null);
 
   const fetchBookings = async () => {
     if (!user) return;
@@ -191,6 +194,21 @@ const MyBookings = () => {
                 </Button>
               )}
 
+              {(booking.status === "confirmed" || booking.status === "completed") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  onClick={() => {
+                    setReportBooking(booking);
+                    setReportDialogOpen(true);
+                  }}
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  Report Issue
+                </Button>
+              )}
+
               {booking.status === "confirmed" && (
                 <Button
                   variant="outline"
@@ -304,6 +322,19 @@ const MyBookings = () => {
       </main>
 
       <Footer />
+
+      {reportBooking && (
+        <ReportIssueDialog
+          open={reportDialogOpen}
+          onOpenChange={(open) => {
+            setReportDialogOpen(open);
+            if (!open) setReportBooking(null);
+          }}
+          bookingId={reportBooking.id}
+          ownerId={reportBooking.listing?.owner_id}
+          resortName={reportBooking.listing?.property?.resort_name}
+        />
+      )}
 
       {selectedBooking && (
         <CancelBookingDialog

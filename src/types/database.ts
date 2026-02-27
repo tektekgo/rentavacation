@@ -301,6 +301,112 @@ export type Database = {
           },
         ]
       }
+      dispute_messages: {
+        Row: {
+          id: string
+          dispute_id: string
+          sender_id: string
+          message: string
+          is_internal: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          dispute_id: string
+          sender_id: string
+          message: string
+          is_internal?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          dispute_id?: string
+          sender_id?: string
+          message?: string
+          is_internal?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_messages_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          id: string
+          booking_id: string
+          reporter_id: string
+          reported_user_id: string | null
+          category: Database["public"]["Enums"]["dispute_category"]
+          priority: Database["public"]["Enums"]["dispute_priority"]
+          status: Database["public"]["Enums"]["dispute_status"]
+          description: string
+          evidence_urls: string[]
+          resolution_notes: string | null
+          resolved_by: string | null
+          resolved_at: string | null
+          refund_amount: number | null
+          refund_reference: string | null
+          assigned_to: string | null
+          admin_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          reporter_id: string
+          reported_user_id?: string | null
+          category?: Database["public"]["Enums"]["dispute_category"]
+          priority?: Database["public"]["Enums"]["dispute_priority"]
+          status?: Database["public"]["Enums"]["dispute_status"]
+          description: string
+          evidence_urls?: string[]
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          resolved_at?: string | null
+          refund_amount?: number | null
+          refund_reference?: string | null
+          assigned_to?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          reporter_id?: string
+          reported_user_id?: string | null
+          category?: Database["public"]["Enums"]["dispute_category"]
+          priority?: Database["public"]["Enums"]["dispute_priority"]
+          status?: Database["public"]["Enums"]["dispute_status"]
+          description?: string
+          evidence_urls?: string[]
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          resolved_at?: string | null
+          refund_amount?: number | null
+          refund_reference?: string | null
+          assigned_to?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkin_confirmations: {
         Row: {
           booking_id: string
@@ -1882,6 +1988,24 @@ export type Database = {
         | "denied"
         | "counter_offer"
         | "completed"
+      dispute_category:
+        | "property_not_as_described"
+        | "access_issues"
+        | "safety_concerns"
+        | "cleanliness"
+        | "cancellation_dispute"
+        | "payment_dispute"
+        | "owner_no_show"
+        | "other"
+      dispute_priority: "low" | "medium" | "high" | "critical"
+      dispute_status:
+        | "open"
+        | "investigating"
+        | "awaiting_response"
+        | "resolved_full_refund"
+        | "resolved_partial_refund"
+        | "resolved_no_refund"
+        | "closed"
       escrow_status:
         | "pending_confirmation"
         | "confirmation_submitted"
