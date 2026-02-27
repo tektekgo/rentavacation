@@ -110,11 +110,10 @@ export const ownerLifecycle: FlowDefinition = {
       label: 'Manage Bids & Date Proposals',
       component: 'BidsManagerDialog',
       tab: 'listings',
-      description: 'Owner reviews bids, accepts/rejects/counter-offers. Accepting a bid does NOT create a booking — the renter must still pay at checkout.',
+      description: 'Owner reviews bids, accepts/rejects/counter-offers. Counter-offers trigger re-negotiation on this page. Accepting a bid does NOT create a booking — the renter must still pay at checkout.',
       tables: ['listing_bids'],
       branches: [
         { condition: 'Bid accepted, renter pays at checkout', targetStepId: 'booking_confirmed', label: 'Accepted → Renter pays' },
-        { condition: 'Counter-offered', targetStepId: 'manage_bids', label: 'Counter', edgeStyle: 'dashed' },
       ],
     },
     {

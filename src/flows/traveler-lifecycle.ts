@@ -99,11 +99,10 @@ export const travelerLifecycle: FlowDefinition = {
       route: '/my-bids',
       label: 'My Bids & Proposals',
       component: 'MyBidsDashboard',
-      description: 'Renter tracks all listing bids and reviews owner proposals on travel requests. Owner responses (accept/reject/counter) appear here.',
+      description: 'Renter tracks all listing bids and reviews owner proposals on travel requests. Counter-offers appear here for review and re-negotiation before accepting.',
       tables: ['listing_bids', 'travel_proposals'],
       branches: [
         { condition: 'Bid or proposal accepted', targetStepId: 'checkout', label: 'Pay now' },
-        { condition: 'Counter-offer received', targetStepId: 'my_bids_dashboard', label: 'Review counter', edgeStyle: 'dashed' },
         { condition: 'All rejected or expired', targetStepId: 'search_listings', label: 'Search again', edgeStyle: 'dashed' },
       ],
     },
