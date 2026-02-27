@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { trackPageView } from "@/lib/posthog";
 import Index from "./pages/Index";
 import Rentals from "./pages/Rentals";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -44,6 +45,15 @@ const queryClient = new QueryClient();
 
 const isDevEnvironment = import.meta.env.VITE_SUPABASE_URL?.includes('oukbxqnlxnkainnligfz');
 
+
+/** Track page views on route changes for PostHog analytics. */
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+}
 
 /**
  * Handles auth events that require navigation (e.g., PASSWORD_RECOVERY).
@@ -117,6 +127,7 @@ const App = () => (
         <CookieConsentBanner />
         <BrowserRouter>
           <ErrorBoundary>
+          <PageViewTracker />
           <AuthEventHandler />
           <Routes>
             {/* Public routes */}

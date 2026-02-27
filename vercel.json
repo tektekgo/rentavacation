@@ -5,7 +5,7 @@
             "headers": [
                 {
                     "key": "Content-Security-Policy",
-                    "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.vapi.ai wss://*.vapi.ai https://accounts.google.com https://*.ingest.us.sentry.io; frame-src 'self' https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri https://o4510954990338048.ingest.us.sentry.io/api/4510955352096768/security/?sentry_key=45c5a10bf0f9aea2f43c9a0b5f7c96ea; upgrade-insecure-requests"
+                    "value": "default-src 'self'; script-src 'self' https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.vapi.ai wss://*.vapi.ai https://accounts.google.com https://*.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com; frame-src 'self' https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri https://o4510954990338048.ingest.us.sentry.io/api/4510955352096768/security/?sentry_key=45c5a10bf0f9aea2f43c9a0b5f7c96ea; upgrade-insecure-requests"
                 },
                 {
                     "key": "X-Content-Type-Options",

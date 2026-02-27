@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { setSentryUser } from '@/lib/sentry';
+import { identifyUser as identifyPostHogUser, resetUser as resetPostHogUser } from '@/lib/posthog';
 import type { AppRole, Profile } from '@/types/database';
 
 interface AuthContextType {
@@ -107,11 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setProfile(userProfile);
             setRoles(userRoles);
             setSentryUser(currentSession.user.id, userRoles[0]);
+            identifyPostHogUser(currentSession.user.id, { role: userRoles[0] || 'none' });
           }, 0);
         } else {
           setProfile(null);
           setRoles([]);
           setSentryUser(null);
+          resetPostHogUser();
         }
 
         setIsLoading(false);
