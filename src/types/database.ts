@@ -1052,9 +1052,13 @@ export type Database = {
           approved_by: string | null
           avatar_url: string | null
           created_at: string
+          deletion_reason: string | null
+          deletion_requested_at: string | null
+          deletion_scheduled_for: string | null
           email: string
           full_name: string | null
           id: string
+          is_anonymized: boolean
           is_seed_foundation: boolean | null
           maintenance_fee_updated_at: string | null
           phone: string | null
@@ -1072,9 +1076,13 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           created_at?: string
+          deletion_reason?: string | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           email: string
           full_name?: string | null
           id: string
+          is_anonymized?: boolean
           is_seed_foundation?: boolean | null
           maintenance_fee_updated_at?: string | null
           phone?: string | null
@@ -1092,9 +1100,13 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           created_at?: string
+          deletion_reason?: string | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          is_anonymized?: boolean
           is_seed_foundation?: boolean | null
           maintenance_fee_updated_at?: string | null
           phone?: string | null

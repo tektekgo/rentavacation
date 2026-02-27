@@ -20,7 +20,13 @@ import {
   NOTIFICATION_CATEGORIES,
   type EmailPrefKey,
 } from "@/hooks/useNotificationPreferences";
-import { User, Mail, Phone, Lock, Shield, Calendar, Save, Loader2, Bell } from "lucide-react";
+import {
+  useRequestDeletion,
+  useCancelDeletion,
+  useExportUserData,
+} from "@/hooks/useAccountDeletion";
+import { User, Mail, Phone, Lock, Shield, Calendar, Save, Loader2, Bell, Download, Trash2, AlertTriangle, XCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const AccountSettings = () => {
   usePageMeta("Account Settings", "Manage your Rent-A-Vacation account profile, security, and preferences.");
@@ -42,6 +48,14 @@ const AccountSettings = () => {
   // Notification preferences
   const { data: notifPrefs, isLoading: notifLoading } = useNotificationPreferences();
   const updatePref = useUpdateNotificationPreference();
+
+  // Account deletion & data export
+  const requestDeletion = useRequestDeletion();
+  const cancelDeletion = useCancelDeletion();
+  const exportData = useExportUserData();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Sync profile data into form when loaded
   useEffect(() => {
@@ -432,15 +446,234 @@ const AccountSettings = () => {
                   </div>
                 </div>
 
+              </CardContent>
+            </Card>
+
+            {/* ─── Section 5: Data & Privacy ─── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="h-5 w-5 text-primary" />
+                  Data & Privacy
+                </CardTitle>
+                <CardDescription>
+                  Export your data or request account deletion.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Export Data */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Export My Data</p>
+                    <p className="text-xs text-muted-foreground">
+                      Download all your data as a JSON file (profile, bookings, listings, bids, etc.)
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      exportData.mutate(undefined, {
+                        onSuccess: () =>
+                          toast({
+                            title: "Data exported",
+                            description: "Your data file has been downloaded.",
+                          }),
+                        onError: (err) =>
+                          toast({
+                            title: "Export failed",
+                            description: err.message,
+                            variant: "destructive",
+                          }),
+                      });
+                    }}
+                    disabled={exportData.isPending}
+                  >
+                    {exportData.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-1" />
+                        Export
+                      </>
+                    )}
+                  </Button>
+                </div>
+
                 <Separator />
 
-                {/* Delete Account placeholder */}
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-foreground">Delete Account</p>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                    Coming soon
-                  </span>
-                </div>
+                {/* Delete Account */}
+                {profile?.deletion_requested_at ? (
+                  // Deletion already requested — show cancellation option
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-red-800">
+                          Account Deletion Scheduled
+                        </p>
+                        <p className="text-xs text-red-600 mt-1">
+                          Your account is scheduled for deletion on{" "}
+                          <strong>
+                            {profile.deletion_scheduled_for
+                              ? new Date(profile.deletion_scheduled_for).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "the scheduled date"}
+                          </strong>
+                          . All personal data will be permanently removed. Financial records will be anonymized and retained for tax compliance.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-300 text-red-700 hover:bg-red-100"
+                      onClick={() => {
+                        cancelDeletion.mutate(undefined, {
+                          onSuccess: () => {
+                            toast({
+                              title: "Deletion cancelled",
+                              description: "Your account will not be deleted.",
+                            });
+                            window.location.reload();
+                          },
+                          onError: (err) =>
+                            toast({
+                              title: "Failed to cancel",
+                              description: err.message,
+                              variant: "destructive",
+                            }),
+                        });
+                      }}
+                      disabled={cancelDeletion.isPending}
+                    >
+                      {cancelDeletion.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                      ) : (
+                        <XCircle className="h-4 w-4 mr-1" />
+                      )}
+                      Cancel Deletion
+                    </Button>
+                  </div>
+                ) : showDeleteConfirm ? (
+                  // Deletion confirmation form
+                  <div className="border border-destructive/30 rounded-lg p-4 space-y-4">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-destructive">
+                          Are you sure you want to delete your account?
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          After a 14-day grace period, your personal data will be permanently deleted.
+                          Booking and financial records will be anonymized but retained for tax compliance (7 years).
+                          You can cancel this request any time during the grace period.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="delete_reason" className="text-xs">
+                        Reason for leaving (optional)
+                      </Label>
+                      <Textarea
+                        id="delete_reason"
+                        value={deleteReason}
+                        onChange={(e) => setDeleteReason(e.target.value)}
+                        placeholder="Help us improve — why are you deleting your account?"
+                        rows={2}
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="delete_confirm" className="text-xs">
+                        Type <strong>DELETE</strong> to confirm
+                      </Label>
+                      <Input
+                        id="delete_confirm"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="DELETE"
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmText("");
+                          setDeleteReason("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={
+                          deleteConfirmText !== "DELETE" || requestDeletion.isPending
+                        }
+                        onClick={() => {
+                          requestDeletion.mutate(deleteReason || undefined, {
+                            onSuccess: (data) => {
+                              toast({
+                                title: "Deletion requested",
+                                description: `Your account will be deleted on ${
+                                  data.scheduled_for
+                                    ? new Date(data.scheduled_for).toLocaleDateString()
+                                    : "the scheduled date"
+                                }. You can cancel this from Account Settings.`,
+                              });
+                              setShowDeleteConfirm(false);
+                              setDeleteConfirmText("");
+                              setDeleteReason("");
+                              window.location.reload();
+                            },
+                            onError: (err) =>
+                              toast({
+                                title: "Failed to request deletion",
+                                description: err.message,
+                                variant: "destructive",
+                              }),
+                          });
+                        }}
+                      >
+                        {requestDeletion.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 mr-1" />
+                        )}
+                        Request Account Deletion
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  // Default — show delete button
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Delete Account</p>
+                      <p className="text-xs text-muted-foreground">
+                        Permanently delete your account and personal data (14-day grace period).
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => setShowDeleteConfirm(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
