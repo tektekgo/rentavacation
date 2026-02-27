@@ -3,7 +3,7 @@ import type { FlowDefinition } from './types';
 export const adminLifecycle: FlowDefinition = {
   id: 'admin-lifecycle',
   label: 'RAV Admin Operations',
-  description: 'Administrative workflows for the RAV team: approvals, verifications, escrow management, and issue resolution.',
+  description: 'Administrative workflows for the RAV team: approvals, verifications, escrow management, and issue resolution. The Admin Dashboard is the central hub with independent operational tracks.',
   primaryRole: 'rav_admin',
   roleEmoji: '🛡️',
   direction: 'TD',
@@ -15,9 +15,18 @@ export const adminLifecycle: FlowDefinition = {
       component: 'AdminOverview',
       nodeStyle: 'start',
       roles: ['rav_owner', 'rav_admin', 'rav_staff'],
-      description: 'KPI overview, charts, pending action counts',
+      description: 'KPI overview, charts, pending action counts. Central hub for all admin operations.',
       tables: ['bookings', 'listings', 'profiles'],
+      branches: [
+        { condition: 'User management', targetStepId: 'user_approvals', label: 'Users' },
+        { condition: 'Content review', targetStepId: 'listing_approval', label: 'Listings' },
+        { condition: 'Booking operations', targetStepId: 'booking_oversight', label: 'Bookings' },
+        { condition: 'Support queue', targetStepId: 'issue_resolution', label: 'Issues' },
+        { condition: 'Analytics & reports', targetStepId: 'financials', label: 'Reports' },
+      ],
     },
+
+    // ── Track 1: User Onboarding ──
     {
       id: 'user_approvals',
       route: '/admin',
@@ -29,8 +38,8 @@ export const adminLifecycle: FlowDefinition = {
       tables: ['profiles'],
       edgeFunctions: ['send-approval-email', 'send-email'],
       branches: [
-        { condition: 'Approve', targetStepId: 'role_management', label: 'Approved' },
-        { condition: 'Reject', targetStepId: 'dashboard', label: 'Rejected', edgeStyle: 'dashed' },
+        { condition: 'Approved, may request owner role', targetStepId: 'role_management', label: 'Approved' },
+        { condition: 'Rejected', targetStepId: 'dashboard', label: 'Back to queue', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -42,7 +51,12 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_owner', 'rav_admin'],
       description: 'Process role upgrade requests (renter → property_owner)',
       tables: ['role_upgrade_requests', 'user_roles'],
+      branches: [
+        { condition: 'Owner needs verification', targetStepId: 'verification_review', label: 'Verify docs' },
+      ],
     },
+
+    // ── Track 2: Content Review ──
     {
       id: 'listing_approval',
       route: '/admin',
@@ -54,8 +68,8 @@ export const adminLifecycle: FlowDefinition = {
       description: 'Review and approve/reject property listings',
       tables: ['listings', 'properties'],
       branches: [
-        { condition: 'Approve', targetStepId: 'verification_review', label: 'Approved' },
-        { condition: 'Reject', targetStepId: 'listing_approval', label: 'Rejected', edgeStyle: 'dashed' },
+        { condition: 'Approved', targetStepId: 'verification_review', label: 'Approved' },
+        { condition: 'Rejected, sent back to owner', targetStepId: 'dashboard', label: 'Rejected → owner fixes', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -68,6 +82,8 @@ export const adminLifecycle: FlowDefinition = {
       description: 'Review owner verification documents, update trust level',
       tables: ['owner_verifications', 'verification_documents'],
     },
+
+    // ── Track 3: Booking Operations ──
     {
       id: 'booking_oversight',
       route: '/admin',
@@ -77,6 +93,9 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_admin', 'rav_staff'],
       description: 'Monitor all bookings across the platform',
       tables: ['bookings', 'booking_confirmations'],
+      branches: [
+        { condition: 'Booking needs escrow review', targetStepId: 'escrow_management', label: 'Escrow' },
+      ],
     },
     {
       id: 'escrow_management',
@@ -90,9 +109,9 @@ export const adminLifecycle: FlowDefinition = {
       tables: ['booking_confirmations'],
       edgeFunctions: ['process-escrow-release'],
       branches: [
-        { condition: 'Verified + hold period elapsed', targetStepId: 'payout_tracking', label: 'Auto-Release' },
-        { condition: 'Admin manual release', targetStepId: 'payout_tracking', label: 'Release' },
-        { condition: 'Issue found', targetStepId: 'issue_resolution', label: 'Hold', edgeStyle: 'dashed' },
+        { condition: 'Verified + hold period elapsed', targetStepId: 'payout_tracking', label: 'Release funds' },
+        { condition: 'Admin manual release', targetStepId: 'payout_tracking', label: 'Manual release' },
+        { condition: 'Issue found during verification', targetStepId: 'issue_resolution', label: 'Hold → investigate', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -102,9 +121,12 @@ export const adminLifecycle: FlowDefinition = {
       component: 'AdminPayouts',
       tab: 'payouts',
       roles: ['rav_admin'],
-      description: 'Track and process owner payouts',
+      description: 'Track and process owner payouts via Stripe Connect or manual methods',
       tables: ['bookings'],
+      edgeFunctions: ['create-stripe-payout'],
     },
+
+    // ── Track 4: Support & Disputes ──
     {
       id: 'issue_resolution',
       route: '/admin',
@@ -112,10 +134,11 @@ export const adminLifecycle: FlowDefinition = {
       component: 'AdminCheckinIssues',
       tab: 'issues',
       roles: ['rav_admin', 'rav_staff'],
-      description: 'Resolve renter check-in complaints and disputes',
-      tables: ['checkin_confirmations'],
+      description: 'Resolve renter check-in complaints and reported issues',
+      tables: ['checkin_confirmations', 'disputes'],
       branches: [
-        { condition: 'Escalated to dispute', targetStepId: 'dispute_resolution', label: 'Escalate' },
+        { condition: 'Escalated to formal dispute', targetStepId: 'dispute_resolution', label: 'Escalate' },
+        { condition: 'Resolved directly', targetStepId: 'dashboard', label: 'Resolved', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -130,11 +153,12 @@ export const adminLifecycle: FlowDefinition = {
       tables: ['disputes', 'dispute_messages', 'bookings'],
       edgeFunctions: ['process-dispute-refund'],
       branches: [
-        { condition: 'Full refund', targetStepId: 'payout_tracking', label: 'Refund', edgeStyle: 'dashed' },
-        { condition: 'Partial refund', targetStepId: 'payout_tracking', label: 'Partial' },
-        { condition: 'No refund', targetStepId: 'financials', label: 'Closed' },
+        { condition: 'Full or partial refund', targetStepId: 'payout_tracking', label: 'Process refund' },
+        { condition: 'No refund, dispute closed', targetStepId: 'financials', label: 'Closed → log', edgeStyle: 'dashed' },
       ],
     },
+
+    // ── Track 5: Analytics & Configuration ──
     {
       id: 'financials',
       route: '/admin',
@@ -144,6 +168,9 @@ export const adminLifecycle: FlowDefinition = {
       roles: ['rav_owner', 'rav_admin'],
       description: 'Revenue reports, commission tracking, marketplace analytics',
       tables: ['bookings', 'listings'],
+      branches: [
+        { condition: 'Deep-dive analytics', targetStepId: 'executive_dashboard', label: 'Executive view' },
+      ],
     },
     {
       id: 'voice_controls',
