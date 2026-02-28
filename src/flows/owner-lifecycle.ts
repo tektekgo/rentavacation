@@ -100,21 +100,20 @@ export const ownerLifecycle: FlowDefinition = {
       tables: ['listings', 'notifications'],
       edgeFunctions: ['match-travel-requests'],
       branches: [
-        { condition: 'Direct booking', targetStepId: 'booking_confirmed' },
-        { condition: 'Open for bidding', targetStepId: 'manage_bids' },
+        { condition: 'Renter books directly', targetStepId: 'booking_confirmed', label: 'Renter pays' },
+        { condition: 'Listing open for bidding', targetStepId: 'manage_bids', label: 'Bids open' },
       ],
     },
     {
       id: 'manage_bids',
       route: '/owner-dashboard',
       label: 'Manage Bids & Date Proposals',
-      component: 'OwnerDashboard',
-      tab: 'proposals',
-      description: 'Owner reviews and responds to renter bids and date proposals',
+      component: 'BidsManagerDialog',
+      tab: 'listings',
+      description: 'Owner reviews bids, accepts/rejects/counter-offers. Counter-offers trigger re-negotiation on this page. Accepting a bid does NOT create a booking — the renter must still pay at checkout.',
       tables: ['listing_bids'],
       branches: [
-        { condition: 'Bid accepted', targetStepId: 'booking_confirmed' },
-        { condition: 'Counter-offered', targetStepId: 'manage_bids', edgeStyle: 'dashed' },
+        { condition: 'Bid accepted, renter pays at checkout', targetStepId: 'booking_confirmed', label: 'Accepted → Renter pays' },
       ],
     },
     {
@@ -123,12 +122,12 @@ export const ownerLifecycle: FlowDefinition = {
       label: 'Booking Confirmed',
       component: 'OwnerBookings',
       tab: 'bookings',
-      description: 'Renter payment captured, booking created (verified by webhook + client)',
+      description: 'Renter payment captured via Stripe, booking created and confirmed (verified by webhook + client). Appears in owner Bookings tab.',
       tables: ['bookings', 'booking_confirmations'],
       edgeFunctions: ['verify-booking-payment', 'stripe-webhook'],
       branches: [
-        { condition: 'Direct booking', targetStepId: 'owner_confirmation' },
-        { condition: 'Owner cancels', targetStepId: 'owner_cancellation', label: 'Cancel booking', edgeStyle: 'dashed' },
+        { condition: 'Proceed to owner confirmation', targetStepId: 'owner_confirmation', label: 'Confirm availability' },
+        { condition: 'Owner cancels before confirmation', targetStepId: 'owner_cancellation', label: 'Cancel booking', edgeStyle: 'dashed' },
       ],
     },
     {
@@ -151,11 +150,12 @@ export const ownerLifecycle: FlowDefinition = {
       tab: 'confirmations',
       roles: ['property_owner'],
       nodeStyle: 'decision',
-      description: 'Owner confirms they can fulfill the booking within configurable time window. Can request time extensions.',
+      description: 'Owner confirms they can fulfill the booking within 60-min window (configurable). Can request up to 2 time extensions (30 min each).',
       tables: ['booking_confirmations'],
+      edgeFunctions: ['process-deadline-reminders'],
       branches: [
         { condition: 'Owner confirms', targetStepId: 'submit_confirmation', label: 'Confirmed' },
-        { condition: 'Owner declines or times out', targetStepId: 'booking_confirmed', label: 'Cancelled', edgeStyle: 'dashed' },
+        { condition: 'Owner declines or times out', targetStepId: 'owner_cancellation', label: 'Declined → refund', edgeStyle: 'dashed' },
       ],
     },
     {

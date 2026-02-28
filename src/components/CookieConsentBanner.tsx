@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCookieConsent, type CookiePreferences } from "@/hooks/useCookieConsent";
+import { initGA4 } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Cookie, Settings2, X } from "lucide-react";
@@ -12,9 +13,15 @@ export function CookieConsentBanner() {
 
   if (!showBanner) return null;
 
+  const handleAcceptAll = () => {
+    acceptAll();
+    initGA4(); // Start GA4 immediately on consent
+  };
+
   const handleSaveCustom = () => {
     const prefs: CookiePreferences = { necessary: true, analytics, marketing };
     saveCustom(prefs);
+    if (analytics) initGA4();
   };
 
   return (
@@ -90,7 +97,7 @@ export function CookieConsentBanner() {
                   </>
                 ) : (
                   <>
-                    <Button size="sm" onClick={acceptAll}>
+                    <Button size="sm" onClick={handleAcceptAll}>
                       Accept All
                     </Button>
                     <Button size="sm" variant="outline" onClick={rejectNonEssential}>

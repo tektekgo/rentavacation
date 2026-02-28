@@ -2,7 +2,7 @@
  * Flow Manifest Type Definitions
  * 
  * Declarative data structures that describe user journeys through the application.
- * The /architecture page auto-generates interactive Mermaid diagrams from these manifests.
+ * The /user-journeys page auto-generates interactive Mermaid diagrams from these manifests.
  * 
  * Convention: When adding a new route or workflow step, update the relevant manifest.
  * See CLAUDE.md for AI agent instructions.
@@ -85,8 +85,11 @@ export function flowToMermaid(flow: FlowDefinition): string {
     const current = flow.steps[i];
     const next = flow.steps[i + 1];
 
-    // If current step has branches, use those instead of sequential
-    if (current.branches && current.branches.length > 0) {
+    // END nodes are terminal — no outgoing edges
+    if (current.nodeStyle === 'end') continue;
+
+    // If step has branches array, use those (empty array = terminal, no sequential edge)
+    if (current.branches) {
       for (const branch of current.branches) {
         const style = branch.edgeStyle === 'dashed' ? '-.->' : '-->';
         const label = branch.label || branch.condition;

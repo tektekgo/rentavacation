@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { trackPageView } from "@/lib/posthog";
+import { initGA4, trackGA4PageView } from "@/lib/analytics";
+import { getCookieConsent } from "@/hooks/useCookieConsent";
 import Index from "./pages/Index";
 import Rentals from "./pages/Rentals";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -30,7 +33,7 @@ import PendingApproval from "./pages/PendingApproval";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
-import Architecture from "./pages/Architecture";
+import UserJourneys from "./pages/UserJourneys";
 import Contact from "./pages/Contact";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import MaintenanceFeeCalculator from "./pages/MaintenanceFeeCalculator";
@@ -44,6 +47,25 @@ const queryClient = new QueryClient();
 
 const isDevEnvironment = import.meta.env.VITE_SUPABASE_URL?.includes('oukbxqnlxnkainnligfz');
 
+
+/** Track page views on route changes for PostHog + GA4 analytics. */
+function PageViewTracker() {
+  const location = useLocation();
+
+  // Initialize GA4 once when analytics consent exists
+  useEffect(() => {
+    const consent = getCookieConsent();
+    if (consent?.analytics) {
+      initGA4();
+    }
+  }, []);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+    trackGA4PageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+}
 
 /**
  * Handles auth events that require navigation (e.g., PASSWORD_RECOVERY).
@@ -117,6 +139,7 @@ const App = () => (
         <CookieConsentBanner />
         <BrowserRouter>
           <ErrorBoundary>
+          <PageViewTracker />
           <AuthEventHandler />
           <Routes>
             {/* Public routes */}
@@ -134,7 +157,7 @@ const App = () => (
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/documentation" element={<Documentation />} />
             <Route path="/user-guide" element={<UserGuide />} />
-            <Route path="/architecture" element={<Architecture />} />
+            <Route path="/user-journeys" element={<UserJourneys />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/calculator" element={<MaintenanceFeeCalculator />} />
 

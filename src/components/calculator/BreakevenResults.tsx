@@ -17,7 +17,7 @@ export function BreakevenResults({ result }: BreakevenResultsProps) {
   }
 
   return (
-    <div className="bg-card rounded-xl shadow-sm border p-6 space-y-6">
+    <div className="bg-card rounded-xl shadow-sm border p-6 space-y-6 animate-fade-in ring-2 ring-primary/20">
       <h2 className="text-lg font-semibold text-foreground">Your Earnings Potential</h2>
 
       {/* Weekly breakdown */}

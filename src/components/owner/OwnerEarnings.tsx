@@ -13,15 +13,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, Loader2, Calendar, Percent } from "lucide-react";
-import { format, addDays, startOfMonth, subMonths, isAfter } from "date-fns";
+import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, Loader2, Calendar, Percent, Shield, FileCheck, XCircle } from "lucide-react";
+import { format, addDays, startOfMonth, subMonths, isAfter, differenceInDays } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import type { Booking, Listing, Property, PayoutStatus } from "@/types/database";
+import type { Booking, Listing, Property, PayoutStatus, EscrowStatus } from "@/types/database";
 import { useOwnerCommission } from "@/hooks/useOwnerCommission";
 import StripeConnectBanner from "./StripeConnectBanner";
 
+interface EscrowInfo {
+  escrow_status: EscrowStatus;
+  escrow_amount: number;
+  owner_confirmation_status: string | null;
+  escrow_released_at: string | null;
+}
+
 interface BookingWithListing extends Booking {
   listing: Listing & { property: Property };
+  escrow?: EscrowInfo | null;
 }
 
 interface EarningsSummary {
@@ -40,6 +48,80 @@ interface MonthlyEarning {
 }
 
 const PAYOUT_PROCESSING_DAYS = 5;
+
+const ESCROW_STEPS = [
+  { key: "confirmed", label: "Confirmed" },
+  { key: "verified", label: "Verified" },
+  { key: "hold", label: "Hold Period" },
+  { key: "released", label: "Released" },
+] as const;
+
+const getEscrowStep = (escrow: EscrowInfo | null | undefined, checkoutDate: string): number => {
+  if (!escrow) return 0;
+  switch (escrow.escrow_status) {
+    case "released": return 4;
+    case "verified": {
+      const release = addDays(new Date(checkoutDate), PAYOUT_PROCESSING_DAYS);
+      return isAfter(new Date(), release) ? 3 : 2;
+    }
+    case "confirmation_submitted": return 1;
+    case "pending_confirmation": return 0;
+    case "refunded": return -1;
+    case "disputed": return -2;
+    default: return 0;
+  }
+};
+
+const EscrowStepper = ({ escrow, checkoutDate }: { escrow: EscrowInfo | null | undefined; checkoutDate: string }) => {
+  if (!escrow) return null;
+
+  if (escrow.escrow_status === "refunded") {
+    return (
+      <Badge variant="outline" className="text-red-600 border-red-300 text-xs">
+        <XCircle className="h-3 w-3 mr-1" />
+        Refunded
+      </Badge>
+    );
+  }
+  if (escrow.escrow_status === "disputed") {
+    return (
+      <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs">
+        <AlertCircle className="h-3 w-3 mr-1" />
+        Disputed
+      </Badge>
+    );
+  }
+
+  const step = getEscrowStep(escrow, checkoutDate);
+  const releaseDate = addDays(new Date(checkoutDate), PAYOUT_PROCESSING_DAYS);
+  const daysLeft = differenceInDays(releaseDate, new Date());
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-1">
+        {ESCROW_STEPS.map((s, i) => (
+          <div key={s.key} className="flex items-center">
+            <div
+              className={`w-2.5 h-2.5 rounded-full ${
+                i < step ? "bg-green-500" : i === step ? "bg-blue-500 ring-2 ring-blue-200" : "bg-gray-200"
+              }`}
+              title={s.label}
+            />
+            {i < ESCROW_STEPS.length - 1 && (
+              <div className={`w-4 h-0.5 ${i < step ? "bg-green-500" : "bg-gray-200"}`} />
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {step < 2 && "Awaiting verification"}
+        {step === 2 && daysLeft > 0 && `${daysLeft}d until payout`}
+        {step === 2 && daysLeft <= 0 && "Ready for release"}
+        {step >= 3 && "Payout released"}
+      </p>
+    </div>
+  );
+};
 
 const getPayoutStatusBadge = (booking: BookingWithListing) => {
   const payoutStatus = booking.payout_status || 'pending';
@@ -138,6 +220,25 @@ const OwnerEarnings = () => {
       if (error) throw error;
 
       const bookingsData = data as BookingWithListing[] || [];
+
+      // Fetch escrow data for these bookings
+      const bookingIds = bookingsData.map((b) => b.id);
+      if (bookingIds.length > 0) {
+        const { data: escrowData } = await supabase
+          .from("booking_confirmations")
+          .select("booking_id, escrow_status, escrow_amount, owner_confirmation_status, escrow_released_at")
+          .in("booking_id", bookingIds);
+
+        if (escrowData) {
+          const escrowMap = new Map(
+            (escrowData as (EscrowInfo & { booking_id: string })[]).map((e) => [e.booking_id, e])
+          );
+          for (const booking of bookingsData) {
+            booking.escrow = escrowMap.get(booking.id) || null;
+          }
+        }
+      }
+
       setBookings(bookingsData);
 
       // Calculate summary with payout status
@@ -419,6 +520,7 @@ const OwnerEarnings = () => {
                       <TableHead>Property</TableHead>
                       <TableHead>Stay Dates</TableHead>
                       <TableHead>Payout Status</TableHead>
+                      <TableHead>Escrow</TableHead>
                       <TableHead className="text-right">Total Paid</TableHead>
                       <TableHead className="text-right">Commission</TableHead>
                       <TableHead className="text-right">Your Payout</TableHead>
@@ -452,6 +554,12 @@ const OwnerEarnings = () => {
                               Paid {format(new Date(booking.payout_date), "MMM d, yyyy")}
                             </p>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <EscrowStepper
+                            escrow={booking.escrow}
+                            checkoutDate={booking.listing.check_out_date}
+                          />
                         </TableCell>
                         <TableCell className="text-right">
                           ${booking.total_amount.toLocaleString()}

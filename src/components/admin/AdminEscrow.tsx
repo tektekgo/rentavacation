@@ -51,7 +51,8 @@ import {
   Zap,
   ExternalLink,
 } from "lucide-react";
-import { format, differenceInDays, addDays, isPast } from "date-fns";
+import { format, differenceInDays, addDays, isPast, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import type {
   BookingConfirmation,
   Booking,
@@ -61,6 +62,9 @@ import type {
   EscrowStatus,
   OwnerConfirmationStatus
 } from "@/types/database";
+import { AdminEntityLink } from "./AdminEntityLink";
+import { DateRangeFilter } from "./DateRangeFilter";
+import { AgeBadge } from "./AgeBadge";
 
 interface EscrowWithDetails extends BookingConfirmation {
   booking: Booking & {
@@ -110,13 +114,14 @@ const OWNER_CONFIRMATION_CONFIG: Record<string, { label: string; variant: "defau
   owner_declined: { label: "Declined", variant: "destructive" },
 };
 
-const AdminEscrow = () => {
+const AdminEscrow = ({ initialSearch = "", onNavigateToEntity }: { initialSearch?: string; onNavigateToEntity?: (tab: string, search?: string) => void }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [escrows, setEscrows] = useState<EscrowWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedEscrow, setSelectedEscrow] = useState<EscrowWithDetails | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -396,15 +401,23 @@ const AdminEscrow = () => {
 
   // Filter escrows
   const filteredEscrows = escrows.filter((e) => {
-    const matchesSearch =
-      e.owner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.owner?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.resort_confirmation_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.booking?.listing?.property?.resort_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      e.owner?.full_name?.toLowerCase().includes(q) ||
+      e.owner?.email?.toLowerCase().includes(q) ||
+      e.resort_confirmation_number?.toLowerCase().includes(q) ||
+      e.booking?.listing?.property?.resort_name?.toLowerCase().includes(q) ||
+      e.booking_id?.toLowerCase().includes(q) ||
+      e.booking?.renter?.full_name?.toLowerCase().includes(q);
 
     const matchesStatus = statusFilter === "all" || e.escrow_status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const matchesDateRange = !dateRange?.from || isWithinInterval(
+      new Date(e.created_at),
+      { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to || dateRange.from) }
+    );
+
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
   // Stats
@@ -464,10 +477,11 @@ const AdminEscrow = () => {
               <SelectItem value="disputed">Disputed</SelectItem>
             </SelectContent>
           </Select>
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search owner, resort..."
+              placeholder="Search by name, resort, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -581,7 +595,9 @@ const AdminEscrow = () => {
                     <TableRow key={escrow.id}>
                       <TableCell>
                         <div>
-                          <p className="font-medium">{escrow.owner?.full_name || "Unknown"}</p>
+                          <AdminEntityLink tab="users" search={escrow.owner?.email || ""} onNavigate={onNavigateToEntity}>
+                            <p className="font-medium">{escrow.owner?.full_name || "Unknown"}</p>
+                          </AdminEntityLink>
                           <p className="text-sm text-muted-foreground">
                             {escrow.booking?.listing?.property?.resort_name}
                           </p>
@@ -589,7 +605,9 @@ const AdminEscrow = () => {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-medium">{escrow.booking?.renter?.full_name || "Guest"}</p>
+                          <AdminEntityLink tab="users" search={escrow.booking?.renter?.email || ""} onNavigate={onNavigateToEntity}>
+                            <p className="font-medium">{escrow.booking?.renter?.full_name || "Guest"}</p>
+                          </AdminEntityLink>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(escrow.booking?.listing?.check_in_date), "MMM d")} -{" "}
                             {format(new Date(escrow.booking?.listing?.check_out_date), "MMM d")}
@@ -632,6 +650,9 @@ const AdminEscrow = () => {
                               <Zap className="h-3 w-3 mr-1" />
                               Auto-released
                             </Badge>
+                          )}
+                          {["pending_confirmation", "confirmation_submitted"].includes(escrow.escrow_status) && (
+                            <AgeBadge date={escrow.created_at} useHours thresholds={{ warning: 1, critical: 3 }} />
                           )}
                         </div>
                       </TableCell>

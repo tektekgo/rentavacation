@@ -30,7 +30,8 @@ import {
   Network,
   Wrench,
   Mic,
-  Scale
+  Scale,
+  Receipt,
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -49,6 +50,7 @@ import { AdminMemberships } from "@/components/admin/AdminMemberships";
 import { DevTools } from "@/components/admin/DevTools";
 import { VoiceControls } from "@/components/admin/VoiceControls";
 import AdminDisputes from "@/components/admin/AdminDisputes";
+import AdminTaxReporting from "@/components/admin/AdminTaxReporting";
 
 const IS_DEV = import.meta.env.VITE_SUPABASE_URL?.includes("oukbxqnlxnkainnligfz");
 
@@ -60,9 +62,17 @@ const AdminDashboard = () => {
   const [roleRequestCount, setRoleRequestCount] = useState(0);
 
   const activeTab = searchParams.get("tab") || "overview";
+  const initialSearch = searchParams.get("search") || "";
 
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
+  };
+
+  /** Navigate to a tab with an optional pre-filled search term */
+  const navigateToEntity = (tab: string, search?: string) => {
+    const params: Record<string, string> = { tab };
+    if (search) params.search = search;
+    setSearchParams(params);
   };
 
   // Redirect if not authorized
@@ -148,9 +158,9 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               {hasRole("rav_owner") && (
-                <Button variant="outline" size="sm" onClick={() => navigate("/architecture")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/user-journeys")}>
                   <Network className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Architecture</span>
+                  <span className="hidden sm:inline">User Journeys</span>
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={() => navigate("/documentation")}>
@@ -202,6 +212,10 @@ const AdminDashboard = () => {
               <DollarSign className="h-4 w-4" />
               <span className="hidden sm:inline">Financials</span>
             </TabsTrigger>
+            <TabsTrigger value="tax" className="gap-2">
+              <Receipt className="h-4 w-4" />
+              <span className="hidden sm:inline">Tax & 1099</span>
+            </TabsTrigger>
             <TabsTrigger value="payouts" className="gap-2">
               <Wallet className="h-4 w-4" />
               <span className="hidden sm:inline">Payouts</span>
@@ -244,19 +258,31 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="properties">
-            <AdminProperties />
+            <AdminProperties
+              initialSearch={activeTab === "properties" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="listings">
-            <AdminListings />
+            <AdminListings
+              initialSearch={activeTab === "listings" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="bookings">
-            <AdminBookings />
+            <AdminBookings
+              initialSearch={activeTab === "bookings" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="escrow">
-            <AdminEscrow />
+            <AdminEscrow
+              initialSearch={activeTab === "escrow" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="issues">
@@ -264,7 +290,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="disputes">
-            <AdminDisputes />
+            <AdminDisputes
+              initialSearch={activeTab === "disputes" ? initialSearch : ""}
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="verifications">
@@ -275,12 +304,20 @@ const AdminDashboard = () => {
             <AdminFinancials />
           </TabsContent>
 
+          <TabsContent value="tax">
+            <AdminTaxReporting />
+          </TabsContent>
+
           <TabsContent value="payouts">
-            <AdminPayouts />
+            <AdminPayouts
+              onNavigateToEntity={navigateToEntity}
+            />
           </TabsContent>
 
           <TabsContent value="users">
-            <AdminUsers />
+            <AdminUsers
+              initialSearch={activeTab === "users" ? initialSearch : ""}
+            />
           </TabsContent>
 
           <TabsContent value="pending-approvals">

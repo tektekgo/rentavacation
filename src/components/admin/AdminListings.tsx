@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -22,9 +23,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, MapPin, Search, Check, X, DollarSign } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Calendar, MapPin, Search, Check, X, DollarSign, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import type { Listing, Property, Profile, ListingStatus } from "@/types/database";
+import { AdminEntityLink, type AdminNavigationProps } from "./AdminEntityLink";
+import { AgeBadge } from "./AgeBadge";
+
+const REJECTION_TEMPLATES = [
+  "Incomplete property details",
+  "Photos do not meet quality standards",
+  "Pricing appears unrealistic",
+  "Duplicate listing",
+];
 
 interface ListingWithDetails extends Listing {
   property: Property;
@@ -49,13 +68,23 @@ const STATUS_LABELS: Record<ListingStatus, string> = {
   cancelled: "Cancelled",
 };
 
-const AdminListings = () => {
+const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigationProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [listings, setListings] = useState<ListingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectingListingId, setRejectingListingId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkRejecting, setIsBulkRejecting] = useState(false);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
 
   const fetchListings = async () => {
     try {
@@ -137,17 +166,26 @@ const AdminListings = () => {
     }
   };
 
-  const handleReject = async (listingId: string) => {
+  const openRejectDialog = (listingId: string) => {
+    setRejectingListingId(listingId);
+    setRejectionReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectingListingId || !rejectionReason.trim()) return;
+
     try {
-      const listing = listings.find((l) => l.id === listingId);
+      const listing = listings.find((l) => l.id === rejectingListingId);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any)
         .from("listings")
         .update({
           status: "cancelled",
+          rejection_reason: rejectionReason.trim(),
         })
-        .eq("id", listingId);
+        .eq("id", rejectingListingId);
 
       if (error) throw error;
 
@@ -158,9 +196,11 @@ const AdminListings = () => {
 
       toast({
         title: "Listing Rejected",
-        description: "The listing has been rejected.",
+        description: "The listing has been rejected with a reason.",
       });
 
+      setRejectDialogOpen(false);
+      setRejectingListingId(null);
       fetchListings();
     } catch (error) {
       console.error("Error rejecting listing:", error);
@@ -172,11 +212,113 @@ const AdminListings = () => {
     }
   };
 
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    let successCount = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const listing = listings.find((l) => l.id === id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("listings")
+          .update({
+            status: "active",
+            approved_by: user?.id,
+            approved_at: new Date().toISOString(),
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+        successCount++;
+
+        // Send approval email (non-blocking)
+        if (listing?.owner?.id) {
+          sendApprovalEmail(listing.owner.id, "approved");
+        }
+
+        // Trigger travel request matching (fire-and-forget)
+        supabase.functions.invoke("match-travel-requests", {
+          body: { listing_id: id },
+        }).catch((err) => console.error("Match trigger failed:", err));
+      } catch (error) {
+        console.error(`Error approving listing ${id}:`, error);
+      }
+    }
+
+    toast({
+      title: "Bulk Approve Complete",
+      description: `${successCount} of ${selectedIds.size} listings approved.`,
+    });
+    setSelectedIds(new Set());
+    setIsBulkProcessing(false);
+    fetchListings();
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedIds.size === 0 || !rejectionReason.trim()) return;
+    setIsBulkProcessing(true);
+    let successCount = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const listing = listings.find((l) => l.id === id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from("listings")
+          .update({
+            status: "cancelled",
+            rejection_reason: rejectionReason.trim(),
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+        successCount++;
+
+        if (listing?.owner?.id) {
+          sendApprovalEmail(listing.owner.id, "rejected");
+        }
+      } catch (error) {
+        console.error(`Error rejecting listing ${id}:`, error);
+      }
+    }
+
+    toast({
+      title: "Bulk Reject Complete",
+      description: `${successCount} of ${selectedIds.size} listings rejected.`,
+    });
+    setSelectedIds(new Set());
+    setIsBulkProcessing(false);
+    setRejectDialogOpen(false);
+    setIsBulkRejecting(false);
+    fetchListings();
+  };
+
+  const openBulkRejectDialog = () => {
+    setIsBulkRejecting(true);
+    setRejectingListingId(null);
+    setRejectionReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const filteredListings = listings.filter((l) => {
-    const matchesSearch =
-      l.property?.resort_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.property?.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.owner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      l.property?.resort_name?.toLowerCase().includes(q) ||
+      l.property?.location?.toLowerCase().includes(q) ||
+      l.owner?.full_name?.toLowerCase().includes(q) ||
+      l.owner?.email?.toLowerCase().includes(q) ||
+      l.id.toLowerCase().includes(q);
 
     const matchesStatus = statusFilter === "all" || l.status === statusFilter;
 
@@ -220,7 +362,7 @@ const AdminListings = () => {
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search listings..."
+              placeholder="Search by name, location, or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -243,6 +385,28 @@ const AdminListings = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={
+                        filteredListings.filter((l) => l.status === "pending_approval").length > 0 &&
+                        filteredListings
+                          .filter((l) => l.status === "pending_approval")
+                          .every((l) => selectedIds.has(l.id))
+                      }
+                      onCheckedChange={(checked) => {
+                        const pendingIds = filteredListings
+                          .filter((l) => l.status === "pending_approval")
+                          .map((l) => l.id);
+                        if (checked) {
+                          setSelectedIds(new Set([...selectedIds, ...pendingIds]));
+                        } else {
+                          const next = new Set(selectedIds);
+                          pendingIds.forEach((id) => next.delete(id));
+                          setSelectedIds(next);
+                        }
+                      }}
+                    />
+                  </TableHead>
                   <TableHead>Property</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Dates</TableHead>
@@ -255,6 +419,16 @@ const AdminListings = () => {
                 {filteredListings.map((listing) => (
                   <TableRow key={listing.id}>
                     <TableCell>
+                      {listing.status === "pending_approval" ? (
+                        <Checkbox
+                          checked={selectedIds.has(listing.id)}
+                          onCheckedChange={() => toggleSelected(listing.id)}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <div>
                         <p className="font-medium">{listing.property?.resort_name}</p>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -264,7 +438,9 @@ const AdminListings = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="text-sm">{listing.owner?.full_name || "Unknown"}</p>
+                      <AdminEntityLink tab="users" search={listing.owner?.email || ""} onNavigate={onNavigateToEntity}>
+                        <p className="text-sm font-medium">{listing.owner?.full_name || "Unknown"}</p>
+                      </AdminEntityLink>
                       <p className="text-xs text-muted-foreground">{listing.owner?.email}</p>
                     </TableCell>
                     <TableCell>
@@ -285,9 +461,19 @@ const AdminListings = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={STATUS_COLORS[listing.status]}>
-                        {STATUS_LABELS[listing.status]}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={STATUS_COLORS[listing.status]}>
+                          {STATUS_LABELS[listing.status]}
+                        </Badge>
+                        {listing.status === "pending_approval" && (
+                          <AgeBadge date={listing.created_at} thresholds={{ warning: 2, critical: 5 }} />
+                        )}
+                        {listing.status === "cancelled" && listing.rejection_reason && (
+                          <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate" title={listing.rejection_reason}>
+                            {listing.rejection_reason}
+                          </p>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {listing.status === "pending_approval" && (
@@ -305,7 +491,7 @@ const AdminListings = () => {
                             size="sm"
                             variant="outline"
                             className="text-red-600 hover:text-red-700"
-                            onClick={() => handleReject(listing.id)}
+                            onClick={() => openRejectDialog(listing.id)}
                           >
                             <X className="h-4 w-4 mr-1" />
                             Reject
@@ -320,6 +506,99 @@ const AdminListings = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background border rounded-lg shadow-lg px-6 py-3 flex items-center gap-4">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <Button
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleBulkApprove}
+            disabled={isBulkProcessing}
+          >
+            {isBulkProcessing ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4 mr-1" />
+            )}
+            Approve All
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={openBulkRejectDialog}
+            disabled={isBulkProcessing}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Reject All
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={(open) => {
+        setRejectDialogOpen(open);
+        if (!open) setIsBulkRejecting(false);
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {isBulkRejecting ? `Reject ${selectedIds.size} Listings` : "Reject Listing"}
+            </DialogTitle>
+            <DialogDescription>
+              {isBulkRejecting
+                ? `Provide a reason for rejecting ${selectedIds.size} listings. All owners will see this.`
+                : "Provide a reason for rejecting this listing. The owner will see this."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex flex-wrap gap-2">
+              {REJECTION_TEMPLATES.map((template) => (
+                <Button
+                  key={template}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => setRejectionReason(
+                    rejectionReason ? `${rejectionReason}\n${template}` : template
+                  )}
+                >
+                  {template}
+                </Button>
+              ))}
+            </div>
+            <Textarea
+              placeholder="Enter rejection reason..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={isBulkRejecting ? handleBulkReject : handleReject}
+              disabled={!rejectionReason.trim() || isBulkProcessing}
+            >
+              {isBulkProcessing ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : null}
+              {isBulkRejecting ? `Reject ${selectedIds.size} Listings` : "Reject Listing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

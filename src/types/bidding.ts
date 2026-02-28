@@ -59,7 +59,7 @@ export interface ListingBid {
 
 // Extended type with joins
 export interface ListingBidWithDetails extends ListingBid {
-  listing: Listing & { property: Property };
+  listing: Listing & { property: Property; owner?: Pick<Profile, 'id' | 'full_name'> };
   bidder: Profile;
 }
 

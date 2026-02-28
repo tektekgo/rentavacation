@@ -14,7 +14,7 @@ export function useOwnerListingsData() {
         .from('listings')
         .select(`
           id, check_in_date, check_out_date, status, final_price, owner_price, nightly_rate,
-          open_for_bidding,
+          open_for_bidding, rejection_reason,
           property:properties!inner(resort_name, location)
         `)
         .eq('owner_id', user!.id)
@@ -67,6 +67,7 @@ export function useOwnerListingsData() {
           bid_count: bc.count,
           highest_bid: bc.highest,
           days_until_checkin: daysUntil,
+          rejection_reason: l.rejection_reason || null,
         };
       });
     },

@@ -60,7 +60,7 @@ docs/
 **Copy from outputs folder to your project:**
 
 ```bash
-cd C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation\docs
+cd C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation (GitHub: rent-a-vacation/rav-website)\docs
 
 # Add the hub
 copy [downloads]\PROJECT-HUB.md .
@@ -156,7 +156,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 2. docs/ARCHITECTURE.md - Technical architecture
 3. [Specific feature docs if working on a feature]
 
-**Project Location:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
+**Project Location:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation (GitHub: rent-a-vacation/rav-website)
 
 **Current Phase:** [Copy from PROJECT-HUB.md "Current Status"]
 
@@ -199,7 +199,7 @@ Ready to start!
 ### Step 7: Commit Everything (5 min)
 
 ```bash
-cd C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
+cd C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation (GitHub: rent-a-vacation/rav-website)
 
 # Stage all doc changes
 git add docs/

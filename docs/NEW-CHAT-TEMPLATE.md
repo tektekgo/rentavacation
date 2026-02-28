@@ -19,7 +19,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 3. [If working on specific feature: `docs/features/[feature-name]/`]
 
 **PROJECT INFO:**
-- **Path:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
+- **Path:** C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation (GitHub: rent-a-vacation/rav-website)
 - **Production:** https://rent-a-vacation.com
 - **GitHub:** https://github.com/rent-a-vacation/rav-website
 
@@ -90,7 +90,7 @@ Hi Claude! Continuing Rent-A-Vacation project.
 3. docs/features/voice-search/KNOWN-ISSUES.md
 
 **PROJECT INFO:**
-- Path: C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation
+- Path: C:\Repos\personal_gsujit\github_jisujit_tektekgo\rentavacation (GitHub: rent-a-vacation/rav-website)
 - Production: https://rent-a-vacation.com
 - GitHub: https://github.com/rent-a-vacation/rav-website
 

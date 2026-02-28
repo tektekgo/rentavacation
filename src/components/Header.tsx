@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator, BookOpen, Settings } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShieldCheck, Gavel, Store, BarChart3, Calculator, BookOpen, Settings, GitBranch } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/bidding/NotificationBell";
@@ -28,6 +28,13 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
+      {/* Skip-to-content link — WCAG 2.4.1 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"
+      >
+        Skip to main content
+      </a>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
@@ -43,38 +50,60 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <div 
+            <div
               className="relative pb-2 -mb-2"
               onMouseEnter={() => setIsDropdownOpen(true)}
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
-              <button className="flex items-center gap-1 cursor-pointer group py-2">
+              <button
+                className="flex items-center gap-1 cursor-pointer group py-2"
+                aria-haspopup="true"
+                aria-expanded={isDropdownOpen}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setIsDropdownOpen(false);
+                }}
+              >
                 <span className="text-muted-foreground group-hover:text-foreground transition-colors">Explore</span>
                 <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 w-56 bg-card rounded-xl shadow-card-hover border border-border p-2 animate-fade-in z-50">
-                  <Link 
-                    to="/rentals" 
+                <div
+                  className="absolute top-full left-0 w-56 bg-card rounded-xl shadow-card-hover border border-border p-2 animate-fade-in z-50"
+                  role="menu"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setIsDropdownOpen(false);
+                  }}
+                >
+                  <Link
+                    to="/rentals"
+                    role="menuitem"
                     className="block px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     All Rentals
                   </Link>
-                  <Link 
-                    to="/destinations" 
+                  <Link
+                    to="/destinations"
+                    role="menuitem"
                     className="block px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     By Destination
                   </Link>
                   <Link
                     to="/rentals?filter=deals"
+                    role="menuitem"
                     className="block px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     Last Minute Deals
                   </Link>
                   <Link
                     to="/calculator"
+                    role="menuitem"
                     className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     <Calculator className="h-4 w-4" />
                     Fee Calculator
@@ -149,6 +178,14 @@ const Header = () => {
                         <Link to="/executive-dashboard" className="flex items-center gap-2 cursor-pointer">
                           <BarChart3 className="h-4 w-4" />
                           Executive Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isRavTeam() && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/user-journeys" className="flex items-center gap-2 cursor-pointer">
+                          <GitBranch className="h-4 w-4" />
+                          User Journeys
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -339,6 +376,16 @@ const Header = () => {
                     >
                       <BarChart3 className="h-4 w-4" />
                       Executive Dashboard
+                    </Link>
+                  )}
+                  {isRavTeam() && (
+                    <Link
+                      to="/user-journeys"
+                      className="flex items-center gap-2 text-foreground py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <GitBranch className="h-4 w-4" />
+                      User Journeys
                     </Link>
                   )}
                   {isPropertyOwner() && (

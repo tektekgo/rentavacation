@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMyBids, useMyTravelRequests, useProposalsForRequest, useUpdateProposalStatus } from '@/hooks/useBidding';
+import { useMyBids, useMyTravelRequests, useProposalsForRequest, useUpdateProposalStatus, useUpdateBidStatus } from '@/hooks/useBidding';
 import { VerifiedOwnerBadge } from '@/components/RoleBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +19,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { 
   Gavel, 
   Send, 
@@ -32,6 +43,10 @@ import {
   Eye,
   Home,
   CreditCard,
+  ExternalLink,
+  XCircle,
+  ThumbsUp,
+  ThumbsDown,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import type { TravelRequest, TravelProposalWithDetails } from '@/types/bidding';
@@ -52,6 +67,7 @@ const MyBidsDashboard = () => {
   const { user } = useAuth();
   const { data: myBids, isLoading: bidsLoading } = useMyBids();
   const { data: myRequests, isLoading: requestsLoading } = useMyTravelRequests();
+  const updateBidStatus = useUpdateBidStatus();
 
   const [selectedRequest, setSelectedRequest] = useState<TravelRequest | null>(null);
   const [proposalsDialogOpen, setProposalsDialogOpen] = useState(false);
@@ -123,8 +139,8 @@ const MyBidsDashboard = () => {
                               <Badge className={STATUS_COLORS[bid.status]}>
                                 {bid.status.replace('_', ' ')}
                               </Badge>
-                              {bid.counter_offer_amount && (
-                                <Badge variant="outline">
+                              {bid.counter_offer_amount && bid.status === 'pending' && (
+                                <Badge variant="outline" className="border-warning text-warning-foreground">
                                   Counter offer: ${bid.counter_offer_amount.toLocaleString()}
                                 </Badge>
                               )}
@@ -136,6 +152,11 @@ const MyBidsDashboard = () => {
                               <MapPin className="h-3 w-3 flex-shrink-0" />
                               <span className="truncate">{bid.listing?.property?.location}</span>
                             </p>
+                            {bid.listing?.owner?.full_name && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Owner: {bid.listing.owner.full_name}
+                              </p>
+                            )}
                             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
@@ -145,7 +166,7 @@ const MyBidsDashboard = () => {
                             </div>
                           </div>
                           <div className="text-left sm:text-right flex-shrink-0">
-                            <p className="text-sm text-muted-foreground">Your bid</p>
+                            <p className="text-sm text-muted-foreground">My bid</p>
                             <p className="text-2xl font-bold">${bid.bid_amount.toLocaleString()}</p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true })}
@@ -154,7 +175,7 @@ const MyBidsDashboard = () => {
                         </div>
                         {bid.message && (
                           <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm">
-                            <p className="text-muted-foreground">Your message:</p>
+                            <p className="text-muted-foreground">My message:</p>
                             <p>{bid.message}</p>
                           </div>
                         )}
@@ -164,16 +185,105 @@ const MyBidsDashboard = () => {
                             <p>{bid.counter_offer_message}</p>
                           </div>
                         )}
-                        {bid.status === 'accepted' && bid.listing_id && (
-                          <div className="mt-4 pt-4 border-t">
-                            <Link to={`/checkout?listing=${bid.listing_id}&guests=${bid.guest_count || 1}`}>
-                              <Button className="w-full sm:w-auto">
+
+                        {/* Action buttons based on bid state */}
+                        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+                          {/* Pending bid with counter-offer: Accept or Decline */}
+                          {bid.status === 'pending' && bid.counter_offer_amount && (
+                            <>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" disabled={updateBidStatus.isPending}>
+                                    <ThumbsUp className="h-4 w-4 mr-1" />
+                                    Accept Counter (${bid.counter_offer_amount.toLocaleString()})
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Accept counter-offer?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      You'll accept the owner's counter-offer of <strong>${bid.counter_offer_amount.toLocaleString()}</strong> (your original bid was ${bid.bid_amount.toLocaleString()}). You can then proceed to checkout.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => updateBidStatus.mutate({ bidId: bid.id, status: 'accepted' })}>
+                                      Accept Counter-Offer
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm" disabled={updateBidStatus.isPending}>
+                                    <ThumbsDown className="h-4 w-4 mr-1" />
+                                    Decline
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Decline counter-offer?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will decline the owner's counter-offer. You can always place a new bid on this listing.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => updateBidStatus.mutate({ bidId: bid.id, status: 'rejected' })}>
+                                      Decline Counter-Offer
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
+                          )}
+
+                          {/* Pending bid without counter: Withdraw */}
+                          {bid.status === 'pending' && !bid.counter_offer_amount && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" disabled={updateBidStatus.isPending}>
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Withdraw Bid
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Withdraw this bid?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will withdraw your ${bid.bid_amount.toLocaleString()} bid on {bid.listing?.property?.resort_name}. You can place a new bid later.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Keep Bid</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => updateBidStatus.mutate({ bidId: bid.id, status: 'withdrawn' })}>
+                                    Withdraw Bid
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+
+                          {/* Accepted bid: Checkout */}
+                          {bid.status === 'accepted' && bid.listing_id && (
+                            <Link to={`/checkout?listing=${bid.listing_id}&guests=${bid.guest_count || 1}&bid=${bid.id}`}>
+                              <Button size="sm">
                                 <CreditCard className="h-4 w-4 mr-2" />
                                 Proceed to Checkout
                               </Button>
                             </Link>
-                          </div>
-                        )}
+                          )}
+
+                          {/* View Listing link (always, if listing exists) */}
+                          {bid.listing?.property?.id && (
+                            <Link to={`/property/${bid.listing.property.id}`}>
+                              <Button variant="ghost" size="sm">
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                View Listing
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -353,6 +463,11 @@ function ProposalsDialog({ request, open, onOpenChange }: ProposalsDialogProps) 
                       <p className="text-sm mt-1">
                         {proposal.property?.bedrooms} BR • Sleeps {proposal.property?.sleeps}
                       </p>
+                      {proposal.owner?.full_name && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Owner: {proposal.owner.full_name}
+                        </p>
+                      )}
                       {proposal.message && (
                         <div className="mt-2 p-2 bg-muted/50 rounded text-sm">
                           {proposal.message}

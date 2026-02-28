@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,8 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DollarSign, TrendingUp, TrendingDown, Wallet, PiggyBank } from "lucide-react";
-import { format } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import type { Booking, Listing, Property, Profile } from "@/types/database";
+import { DateRangeFilter } from "./DateRangeFilter";
 
 interface BookingWithDetails extends Booking {
   listing: Listing & { property: Property; owner: Profile };
@@ -30,17 +32,9 @@ interface FinancialSummary {
 }
 
 const AdminFinancials = () => {
-  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
-  const [summary, setSummary] = useState<FinancialSummary>({
-    totalRevenue: 0,
-    totalCommission: 0,
-    totalOwnerPayouts: 0,
-    pendingPayouts: 0,
-    completedPayouts: 0,
-    averageBookingValue: 0,
-    averageCommission: 0,
-  });
+  const [allBookings, setAllBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
     const fetchFinancials = async () => {
@@ -60,29 +54,7 @@ const AdminFinancials = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-
-        const bookingsData = data as BookingWithDetails[] || [];
-        setBookings(bookingsData);
-
-        // Calculate summary
-        const completedBookings = bookingsData.filter(b => b.status === "completed");
-        const confirmedBookings = bookingsData.filter(b => b.status === "confirmed");
-
-        const totalRevenue = bookingsData.reduce((sum, b) => sum + b.total_amount, 0);
-        const totalCommission = bookingsData.reduce((sum, b) => sum + b.rav_commission, 0);
-        const totalOwnerPayouts = bookingsData.reduce((sum, b) => sum + b.owner_payout, 0);
-        const pendingPayouts = confirmedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
-        const completedPayouts = completedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
-
-        setSummary({
-          totalRevenue,
-          totalCommission,
-          totalOwnerPayouts,
-          pendingPayouts,
-          completedPayouts,
-          averageBookingValue: bookingsData.length > 0 ? totalRevenue / bookingsData.length : 0,
-          averageCommission: bookingsData.length > 0 ? totalCommission / bookingsData.length : 0,
-        });
+        setAllBookings(data as BookingWithDetails[] || []);
       } catch (error) {
         console.error("Error fetching financials:", error);
       } finally {
@@ -92,6 +64,39 @@ const AdminFinancials = () => {
 
     fetchFinancials();
   }, []);
+
+  // Filter bookings by date range
+  const bookings = useMemo(() => {
+    if (!dateRange?.from) return allBookings;
+    return allBookings.filter((b) =>
+      isWithinInterval(new Date(b.created_at), {
+        start: startOfDay(dateRange.from!),
+        end: endOfDay(dateRange.to || dateRange.from!),
+      })
+    );
+  }, [allBookings, dateRange]);
+
+  // Derive summary from filtered bookings
+  const summary = useMemo<FinancialSummary>(() => {
+    const completedBookings = bookings.filter(b => b.status === "completed");
+    const confirmedBookings = bookings.filter(b => b.status === "confirmed");
+
+    const totalRevenue = bookings.reduce((sum, b) => sum + b.total_amount, 0);
+    const totalCommission = bookings.reduce((sum, b) => sum + b.rav_commission, 0);
+    const totalOwnerPayouts = bookings.reduce((sum, b) => sum + b.owner_payout, 0);
+    const pendingPayouts = confirmedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
+    const completedPayouts = completedBookings.reduce((sum, b) => sum + b.owner_payout, 0);
+
+    return {
+      totalRevenue,
+      totalCommission,
+      totalOwnerPayouts,
+      pendingPayouts,
+      completedPayouts,
+      averageBookingValue: bookings.length > 0 ? totalRevenue / bookings.length : 0,
+      averageCommission: bookings.length > 0 ? totalCommission / bookings.length : 0,
+    };
+  }, [bookings]);
 
   if (isLoading) {
     return (
@@ -114,11 +119,14 @@ const AdminFinancials = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold">Platform Financials</h2>
-        <p className="text-muted-foreground">
-          Revenue, commissions, and payout tracking
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Platform Financials</h2>
+          <p className="text-muted-foreground">
+            Revenue, commissions, and payout tracking
+          </p>
+        </div>
+        <DateRangeFilter value={dateRange} onChange={setDateRange} />
       </div>
 
       {/* Summary Cards */}

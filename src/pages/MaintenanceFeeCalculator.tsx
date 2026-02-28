@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Calculator, Users } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Calculator, Users, ArrowDown } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Button } from '@/components/ui/button';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { OwnershipForm } from '@/components/calculator/OwnershipForm';
 import { BreakevenResults } from '@/components/calculator/BreakevenResults';
@@ -22,11 +23,20 @@ export default function MaintenanceFeeCalculator() {
   });
   const [result, setResult] = useState<CalculatorResult | null>(null);
   const [ownerCount, setOwnerCount] = useState<number | null>(null);
+  const [hasScrolledToResults, setHasScrolledToResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Live calculation on input change
   useEffect(() => {
     setResult(calculateBreakeven(inputs));
   }, [inputs]);
+
+  const isFormComplete = !!(inputs.brand && inputs.unitType && inputs.annualMaintenanceFees > 0);
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setHasScrolledToResults(true);
+  };
 
   // Fetch owner count for social proof
   useEffect(() => {
@@ -66,8 +76,31 @@ export default function MaintenanceFeeCalculator() {
 
           {/* Two-column layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            <OwnershipForm inputs={inputs} onChange={setInputs} />
-            <BreakevenResults result={result} />
+            <div className="space-y-4">
+              <OwnershipForm inputs={inputs} onChange={setInputs} />
+              {/* Calculate button — gives user a clear next step */}
+              <Button
+                onClick={scrollToResults}
+                disabled={!isFormComplete}
+                className="w-full lg:hidden"
+                size="lg"
+              >
+                <ArrowDown className="h-4 w-4 mr-2" />
+                See My Results
+              </Button>
+              <Button
+                onClick={scrollToResults}
+                disabled={!isFormComplete}
+                className="w-full hidden lg:flex"
+                variant={result && !hasScrolledToResults ? 'default' : 'outline'}
+                size="lg"
+              >
+                {result ? 'See My Results' : 'Fill in all fields to calculate'}
+              </Button>
+            </div>
+            <div ref={resultsRef}>
+              <BreakevenResults result={result} />
+            </div>
           </div>
 
           {/* Social proof */}

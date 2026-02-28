@@ -55,12 +55,14 @@ export function RoleBadge({ role, variant = "full", className = "" }: RoleBadgeP
 
   if (variant === "icon-only") {
     return (
-      <div 
+      <span
+        role="img"
+        aria-label={config.label}
         className={`w-6 h-6 rounded-full flex items-center justify-center ${config.className} ${className}`}
         title={config.label}
       >
         <Icon className="h-3 w-3" />
-      </div>
+      </span>
     );
   }
 

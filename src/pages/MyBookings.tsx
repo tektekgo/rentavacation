@@ -12,19 +12,39 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink, AlertTriangle } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink, AlertTriangle, MessageCircle, CheckCircle, Clock, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, BookingStatus, Listing, Property } from "@/types/database";
 
-interface BookingWithListing extends Booking {
-  listing: Listing & { property: Property };
+interface DisputeInfo {
+  id: string;
+  status: string;
+  category: string;
+  description: string;
+  resolution_notes: string | null;
+  refund_amount: number | null;
+  created_at: string;
+  resolved_at: string | null;
 }
 
+interface BookingWithListing extends Booking {
+  listing: Listing & { property: Property };
+  disputes?: DisputeInfo[];
+}
+
+const DISPUTE_STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  open: { label: "Submitted", color: "bg-yellow-100 text-yellow-800", icon: <Clock className="h-3 w-3" /> },
+  investigating: { label: "Under Review", color: "bg-blue-100 text-blue-800", icon: <RefreshCw className="h-3 w-3" /> },
+  resolved: { label: "Resolved", color: "bg-green-100 text-green-800", icon: <CheckCircle className="h-3 w-3" /> },
+  refunded: { label: "Refunded", color: "bg-purple-100 text-purple-800", icon: <DollarSign className="h-3 w-3" /> },
+  dismissed: { label: "Dismissed", color: "bg-gray-100 text-gray-800", icon: <MessageCircle className="h-3 w-3" /> },
+};
+
 const STATUS_COLORS: Record<BookingStatus, string> = {
-  pending: "bg-yellow-500",
-  confirmed: "bg-green-500",
-  cancelled: "bg-red-500",
-  completed: "bg-purple-500",
+  pending: "bg-yellow-100 text-yellow-800",
+  confirmed: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
+  completed: "bg-purple-100 text-purple-800",
 };
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -58,6 +78,16 @@ const MyBookings = () => {
           listing:listings(
             *,
             property:properties(*)
+          ),
+          disputes(
+            id,
+            status,
+            category,
+            description,
+            resolution_notes,
+            refund_amount,
+            created_at,
+            resolved_at
           )
         `)
         .eq("renter_id", user.id)
@@ -128,7 +158,7 @@ const MyBookings = () => {
               )}
             </div>
             <Badge
-              className={`${STATUS_COLORS[booking.status]} text-white shrink-0`}
+              className={`${STATUS_COLORS[booking.status]} shrink-0`}
             >
               {STATUS_LABELS[booking.status]}
             </Badge>
@@ -136,6 +166,43 @@ const MyBookings = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {/* Dispute Status */}
+          {booking.disputes && booking.disputes.length > 0 && (
+            <div className="space-y-2">
+              {booking.disputes.map((dispute) => {
+                const config = DISPUTE_STATUS_CONFIG[dispute.status] || DISPUTE_STATUS_CONFIG.open;
+                return (
+                  <div key={dispute.id} className="border rounded-lg p-3 bg-muted/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${config.color} flex items-center gap-1`}>
+                          {config.icon}
+                          {config.label}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground capitalize">{dispute.category.replace(/_/g, " ")}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(dispute.created_at), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{dispute.description}</p>
+                    {dispute.resolution_notes && (
+                      <div className="mt-2 pt-2 border-t">
+                        <p className="text-xs font-medium">Resolution:</p>
+                        <p className="text-sm text-muted-foreground">{dispute.resolution_notes}</p>
+                        {dispute.refund_amount && dispute.refund_amount > 0 && (
+                          <p className="text-sm font-medium text-green-600 mt-1">
+                            Refund: ${dispute.refund_amount.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* Check-in / Check-out */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex items-center gap-2">
@@ -276,7 +343,7 @@ const MyBookings = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-20 md:pt-24 pb-12 px-4">
+      <main id="main-content" className="flex-1 pt-20 md:pt-24 pb-12 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">My Bookings</h1>

@@ -24,9 +24,11 @@ mermaid.initialize({
     tertiaryColor: '#fef3c7',
     fontFamily: 'Roboto, sans-serif',
     fontSize: '14px',
-    // Edge label styling — dark text on a visible background
-    edgeLabelBackground: '#cbd5e1',
-    edgeLabelColor: '#1e293b',
+    // Edge label styling — high contrast dark text on visible background
+    edgeLabelBackground: '#e2e8f0',
+    edgeLabelColor: '#0f172a',
+    // Override text colors that Mermaid inherits from primaryTextColor
+    nodeBorder: '#0a5c5f',
   },
   flowchart: {
     htmlLabels: true,
@@ -36,6 +38,20 @@ mermaid.initialize({
     rankSpacing: 50,
   },
 });
+
+// Inject CSS to override Mermaid's edge label text color (it inherits primaryTextColor which is white)
+const edgeLabelStyleId = 'mermaid-edge-label-fix';
+if (typeof document !== 'undefined' && !document.getElementById(edgeLabelStyleId)) {
+  const style = document.createElement('style');
+  style.id = edgeLabelStyleId;
+  style.textContent = `
+    .edgeLabel { color: #0f172a !important; }
+    .edgeLabel p, .edgeLabel span { color: #0f172a !important; }
+    .edgeLabel .edgeLabel { background-color: #e2e8f0 !important; }
+    .edgeLabel foreignObject div { color: #0f172a !important; }
+  `;
+  document.head.appendChild(style);
+}
 
 function MermaidDiagram({ flow }: { flow: FlowDefinition }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,9 +106,9 @@ function MermaidDiagram({ flow }: { flow: FlowDefinition }) {
   }
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="w-full overflow-x-auto p-4 [&_svg]:mx-auto [&_.node]:transition-opacity [&_.node:hover]:opacity-80"
+      className="w-full overflow-x-auto p-4 [&_svg]:mx-auto [&_.node]:transition-opacity [&_.node:hover]:opacity-80 [&_.edgeLabel]:!text-slate-900 [&_.edgeLabel]:font-medium [&_.edgeLabel_p]:!text-slate-900 [&_.edgeLabel_span]:!text-slate-900 [&_.edgeLabel_foreignObject_div]:!text-slate-900"
     />
   );
 }
@@ -163,7 +179,7 @@ function StepTable({ flow }: { flow: FlowDefinition }) {
   );
 }
 
-export default function Architecture() {
+export default function UserJourneys() {
   const { user, roles, isRavTeam, isLoading } = useAuth();
   const navigate = useNavigate();
   const [rolesChecked, setRolesChecked] = useState(false);
@@ -172,7 +188,7 @@ export default function Architecture() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      navigate('/login', { state: { from: '/architecture' } });
+      navigate('/login', { state: { from: '/user-journeys' } });
       return;
     }
     // Give roles time to load (they're fetched in setTimeout in AuthContext)
@@ -196,7 +212,7 @@ export default function Architecture() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold font-display text-foreground">
-              System Architecture
+              User Journeys
             </h1>
             <Badge className="bg-primary text-primary-foreground">RAV Team</Badge>
           </div>
