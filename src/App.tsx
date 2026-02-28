@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { trackPageView } from "@/lib/posthog";
+import { initGA4, trackGA4PageView } from "@/lib/analytics";
+import { getCookieConsent } from "@/hooks/useCookieConsent";
 import Index from "./pages/Index";
 import Rentals from "./pages/Rentals";
 import HowItWorksPage from "./pages/HowItWorksPage";
@@ -46,11 +48,21 @@ const queryClient = new QueryClient();
 const isDevEnvironment = import.meta.env.VITE_SUPABASE_URL?.includes('oukbxqnlxnkainnligfz');
 
 
-/** Track page views on route changes for PostHog analytics. */
+/** Track page views on route changes for PostHog + GA4 analytics. */
 function PageViewTracker() {
   const location = useLocation();
+
+  // Initialize GA4 once when analytics consent exists
+  useEffect(() => {
+    const consent = getCookieConsent();
+    if (consent?.analytics) {
+      initGA4();
+    }
+  }, []);
+
   useEffect(() => {
     trackPageView(location.pathname);
+    trackGA4PageView(location.pathname);
   }, [location.pathname]);
   return null;
 }

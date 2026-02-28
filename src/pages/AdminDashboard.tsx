@@ -30,7 +30,8 @@ import {
   Network,
   Wrench,
   Mic,
-  Scale
+  Scale,
+  Receipt,
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminProperties from "@/components/admin/AdminProperties";
@@ -49,6 +50,7 @@ import { AdminMemberships } from "@/components/admin/AdminMemberships";
 import { DevTools } from "@/components/admin/DevTools";
 import { VoiceControls } from "@/components/admin/VoiceControls";
 import AdminDisputes from "@/components/admin/AdminDisputes";
+import AdminTaxReporting from "@/components/admin/AdminTaxReporting";
 
 const IS_DEV = import.meta.env.VITE_SUPABASE_URL?.includes("oukbxqnlxnkainnligfz");
 
@@ -210,6 +212,10 @@ const AdminDashboard = () => {
               <DollarSign className="h-4 w-4" />
               <span className="hidden sm:inline">Financials</span>
             </TabsTrigger>
+            <TabsTrigger value="tax" className="gap-2">
+              <Receipt className="h-4 w-4" />
+              <span className="hidden sm:inline">Tax & 1099</span>
+            </TabsTrigger>
             <TabsTrigger value="payouts" className="gap-2">
               <Wallet className="h-4 w-4" />
               <span className="hidden sm:inline">Payouts</span>
@@ -296,6 +302,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="financials">
             <AdminFinancials />
+          </TabsContent>
+
+          <TabsContent value="tax">
+            <AdminTaxReporting />
           </TabsContent>
 
           <TabsContent value="payouts">
