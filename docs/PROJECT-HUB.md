@@ -128,10 +128,18 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - Demo walkthrough document: docs/DEMO-WALKTHROUGH.md (comprehensive presentation script)
 - Tests: 409→451 (42 new)
 
+**Session 28 — Accounting Strategy & Documentation (Feb 28):**
+- Accounting tool evaluation: Puzzle.io selected over QuickBooks (native Stripe, free tier, automated ASC 606)
+- Updated DEC-022 to reflect Puzzle.io + pluggable architecture decision
+- Updated `docs/RAV-PRICING-TAXES-ACCOUNTING.md` v2.0 — added implementation status, Puzzle.io rationale, pluggable architecture design, 1099-K via Stripe Connect, accounting tool comparison appendix
+- Updated issue #63: renamed to "Accounting Integration (Puzzle.io → pluggable)", detailed implementation plan
+- Key insight: 1099-K handled natively by Stripe Connect — no Gusto or accounting tool needed
+
 **Open pre-launch issues:** 3 remaining (#80 Legal review, #87 Launch checklist, #127 Business formation — blocked)
 
 **Next recommended work:**
-- Create PR `dev → main` (2 commits) to sync production
+- #63 Phase E: Set up Puzzle.io account + connect Stripe (manual, 0 code hours)
+- #63 Phase E.2: Build pluggable accounting adapter architecture (4-6 hours)
 - #87 Launch readiness checklist
 - #80 Legal review of Terms/Privacy
 - #127 Business formation (blocked on LLC/EIN — human action required)
@@ -446,18 +454,20 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ### DEC-022: Pricing, Tax & Accounting Framework
 **Date:** February 21, 2026
-**Decision:** Per-night pricing + separated fee line items + Stripe Tax before launch + QuickBooks post-launch
-**Status:** Approved
+**Date Updated:** February 28, 2026
+**Decision:** Per-night pricing + separated fee line items + Stripe Tax before launch + Puzzle.io post-launch (pluggable)
+**Status:** Approved (Updated — Puzzle.io replaces QuickBooks)
 **Docs:** `docs/RAV-PRICING-TAXES-ACCOUNTING.md`
 
-**Context:** Platform currently uses lump-sum pricing with fees bundled into `final_price`. As a marketplace facilitator in 43+ US states, RAV must collect and remit occupancy/sales taxes before going live with real transactions.
+**Context:** Platform uses per-night pricing with itemized fee breakdown. As a marketplace facilitator in 43+ US states, RAV must collect and remit occupancy/sales taxes before going live. Accounting tool re-evaluated Feb 28 — Puzzle.io selected over QuickBooks for native Stripe integration, free tier, and automated revenue recognition (ASC 606).
 
 **Key decisions:**
-- Per-night rate (`nightly_rate`) becomes the atomic pricing unit across the platform
-- Fee breakdown: separate `service_fee`, `cleaning_fee`, `tax_amount` line items on every booking
-- Stripe Tax for automated tax calculation at checkout (already on Stripe — easiest path)
-- QuickBooks Online as general ledger, synced via Stripe integration
-- 1099-K generation required for owners earning >$600/year (deadline: Jan 2027)
+- Per-night rate (`nightly_rate`) is the atomic pricing unit across the platform ✅
+- Fee breakdown: separate `service_fee`, `cleaning_fee`, `tax_amount` line items on every booking ✅
+- Stripe Tax for automated tax calculation at checkout (code ready, pending #127) 🟡
+- **Puzzle.io** as general ledger (replaces QuickBooks) — native Stripe sync, free <$20K/mo, automated revenue recognition
+- **Pluggable accounting architecture** — provider-agnostic adapter pattern; can swap to QuickBooks/Xero/Zoho via config
+- 1099-K handled natively by **Stripe Connect** ($2.99/form) — no Gusto needed
 - Resort fees are owner-disclosed, not RAV-collected (paid at resort check-in)
 - Stripe processing fees (~2.9%) absorbed by RAV, baked into 15% service fee margin
 
