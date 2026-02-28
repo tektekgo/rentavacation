@@ -41,6 +41,8 @@ import { InspiredTravelRequestDialog } from "@/components/bidding/InspiredTravel
 import { Gavel } from "lucide-react";
 import { isPast } from "date-fns";
 import { FairValueCard } from "@/components/fair-value/FairValueCard";
+import ReviewList from "@/components/reviews/ReviewList";
+import ReviewSummary from "@/components/reviews/ReviewSummary";
 import { calculateNights } from "@/lib/pricing";
 
 const BRAND_LABELS: Record<string, string> = {
@@ -423,6 +425,16 @@ const PropertyDetail = () => {
                   {listing.cancellation_policy.replace("_", " ")}
                 </p>
               </div>
+
+              {/* Guest Reviews */}
+              {listing.property_id && (
+                <div className="mb-8">
+                  <h2 className="font-display text-xl font-semibold text-foreground mb-4">
+                    Guest Reviews
+                  </h2>
+                  <ReviewList propertyId={listing.property_id} />
+                </div>
+              )}
             </div>
 
             {/* Booking Sidebar */}
@@ -593,6 +605,11 @@ const PropertyDetail = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Review Summary */}
+                {listing.property_id && (
+                  <ReviewSummary propertyId={listing.property_id} />
+                )}
 
                 {/* Resort Information Card */}
                 {resort && (

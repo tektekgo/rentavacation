@@ -35,6 +35,7 @@ import {
   Sparkles,
   Clock,
   Mic,
+  ArrowUpDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
@@ -53,6 +54,7 @@ import { useVoiceFeatureFlags } from "@/hooks/useVoiceFeatureFlags";
 import { ListingFairValueBadge } from "@/components/fair-value/ListingFairValueBadge";
 import { PostRequestCTA } from "@/components/bidding/PostRequestCTA";
 import { calculateNights } from "@/lib/pricing";
+import { sortListings, SORT_LABELS, type SortOption } from "@/lib/listingSort";
 const ITEMS_PER_PAGE = 6;
 
 // Brand enum to display label mapping
@@ -114,6 +116,7 @@ const Rentals = () => {
   const [minGuests, setMinGuests] = useState("");
   const [minBedrooms, setMinBedrooms] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
 
   // Auth state for voice search gating
   const { user, isPropertyOwner, isRavTeam } = useAuth();
@@ -219,10 +222,13 @@ const Rentals = () => {
     return true;
   });
 
+  // Sort
+  const sortedListings = sortListings(filteredListings, sortOption);
+
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredListings.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(sortedListings.length / ITEMS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
-  const paginatedListings = filteredListings.slice(
+  const paginatedListings = sortedListings.slice(
     (safePage - 1) * ITEMS_PER_PAGE,
     safePage * ITEMS_PER_PAGE
   );
@@ -230,7 +236,7 @@ const Rentals = () => {
   // Reset page when any filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, dateRange, minPrice, maxPrice, minGuests, minBedrooms, brandFilter]);
+  }, [searchQuery, dateRange, minPrice, maxPrice, minGuests, minBedrooms, brandFilter, sortOption]);
 
   // Clear all filters helper
   const clearAllFilters = () => {
@@ -392,6 +398,17 @@ const Rentals = () => {
               <span className="text-sm text-muted-foreground">
                 {filteredListings.length} {filteredListings.length === 1 ? "property" : "properties"} found
               </span>
+              <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+                <SelectTrigger className="w-44">
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(SORT_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div className="flex border rounded-lg overflow-hidden" role="group" aria-label="View mode">
                 <button
                   onClick={() => setViewMode("grid")}

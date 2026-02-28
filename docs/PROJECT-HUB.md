@@ -87,14 +87,14 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - Edge functions require `--no-verify-jwt` deployment flag
 
 ### Platform Status
-- **409 automated tests** (57 test files, all passing), 0 type errors, 0 lint errors, build clean
-- **Migrations deployed:** 001-032 on DEV, 001-023 on PROD
+- **451 automated tests** (63 test files, all passing), 0 type errors, 0 lint errors, build clean
+- **Migrations deployed:** 001-035 on DEV, 001-023 on PROD
 - **Edge functions deployed:** 25 on DEV, 22 on PROD
 - **PROD platform:** locked (Staff Only Mode enabled)
 - **Supabase CLI:** currently linked to DEV
-- **dev branch:** 19 commits ahead of main — PR needed before next code session
+- **dev branch:** 2 commits ahead of main
 
-### Session Handoff (Sessions 25-26, Feb 26-27)
+### Session Handoff (Sessions 25-27, Feb 26-28)
 
 **Session 24 — GDPR, Disputes & Security Hardening (Feb 26):**
 - Dispute Resolution (#79): Migration 026, `process-dispute-refund` edge fn, AdminDisputes.tsx, ReportIssueDialog.tsx
@@ -119,10 +119,19 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - Doc repo references (#70): Updated old tektekgo references to rent-a-vacation/rav-website
 - Tests: 402→409
 
+**Session 27 — Reviews, Messaging, Sort, Portfolio (Feb 28):**
+- Post-stay review system (#95): Migration 033, reviews table with sub-ratings, StarRating component, ReviewForm/List/Summary, integrated into PropertyDetail + MyBookings
+- Listing sort options (#97): Sort by price, date, rating, newest on Rentals page
+- Renter-owner messaging (#98): Migration 034, booking_messages table, BookingMessageThread chat UI, integrated into MyBookings + OwnerBookings
+- Multi-property portfolio (#103): Migration 035, portfolio RPC, PortfolioOverview with expandable PropertyCalendar in OwnerDashboard
+- Admin owner filter (#120): Owner dropdown in AdminListings tab
+- Demo walkthrough document: docs/DEMO-WALKTHROUGH.md (comprehensive presentation script)
+- Tests: 409→451 (42 new)
+
 **Open pre-launch issues:** 3 remaining (#80 Legal review, #87 Launch checklist, #127 Business formation — blocked)
 
 **Next recommended work:**
-- Create PR `dev → main` (19 commits) to sync production
+- Create PR `dev → main` (2 commits) to sync production
 - #87 Launch readiness checklist
 - #80 Legal review of Terms/Privacy
 - #127 Business formation (blocked on LLC/EIN — human action required)
@@ -567,6 +576,6 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ---
 
-**Last updated:** February 27, 2026 (Sessions 24-26: Security, Role UX Overhaul, GA4, Tax Reporting)
+**Last updated:** February 28, 2026 (Session 27: Reviews, Messaging, Sort, Portfolio)
 **Maintained by:** Sujit
 **Tracking:** [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) · [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) · [Milestones](https://github.com/rent-a-vacation/rav-website/milestones)

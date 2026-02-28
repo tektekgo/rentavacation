@@ -23,7 +23,8 @@ import {
   FileCheck,
   Crown,
   Percent,
-  Wallet
+  Wallet,
+  BarChart3
 } from "lucide-react";
 import type { Property, Listing, Booking, ListingStatus, BookingStatus } from "@/types/database";
 import { RoleUpgradeDialog } from "@/components/RoleUpgradeDialog";
@@ -48,6 +49,7 @@ import { MyListingsTable } from "@/components/owner-dashboard/MyListingsTable";
 import { BidActivityFeed } from "@/components/owner-dashboard/BidActivityFeed";
 import { PricingIntelligence } from "@/components/owner-dashboard/PricingIntelligence";
 import { MaintenanceFeeTracker } from "@/components/owner-dashboard/MaintenanceFeeTracker";
+import PortfolioOverview from "@/components/owner-dashboard/PortfolioOverview";
 
 interface DashboardStats {
   totalProperties: number;
@@ -258,7 +260,7 @@ const OwnerDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex flex-wrap gap-1 h-auto w-full lg:w-auto lg:inline-grid lg:grid-cols-10">
+          <TabsList className="flex flex-wrap gap-1 h-auto w-full lg:w-auto lg:inline-grid lg:grid-cols-11">
             <TabsTrigger value="overview" className="gap-2">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -290,6 +292,10 @@ const OwnerDashboard = () => {
             <TabsTrigger value="payouts" className="gap-2">
               <Wallet className="h-4 w-4" />
               <span className="hidden sm:inline">Payouts</span>
+            </TabsTrigger>
+            <TabsTrigger value="portfolio" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Portfolio</span>
             </TabsTrigger>
             <TabsTrigger value="verification" className="gap-2">
               <Shield className="h-4 w-4" />
@@ -407,6 +413,11 @@ const OwnerDashboard = () => {
           {/* Payouts Tab */}
           <TabsContent value="payouts" className="mt-6">
             <OwnerPayouts />
+          </TabsContent>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio" className="mt-6">
+            <PortfolioOverview />
           </TabsContent>
 
           {/* Verification Tab */}

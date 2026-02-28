@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, Users, DollarSign, Clock, CheckCircle, XCircle, Mail, Ban } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Clock, CheckCircle, XCircle, Mail, Ban, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, BookingStatus, Property, Listing, Profile } from "@/types/database";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
+import BookingMessageThread from "@/components/booking/BookingMessageThread";
 import { Button } from "@/components/ui/button";
 
 interface BookingWithDetails extends Booking {
@@ -36,6 +37,7 @@ const OwnerBookings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past">("all");
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+  const [messageBookingId, setMessageBookingId] = useState<string | null>(null);
 
   // Fetch bookings for owner's listings
   const fetchBookings = async () => {
@@ -81,6 +83,7 @@ const OwnerBookings = () => {
 
   useEffect(() => {
     fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Filter bookings
@@ -254,18 +257,29 @@ const OwnerBookings = () => {
                       </div>
                     )}
 
-                    {/* Cancel Button */}
-                    {booking.status === "confirmed" && (
-                      <div className="mt-4 pt-4 border-t">
+                    {/* Actions */}
+                    {(booking.status === "confirmed" || booking.status === "completed") && (
+                      <div className="mt-4 pt-4 border-t flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                          onClick={() => setCancelBookingId(booking.id)}
+                          onClick={() => setMessageBookingId(booking.id)}
                         >
-                          <Ban className="mr-2 h-4 w-4" />
-                          Cancel Booking
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Message Renter
                         </Button>
+
+                        {booking.status === "confirmed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                            onClick={() => setCancelBookingId(booking.id)}
+                          >
+                            <Ban className="mr-2 h-4 w-4" />
+                            Cancel Booking
+                          </Button>
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -293,6 +307,23 @@ const OwnerBookings = () => {
               setCancelBookingId(null);
               fetchBookings();
             }}
+          />
+        );
+      })()}
+
+      {/* Message Renter Thread */}
+      {messageBookingId && (() => {
+        const target = bookings.find((b) => b.id === messageBookingId);
+        if (!target) return null;
+        return (
+          <BookingMessageThread
+            open={!!messageBookingId}
+            onOpenChange={(open) => {
+              if (!open) setMessageBookingId(null);
+            }}
+            bookingId={target.id}
+            bookingRef={target.id.slice(0, 8).toUpperCase()}
+            otherPartyName={target.renter?.full_name || "Renter"}
           />
         );
       })()}

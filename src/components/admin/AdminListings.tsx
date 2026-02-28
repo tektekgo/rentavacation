@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -75,6 +75,7 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [ownerFilter, setOwnerFilter] = useState("all");
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectingListingId, setRejectingListingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -311,6 +312,22 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
     });
   };
 
+  const uniqueOwners = useMemo(() => {
+    const ownerMap = new Map<string, { id: string; full_name: string; email: string }>();
+    for (const l of listings) {
+      if (l.owner?.id && !ownerMap.has(l.owner.id)) {
+        ownerMap.set(l.owner.id, {
+          id: l.owner.id,
+          full_name: l.owner.full_name || "Unknown",
+          email: l.owner.email || "",
+        });
+      }
+    }
+    return Array.from(ownerMap.values()).sort((a, b) =>
+      a.full_name.localeCompare(b.full_name)
+    );
+  }, [listings]);
+
   const filteredListings = listings.filter((l) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q ||
@@ -321,8 +338,9 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
       l.id.toLowerCase().includes(q);
 
     const matchesStatus = statusFilter === "all" || l.status === statusFilter;
+    const matchesOwner = ownerFilter === "all" || l.owner?.id === ownerFilter;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesOwner;
   });
 
   const pendingCount = listings.filter((l) => l.status === "pending_approval").length;
@@ -346,6 +364,19 @@ const AdminListings = ({ initialSearch = "", onNavigateToEntity }: AdminNavigati
           </p>
         </div>
         <div className="flex gap-3">
+          <Select value={ownerFilter} onValueChange={setOwnerFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by owner" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Owners</SelectItem>
+              {uniqueOwners.map((owner) => (
+                <SelectItem key={owner.id} value={owner.id}>
+                  {owner.full_name} ({owner.email})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Filter by status" />
