@@ -7,12 +7,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import ReportIssueDialog from "@/components/booking/ReportIssueDialog";
+import BookingMessageThread from "@/components/booking/BookingMessageThread";
+import ReviewForm from "@/components/reviews/ReviewForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink, AlertTriangle, MessageCircle, CheckCircle, Clock, RefreshCw } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Ban, ExternalLink, AlertTriangle, MessageCircle, CheckCircle, Clock, RefreshCw, Star } from "lucide-react";
 import { format } from "date-fns";
 import type { Booking, BookingStatus, Listing, Property } from "@/types/database";
 
@@ -64,6 +66,9 @@ const MyBookings = () => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingWithListing | null>(null);
   const [reportBooking, setReportBooking] = useState<BookingWithListing | null>(null);
+  const [messageBooking, setMessageBooking] = useState<BookingWithListing | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<BookingWithListing | null>(null);
+  const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
 
   const fetchBookings = async () => {
     if (!user) return;
@@ -107,8 +112,25 @@ const MyBookings = () => {
     }
   };
 
+  const fetchReviewedBookings = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from("reviews")
+        .select("booking_id")
+        .eq("reviewer_id", user.id);
+      if (data) {
+        setReviewedBookingIds(new Set(data.map((r: { booking_id: string }) => r.booking_id)));
+      }
+    } catch {
+      // Non-critical — button will just show "Write Review" as fallback
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
+    fetchReviewedBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const now = new Date();
@@ -259,6 +281,36 @@ const MyBookings = () => {
                     View Property
                   </Link>
                 </Button>
+              )}
+
+              {(booking.status === "confirmed" || booking.status === "completed") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMessageBooking(booking)}
+                >
+                  <MessageCircle className="h-3.5 w-3.5 mr-1" />
+                  Message Owner
+                </Button>
+              )}
+
+              {booking.status === "completed" && (
+                reviewedBookingIds.has(booking.id) ? (
+                  <Badge variant="outline" className="text-green-600 border-green-200 gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    Review Written
+                  </Badge>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary hover:text-primary/80"
+                    onClick={() => setReviewBooking(booking)}
+                  >
+                    <Star className="h-3.5 w-3.5 mr-1" />
+                    Write Review
+                  </Button>
+                )
               )}
 
               {(booking.status === "confirmed" || booking.status === "completed") && (
@@ -416,6 +468,36 @@ const MyBookings = () => {
           cancellationPolicy={selectedBooking.listing?.cancellation_policy || "moderate"}
           cancelledBy="renter"
           onCancelled={handleCancelled}
+        />
+      )}
+
+      {messageBooking && (
+        <BookingMessageThread
+          open={!!messageBooking}
+          onOpenChange={(open) => {
+            if (!open) setMessageBooking(null);
+          }}
+          bookingId={messageBooking.id}
+          bookingRef={messageBooking.id.slice(0, 8).toUpperCase()}
+          otherPartyName="Owner"
+        />
+      )}
+
+      {reviewBooking && (
+        <ReviewForm
+          open={!!reviewBooking}
+          onOpenChange={(open) => {
+            if (!open) {
+              setReviewBooking(null);
+              // Refresh reviewed IDs so the button updates
+              fetchReviewedBookings();
+            }
+          }}
+          bookingId={reviewBooking.id}
+          listingId={reviewBooking.listing?.id}
+          propertyId={reviewBooking.listing?.property_id}
+          ownerId={reviewBooking.listing?.owner_id}
+          resortName={reviewBooking.listing?.property?.resort_name || "Vacation Rental"}
         />
       )}
     </div>
