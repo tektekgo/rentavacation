@@ -131,18 +131,35 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 **Session 28 — Accounting Strategy & Documentation (Feb 28):**
 - Accounting tool evaluation: Puzzle.io selected over QuickBooks (native Stripe, free tier, automated ASC 606)
 - Updated DEC-022 to reflect Puzzle.io + pluggable architecture decision
-- Updated `docs/RAV-PRICING-TAXES-ACCOUNTING.md` v2.0 — added implementation status, Puzzle.io rationale, pluggable architecture design, 1099-K via Stripe Connect, accounting tool comparison appendix
+- Updated `docs/RAV-PRICING-TAXES-ACCOUNTING.md` v2.1 — staged growth plan (§9), environment mapping (§10), tool evaluation appendix
 - Updated issue #63: renamed to "Accounting Integration (Puzzle.io → pluggable)", detailed implementation plan
-- Key insight: 1099-K handled natively by Stripe Connect — no Gusto or accounting tool needed
+- Key insight: Puzzle.io IS the ledger (not middleware) — replaces QB/Xero, doesn't supplement them
+- Key insight: 1099-K handled natively by Stripe Connect ($2.99/form) — no Gusto needed
+- Puzzle.io account created, but **onboarding blocked at step 7** — requires bank connection → EIN → LLC formation (#127)
+- Issue #63 marked `blocked` with resume instructions
+- dev branch: 1 commit ahead of main (docs only — `1e6b9e3`)
 
 **Open pre-launch issues:** 3 remaining (#80 Legal review, #87 Launch checklist, #127 Business formation — blocked)
 
-**Next recommended work:**
-- #63 Phase E: Set up Puzzle.io account + connect Stripe (manual, 0 code hours)
-- #63 Phase E.2: Build pluggable accounting adapter architecture (4-6 hours)
+**Blocked dependency chain:**
+```
+#127 (Form LLC, get EIN) ──blocks──→ Stripe Tax activation
+                          ──blocks──→ Puzzle.io onboarding (#63)
+                          ──blocks──→ Business bank account
+```
+
+**Resume instructions when #127 is unblocked:**
+1. Form LLC → receive EIN
+2. Open Mercury bank account (recommended) with EIN
+3. Resume Puzzle.io onboarding at step 7 → connect bank + Stripe
+4. Activate Stripe Tax in Stripe Dashboard (zero code changes needed)
+5. Build pluggable accounting adapter (#63 Phase E.2, 4-6 hours)
+
+**Next recommended work (not blocked):**
 - #87 Launch readiness checklist
 - #80 Legal review of Terms/Privacy
-- #127 Business formation (blocked on LLC/EIN — human action required)
+- Post-launch enhancements (#117 notifications, #119 staff permissions, #108 code splitting)
+- Create PR `dev → main` to sync the accounting docs commit
 
 ---
 
