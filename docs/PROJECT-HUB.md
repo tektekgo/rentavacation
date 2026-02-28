@@ -87,40 +87,45 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - Edge functions require `--no-verify-jwt` deployment flag
 
 ### Platform Status
-- **306 automated tests** (all passing), 0 type errors, 0 lint errors, build clean
-- **Migrations deployed:** 001-023 on both DEV + PROD
-- **Edge functions deployed:** 22 on both DEV + PROD
+- **409 automated tests** (57 test files, all passing), 0 type errors, 0 lint errors, build clean
+- **Migrations deployed:** 001-032 on DEV, 001-023 on PROD
+- **Edge functions deployed:** 25 on DEV, 22 on PROD
 - **PROD platform:** locked (Staff Only Mode enabled)
 - **Supabase CLI:** currently linked to DEV
-- **dev branch:** 42 commits ahead of main — PR needed before next code session
+- **dev branch:** 19 commits ahead of main — PR needed before next code session
 
-### Session Handoff (Sessions 21-23, Feb 25-26)
+### Session Handoff (Sessions 25-26, Feb 26-27)
 
-**Payments & Cancellations (Sessions 21-22):**
-- PR #126: Merged — Stripe webhook (#75), Stripe Connect (#78), renter cancellation (#76), owner cancellation (#77)
-- `stripe-webhook` edge function: 6 Stripe events, idempotent processing
-- `create-connect-account` + `create-stripe-payout` edge functions for owner payouts
-- `process-cancellation` edge function: policy-based refunds (flexible/moderate/strict/super_strict)
-- Migration 022: Stripe Connect fields on profiles, stripe_transfer_id on bookings
+**Session 24 — GDPR, Disputes & Security Hardening (Feb 26):**
+- Dispute Resolution (#79): Migration 026, `process-dispute-refund` edge fn, AdminDisputes.tsx, ReportIssueDialog.tsx
+- GDPR Account Deletion (#89): Migration 027, `export-user-data` + `delete-user-account` edge fns, 14-day grace period, anonymization
+- CSP Headers (#66): `vercel.json` security headers (script-src, HSTS, X-Frame-Options, etc.)
+- Rate Limiting (#67): Migration 028, `_shared/rate-limit.ts`, applied to 7 edge functions
+- Cookie consent (#69), Email verification (#81), Escrow improvements (#91), Tax disclosure (#92), Notification prefs (#82)
+- Tests sprint: 306→387
 
-**Accounting & User Pages (Session 23):**
-- Fee Breakdown UI (#60): Itemized display on Checkout (base, service fee, cleaning fee, taxes)
-- Stripe Tax Integration (#61): `automatic_tax: { enabled: true }`, tax codes on line items, tax extraction in verify-booking-payment
-- My Bookings page (#83): `/my-bookings` route with tabs, cancel button, property links
-- Account Settings (#84): `/account` route with profile editing, password change, roles display
-- Migration 023: fee breakdown + tax fields on bookings, cleaning_fee/resort_fee on listings
-- `computeFeeBreakdown()` added to `src/lib/pricing.ts`
-- OwnerListings form now has cleaning_fee and resort_fee inputs
-- Header nav updated with My Bookings + Account Settings links
+**Session 25 — Role-Based UX Overhaul (Feb 26-27):**
+- 10 issues closed (#131-#140) across 3 batches
+- Admin entity cross-linking + search by ID (#131, #132)
+- Date-range filters + admin notes on users (#133, #134)
+- Owner escrow visibility, renter disputes, rejection reasons (#135, #136, #137)
+- Bulk approve/reject listings, SLA age badges, dispute assignment (#138, #139, #140)
+- Migration 031: dispute assignment column
+- Tests: 387→402
 
-**Blocker discovered:**
-- **#127 Business Formation & Stripe Tax Activation** — Cannot fully activate Stripe Tax without business entity, EIN, and state tax registrations. Code is forward-compatible (tax = $0 until activated). Pre-launch blocker.
+**Session 26 — GA4, Tax Reporting & Doc Fixes (Feb 27):**
+- GA4 Integration (#74): `src/lib/analytics.ts` with cookie-consent-gated gtag.js, SPA tracking, typed event helpers, CSP updates. Measurement ID: G-G2YCVHNS25
+- Admin Tax & 1099-K Reporting (#62, #64): `AdminTaxReporting.tsx` tab with monthly revenue table, owner earnings tracking, $600 threshold, W-9 status. Migration 032: tax info fields on profiles
+- Doc repo references (#70): Updated old tektekgo references to rent-a-vacation/rav-website
+- Tests: 402→409
 
-**Open issues summary:** 21 pre-launch, 17 post-launch, 2 other (40 total)
+**Open pre-launch issues:** 3 remaining (#80 Legal review, #87 Launch checklist, #127 Business formation — blocked)
 
 **Next recommended work:**
-- Create PR `dev → main` (42 commits) to sync production
-- Then pick from pre-launch milestones: Security Hardening (#66-69), Launch Readiness (#79-89), Phase 20 remaining (#62, #64, #91, #92), or Analytics (#73-74)
+- Create PR `dev → main` (19 commits) to sync production
+- #87 Launch readiness checklist
+- #80 Legal review of Terms/Privacy
+- #127 Business formation (blocked on LLC/EIN — human action required)
 
 ---
 
@@ -562,6 +567,6 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 
 ---
 
-**Last updated:** February 26, 2026 (Sessions 21-23: Payments, Cancellations, Accounting)
+**Last updated:** February 27, 2026 (Sessions 24-26: Security, Role UX Overhaul, GA4, Tax Reporting)
 **Maintained by:** Sujit
 **Tracking:** [GitHub Issues](https://github.com/rent-a-vacation/rav-website/issues) · [RAV Roadmap](https://github.com/orgs/rent-a-vacation/projects/1) · [Milestones](https://github.com/rent-a-vacation/rav-website/milestones)
