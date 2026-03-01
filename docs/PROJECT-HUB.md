@@ -137,7 +137,7 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - Key insight: 1099-K handled natively by Stripe Connect ($2.99/form) — no Gusto needed
 - Puzzle.io account created, but **onboarding blocked at step 7** — requires bank connection → EIN → LLC formation (#127)
 - Issue #63 marked `blocked` with resume instructions
-- dev branch: 1 commit ahead of main (docs only — `1e6b9e3`)
+- PR #144 merged — dev and main in sync
 
 **Open pre-launch issues:** 3 remaining (#80 Legal review, #87 Launch checklist, #127 Business formation — blocked)
 
@@ -159,7 +159,6 @@ gh issue create --repo rent-a-vacation/rav-website --title "..." --label "..." -
 - #87 Launch readiness checklist
 - #80 Legal review of Terms/Privacy
 - Post-launch enhancements (#117 notifications, #119 staff permissions, #108 code splitting)
-- Create PR `dev → main` to sync the accounting docs commit
 
 ---
 
